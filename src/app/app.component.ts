@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { environment } from '@environments/environment';
+import { ApiService } from './services/api.service';
 
 @Component({
   selector: 'app-root',
@@ -8,5 +10,15 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.component.scss',
   standalone: true
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+
+  constructor(private apiService: ApiService) {
+    console.log(environment.production);
+  }
+
+  ngOnInit(): void {
+    this.apiService.health().subscribe({
+      next: (r) => console.log(r)
+    });
+  }
 }
