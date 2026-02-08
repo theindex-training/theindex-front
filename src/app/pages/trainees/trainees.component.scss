@@ -1,0 +1,24 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+p {
+  margin: 0.5rem 0 0;
+  color: var(--color-muted);
+}
+
+.placeholder {
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: 1rem;
+  padding: 2rem;
+  color: var(--color-muted);
+  font-weight: 600;
+}

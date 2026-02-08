@@ -8,6 +8,15 @@ interface LoginResponse {
   account: unknown;
 }
 
+interface TokenPayload {
+  sub?: string;
+  role?: string;
+  trainerProfileId?: string | null;
+  traineeProfileId?: string | null;
+  iat?: number;
+  exp?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -37,7 +46,35 @@ export class AuthService {
     return localStorage.getItem(this.tokenKey);
   }
 
+  getUserRole(): string | null {
+    const token = this.getToken();
+
+    if (!token) {
+      return null;
+    }
+
+    return this.decodeToken(token)?.role ?? null;
+  }
+
   private setToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
+  }
+
+  private decodeToken(token: string): TokenPayload | null {
+    try {
+      const payload = token.split('.')[1];
+
+      if (!payload) {
+        return null;
+      }
+
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+      const decoded = atob(padded);
+
+      return JSON.parse(decoded) as TokenPayload;
+    } catch {
+      return null;
+    }
   }
 }
