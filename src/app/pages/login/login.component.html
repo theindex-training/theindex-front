@@ -22,25 +22,28 @@
       </div>
 
       <form class="login__form" novalidate>
-        <label class="login__field">
-          <span>Email</span>
-          <input type="email" placeholder="you@company.com" autocomplete="email" />
-        </label>
+        <app-ui-input
+          id="email"
+          label="Email"
+          type="email"
+          placeholder="you@company.com"
+          autocomplete="email"
+        />
 
-        <label class="login__field">
-          <span>Password</span>
-          <input type="password" placeholder="••••••••" autocomplete="current-password" />
-        </label>
+        <app-ui-input
+          id="password"
+          label="Password"
+          type="password"
+          placeholder="••••••••"
+          autocomplete="current-password"
+        />
 
         <div class="login__options">
-          <label class="login__checkbox">
-            <input type="checkbox" />
-            <span>Remember me</span>
-          </label>
+          <app-ui-checkbox id="remember-me" label="Remember me" />
           <a class="login__link" href="/">Forgot password?</a>
         </div>
 
-        <button class="login__submit" type="button">Sign in</button>
+        <app-ui-button type="button">Sign in</app-ui-button>
       </form>
 
       <div class="login__footer">

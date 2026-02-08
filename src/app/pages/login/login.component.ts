@@ -1,9 +1,13 @@
 import { Component } from '@angular/core';
+import { UiButtonComponent } from '../../components/ui-button/ui-button.component';
+import { UiCheckboxComponent } from '../../components/ui-checkbox/ui-checkbox.component';
+import { UiInputComponent } from '../../components/ui-input/ui-input.component';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
-  standalone: true
+  standalone: true,
+  imports: [UiButtonComponent, UiCheckboxComponent, UiInputComponent]
 })
 export class LoginComponent {}
