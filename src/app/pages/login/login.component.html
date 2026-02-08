@@ -18,14 +18,18 @@
         <p>Use your The Index account credentials to continue.</p>
       </div>
 
-      <form class="login__form" novalidate>
+      <form class="login__form" novalidate [formGroup]="loginForm" (ngSubmit)="handleLogin()">
         <app-ui-input
           id="email"
           label="Email"
           type="email"
           placeholder="you@company.com"
           autocomplete="email"
+          formControlName="email"
         />
+        <p class="login__error" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')">
+          Email is required.
+        </p>
 
         <app-ui-input
           id="password"
@@ -33,14 +37,23 @@
           type="password"
           placeholder="••••••••"
           autocomplete="current-password"
+          formControlName="password"
         />
+        <p class="login__error" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')">
+          Password is required.
+        </p>
+        <p class="login__error" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('minlength')">
+          Password must be at least 3 characters.
+        </p>
+
+        <p class="login__error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
         <div class="login__options">
           <app-ui-checkbox id="remember-me" label="Remember me" />
           <a class="login__link" href="/">Forgot password?</a>
         </div>
 
-        <app-ui-button type="button" (click)="handleLogin()">Sign in</app-ui-button>
+        <app-ui-button type="submit">Sign in</app-ui-button>
       </form>
 
       <div class="login__footer">
