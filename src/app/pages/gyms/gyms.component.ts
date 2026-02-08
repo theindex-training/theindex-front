@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
@@ -17,7 +17,10 @@ export class GymsComponent implements OnInit {
   loading = true;
   errorMessage = '';
 
-  constructor(private readonly gymsService: GymLocationsService) {}
+  constructor(
+    private readonly gymsService: GymLocationsService,
+    private readonly changeDetector: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadGyms();
@@ -36,11 +39,13 @@ export class GymsComponent implements OnInit {
             ? gyms.filter((gym) => !gym.isActive)
             : gyms;
         this.loading = false;
+        this.changeDetector.detectChanges();
       },
       error: (error) => {
         this.errorMessage =
           error?.error?.message || 'Unable to load gyms right now.';
         this.loading = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

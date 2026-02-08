@@ -20,6 +20,22 @@ const integerValidator: ValidatorFn = (control: AbstractControl) => {
   return Number.isInteger(Number(value)) ? null : { integer: true };
 };
 
+const currencyValidator: ValidatorFn = (control: AbstractControl) => {
+  const value = control.value;
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue) || numericValue < 0) {
+    return { currency: true };
+  }
+
+  const cents = Math.round(numericValue * 100);
+  const difference = Math.abs(cents - numericValue * 100);
+  return difference < 1e-6 ? null : { currency: true };
+};
+
 @Component({
   selector: 'app-plan-create',
   standalone: true,
@@ -31,7 +47,7 @@ export class PlanCreateComponent implements OnInit {
   readonly form: FormGroup<{
     type: FormControl<PlanType>;
     title: FormControl<string>;
-    priceCents: FormControl<number>;
+    price: FormControl<number>;
     credits: FormControl<number | null>;
     durationDays: FormControl<number | null>;
     isActive: FormControl<boolean>;
@@ -48,10 +64,9 @@ export class PlanCreateComponent implements OnInit {
     this.form = this.formBuilder.group({
       type: this.formBuilder.nonNullable.control<PlanType>('PUNCH', [Validators.required]),
       title: this.formBuilder.nonNullable.control('', [Validators.required]),
-      priceCents: this.formBuilder.nonNullable.control(0, [
+      price: this.formBuilder.nonNullable.control(0, [
         Validators.required,
-        Validators.min(0),
-        integerValidator
+        currencyValidator
       ]),
       credits: this.formBuilder.control<number | null>(null),
       durationDays: this.formBuilder.control<number | null>(null),
@@ -76,7 +91,7 @@ export class PlanCreateComponent implements OnInit {
     const payload: CreatePlanPayload = {
       type: raw.type,
       title: raw.title.trim(),
-      priceCents: Number(raw.priceCents),
+      priceCents: this.toCents(raw.price),
       isActive: raw.isActive
     };
 
@@ -126,5 +141,9 @@ export class PlanCreateComponent implements OnInit {
 
     creditsControl.updateValueAndValidity();
     durationControl.updateValueAndValidity();
+  }
+
+  private toCents(price: number): number {
+    return Math.round(price * 100);
   }
 }

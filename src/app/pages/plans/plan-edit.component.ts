@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -25,6 +25,22 @@ const integerValidator: ValidatorFn = (control: AbstractControl) => {
   return Number.isInteger(Number(value)) ? null : { integer: true };
 };
 
+const currencyValidator: ValidatorFn = (control: AbstractControl) => {
+  const value = control.value;
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue) || numericValue < 0) {
+    return { currency: true };
+  }
+
+  const cents = Math.round(numericValue * 100);
+  const difference = Math.abs(cents - numericValue * 100);
+  return difference < 1e-6 ? null : { currency: true };
+};
+
 @Component({
   selector: 'app-plan-edit',
   standalone: true,
@@ -36,7 +52,7 @@ export class PlanEditComponent implements OnInit {
   readonly form: FormGroup<{
     type: FormControl<PlanType>;
     title: FormControl<string>;
-    priceCents: FormControl<number>;
+    price: FormControl<number>;
     credits: FormControl<number | null>;
     durationDays: FormControl<number | null>;
     isActive: FormControl<boolean>;
@@ -51,15 +67,15 @@ export class PlanEditComponent implements OnInit {
     private readonly formBuilder: FormBuilder,
     private readonly plansService: PlansService,
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly changeDetector: ChangeDetectorRef
   ) {
     this.form = this.formBuilder.group({
       type: this.formBuilder.nonNullable.control<PlanType>('PUNCH', [Validators.required]),
       title: this.formBuilder.nonNullable.control('', [Validators.required]),
-      priceCents: this.formBuilder.nonNullable.control(0, [
+      price: this.formBuilder.nonNullable.control(0, [
         Validators.required,
-        Validators.min(0),
-        integerValidator
+        currencyValidator
       ]),
       credits: this.formBuilder.control<number | null>(null),
       durationDays: this.formBuilder.control<number | null>(null),
@@ -85,18 +101,20 @@ export class PlanEditComponent implements OnInit {
         this.form.patchValue({
           type: plan.type,
           title: plan.title,
-          priceCents: plan.priceCents,
+          price: this.toEuros(plan.priceCents),
           credits: plan.credits,
           durationDays: plan.durationDays,
           isActive: plan.isActive
         });
         this.syncTypeValidators(plan.type);
         this.loading = false;
+        this.changeDetector.detectChanges();
       },
       error: (error) => {
         this.errorMessage =
           error?.error?.message || 'Unable to load this plan.';
         this.loading = false;
+        this.changeDetector.detectChanges();
       }
     });
   }
@@ -114,7 +132,7 @@ export class PlanEditComponent implements OnInit {
     const payload: UpdatePlanPayload = {
       type: raw.type,
       title: raw.title.trim(),
-      priceCents: Number(raw.priceCents),
+      priceCents: this.toCents(raw.price),
       isActive: raw.isActive,
       credits: raw.type === 'PUNCH' ? Number(raw.credits) : null,
       durationDays: raw.type === 'TIME' ? Number(raw.durationDays) : null
@@ -160,5 +178,13 @@ export class PlanEditComponent implements OnInit {
 
     creditsControl.updateValueAndValidity();
     durationControl.updateValueAndValidity();
+  }
+
+  private toCents(price: number): number {
+    return Math.round(price * 100);
+  }
+
+  private toEuros(priceCents: number): number {
+    return Number((priceCents / 100).toFixed(2));
   }
 }
