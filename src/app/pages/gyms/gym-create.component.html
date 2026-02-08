@@ -1,0 +1,41 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Create gym</h1>
+      <p>Add a new gym location and optional notes.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/gyms">Back to gyms</a>
+  </header>
+
+  <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
+    <div class="form-grid">
+      <label class="field">
+        <span>Name</span>
+        <input type="text" formControlName="name" placeholder="West Gym" />
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <small class="error">Name is required and must be at least 2 characters.</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Address</span>
+        <input type="text" formControlName="address" placeholder="Plovdiv, Bulgaria" />
+      </label>
+
+      <label class="field">
+        <span>Notes</span>
+        <textarea rows="4" formControlName="notes" placeholder="Main CrossFit hall"></textarea>
+      </label>
+    </div>
+
+    @if (errorMessage) {
+      <div class="state error">{{ errorMessage }}</div>
+    }
+
+    <div class="form-actions">
+      <button class="button button-primary" type="submit" [disabled]="submitting">
+        {{ submitting ? 'Saving...' : 'Create gym' }}
+      </button>
+    </div>
+  </form>
+</section>

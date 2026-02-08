@@ -1,0 +1,55 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Deactivate gym</h1>
+      <p>Gyms are archived by marking them inactive.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/gyms">Back to gyms</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading gym...</div>
+  } @else if (errorMessage && !gym) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (gym) {
+    <div class="card">
+      <div class="details">
+        <div>
+          <span class="label">Name</span>
+          <strong>{{ gym.name }}</strong>
+        </div>
+        <div>
+          <span class="label">Address</span>
+          <strong>{{ gym.address || '—' }}</strong>
+        </div>
+        <div>
+          <span class="label">Notes</span>
+          <strong>{{ gym.notes || '—' }}</strong>
+        </div>
+        <div>
+          <span class="label">Status</span>
+          <strong>{{ gym.isActive ? 'Active' : 'Inactive' }}</strong>
+        </div>
+      </div>
+
+      <p class="warning">
+        Deactivating a gym hides it from new schedules, but existing references remain unchanged.
+      </p>
+
+      @if (errorMessage) {
+        <div class="state error">{{ errorMessage }}</div>
+      }
+
+      <div class="form-actions">
+        <button
+          class="button button-danger"
+          type="button"
+          (click)="confirmDeactivate()"
+          [disabled]="submitting || !gym.isActive"
+        >
+          {{ gym.isActive ? (submitting ? 'Deactivating...' : 'Deactivate gym') : 'Gym inactive' }}
+        </button>
+      </div>
+    </div>
+  }
+</section>
