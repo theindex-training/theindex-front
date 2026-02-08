@@ -6,5 +6,9 @@
     [type]="type"
     [placeholder]="placeholder"
     [autocomplete]="autocomplete"
+    [value]="value"
+    [disabled]="isDisabled"
+    (input)="handleInput($event)"
+    (blur)="handleBlur()"
   />
 </label>
