@@ -64,6 +64,25 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
       {
+        path: 'gyms/new',
+        loadComponent: () => import('./pages/gyms/gym-create.component').then(m => m.GymCreateComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'gyms/:id/edit',
+        loadComponent: () => import('./pages/gyms/gym-edit.component').then(m => m.GymEditComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'gyms/:id/delete',
+        loadComponent: () =>
+          import('./pages/gyms/gym-delete.component').then(m => m.GymDeleteComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
         path: 'gyms',
         loadComponent: () => import('./pages/gyms/gyms.component').then(m => m.GymsComponent),
         canActivate: [roleGuard],
