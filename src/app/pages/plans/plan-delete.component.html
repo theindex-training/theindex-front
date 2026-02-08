@@ -1,0 +1,56 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Deactivate plan</h1>
+      <p>Plans are archived by marking them inactive.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/plans">Back to plans</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading plan...</div>
+  } @else if (errorMessage && !plan) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (plan) {
+    <div class="card">
+      <div class="details">
+        <div>
+          <span class="label">Title</span>
+          <strong>{{ plan.title }}</strong>
+        </div>
+        <div>
+          <span class="label">Type</span>
+          <strong>{{ plan.type }}</strong>
+        </div>
+        <div>
+          <span class="label">Price</span>
+          <strong>{{ formatPrice(plan.priceCents) }}</strong>
+        </div>
+        <div>
+          <span class="label">Status</span>
+          <strong>{{ plan.isActive ? 'Active' : 'Inactive' }}</strong>
+        </div>
+      </div>
+
+      <p class="warning">
+        Deactivating a plan hides it from new sign-ups, but existing subscriptions remain
+        unchanged.
+      </p>
+
+      @if (errorMessage) {
+        <div class="state error">{{ errorMessage }}</div>
+      }
+
+      <div class="form-actions">
+        <button
+          class="button button-danger"
+          type="button"
+          (click)="confirmDeactivate()"
+          [disabled]="submitting || !plan.isActive"
+        >
+          {{ plan.isActive ? (submitting ? 'Deactivating...' : 'Deactivate plan') : 'Plan inactive' }}
+        </button>
+      </div>
+    </div>
+  }
+</section>

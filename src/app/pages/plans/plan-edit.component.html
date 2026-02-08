@@ -1,0 +1,76 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Edit plan</h1>
+      <p>Update plan details or availability.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/plans">Back to plans</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading plan...</div>
+  } @else if (errorMessage && !plan) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (plan) {
+    <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <div class="form-grid">
+        <label class="field">
+          <span>Plan type</span>
+          <select formControlName="type">
+            <option value="PUNCH">Punch (credits)</option>
+            <option value="TIME">Time (days)</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Title</span>
+          <input type="text" formControlName="title" />
+          @if (form.controls.title.touched && form.controls.title.invalid) {
+            <small class="error">Title is required.</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Price (cents)</span>
+          <input type="number" formControlName="priceCents" min="0" step="1" />
+          @if (form.controls.priceCents.touched && form.controls.priceCents.invalid) {
+            <small class="error">Enter a valid non-negative price.</small>
+          }
+        </label>
+
+        @if (form.controls.type.value === 'PUNCH') {
+          <label class="field">
+            <span>Credits</span>
+            <input type="number" formControlName="credits" min="1" step="1" />
+            @if (form.controls.credits.touched && form.controls.credits.invalid) {
+              <small class="error">Credits must be at least 1.</small>
+            }
+          </label>
+        } @else {
+          <label class="field">
+            <span>Duration (days)</span>
+            <input type="number" formControlName="durationDays" min="1" step="1" />
+            @if (form.controls.durationDays.touched && form.controls.durationDays.invalid) {
+              <small class="error">Duration must be at least 1 day.</small>
+            }
+          </label>
+        }
+
+        <label class="field checkbox">
+          <input type="checkbox" formControlName="isActive" />
+          <span>Active plan</span>
+        </label>
+      </div>
+
+      @if (errorMessage) {
+        <div class="state error">{{ errorMessage }}</div>
+      }
+
+      <div class="form-actions">
+        <button class="button button-primary" type="submit" [disabled]="submitting">
+          {{ submitting ? 'Saving...' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>
