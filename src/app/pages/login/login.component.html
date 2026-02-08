@@ -1,0 +1,51 @@
+<section class="login">
+  <div class="login__panel login__panel--brand">
+    <div class="login__brand">
+      <p class="login__eyebrow">The Index</p>
+      <h1>Welcome back</h1>
+      <p class="login__copy">Sign in to access TheIndex.</p>
+      <ul class="login__highlights">
+        <li>Trainers to manage trainings</li>
+        <li>Trainee to track their personal progress</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="login__panel login__panel--form">
+    <div class="login__card">
+      <div class="login__header">
+        <h2>Sign in</h2>
+        <p>Use your The Index account credentials to continue.</p>
+      </div>
+
+      <form class="login__form" novalidate>
+        <app-ui-input
+          id="email"
+          label="Email"
+          type="email"
+          placeholder="you@company.com"
+          autocomplete="email"
+        />
+
+        <app-ui-input
+          id="password"
+          label="Password"
+          type="password"
+          placeholder="••••••••"
+          autocomplete="current-password"
+        />
+
+        <div class="login__options">
+          <app-ui-checkbox id="remember-me" label="Remember me" />
+          <a class="login__link" href="/">Forgot password?</a>
+        </div>
+
+        <app-ui-button type="button" (click)="handleLogin()">Sign in</app-ui-button>
+      </form>
+
+      <div class="login__footer">
+        <p>Need access? <a href="/">Contact your admin</a></p>
+      </div>
+    </div>
+  </div>
+</section>
