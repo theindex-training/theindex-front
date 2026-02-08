@@ -37,6 +37,27 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
       {
+        path: 'plans/new',
+        loadComponent: () =>
+          import('./pages/plans/plan-create.component').then(m => m.PlanCreateComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'plans/:id/edit',
+        loadComponent: () =>
+          import('./pages/plans/plan-edit.component').then(m => m.PlanEditComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'plans/:id/delete',
+        loadComponent: () =>
+          import('./pages/plans/plan-delete.component').then(m => m.PlanDeleteComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
         path: 'plans',
         loadComponent: () => import('./pages/plans/plans.component').then(m => m.PlansComponent),
         canActivate: [roleGuard],
