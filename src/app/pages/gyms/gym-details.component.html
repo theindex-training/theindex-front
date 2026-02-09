@@ -1,0 +1,45 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Gym details</h1>
+      <p>Review gym location information and manage availability.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/gyms">Back to gyms</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading gym...</div>
+  } @else if (errorMessage && !gym) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (gym) {
+    <div class="card">
+      <div class="details">
+        <div>
+          <span class="label">Name</span>
+          <strong>{{ gym.name }}</strong>
+        </div>
+        <div>
+          <span class="label">Address</span>
+          <strong>{{ formatAddress() }}</strong>
+        </div>
+        <div>
+          <span class="label">Notes</span>
+          <strong>{{ gym.notes?.trim() || '—' }}</strong>
+        </div>
+        <div>
+          <span class="label">Status</span>
+          <strong>{{ gym.isActive ? 'Active' : 'Inactive' }}</strong>
+        </div>
+      </div>
+
+      <div class="details-actions">
+        <a class="button button-secondary" [routerLink]="['/gyms', gym.id, 'edit']">
+          Edit gym
+        </a>
+        <a class="button button-ghost" [routerLink]="['/gyms', gym.id, 'delete']">
+          Deactivate gym
+        </a>
+      </div>
+    </div>
+  }
+</section>

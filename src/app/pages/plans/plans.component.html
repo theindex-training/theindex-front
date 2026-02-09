@@ -34,7 +34,7 @@
         <span>Price</span>
         <span>Details</span>
         <span>Status</span>
-        <span class="table-actions">Actions</span>
+        <span class="table-actions">Details</span>
       </div>
       @for (plan of plans; track plan.id) {
         <div class="table-row">
@@ -48,11 +48,8 @@
             </span>
           </span>
           <span class="table-actions">
-            <a class="button button-secondary" [routerLink]="['/plans', plan.id, 'edit']">
-              Edit
-            </a>
-            <a class="button button-ghost" [routerLink]="['/plans', plan.id, 'delete']">
-              Deactivate
+            <a class="button button-secondary" [routerLink]="['/plans', plan.id]">
+              Open details
             </a>
           </span>
         </div>

@@ -33,7 +33,7 @@
         <span>Address</span>
         <span>Notes</span>
         <span>Status</span>
-        <span class="table-actions">Actions</span>
+        <span class="table-actions">Details</span>
       </div>
       @for (gym of gyms; track gym.id) {
         <div class="table-row">
@@ -46,11 +46,8 @@
             </span>
           </span>
           <span class="table-actions">
-            <a class="button button-secondary" [routerLink]="['/gyms', gym.id, 'edit']">
-              Edit
-            </a>
-            <a class="button button-ghost" [routerLink]="['/gyms', gym.id, 'delete']">
-              Deactivate
+            <a class="button button-secondary" [routerLink]="['/gyms', gym.id]">
+              Open details
             </a>
           </span>
         </div>

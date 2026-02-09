@@ -58,6 +58,13 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
       {
+        path: 'plans/:id',
+        loadComponent: () =>
+          import('./pages/plans/plan-details.component').then(m => m.PlanDetailsComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
         path: 'plans',
         loadComponent: () => import('./pages/plans/plans.component').then(m => m.PlansComponent),
         canActivate: [roleGuard],
@@ -79,6 +86,13 @@ export const routes: Routes = [
         path: 'gyms/:id/delete',
         loadComponent: () =>
           import('./pages/gyms/gym-delete.component').then(m => m.GymDeleteComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'gyms/:id',
+        loadComponent: () =>
+          import('./pages/gyms/gym-details.component').then(m => m.GymDetailsComponent),
         canActivate: [roleGuard],
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
@@ -113,6 +127,13 @@ export const routes: Routes = [
         path: 'trainers/:id/account',
         loadComponent: () =>
           import('./pages/trainers/trainer-account.component').then(m => m.TrainerAccountComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'trainers/:id',
+        loadComponent: () =>
+          import('./pages/trainers/trainer-details.component').then(m => m.TrainerDetailsComponent),
         canActivate: [roleGuard],
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
@@ -153,6 +174,15 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/trainees/trainee-account.component').then(
             m => m.TraineeAccountComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'trainees/:id',
+        loadComponent: () =>
+          import('./pages/trainees/trainee-details.component').then(
+            m => m.TraineeDetailsComponent
           ),
         canActivate: [roleGuard],
         data: { roles: ['ADMIN', 'TRAINER'] }

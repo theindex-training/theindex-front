@@ -1,0 +1,140 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Trainee details</h1>
+      <p>Review trainee information, accounts, and subscriptions.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/trainees">Back to trainees</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading trainee...</div>
+  } @else if (errorMessage && !trainee) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (trainee) {
+    <div class="card">
+      <div class="details">
+        <div>
+          <span class="label">Name</span>
+          <strong>{{ trainee.name }}</strong>
+        </div>
+        <div>
+          <span class="label">Nickname</span>
+          <strong>{{ formatNickname() }}</strong>
+        </div>
+        <div>
+          <span class="label">Phone</span>
+          <strong>{{ formatPhone() }}</strong>
+        </div>
+        <div>
+          <span class="label">Account</span>
+          <strong>{{ formatAccount() }}</strong>
+        </div>
+        <div>
+          <span class="label">Status</span>
+          <strong>{{ trainee.isActive ? 'Active' : 'Inactive' }}</strong>
+        </div>
+      </div>
+
+      <div class="details-actions">
+        <a class="button button-secondary" [routerLink]="['/trainees', trainee.id, 'edit']">
+          Edit trainee
+        </a>
+        @if (!trainee.accountId) {
+          <a class="button button-primary" [routerLink]="['/trainees', trainee.id, 'account']">
+            Create account
+          </a>
+        }
+        <a class="button button-ghost" [routerLink]="['/trainees', trainee.id, 'delete']">
+          Deactivate trainee
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Subscriptions</h2>
+          <p>Track current plans and purchase new subscriptions.</p>
+        </div>
+      </div>
+
+      @if (subscriptionsLoading) {
+        <div class="state">Loading subscriptions...</div>
+      } @else if (subscriptionErrorMessage && !subscriptions.length) {
+        <div class="state error">{{ subscriptionErrorMessage }}</div>
+      } @else if (!subscriptions.length) {
+        <div class="state">No subscriptions yet.</div>
+      } @else {
+        <div class="table">
+          <div class="table-row table-header">
+            <span>Plan</span>
+            <span>Type</span>
+            <span>Status</span>
+            <span>Starts</span>
+            <span>Ends / Credits</span>
+            <span>Paid</span>
+          </div>
+          @for (subscription of subscriptions; track subscription.id) {
+            <div class="table-row">
+              <span class="title">{{ formatPlanLabel(subscription) }}</span>
+              <span>{{ subscription.type }}</span>
+              <span>{{ subscription.status }}</span>
+              <span>{{ formatDate(subscription.startsAt) }}</span>
+              <span>{{ formatEndsOrCredits(subscription) }}</span>
+              <span>{{ formatPrice(subscription.paidCents) }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <form class="form" [formGroup]="form" (ngSubmit)="handleCreateSubscription()">
+        <div class="form-grid">
+          <label class="field">
+            <span>Plan</span>
+            <select formControlName="planId" [disabled]="plansLoading || submitting">
+              @for (plan of plans; track plan.id) {
+                <option [value]="plan.id">{{ formatPlanOption(plan) }}</option>
+              }
+            </select>
+            @if (form.controls.planId.touched && form.controls.planId.invalid) {
+              <small class="error">Select a plan to purchase.</small>
+            }
+          </label>
+
+          <label class="field">
+            <span>Starts at</span>
+            <input type="date" formControlName="startsAt" [disabled]="submitting" />
+            @if (form.controls.startsAt.touched && form.controls.startsAt.invalid) {
+              <small class="error">Choose a start date.</small>
+            }
+          </label>
+
+          <label class="field">
+            <span>Paid amount (EUR)</span>
+            <input
+              type="number"
+              step="0.01"
+              formControlName="paid"
+              [disabled]="submitting"
+              placeholder="0.00"
+            />
+            @if (form.controls.paid.touched && form.controls.paid.invalid) {
+              <small class="error">Enter a valid amount.</small>
+            }
+          </label>
+        </div>
+
+        @if (subscriptionErrorMessage) {
+          <div class="state error">{{ subscriptionErrorMessage }}</div>
+        }
+
+        <div class="form-actions">
+          <button class="button button-primary" type="submit" [disabled]="submitting || plansLoading">
+            {{ submitting ? 'Purchasing...' : 'Buy subscription' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</section>
