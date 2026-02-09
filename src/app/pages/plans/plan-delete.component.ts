@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Plan, PlansService } from '../../services/plans.service';
 
@@ -19,7 +19,8 @@ export class PlanDeleteComponent implements OnInit {
   constructor(
     private readonly plansService: PlansService,
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -34,11 +35,13 @@ export class PlanDeleteComponent implements OnInit {
       next: (plan) => {
         this.plan = plan;
         this.loading = false;
+        this.changeDetector.detectChanges();
       },
       error: (error) => {
         this.errorMessage =
           error?.error?.message || 'Unable to load this plan.';
         this.loading = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

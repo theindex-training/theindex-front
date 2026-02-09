@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
 
@@ -19,7 +19,8 @@ export class GymDeleteComponent implements OnInit {
   constructor(
     private readonly gymsService: GymLocationsService,
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -34,11 +35,13 @@ export class GymDeleteComponent implements OnInit {
       next: (gym) => {
         this.gym = gym;
         this.loading = false;
+        this.changeDetector.detectChanges();
       },
       error: (error) => {
         this.errorMessage =
           error?.error?.message || 'Unable to load this gym.';
         this.loading = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

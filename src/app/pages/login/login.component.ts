@@ -3,7 +3,6 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UiButtonComponent } from '../../components/ui-button/ui-button.component';
-import { UiCheckboxComponent } from '../../components/ui-checkbox/ui-checkbox.component';
 import { UiInputComponent } from '../../components/ui-input/ui-input.component';
 import { AuthService } from '../../services/auth.service';
 
@@ -16,7 +15,6 @@ import { AuthService } from '../../services/auth.service';
     CommonModule,
     ReactiveFormsModule,
     UiButtonComponent,
-    UiCheckboxComponent,
     UiInputComponent
   ]
 })

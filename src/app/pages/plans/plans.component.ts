@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Plan, PlansService } from '../../services/plans.service';
@@ -17,7 +17,10 @@ export class PlansComponent implements OnInit {
   loading = true;
   errorMessage = '';
 
-  constructor(private readonly plansService: PlansService) {}
+  constructor(
+    private readonly plansService: PlansService,
+    private readonly changeDetector: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadPlans();
@@ -38,11 +41,13 @@ export class PlansComponent implements OnInit {
       next: (plans) => {
         this.plans = plans;
         this.loading = false;
+        this.changeDetector.detectChanges();
       },
       error: (error) => {
         this.errorMessage =
           error?.error?.message || 'Unable to load plans right now.';
         this.loading = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

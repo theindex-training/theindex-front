@@ -1,5 +1,5 @@
-<label class="ui-input" [attr.for]="id">
-  <span class="ui-input__label">{{ label }}</span>
+<div class="ui-input">
+  <label class="ui-input__label" [attr.for]="id">{{ label }}</label>
   <input
     class="ui-input__field"
     [id]="id"
@@ -11,4 +11,4 @@
     (input)="handleInput($event)"
     (blur)="handleBlur()"
   />
-</label>
+</div>
