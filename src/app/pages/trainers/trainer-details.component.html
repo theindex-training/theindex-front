@@ -1,0 +1,50 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Trainer details</h1>
+      <p>Review trainer information and account access.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/trainers">Back to trainers</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading trainer...</div>
+  } @else if (errorMessage && !trainer) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (trainer) {
+    <div class="card">
+      <div class="details">
+        <div>
+          <span class="label">Name</span>
+          <strong>{{ trainer.name }}</strong>
+        </div>
+        <div>
+          <span class="label">Nickname</span>
+          <strong>{{ formatNickname() }}</strong>
+        </div>
+        <div>
+          <span class="label">Account</span>
+          <strong>{{ formatAccount() }}</strong>
+        </div>
+        <div>
+          <span class="label">Status</span>
+          <strong>{{ trainer.isActive ? 'Active' : 'Inactive' }}</strong>
+        </div>
+      </div>
+
+      <div class="details-actions">
+        <a class="button button-secondary" [routerLink]="['/trainers', trainer.id, 'edit']">
+          Edit trainer
+        </a>
+        @if (!trainer.accountId) {
+          <a class="button button-primary" [routerLink]="['/trainers', trainer.id, 'account']">
+            Create account
+          </a>
+        }
+        <a class="button button-ghost" [routerLink]="['/trainers', trainer.id, 'delete']">
+          Deactivate trainer
+        </a>
+      </div>
+    </div>
+  }
+</section>

@@ -34,7 +34,7 @@
         <span>Phone</span>
         <span>Account</span>
         <span>Status</span>
-        <span class="table-actions">Actions</span>
+        <span class="table-actions">Details</span>
       </div>
       @for (trainee of trainees; track trainee.id) {
         <div class="table-row">
@@ -48,16 +48,8 @@
             </span>
           </span>
           <span class="table-actions">
-            <a class="button button-secondary" [routerLink]="['/trainees', trainee.id, 'edit']">
-              Edit
-            </a>
-            @if (!trainee.accountId) {
-              <a class="button button-primary" [routerLink]="['/trainees', trainee.id, 'account']">
-                Create account
-              </a>
-            }
-            <a class="button button-ghost" [routerLink]="['/trainees', trainee.id, 'delete']">
-              Deactivate
+            <a class="button button-secondary" [routerLink]="['/trainees', trainee.id]">
+              Open details
             </a>
           </span>
         </div>
