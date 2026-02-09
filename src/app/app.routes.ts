@@ -124,6 +124,40 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
       {
+        path: 'trainees/new',
+        loadComponent: () =>
+          import('./pages/trainees/trainee-create.component').then(
+            m => m.TraineeCreateComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'trainees/:id/edit',
+        loadComponent: () =>
+          import('./pages/trainees/trainee-edit.component').then(m => m.TraineeEditComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'trainees/:id/delete',
+        loadComponent: () =>
+          import('./pages/trainees/trainee-delete.component').then(
+            m => m.TraineeDeleteComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'trainees/:id/account',
+        loadComponent: () =>
+          import('./pages/trainees/trainee-account.component').then(
+            m => m.TraineeAccountComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
         path: 'trainees',
         loadComponent: () =>
           import('./pages/trainees/trainees.component').then(m => m.TraineesComponent),
