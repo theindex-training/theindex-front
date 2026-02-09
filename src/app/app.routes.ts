@@ -89,6 +89,34 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
       {
+        path: 'trainers/new',
+        loadComponent: () =>
+          import('./pages/trainers/trainer-create.component').then(m => m.TrainerCreateComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'trainers/:id/edit',
+        loadComponent: () =>
+          import('./pages/trainers/trainer-edit.component').then(m => m.TrainerEditComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'trainers/:id/delete',
+        loadComponent: () =>
+          import('./pages/trainers/trainer-delete.component').then(m => m.TrainerDeleteComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'trainers/:id/account',
+        loadComponent: () =>
+          import('./pages/trainers/trainer-account.component').then(m => m.TrainerAccountComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
         path: 'trainers',
         loadComponent: () =>
           import('./pages/trainers/trainers.component').then(m => m.TrainersComponent),
