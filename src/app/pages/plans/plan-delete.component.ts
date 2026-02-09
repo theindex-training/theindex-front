@@ -54,7 +54,7 @@ export class PlanDeleteComponent implements OnInit {
     this.submitting = true;
     this.errorMessage = '';
 
-    this.plansService.update(this.plan.id, { isActive: false }).subscribe({
+    this.plansService.deactivate(this.plan.id).subscribe({
       next: () => {
         this.submitting = false;
         this.router.navigate(['/plans']);

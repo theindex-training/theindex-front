@@ -61,4 +61,8 @@ export class PlansService {
   update(id: string, payload: UpdatePlanPayload): Observable<Plan> {
     return this.http.patch<Plan>(`${this.baseUrl}/${id}`, payload);
   }
+
+  deactivate(id: string): Observable<Plan> {
+    return this.http.delete<Plan>(`${this.baseUrl}/${id}`);
+  }
 }

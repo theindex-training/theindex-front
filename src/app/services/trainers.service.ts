@@ -51,4 +51,8 @@ export class TrainersService {
   update(id: string, payload: UpdateTrainerPayload): Observable<TrainerProfile> {
     return this.http.patch<TrainerProfile>(`${this.baseUrl}/${id}`, payload);
   }
+
+  deactivate(id: string): Observable<TrainerProfile> {
+    return this.http.delete<TrainerProfile>(`${this.baseUrl}/${id}`);
+  }
 }

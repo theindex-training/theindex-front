@@ -54,7 +54,7 @@ export class TrainerDeleteComponent implements OnInit {
     this.submitting = true;
     this.errorMessage = '';
 
-    this.trainersService.update(this.trainer.id, { isActive: false }).subscribe({
+    this.trainersService.deactivate(this.trainer.id).subscribe({
       next: () => {
         this.submitting = false;
         this.router.navigate(['/trainers']);
