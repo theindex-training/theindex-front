@@ -1,0 +1,50 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Edit trainer</h1>
+      <p>Update trainer details, account link, or status.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/trainers">Back to trainers</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading trainer...</div>
+  } @else if (errorMessage && !trainer) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (trainer) {
+    <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <div class="form-grid">
+        <label class="field">
+          <span>Name</span>
+          <input type="text" formControlName="name" />
+          @if (form.controls.name.touched && form.controls.name.invalid) {
+            <small class="error">Name is required and must be at least 2 characters.</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Nickname</span>
+          <input type="text" formControlName="nickname" />
+          @if (form.controls.nickname.touched && form.controls.nickname.invalid) {
+            <small class="error">Nickname must be at least 1 character.</small>
+          }
+        </label>
+
+        <label class="field checkbox">
+          <input type="checkbox" formControlName="isActive" />
+          <span>Active trainer</span>
+        </label>
+      </div>
+
+      @if (errorMessage) {
+        <div class="state error">{{ errorMessage }}</div>
+      }
+
+      <div class="form-actions">
+        <button class="button button-primary" type="submit" [disabled]="submitting">
+          {{ submitting ? 'Saving...' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>
