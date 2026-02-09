@@ -48,16 +48,11 @@
 
         <p class="login__error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
-        <div class="login__options">
-          <app-ui-checkbox id="remember-me" label="Remember me" />
-          <a class="login__link" href="/">Forgot password?</a>
-        </div>
-
         <app-ui-button type="submit">Sign in</app-ui-button>
       </form>
 
       <div class="login__footer">
-        <p>Need access? <a href="/">Contact your admin</a></p>
+        <p>Need access? Contact admin</p>
       </div>
     </div>
   </div>
