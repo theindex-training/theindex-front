@@ -83,6 +83,14 @@ select {
   justify-content: flex-end;
 }
 
+.table-actions .button {
+  white-space: nowrap;
+}
+
+.table-actions .button-primary {
+  min-width: 140px;
+}
+
 .status {
   display: inline-flex;
   padding: 0.25rem 0.6rem;

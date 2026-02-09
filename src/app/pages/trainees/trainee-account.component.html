@@ -1,0 +1,90 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Create trainee account</h1>
+      <p>Provision login credentials for the selected trainee.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/trainees">Back to trainees</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading trainee...</div>
+  } @else if (errorMessage && !trainee) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (trainee) {
+    <div class="card">
+      <div class="details">
+        <div>
+          <span class="label">Trainee</span>
+          <strong>{{ trainee.name }}</strong>
+        </div>
+        <div>
+          <span class="label">Nickname</span>
+          <strong>{{ formatNickname() }}</strong>
+        </div>
+        <div>
+          <span class="label">Phone</span>
+          <strong>{{ formatPhone() }}</strong>
+        </div>
+        <div>
+          <span class="label">Status</span>
+          <strong>{{ trainee.isActive ? 'Active' : 'Inactive' }}</strong>
+        </div>
+      </div>
+
+      @if (trainee.accountId) {
+        <div class="state">This trainee already has an account linked.</div>
+      } @else {
+        <form class="form" [formGroup]="form" (ngSubmit)="handleSubmit()">
+          <div class="form-grid">
+            <label class="field">
+              <span>Email</span>
+              <input type="email" formControlName="email" placeholder="trainee@example.com" />
+              @if (form.controls.email.touched && form.controls.email.invalid) {
+                <small class="error">Enter a valid email address.</small>
+              }
+            </label>
+
+            <label class="field">
+              <span>Status</span>
+              <select formControlName="status">
+                @for (option of statusOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Password</span>
+              <input type="password" formControlName="password" placeholder="Minimum 8 characters" />
+              @if (form.controls.password.touched && form.controls.password.invalid) {
+                <small class="error">Password must be at least 8 characters.</small>
+              }
+            </label>
+
+            <label class="field">
+              <span>Confirm password</span>
+              <input type="password" formControlName="confirmPassword" placeholder="Repeat password" />
+              @if (form.controls.confirmPassword.touched && form.controls.confirmPassword.invalid) {
+                <small class="error">Confirmation must be at least 8 characters.</small>
+              }
+              @if (showPasswordMismatch) {
+                <small class="error">Passwords do not match.</small>
+              }
+            </label>
+          </div>
+
+          @if (errorMessage) {
+            <div class="state error">{{ errorMessage }}</div>
+          }
+
+          <div class="form-actions">
+            <button class="button button-primary" type="submit" [disabled]="submitting">
+              {{ submitting ? 'Provisioning...' : 'Create account' }}
+            </button>
+          </div>
+        </form>
+      }
+    </div>
+  }
+</section>

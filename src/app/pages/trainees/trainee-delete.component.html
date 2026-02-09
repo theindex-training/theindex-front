@@ -1,0 +1,50 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Deactivate trainee</h1>
+      <p>Disable access for a trainee while keeping their profile.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/trainees">Back to trainees</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading trainee...</div>
+  } @else if (errorMessage && !trainee) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (trainee) {
+    <div class="card">
+      <div class="details">
+        <div>
+          <span class="label">Name</span>
+          <strong>{{ trainee.name }}</strong>
+        </div>
+        <div>
+          <span class="label">Nickname</span>
+          <strong>{{ formatNickname() }}</strong>
+        </div>
+        <div>
+          <span class="label">Phone</span>
+          <strong>{{ formatPhone() }}</strong>
+        </div>
+        <div>
+          <span class="label">Account</span>
+          <strong>{{ formatAccount() }}</strong>
+        </div>
+      </div>
+
+      <div class="warning">
+        This trainee will no longer be active, but their profile can be reactivated later.
+      </div>
+
+      @if (errorMessage) {
+        <div class="state error">{{ errorMessage }}</div>
+      }
+
+      <div class="form-actions">
+        <button class="button button-danger" type="button" (click)="confirmDeactivate()" [disabled]="submitting">
+          {{ submitting ? 'Deactivating...' : 'Deactivate trainee' }}
+        </button>
+      </div>
+    </div>
+  }
+</section>
