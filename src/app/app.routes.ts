@@ -145,6 +145,24 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
       {
+        path: 'attendance/new',
+        loadComponent: () =>
+          import('./pages/attendance/attendance-register.component').then(
+            m => m.AttendanceRegisterComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'attendance',
+        loadComponent: () =>
+          import('./pages/attendance/attendance-sessions.component').then(
+            m => m.AttendanceSessionsComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
         path: 'trainees/new',
         loadComponent: () =>
           import('./pages/trainees/trainee-create.component').then(

@@ -1,0 +1,113 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Register attendance</h1>
+      <p>Capture a completed training session and mark all trainees who attended.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/attendance">Back to attendance</a>
+  </header>
+
+  @if (loading) {
+    <div class="card state">Loading trainers, gyms, and trainees...</div>
+  } @else {
+    <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <div class="form-grid">
+        <label class="field">
+          <span>Trainer</span>
+          <select formControlName="trainerId">
+            <option value="" disabled>Select trainer</option>
+            @for (trainer of trainers; track trainer.id) {
+              <option [value]="trainer.id">
+                {{ trainer.name }}{{ trainer.nickname ? ' (' + trainer.nickname + ')' : '' }}
+              </option>
+            }
+          </select>
+          @if (form.controls.trainerId.touched && form.controls.trainerId.invalid) {
+            <small class="error">Trainer is required.</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Gym location</span>
+          <select formControlName="locationId">
+            <option value="" disabled>Select gym location</option>
+            @for (gym of gymLocations; track gym.id) {
+              <option [value]="gym.id">{{ gym.name }}</option>
+            }
+          </select>
+          @if (form.controls.locationId.touched && form.controls.locationId.invalid) {
+            <small class="error">Gym location is required.</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Training date *</span>
+          <input type="date" formControlName="trainedDate" />
+          @if (form.controls.trainedDate.touched && form.controls.trainedDate.invalid) {
+            <small class="error">Training date is required.</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Training time (optional)</span>
+          <input type="time" formControlName="trainedTime" />
+        </label>
+      </div>
+
+      <section class="trainee-section">
+        <div class="trainee-toolbar">
+          <label class="field search-field">
+            <span>Search trainees (name or nickname)</span>
+            <input
+              type="text"
+              formControlName="traineeSearch"
+              placeholder="Type trainee name or nickname"
+            />
+          </label>
+
+          <div class="selection-actions">
+            <button class="button button-ghost" type="button" (click)="selectFiltered()">
+              Select filtered
+            </button>
+            <button class="button button-ghost" type="button" (click)="clearFiltered()">
+              Clear filtered
+            </button>
+          </div>
+        </div>
+
+        <p class="selection-hint">
+          Selected trainees: <strong>{{ selectedTraineeIds.size }}</strong>
+        </p>
+
+        <div class="trainee-list">
+          @if (filteredTrainees.length === 0) {
+            <p class="state">No trainees match this search.</p>
+          } @else {
+            @for (trainee of filteredTrainees; track trainee.id) {
+              <label class="trainee-item">
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(trainee.id)"
+                  (change)="toggleTraineeSelection(trainee.id, $any($event.target).checked)"
+                />
+                <span class="trainee-name">{{ trainee.name }}</span>
+                <span class="trainee-nickname">{{ trainee.nickname || '—' }}</span>
+              </label>
+            }
+          }
+        </div>
+      </section>
+
+      @if (errorMessage) {
+        <div class="state error">{{ errorMessage }}</div>
+      }
+
+
+      <div class="form-actions">
+        <button class="button button-primary" type="submit" [disabled]="submitting">
+          {{ submitting ? 'Saving...' : 'Register attendance' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

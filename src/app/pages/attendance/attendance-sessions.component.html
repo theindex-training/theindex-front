@@ -1,0 +1,89 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Attendance</h1>
+      <p>Review training sessions and all registered attendees.</p>
+    </div>
+    <div class="page-actions">
+      <a class="button button-primary" routerLink="/attendance/new">Register attendance</a>
+    </div>
+  </header>
+
+  <section class="filters">
+    <label class="field">
+      <span>Date</span>
+      <input type="date" [(ngModel)]="selectedDate" />
+    </label>
+
+    <label class="field">
+      <span>Trainer</span>
+      <select [(ngModel)]="selectedTrainerId" [disabled]="loadingTrainers">
+        <option value="">All trainers</option>
+        @for (trainer of trainers; track trainer.id) {
+          <option [value]="trainer.id">
+            {{ trainer.name }}{{ trainer.nickname ? ' (' + trainer.nickname + ')' : '' }}
+          </option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Session bucket</span>
+      <select [(ngModel)]="selectedBucketMinutes">
+        <option [ngValue]="30">30 min</option>
+        <option [ngValue]="60">60 min</option>
+        <option [ngValue]="90">90 min</option>
+        <option [ngValue]="120">120 min</option>
+      </select>
+    </label>
+
+    <button class="button button-secondary" type="button" (click)="loadSessions()">Apply</button>
+  </section>
+
+  @if (loading) {
+    <div class="state">Loading attendance sessions...</div>
+  } @else if (errorMessage) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (!sessions.length) {
+    <div class="state">No attendance sessions found for the selected filters.</div>
+  } @else {
+    <div class="sessions-grid">
+      @for (session of sessions; track trackBySession($index, session)) {
+        <article class="card session-card">
+          <header class="session-header">
+            <h2>{{ formatDateTime(session.start) }} - {{ formatDateTime(session.end) }}</h2>
+            <p>
+              Trainer: <strong>{{ formatTrainer(session) }}</strong>
+              · Gym: <strong>{{ session.location?.name || '—' }}</strong>
+            </p>
+            <p>
+              Total: <strong>{{ session.totals.count }}</strong>
+              · Paid: <strong>{{ session.totals.paid }}</strong>
+              · Unpaid: <strong>{{ session.totals.unpaid }}</strong>
+            </p>
+          </header>
+
+          <div class="attendees">
+            <div class="attendees-header">
+              <span>Trainee</span>
+              <span>Nickname</span>
+              <span>Status</span>
+            </div>
+
+            @for (item of session.attendance; track item.id) {
+              <div class="attendee-row">
+                <span>{{ item.trainee.name }}</span>
+                <span>{{ item.trainee.nickname || '—' }}</span>
+                <span>
+                  <span class="status" [class.unpaid]="item.paymentStatus === 'UNPAID'">
+                    {{ item.paymentStatus }}
+                  </span>
+                </span>
+              </div>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
