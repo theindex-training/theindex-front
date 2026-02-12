@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -7,6 +7,7 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AttendanceService } from '../../services/attendance.service';
 import { AuthService } from '../../services/auth.service';
@@ -17,7 +18,7 @@ import { TrainerProfile, TrainersService } from '../../services/trainers.service
 @Component({
   selector: 'app-attendance-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './attendance-register.component.html',
   styleUrl: './attendance-register.component.scss'
 })
@@ -33,7 +34,6 @@ export class AttendanceRegisterComponent implements OnInit {
   loading = true;
   submitting = false;
   errorMessage = '';
-  successMessage = '';
 
   trainers: TrainerProfile[] = [];
   gymLocations: GymLocation[] = [];
@@ -47,7 +47,9 @@ export class AttendanceRegisterComponent implements OnInit {
     private readonly gymsService: GymLocationsService,
     private readonly traineesService: TraineesService,
     private readonly attendanceService: AttendanceService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly router: Router,
+    private readonly changeDetector: ChangeDetectorRef
   ) {
     this.form = this.formBuilder.group({
       trainerId: this.formBuilder.nonNullable.control('', [Validators.required]),
@@ -72,30 +74,34 @@ export class AttendanceRegisterComponent implements OnInit {
         this.preselectCurrentTrainer();
         this.preselectDefaultLocation();
         this.loading = false;
+        this.changeDetector.detectChanges();
       },
       error: (error) => {
         this.errorMessage =
           error?.error?.message || 'Unable to load trainers, gyms, or trainees right now.';
         this.loading = false;
+        this.changeDetector.detectChanges();
       }
     });
 
     this.form.controls.traineeSearch.valueChanges.subscribe(value => {
       this.applyTraineeFilter(value);
+      this.changeDetector.detectChanges();
     });
   }
 
   handleSubmit(): void {
-    this.successMessage = '';
     this.errorMessage = '';
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.changeDetector.detectChanges();
       return;
     }
 
     if (this.selectedTraineeIds.size === 0) {
       this.errorMessage = 'Select at least one trainee for this attendance batch.';
+      this.changeDetector.detectChanges();
       return;
     }
 
@@ -113,15 +119,15 @@ export class AttendanceRegisterComponent implements OnInit {
         ...(trainedTime ? { trainedTime } : {})
       })
       .subscribe({
-        next: (response) => {
+        next: () => {
           this.submitting = false;
-          this.successMessage = `Attendance registered for ${response.count} trainee(s).`;
-          this.selectedTraineeIds.clear();
+          this.changeDetector.detectChanges();
+          this.router.navigate(['/attendance']);
         },
         error: (error) => {
-          this.errorMessage =
-            error?.error?.message || 'Unable to register attendance right now.';
+          this.errorMessage = error?.error?.message || 'Unable to register attendance right now.';
           this.submitting = false;
+          this.changeDetector.detectChanges();
         }
       });
   }
@@ -133,20 +139,22 @@ export class AttendanceRegisterComponent implements OnInit {
   toggleTraineeSelection(traineeId: string, checked: boolean): void {
     if (checked) {
       this.selectedTraineeIds.add(traineeId);
-      return;
+    } else {
+      this.selectedTraineeIds.delete(traineeId);
     }
 
-    this.selectedTraineeIds.delete(traineeId);
+    this.changeDetector.detectChanges();
   }
 
   selectFiltered(): void {
     this.filteredTrainees.forEach(trainee => this.selectedTraineeIds.add(trainee.id));
+    this.changeDetector.detectChanges();
   }
 
   clearFiltered(): void {
     this.filteredTrainees.forEach(trainee => this.selectedTraineeIds.delete(trainee.id));
+    this.changeDetector.detectChanges();
   }
-
 
   private preselectDefaultLocation(): void {
     const firstLocation = this.gymLocations[0];

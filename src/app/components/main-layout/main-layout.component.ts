@@ -24,7 +24,7 @@ export class MainLayoutComponent {
     { label: 'Gyms', route: '/gyms' },
     { label: 'Trainers', route: '/trainers' },
     { label: 'Trainees', route: '/trainees' },
-    { label: 'Attendance', route: '/attendance/new' }
+    { label: 'Attendance', route: '/attendance' }
   ];
 
   constructor(

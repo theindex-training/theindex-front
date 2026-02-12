@@ -4,6 +4,14 @@
   gap: 1.5rem;
 }
 
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .page-header h1 {
   margin: 0;
   font-size: 2rem;
@@ -110,11 +118,6 @@
   color: #b42318;
 }
 
-.success {
-  border: 1px solid #75e0a7;
-  background: #ecfdf3;
-  color: #067647;
-}
 
 .state {
   border-radius: 0.75rem;

@@ -4,6 +4,7 @@
       <h1>Register attendance</h1>
       <p>Capture a completed training session and mark all trainees who attended.</p>
     </div>
+    <a class="button button-ghost" routerLink="/attendance">Back to attendance</a>
   </header>
 
   @if (loading) {
@@ -101,9 +102,6 @@
         <div class="state error">{{ errorMessage }}</div>
       }
 
-      @if (successMessage) {
-        <div class="state success">{{ successMessage }}</div>
-      }
 
       <div class="form-actions">
         <button class="button button-primary" type="submit" [disabled]="submitting">
