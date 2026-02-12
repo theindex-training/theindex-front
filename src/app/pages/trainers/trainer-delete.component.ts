@@ -3,6 +3,8 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
 
+import { displayValue } from '../../utils/display.util';
+
 @Component({
   selector: 'app-trainer-delete',
   standalone: true,
@@ -68,7 +70,7 @@ export class TrainerDeleteComponent implements OnInit {
   }
 
   formatNickname(): string {
-    return this.trainer?.nickname?.trim() || '—';
+    return displayValue(this.trainer?.nickname);
   }
 
   formatAccount(): string {

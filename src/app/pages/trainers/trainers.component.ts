@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
 
+import { displayValue } from '../../utils/display.util';
+
 @Component({
   selector: 'app-trainers',
   standalone: true,
@@ -53,7 +55,7 @@ export class TrainersComponent implements OnInit {
   }
 
   formatNickname(trainer: TrainerProfile): string {
-    return trainer.nickname?.trim() || '—';
+    return displayValue(trainer.nickname);
   }
 
   formatAccount(trainer: TrainerProfile): string {

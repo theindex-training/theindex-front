@@ -30,6 +30,8 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
   return difference < 1e-6 ? null : { currency: true };
 };
 
+import { displayValue } from '../../utils/display.util';
+
 @Component({
   selector: 'app-trainee-details',
   standalone: true,
@@ -125,11 +127,11 @@ export class TraineeDetailsComponent implements OnInit {
   }
 
   formatNickname(): string {
-    return this.trainee?.nickname?.trim() || '—';
+    return displayValue(this.trainee?.nickname);
   }
 
   formatPhone(): string {
-    return this.trainee?.phone?.trim() || '—';
+    return displayValue(this.trainee?.phone);
   }
 
   formatAccount(): string {

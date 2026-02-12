@@ -31,6 +31,8 @@ const matchPasswordsValidator: ValidatorFn = (
   return password === confirmPassword ? null : { passwordsMismatch: true };
 };
 
+import { displayValue } from '../../utils/display.util';
+
 @Component({
   selector: 'app-trainer-account',
   standalone: true,
@@ -153,6 +155,6 @@ export class TrainerAccountComponent implements OnInit {
   }
 
   formatNickname(): string {
-    return this.trainer?.nickname?.trim() || '—';
+    return displayValue(this.trainer?.nickname);
   }
 }

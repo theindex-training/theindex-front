@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
 
+import { displayValue } from '../../utils/display.util';
+
 @Component({
   selector: 'app-gyms',
   standalone: true,
@@ -51,6 +53,6 @@ export class GymsComponent implements OnInit {
   }
 
   formatAddress(gym: GymLocation): string {
-    return gym.address?.trim() || '—';
+    return displayValue(gym.address);
   }
 }

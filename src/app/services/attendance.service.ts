@@ -1,7 +1,8 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
+import { buildHttpParams } from '../utils/http-params.util';
 
 export interface CreateAttendanceBatchPayload {
   trainerId: string;
@@ -93,31 +94,21 @@ export class AttendanceService {
     return this.http.post<AttendanceBatchResponse>(`${this.baseUrl}/batch`, payload);
   }
 
-
   list(query: AttendanceListQuery): Observable<AttendanceListItem[]> {
-    let params = new HttpParams();
-
-    if (query.date) {
-      params = params.set('date', query.date);
-    }
-
-    if (query.trainerId) {
-      params = params.set('trainerId', query.trainerId);
-    }
+    const params = buildHttpParams({
+      date: query.date,
+      trainerId: query.trainerId
+    });
 
     return this.http.get<AttendanceListItem[]>(this.baseUrl, { params });
   }
 
   sessions(query: AttendanceSessionsQuery): Observable<AttendanceSessionsResponse> {
-    let params = new HttpParams().set('date', query.date);
-
-    if (query.trainerId) {
-      params = params.set('trainerId', query.trainerId);
-    }
-
-    if (query.bucketMinutes) {
-      params = params.set('bucketMinutes', String(query.bucketMinutes));
-    }
+    const params = buildHttpParams({
+      date: query.date,
+      trainerId: query.trainerId,
+      bucketMinutes: query.bucketMinutes
+    });
 
     return this.http.get<AttendanceSessionsResponse>(`${this.baseUrl}/sessions`, { params });
   }
