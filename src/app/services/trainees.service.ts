@@ -1,7 +1,8 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
+import { buildHttpParams } from '../utils/http-params.util';
 
 export interface TraineeProfile {
   id: string;
@@ -36,13 +37,11 @@ export class TraineesService {
   constructor(private readonly http: HttpClient) {}
 
   list(active?: boolean, search?: string): Observable<TraineeProfile[]> {
-    let params = new HttpParams();
-    if (active !== undefined) {
-      params = params.set('active', String(active));
-    }
-    if (search) {
-      params = params.set('search', search);
-    }
+    const params = buildHttpParams({
+      active,
+      search
+    });
+
     return this.http.get<TraineeProfile[]>(this.baseUrl, { params });
   }
 

@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
 
+import { displayValue } from '../../utils/display.util';
+
 @Component({
   selector: 'app-trainees',
   standalone: true,
@@ -53,11 +55,11 @@ export class TraineesComponent implements OnInit {
   }
 
   formatNickname(trainee: TraineeProfile): string {
-    return trainee.nickname?.trim() || '—';
+    return displayValue(trainee.nickname);
   }
 
   formatPhone(trainee: TraineeProfile): string {
-    return trainee.phone?.trim() || '—';
+    return displayValue(trainee.phone);
   }
 
   formatAccount(trainee: TraineeProfile): string {

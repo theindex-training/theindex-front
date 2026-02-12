@@ -3,6 +3,8 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
 
+import { displayValue } from '../../utils/display.util';
+
 @Component({
   selector: 'app-gym-details',
   standalone: true,
@@ -48,6 +50,6 @@ export class GymDetailsComponent implements OnInit {
     if (!this.gym) {
       return '—';
     }
-    return this.gym.address?.trim() || '—';
+    return displayValue(this.gym.address);
   }
 }

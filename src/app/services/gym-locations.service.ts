@@ -1,7 +1,8 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
+import { buildHttpParams } from '../utils/http-params.util';
 
 export interface GymLocation {
   id: string;
@@ -34,10 +35,7 @@ export class GymLocationsService {
   constructor(private readonly http: HttpClient) {}
 
   list(includeInactive?: boolean): Observable<GymLocation[]> {
-    let params = new HttpParams();
-    if (includeInactive !== undefined) {
-      params = params.set('includeInactive', String(includeInactive));
-    }
+    const params = buildHttpParams({ includeInactive });
     return this.http.get<GymLocation[]>(this.baseUrl, { params });
   }
 

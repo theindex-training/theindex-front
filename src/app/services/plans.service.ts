@@ -1,7 +1,8 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
+import { buildHttpParams } from '../utils/http-params.util';
 
 export type PlanType = 'PUNCH' | 'TIME';
 
@@ -43,10 +44,7 @@ export class PlansService {
   constructor(private readonly http: HttpClient) {}
 
   list(active?: boolean): Observable<Plan[]> {
-    let params = new HttpParams();
-    if (active !== undefined) {
-      params = params.set('active', String(active));
-    }
+    const params = buildHttpParams({ active });
     return this.http.get<Plan[]>(this.baseUrl, { params });
   }
 
