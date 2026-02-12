@@ -145,6 +145,15 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
       {
+        path: 'attendance/new',
+        loadComponent: () =>
+          import('./pages/attendance/attendance-register.component').then(
+            m => m.AttendanceRegisterComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
         path: 'trainees/new',
         loadComponent: () =>
           import('./pages/trainees/trainee-create.component').then(
