@@ -2,7 +2,9 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import {
+  AttendanceListItem,
   AttendanceService,
   AttendanceSession,
   AttendanceSessionsQuery
@@ -52,9 +54,25 @@ export class AttendanceSessionsComponent implements OnInit {
       query.trainerId = this.selectedTrainerId;
     }
 
-    this.attendanceService.sessions(query).subscribe({
-      next: (response) => {
-        this.sessions = response.sessions;
+    forkJoin({
+      sessionsResponse: this.attendanceService.sessions(query),
+      listItems: this.attendanceService.list({
+        date: this.selectedDate,
+        ...(this.selectedTrainerId ? { trainerId: this.selectedTrainerId } : {})
+      })
+    }).subscribe({
+      next: ({ sessionsResponse, listItems }) => {
+        const sessionLocationMap = this.buildSessionLocationMap(listItems, this.selectedBucketMinutes);
+
+        this.sessions = sessionsResponse.sessions.map(session => ({
+          ...session,
+          location:
+            session.location ||
+            sessionLocationMap.get(session.sessionKey) ||
+            sessionLocationMap.get(this.computeSessionKey(new Date(session.start), session.bucketMinutes)) ||
+            null
+        }));
+
         this.loading = false;
         this.changeDetector.detectChanges();
       },
@@ -85,6 +103,37 @@ export class AttendanceSessionsComponent implements OnInit {
     return session.trainer.nickname
       ? `${session.trainer.name} (${session.trainer.nickname})`
       : session.trainer.name;
+  }
+
+  private buildSessionLocationMap(
+    attendances: AttendanceListItem[],
+    bucketMinutes: number
+  ): Map<string, { id: string; name: string }> {
+    const locationBySession = new Map<string, { id: string; name: string }>();
+
+    for (const attendance of attendances) {
+      if (!attendance.location) {
+        continue;
+      }
+
+      const trainedAt = new Date(attendance.trainedAt);
+      const key = this.computeSessionKey(trainedAt, bucketMinutes);
+
+      if (!locationBySession.has(key)) {
+        locationBySession.set(key, attendance.location);
+      }
+    }
+
+    return locationBySession;
+  }
+
+  private computeSessionKey(dateTime: Date, bucketMinutes: number): string {
+    const minutesFromMidnight = dateTime.getHours() * 60 + dateTime.getMinutes();
+    const bucketStartMin = Math.floor(minutesFromMidnight / bucketMinutes) * bucketMinutes;
+    const startH = Math.floor(bucketStartMin / 60);
+    const startM = bucketStartMin % 60;
+
+    return `${this.selectedDate}|${String(startH).padStart(2, '0')}:${String(startM).padStart(2, '0')}`;
   }
 
   private loadTrainers(): void {

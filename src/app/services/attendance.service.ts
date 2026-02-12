@@ -24,6 +24,22 @@ export interface AttendanceSessionsQuery {
   bucketMinutes?: number;
 }
 
+export interface AttendanceListItem {
+  id: string;
+  trainedAt: string;
+  trainerId: string;
+  locationId: string;
+  location: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+export interface AttendanceListQuery {
+  date?: string;
+  trainerId?: string;
+}
+
 export interface AttendanceSessionAttendanceItem {
   id: string;
   trainedAt: string;
@@ -75,6 +91,21 @@ export class AttendanceService {
 
   createBatch(payload: CreateAttendanceBatchPayload): Observable<AttendanceBatchResponse> {
     return this.http.post<AttendanceBatchResponse>(`${this.baseUrl}/batch`, payload);
+  }
+
+
+  list(query: AttendanceListQuery): Observable<AttendanceListItem[]> {
+    let params = new HttpParams();
+
+    if (query.date) {
+      params = params.set('date', query.date);
+    }
+
+    if (query.trainerId) {
+      params = params.set('trainerId', query.trainerId);
+    }
+
+    return this.http.get<AttendanceListItem[]>(this.baseUrl, { params });
   }
 
   sessions(query: AttendanceSessionsQuery): Observable<AttendanceSessionsResponse> {
