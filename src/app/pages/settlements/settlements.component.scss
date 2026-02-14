@@ -1,0 +1,154 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.page-header p {
+  margin: 0.5rem 0 0;
+  color: var(--color-muted);
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.card h2 {
+  margin: 0 0 1rem;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 180px;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+input {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 0.95rem;
+}
+
+.feedback {
+  margin: 0.75rem 0 0;
+  font-weight: 600;
+}
+
+.feedback.error {
+  color: #b42318;
+}
+
+.table {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr 0.8fr 1fr;
+  gap: 1rem;
+  align-items: center;
+  background: var(--color-surface);
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+}
+
+.table-header {
+  font-weight: 700;
+  color: var(--color-muted);
+  background: transparent;
+  border: none;
+  padding: 0 0.25rem;
+}
+
+.table-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.state {
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.state.error {
+  border-color: #fda29b;
+  color: #b42318;
+}
+
+.status {
+  display: inline-flex;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: #eff8ff;
+  color: #175cd3;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.status.final {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.button {
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.button-secondary {
+  background: #eef4ff;
+  color: #3538cd;
+  border-color: #c7d7fe;
+}
+
+@media (max-width: 960px) {
+  .table-row {
+    grid-template-columns: 1fr;
+  }
+
+  .table-header {
+    display: none;
+  }
+
+  .table-actions {
+    justify-content: flex-start;
+  }
+}
