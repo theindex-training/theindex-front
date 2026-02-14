@@ -112,4 +112,8 @@ export class AttendanceService {
 
     return this.http.get<AttendanceSessionsResponse>(`${this.baseUrl}/sessions`, { params });
   }
+
+  deleteById(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
 }
