@@ -1,0 +1,53 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Settlements</h1>
+      <p>Review generated settlement reports and open detailed breakdowns.</p>
+    </div>
+    <div class="page-actions">
+      <a class="button button-primary" routerLink="/settlements/new">Generate report</a>
+    </div>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading settlements...</div>
+  } @else if (errorMessage) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (!settlements.length) {
+    <div class="state">No settlements available yet.</div>
+  } @else {
+    <div class="table">
+      <div class="table-row table-header">
+        <span>Period start</span>
+        <span>Period end</span>
+        <span>Generated at</span>
+        <span>Status</span>
+        <span class="table-actions">Actions</span>
+      </div>
+
+      @for (settlement of settlements; track settlement.id) {
+        <div class="table-row">
+          <span>{{ settlement.periodStart }}</span>
+          <span>{{ settlement.periodEnd }}</span>
+          <span>{{ formatDate(settlement.generatedAt) }}</span>
+          <span>
+            <span class="status" [class.final]="settlement.status === 'FINAL'">{{ settlement.status }}</span>
+          </span>
+          <span class="table-actions">
+            <a class="button button-secondary" [routerLink]="['/settlements', settlement.id]">
+              Open report
+            </a>
+            <button
+              class="button button-danger"
+              type="button"
+              (click)="deleteSettlement(settlement)"
+              [disabled]="deletingSettlementId === settlement.id"
+            >
+              {{ deletingSettlementId === settlement.id ? 'Deleting...' : 'Delete' }}
+            </button>
+          </span>
+        </div>
+      }
+    </div>
+  }
+</section>

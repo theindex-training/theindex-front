@@ -1,0 +1,122 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Settlement report details</h1>
+      <p>Inspect settlement totals and allocation rows for this report.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/settlements">Back to settlements</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading settlement...</div>
+  } @else if (errorMessage && !settlement) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (settlement) {
+    <article class="card">
+      <div class="meta-grid">
+        <div>
+          <span class="label">Status</span>
+          <strong>{{ settlement.status }}</strong>
+        </div>
+        <div>
+          <span class="label">Period start</span>
+          <strong>{{ settlement.periodStart }}</strong>
+        </div>
+        <div>
+          <span class="label">Period end</span>
+          <strong>{{ settlement.periodEnd }}</strong>
+        </div>
+        <div>
+          <span class="label">Generated at</span>
+          <strong>{{ formatDate(settlement.generatedAt) }}</strong>
+        </div>
+      </div>
+
+      @if (settlement.status === 'DRAFT') {
+        <div class="actions">
+          <button class="button button-primary" type="button" (click)="finalizeSettlement()" [disabled]="finalizing">
+            {{ finalizing ? 'Finalizing...' : 'Finalize settlement' }}
+          </button>
+        </div>
+      }
+
+      @if (errorMessage) {
+        <p class="feedback error">{{ errorMessage }}</p>
+      }
+    </article>
+
+    <section class="card">
+      <h2>Settlement lines</h2>
+      @if (!lines.length) {
+        <div class="state">No trainer totals found for this settlement.</div>
+      } @else {
+        <div class="table">
+          <div class="table-row table-header">
+            <span>Trainer</span>
+            <span>Total amount</span>
+            <span>Attendance count</span>
+            <span>Unpaid count</span>
+            <span>Punch cents</span>
+            <span>Time cents</span>
+          </div>
+          @for (line of lines; track line.id) {
+            <div class="table-row">
+              <span>{{ formatTrainer(line.trainerId) }}</span>
+              <span>{{ formatCurrency(line.amountCents) }}</span>
+              <span>{{ line.attendanceCount }}</span>
+              <span>{{ line.unpaidAttendanceCount }}</span>
+              <span>{{ formatCurrency(line.details.punchCents) }}</span>
+              <span>{{ formatCurrency(line.details.timeCents) }}</span>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="card">
+      <h2>Allocations</h2>
+      <div class="filter-row">
+        <label class="field">
+          <span>Trainer filter</span>
+          <select [(ngModel)]="selectedTrainerId" (change)="loadAllocations()">
+            <option value="">All trainers</option>
+            @for (trainer of trainers; track trainer.id) {
+              <option [value]="trainer.id">{{ trainer.nickname || trainer.name }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      @if (loadingAllocations) {
+        <div class="state">Loading allocations...</div>
+      } @else if (allocationError) {
+        <div class="state error">{{ allocationError }}</div>
+      } @else if (!allocations.length) {
+        <div class="state">No allocations to display.</div>
+      } @else {
+        <p class="allocation-summary">Showing {{ allocations.length }} of {{ allocationsTotal }} allocation rows.</p>
+        <div class="table">
+          <div class="table-row table-header allocations-header">
+            <span>Trainer</span>
+            <span>Trainee</span>
+            <span>Subscription type</span>
+            <span>Value</span>
+            <span>Gym</span>
+            <span>Trained at</span>
+          </div>
+
+          @for (row of allocations; track row.id) {
+            <div class="table-row allocations-row">
+              <span>{{ formatTrainer(row.trainerId) }}</span>
+              <span>{{ formatTrainee(row.attendance?.traineeId) }}</span>
+              <span>{{ row.subscriptionType || '—' }}</span>
+              <span>{{ formatCurrency(row.valueCents) }}</span>
+              <span>{{ formatGym(row.attendance?.locationId) }}</span>
+              <span>{{ formatOptionalDate(row.attendance?.trainedAt) }}</span>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+</section>

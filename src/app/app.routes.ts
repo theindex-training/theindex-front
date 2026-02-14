@@ -162,6 +162,32 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
+
+      {
+        path: 'settlements/new',
+        loadComponent: () =>
+          import('./pages/settlements/settlement-generate.component').then(
+            m => m.SettlementGenerateComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'settlements/:id',
+        loadComponent: () =>
+          import('./pages/settlements/settlement-details.component').then(
+            m => m.SettlementDetailsComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'settlements',
+        loadComponent: () =>
+          import('./pages/settlements/settlements.component').then(m => m.SettlementsComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
       {
         path: 'trainees/new',
         loadComponent: () =>
