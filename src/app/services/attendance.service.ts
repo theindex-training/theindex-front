@@ -20,36 +20,20 @@ export interface AttendanceBatchResponse {
 }
 
 export interface AttendanceSessionsQuery {
-  date: string;
+  startDate: string;
+  endDate: string;
+  startTime?: string;
+  endTime?: string;
   trainerId?: string;
   bucketMinutes?: number;
-}
-
-export interface AttendanceListItem {
-  id: string;
-  trainedAt: string;
-  trainerId: string;
-  locationId: string;
-  location: {
-    id: string;
-    name: string;
-  } | null;
-}
-
-export interface AttendanceListQuery {
-  date?: string;
-  trainerId?: string;
 }
 
 export interface AttendanceSessionAttendanceItem {
   id: string;
   trainedAt: string;
   paymentStatus: 'PAID' | 'UNPAID';
-  trainee: {
-    id: string;
-    name: string;
-    nickname: string | null;
-  };
+  traineeId: string;
+  subscriptionId: string | null;
 }
 
 export interface AttendanceSession {
@@ -58,15 +42,8 @@ export interface AttendanceSession {
   start: string;
   end: string;
   bucketMinutes: number;
-  trainer: {
-    id: string;
-    name: string;
-    nickname: string | null;
-  } | null;
-  location: {
-    id: string;
-    name: string;
-  } | null;
+  trainerId: string;
+  locationId: string;
   attendance: AttendanceSessionAttendanceItem[];
   totals: {
     count: number;
@@ -75,11 +52,27 @@ export interface AttendanceSession {
   };
 }
 
+export interface AttendanceSessionEntity {
+  id: string;
+  name: string;
+  nickname?: string | null;
+}
+
 export interface AttendanceSessionsResponse {
-  date: string;
-  trainerId: string | null;
+  filters: {
+    startDate: string;
+    endDate: string;
+    startTime: string;
+    endTime: string;
+    trainerId: string | null;
+  };
   bucketMinutes: number;
   sessions: AttendanceSession[];
+  entities: {
+    trainees: AttendanceSessionEntity[];
+    trainers: AttendanceSessionEntity[];
+    locations: Array<{ id: string; name: string }>;
+  };
 }
 
 @Injectable({
@@ -94,18 +87,12 @@ export class AttendanceService {
     return this.http.post<AttendanceBatchResponse>(`${this.baseUrl}/batch`, payload);
   }
 
-  list(query: AttendanceListQuery): Observable<AttendanceListItem[]> {
-    const params = buildHttpParams({
-      date: query.date,
-      trainerId: query.trainerId
-    });
-
-    return this.http.get<AttendanceListItem[]>(this.baseUrl, { params });
-  }
-
   sessions(query: AttendanceSessionsQuery): Observable<AttendanceSessionsResponse> {
     const params = buildHttpParams({
-      date: query.date,
+      startDate: query.startDate,
+      endDate: query.endDate,
+      startTime: query.startTime,
+      endTime: query.endTime,
       trainerId: query.trainerId,
       bucketMinutes: query.bucketMinutes
     });
