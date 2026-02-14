@@ -2,13 +2,12 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import {
-  AttendanceListItem,
   AttendanceService,
   AttendanceSession,
   AttendanceSessionAttendanceItem,
-  AttendanceSessionsQuery
+  AttendanceSessionsQuery,
+  AttendanceSessionsResponse
 } from '../../services/attendance.service';
 import { AuthService } from '../../services/auth.service';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
@@ -24,9 +23,20 @@ export class AttendanceSessionsComponent implements OnInit {
   sessions: AttendanceSession[] = [];
   trainers: TrainerProfile[] = [];
 
-  selectedDate = this.todayIsoDate();
+  traineeNameById = new Map<string, string>();
+  traineeNicknameById = new Map<string, string | null>();
+  trainerNameById = new Map<string, string>();
+  trainerNicknameById = new Map<string, string | null>();
+  locationNameById = new Map<string, string>();
+
+  selectedStartDate = this.todayIsoDate();
+  selectedEndDate = this.todayIsoDate();
+  selectedStartTime = '';
+  selectedEndTime = '';
   selectedTrainerId = '';
-  selectedBucketMinutes = 60;
+  selectedBucketMinutes: number | null = null;
+
+  selectedSessionKey = '';
 
   loading = true;
   loadingTrainers = true;
@@ -49,38 +59,44 @@ export class AttendanceSessionsComponent implements OnInit {
     this.loadSessions();
   }
 
+  get activeSession(): AttendanceSession | null {
+    if (!this.sessions.length) {
+      return null;
+    }
+
+    return this.sessions.find(session => session.sessionKey === this.selectedSessionKey) ?? this.sessions[0];
+  }
+
   loadSessions(): void {
     this.loading = true;
     this.errorMessage = '';
 
     const query: AttendanceSessionsQuery = {
-      date: this.selectedDate,
-      bucketMinutes: this.selectedBucketMinutes
+      startDate: this.selectedStartDate,
+      endDate: this.selectedEndDate
     };
+
+    if (this.selectedStartTime) {
+      query.startTime = this.selectedStartTime;
+    }
+
+    if (this.selectedEndTime) {
+      query.endTime = this.selectedEndTime;
+    }
 
     if (this.selectedTrainerId) {
       query.trainerId = this.selectedTrainerId;
     }
 
-    forkJoin({
-      sessionsResponse: this.attendanceService.sessions(query),
-      listItems: this.attendanceService.list({
-        date: this.selectedDate,
-        ...(this.selectedTrainerId ? { trainerId: this.selectedTrainerId } : {})
-      })
-    }).subscribe({
-      next: ({ sessionsResponse, listItems }) => {
-        const sessionLocationMap = this.buildSessionLocationMap(listItems, this.selectedBucketMinutes);
+    if (this.selectedBucketMinutes) {
+      query.bucketMinutes = this.selectedBucketMinutes;
+    }
 
-        this.sessions = sessionsResponse.sessions.map(session => ({
-          ...session,
-          location:
-            session.location ||
-            sessionLocationMap.get(session.sessionKey) ||
-            sessionLocationMap.get(this.computeSessionKey(new Date(session.start), session.bucketMinutes)) ||
-            null
-        }));
-
+    this.attendanceService.sessions(query).subscribe({
+      next: (response) => {
+        this.applyEntities(response);
+        this.sessions = response.sessions;
+        this.ensureSelectedSession();
         this.loading = false;
         this.changeDetector.detectChanges();
       },
@@ -96,6 +112,10 @@ export class AttendanceSessionsComponent implements OnInit {
     return session.sessionKey;
   }
 
+  selectSession(sessionKey: string): void {
+    this.selectedSessionKey = sessionKey;
+  }
+
   formatDateTime(value: string): string {
     return new Intl.DateTimeFormat('en-GB', {
       hour: '2-digit',
@@ -103,14 +123,33 @@ export class AttendanceSessionsComponent implements OnInit {
     }).format(new Date(value));
   }
 
+  sessionTabTitle(session: AttendanceSession): string {
+    return `${this.formatDateTime(session.start)} - ${this.formatDateTime(session.end)}, ${this.formatTrainerNickname(session.trainerId)}`;
+  }
+
   formatTrainer(session: AttendanceSession): string {
-    if (!session.trainer) {
-      return '—';
+    return this.formatTrainerLabel(session.trainerId);
+  }
+
+  formatTrainerNickname(trainerId: string): string {
+    const nickname = this.trainerNicknameById.get(trainerId);
+    if (nickname) {
+      return nickname;
     }
 
-    return session.trainer.nickname
-      ? `${session.trainer.name} (${session.trainer.nickname})`
-      : session.trainer.name;
+    return this.trainerNameById.get(trainerId) || '—';
+  }
+
+  traineeName(traineeId: string): string {
+    return this.traineeNameById.get(traineeId) || '—';
+  }
+
+  traineeNickname(traineeId: string): string {
+    return this.traineeNicknameById.get(traineeId) || '—';
+  }
+
+  locationName(locationId: string): string {
+    return this.locationNameById.get(locationId) || '—';
   }
 
   deleteAttendance(session: AttendanceSession, item: AttendanceSessionAttendanceItem): void {
@@ -119,7 +158,7 @@ export class AttendanceSessionsComponent implements OnInit {
     }
 
     const confirmed = window.confirm(
-      `Delete attendance for ${item.trainee.name} at ${this.formatDateTime(item.trainedAt)}?`
+      `Delete attendance for ${this.traineeName(item.traineeId)} at ${this.formatDateTime(item.trainedAt)}?`
     );
 
     if (!confirmed) {
@@ -148,35 +187,39 @@ export class AttendanceSessionsComponent implements OnInit {
     });
   }
 
-  private buildSessionLocationMap(
-    attendances: AttendanceListItem[],
-    bucketMinutes: number
-  ): Map<string, { id: string; name: string }> {
-    const locationBySession = new Map<string, { id: string; name: string }>();
-
-    for (const attendance of attendances) {
-      if (!attendance.location) {
-        continue;
-      }
-
-      const trainedAt = new Date(attendance.trainedAt);
-      const key = this.computeSessionKey(trainedAt, bucketMinutes);
-
-      if (!locationBySession.has(key)) {
-        locationBySession.set(key, attendance.location);
-      }
-    }
-
-    return locationBySession;
+  private applyEntities(response: AttendanceSessionsResponse): void {
+    this.traineeNameById = new Map(response.entities.trainees.map(item => [item.id, item.name]));
+    this.traineeNicknameById = new Map(
+      response.entities.trainees.map(item => [item.id, item.nickname ?? null])
+    );
+    this.trainerNameById = new Map(response.entities.trainers.map(item => [item.id, item.name]));
+    this.trainerNicknameById = new Map(
+      response.entities.trainers.map(item => [item.id, item.nickname ?? null])
+    );
+    this.locationNameById = new Map(response.entities.locations.map(item => [item.id, item.name]));
   }
 
-  private computeSessionKey(dateTime: Date, bucketMinutes: number): string {
-    const minutesFromMidnight = dateTime.getHours() * 60 + dateTime.getMinutes();
-    const bucketStartMin = Math.floor(minutesFromMidnight / bucketMinutes) * bucketMinutes;
-    const startH = Math.floor(bucketStartMin / 60);
-    const startM = bucketStartMin % 60;
+  private ensureSelectedSession(): void {
+    if (!this.sessions.length) {
+      this.selectedSessionKey = '';
+      return;
+    }
 
-    return `${this.selectedDate}|${String(startH).padStart(2, '0')}:${String(startM).padStart(2, '0')}`;
+    const hasSelectedSession = this.sessions.some(session => session.sessionKey === this.selectedSessionKey);
+    if (!hasSelectedSession) {
+      this.selectedSessionKey = this.sessions[0].sessionKey;
+    }
+  }
+
+  private formatTrainerLabel(trainerId: string): string {
+    const trainerName = this.trainerNameById.get(trainerId);
+    const trainerNickname = this.trainerNicknameById.get(trainerId);
+
+    if (!trainerName) {
+      return '—';
+    }
+
+    return trainerNickname ? `${trainerName} (${trainerNickname})` : trainerName;
   }
 
   private loadTrainers(): void {
