@@ -52,7 +52,7 @@
       } @else {
         <div class="table">
           <div class="table-row table-header">
-            <span>Trainer ID</span>
+            <span>Trainer</span>
             <span>Total amount</span>
             <span>Attendance count</span>
             <span>Unpaid count</span>
@@ -61,7 +61,7 @@
           </div>
           @for (line of lines; track line.id) {
             <div class="table-row">
-              <span>{{ line.trainerId }}</span>
+              <span>{{ formatTrainer(line.trainerId) }}</span>
               <span>{{ formatCurrency(line.amountCents) }}</span>
               <span>{{ line.attendanceCount }}</span>
               <span>{{ line.unpaidAttendanceCount }}</span>
@@ -80,8 +80,8 @@
           <span>Trainer filter</span>
           <select [(ngModel)]="selectedTrainerId" (change)="loadAllocations()">
             <option value="">All trainers</option>
-            @for (trainerId of trainerIds(); track trainerId) {
-              <option [value]="trainerId">{{ trainerId }}</option>
+            @for (trainer of trainers; track trainer.id) {
+              <option [value]="trainer.id">{{ trainer.nickname || trainer.name }}</option>
             }
           </select>
         </label>
@@ -96,22 +96,22 @@
       } @else {
         <p class="allocation-summary">Showing {{ allocations.length }} of {{ allocationsTotal }} allocation rows.</p>
         <div class="table">
-          <div class="table-row table-header">
-            <span>Trainer ID</span>
-            <span>Attendance ID</span>
+          <div class="table-row table-header allocations-header">
+            <span>Trainer</span>
+            <span>Trainee</span>
             <span>Subscription type</span>
-            <span>Reason</span>
             <span>Value</span>
+            <span>Gym</span>
             <span>Trained at</span>
           </div>
 
           @for (row of allocations; track row.id) {
-            <div class="table-row">
-              <span>{{ row.trainerId }}</span>
-              <span>{{ row.attendanceId }}</span>
+            <div class="table-row allocations-row">
+              <span>{{ formatTrainer(row.trainerId) }}</span>
+              <span>{{ formatTrainee(row.attendance?.traineeId) }}</span>
               <span>{{ row.subscriptionType || '—' }}</span>
-              <span>{{ row.reason }}</span>
               <span>{{ formatCurrency(row.valueCents) }}</span>
+              <span>{{ formatGym(row.attendance?.locationId) }}</span>
               <span>{{ formatOptionalDate(row.attendance?.trainedAt) }}</span>
             </div>
           }

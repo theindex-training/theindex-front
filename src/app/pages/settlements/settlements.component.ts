@@ -1,30 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import {
-  GenerateSettlementPayload,
-  Settlement,
-  SettlementsService
-} from '../../services/settlements.service';
+import { Settlement, SettlementsService } from '../../services/settlements.service';
 
 @Component({
   selector: 'app-settlements',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, RouterLink],
   templateUrl: './settlements.component.html',
   styleUrl: './settlements.component.scss'
 })
 export class SettlementsComponent implements OnInit {
   settlements: Settlement[] = [];
 
-  periodStart = this.todayIsoDate();
-  periodEnd = this.todayIsoDate();
-
   loading = true;
-  generating = false;
   errorMessage = '';
-  generationError = '';
+  deletingSettlementId: string | null = null;
 
   constructor(
     private readonly settlementsService: SettlementsService,
@@ -40,12 +31,12 @@ export class SettlementsComponent implements OnInit {
     this.errorMessage = '';
 
     this.settlementsService.list().subscribe({
-      next: (settlements) => {
+      next: settlements => {
         this.settlements = settlements;
         this.loading = false;
         this.changeDetector.detectChanges();
       },
-      error: (error) => {
+      error: error => {
         this.errorMessage = error?.error?.message || 'Unable to load settlements right now.';
         this.loading = false;
         this.changeDetector.detectChanges();
@@ -53,31 +44,30 @@ export class SettlementsComponent implements OnInit {
     });
   }
 
-  generateSettlement(): void {
-    this.generationError = '';
-
-    if (!this.periodStart || !this.periodEnd) {
-      this.generationError = 'Please provide both period start and period end.';
+  deleteSettlement(settlement: Settlement): void {
+    if (this.deletingSettlementId) {
       return;
     }
 
-    const payload: GenerateSettlementPayload = {
-      periodStart: this.periodStart,
-      periodEnd: this.periodEnd
-    };
+    const confirmed = window.confirm(
+      `Delete settlement for ${settlement.periodStart} to ${settlement.periodEnd}?`
+    );
 
-    this.generating = true;
+    if (!confirmed) {
+      return;
+    }
 
-    this.settlementsService.generate(payload).subscribe({
-      next: (response) => {
-        this.generating = false;
-        this.settlements = [response.settlement, ...this.settlements];
+    this.deletingSettlementId = settlement.id;
+
+    this.settlementsService.delete(settlement.id).subscribe({
+      next: () => {
+        this.settlements = this.settlements.filter(item => item.id !== settlement.id);
+        this.deletingSettlementId = null;
         this.changeDetector.detectChanges();
       },
-      error: (error) => {
-        this.generationError =
-          error?.error?.message || 'Unable to generate a settlement report right now.';
-        this.generating = false;
+      error: error => {
+        this.errorMessage = error?.error?.message || 'Unable to delete settlement right now.';
+        this.deletingSettlementId = null;
         this.changeDetector.detectChanges();
       }
     });
@@ -85,13 +75,5 @@ export class SettlementsComponent implements OnInit {
 
   formatDate(date: string): string {
     return new Date(date).toLocaleString();
-  }
-
-  private todayIsoDate(): string {
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const dd = String(now.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
   }
 }

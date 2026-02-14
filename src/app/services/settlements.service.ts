@@ -59,6 +59,7 @@ export interface SettlementAllocationAttendance {
   trainerId: string;
   traineeId: string;
   subscriptionId: string | null;
+  locationId?: string | null;
 }
 
 export interface SettlementAllocation {
@@ -102,6 +103,10 @@ export class SettlementsService {
 
   finalize(id: string): Observable<Settlement> {
     return this.http.post<Settlement>(`${this.baseUrl}/${id}/finalize`, {});
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
   allocations(id: string, query: SettlementAllocationsQuery): Observable<SettlementAllocationsResponse> {

@@ -2,37 +2,12 @@
   <header class="page-header">
     <div>
       <h1>Settlements</h1>
-      <p>Generate and review trainer settlement reports for a selected period.</p>
+      <p>Review generated settlement reports and open detailed breakdowns.</p>
+    </div>
+    <div class="page-actions">
+      <a class="button button-primary" routerLink="/settlements/new">Generate report</a>
     </div>
   </header>
-
-  <section class="card">
-    <h2>Generate settlement report</h2>
-    <div class="form-row">
-      <label class="field">
-        <span>Period start</span>
-        <input type="date" [(ngModel)]="periodStart" />
-      </label>
-
-      <label class="field">
-        <span>Period end</span>
-        <input type="date" [(ngModel)]="periodEnd" />
-      </label>
-
-      <button
-        class="button button-primary"
-        type="button"
-        (click)="generateSettlement()"
-        [disabled]="generating"
-      >
-        {{ generating ? 'Generating...' : 'Generate report' }}
-      </button>
-    </div>
-
-    @if (generationError) {
-      <p class="feedback error">{{ generationError }}</p>
-    }
-  </section>
 
   @if (loading) {
     <div class="state">Loading settlements...</div>
@@ -47,7 +22,7 @@
         <span>Period end</span>
         <span>Generated at</span>
         <span>Status</span>
-        <span class="table-actions">Details</span>
+        <span class="table-actions">Actions</span>
       </div>
 
       @for (settlement of settlements; track settlement.id) {
@@ -62,6 +37,14 @@
             <a class="button button-secondary" [routerLink]="['/settlements', settlement.id]">
               Open report
             </a>
+            <button
+              class="button button-danger"
+              type="button"
+              (click)="deleteSettlement(settlement)"
+              [disabled]="deletingSettlementId === settlement.id"
+            >
+              {{ deletingSettlementId === settlement.id ? 'Deleting...' : 'Delete' }}
+            </button>
           </span>
         </div>
       }

@@ -2,12 +2,15 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { GymLocationsService } from '../../services/gym-locations.service';
 import {
   Settlement,
   SettlementAllocation,
   SettlementLine,
   SettlementsService
 } from '../../services/settlements.service';
+import { TraineeProfile, TraineesService } from '../../services/trainees.service';
+import { TrainerProfile, TrainersService } from '../../services/trainers.service';
 
 @Component({
   selector: 'app-settlement-details',
@@ -22,10 +25,16 @@ export class SettlementDetailsComponent implements OnInit {
   allocations: SettlementAllocation[] = [];
   allocationsTotal = 0;
 
+  trainers: TrainerProfile[] = [];
+  trainerLabelById = new Map<string, string>();
+  traineeNameById = new Map<string, string>();
+  locationNameById = new Map<string, string>();
+
   selectedTrainerId = '';
 
   loading = true;
   loadingAllocations = true;
+  loadingEntities = true;
   finalizing = false;
   errorMessage = '';
   allocationError = '';
@@ -34,6 +43,9 @@ export class SettlementDetailsComponent implements OnInit {
 
   constructor(
     private readonly settlementsService: SettlementsService,
+    private readonly trainersService: TrainersService,
+    private readonly traineesService: TraineesService,
+    private readonly gymLocationsService: GymLocationsService,
     private readonly route: ActivatedRoute,
     private readonly changeDetector: ChangeDetectorRef
   ) {}
@@ -47,6 +59,7 @@ export class SettlementDetailsComponent implements OnInit {
     }
 
     this.settlementId = id;
+    this.loadEntities();
     this.loadSettlement();
     this.loadAllocations();
   }
@@ -56,13 +69,13 @@ export class SettlementDetailsComponent implements OnInit {
     this.errorMessage = '';
 
     this.settlementsService.getById(this.settlementId).subscribe({
-      next: (response) => {
+      next: response => {
         this.settlement = response.settlement;
         this.lines = response.lines;
         this.loading = false;
         this.changeDetector.detectChanges();
       },
-      error: (error) => {
+      error: error => {
         this.errorMessage = error?.error?.message || 'Unable to load this settlement report.';
         this.loading = false;
         this.changeDetector.detectChanges();
@@ -81,15 +94,14 @@ export class SettlementDetailsComponent implements OnInit {
         limit: 50
       })
       .subscribe({
-        next: (response) => {
+        next: response => {
           this.allocations = response.rows;
           this.allocationsTotal = response.total;
           this.loadingAllocations = false;
           this.changeDetector.detectChanges();
         },
-        error: (error) => {
-          this.allocationError =
-            error?.error?.message || 'Unable to load allocation rows right now.';
+        error: error => {
+          this.allocationError = error?.error?.message || 'Unable to load allocation rows right now.';
           this.loadingAllocations = false;
           this.changeDetector.detectChanges();
         }
@@ -104,12 +116,12 @@ export class SettlementDetailsComponent implements OnInit {
     this.finalizing = true;
 
     this.settlementsService.finalize(this.settlement.id).subscribe({
-      next: (settlement) => {
+      next: settlement => {
         this.settlement = settlement;
         this.finalizing = false;
         this.changeDetector.detectChanges();
       },
-      error: (error) => {
+      error: error => {
         this.errorMessage = error?.error?.message || 'Unable to finalize this settlement report.';
         this.finalizing = false;
         this.changeDetector.detectChanges();
@@ -117,8 +129,24 @@ export class SettlementDetailsComponent implements OnInit {
     });
   }
 
-  trainerIds(): string[] {
-    return Array.from(new Set(this.lines.map(line => line.trainerId)));
+  formatTrainer(trainerId: string): string {
+    return this.trainerLabelById.get(trainerId) || trainerId;
+  }
+
+  formatTrainee(traineeId: string | undefined): string {
+    if (!traineeId) {
+      return '—';
+    }
+
+    return this.traineeNameById.get(traineeId) || traineeId;
+  }
+
+  formatGym(locationId: string | null | undefined): string {
+    if (!locationId) {
+      return '—';
+    }
+
+    return this.locationNameById.get(locationId) || locationId;
   }
 
   formatCurrency(valueCents: number): string {
@@ -134,5 +162,44 @@ export class SettlementDetailsComponent implements OnInit {
 
   formatOptionalDate(date: string | undefined): string {
     return date ? this.formatDate(date) : '—';
+  }
+
+  private loadEntities(): void {
+    this.loadingEntities = true;
+
+    this.trainersService.list().subscribe({
+      next: trainers => {
+        this.trainers = trainers;
+        this.trainerLabelById = new Map(
+          trainers.map(trainer => [trainer.id, trainer.nickname?.trim() || trainer.name])
+        );
+        this.changeDetector.detectChanges();
+      },
+      error: () => {
+        this.changeDetector.detectChanges();
+      }
+    });
+
+    this.traineesService.list().subscribe({
+      next: (trainees: TraineeProfile[]) => {
+        this.traineeNameById = new Map(trainees.map(trainee => [trainee.id, trainee.name]));
+        this.changeDetector.detectChanges();
+      },
+      error: () => {
+        this.changeDetector.detectChanges();
+      }
+    });
+
+    this.gymLocationsService.list(true).subscribe({
+      next: locations => {
+        this.locationNameById = new Map(locations.map(location => [location.id, location.name]));
+        this.loadingEntities = false;
+        this.changeDetector.detectChanges();
+      },
+      error: () => {
+        this.loadingEntities = false;
+        this.changeDetector.detectChanges();
+      }
+    });
   }
 }

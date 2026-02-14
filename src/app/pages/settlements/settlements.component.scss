@@ -4,6 +4,14 @@
   gap: 1.5rem;
 }
 
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
 .page-header h1 {
   margin: 0;
   font-size: 2rem;
@@ -14,50 +22,6 @@
   color: var(--color-muted);
 }
 
-.card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 1rem;
-  padding: 1rem;
-}
-
-.card h2 {
-  margin: 0 0 1rem;
-}
-
-.form-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 1rem;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-width: 180px;
-  font-weight: 600;
-  color: var(--color-muted);
-}
-
-input {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  font-size: 0.95rem;
-}
-
-.feedback {
-  margin: 0.75rem 0 0;
-  font-weight: 600;
-}
-
-.feedback.error {
-  color: #b42318;
-}
-
 .table {
   display: grid;
   gap: 0.5rem;
@@ -65,7 +29,7 @@ input {
 
 .table-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1.5fr 0.8fr 1fr;
+  grid-template-columns: 1fr 1fr 1.5fr 0.8fr 1.5fr;
   gap: 1rem;
   align-items: center;
   background: var(--color-surface);
@@ -85,6 +49,7 @@ input {
 .table-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .state {
@@ -137,6 +102,12 @@ input {
   background: #eef4ff;
   color: #3538cd;
   border-color: #c7d7fe;
+}
+
+.button-danger {
+  background: #fef3f2;
+  color: #b42318;
+  border-color: #fecdca;
 }
 
 @media (max-width: 960px) {

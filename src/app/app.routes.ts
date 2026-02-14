@@ -164,6 +164,15 @@ export const routes: Routes = [
       },
 
       {
+        path: 'settlements/new',
+        loadComponent: () =>
+          import('./pages/settlements/settlement-generate.component').then(
+            m => m.SettlementGenerateComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
         path: 'settlements/:id',
         loadComponent: () =>
           import('./pages/settlements/settlement-details.component').then(
