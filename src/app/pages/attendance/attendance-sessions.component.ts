@@ -7,8 +7,10 @@ import {
   AttendanceListItem,
   AttendanceService,
   AttendanceSession,
+  AttendanceSessionAttendanceItem,
   AttendanceSessionsQuery
 } from '../../services/attendance.service';
+import { AuthService } from '../../services/auth.service';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
 
 @Component({
@@ -29,12 +31,18 @@ export class AttendanceSessionsComponent implements OnInit {
   loading = true;
   loadingTrainers = true;
   errorMessage = '';
+  deletingAttendanceId: string | null = null;
+  readonly canDeleteAttendance: boolean;
 
   constructor(
     private readonly attendanceService: AttendanceService,
     private readonly trainersService: TrainersService,
+    private readonly authService: AuthService,
     private readonly changeDetector: ChangeDetectorRef
-  ) {}
+  ) {
+    const userRole = this.authService.getUserRole();
+    this.canDeleteAttendance = userRole === 'ADMIN' || userRole === 'TRAINER';
+  }
 
   ngOnInit(): void {
     this.loadTrainers();
@@ -103,6 +111,41 @@ export class AttendanceSessionsComponent implements OnInit {
     return session.trainer.nickname
       ? `${session.trainer.name} (${session.trainer.nickname})`
       : session.trainer.name;
+  }
+
+  deleteAttendance(session: AttendanceSession, item: AttendanceSessionAttendanceItem): void {
+    if (!this.canDeleteAttendance || this.deletingAttendanceId) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Delete attendance for ${item.trainee.name} at ${this.formatDateTime(item.trainedAt)}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.errorMessage = '';
+    this.deletingAttendanceId = item.id;
+
+    this.attendanceService.deleteById(item.id).subscribe({
+      next: () => {
+        session.attendance = session.attendance.filter(attendance => attendance.id !== item.id);
+        session.totals = {
+          count: session.attendance.length,
+          paid: session.attendance.filter(attendance => attendance.paymentStatus === 'PAID').length,
+          unpaid: session.attendance.filter(attendance => attendance.paymentStatus === 'UNPAID').length
+        };
+        this.deletingAttendanceId = null;
+        this.changeDetector.detectChanges();
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.message || 'Unable to delete attendance right now.';
+        this.deletingAttendanceId = null;
+        this.changeDetector.detectChanges();
+      }
+    });
   }
 
   private buildSessionLocationMap(

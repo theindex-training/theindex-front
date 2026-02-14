@@ -82,6 +82,11 @@
   padding: 0.6rem 0.75rem;
 }
 
+.attendees-header.with-actions,
+.attendee-row.with-actions {
+  grid-template-columns: 1.2fr 0.9fr 0.7fr auto;
+}
+
 .attendees-header {
   background: #f8fafc;
   font-weight: 700;
@@ -138,4 +143,25 @@
   border-color: var(--color-border);
   background: #fff;
   color: #344054;
+}
+
+.action-cell {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.button-danger {
+  border-color: #fda29b;
+  color: #b42318;
+  background: #fff5f4;
+}
+
+.button-danger:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.button-small {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
 }
