@@ -56,7 +56,7 @@ select {
 
 .table-row {
   display: grid;
-  grid-template-columns: 1.4fr 0.9fr 1.3fr 0.8fr 1fr;
+  grid-template-columns: 1.4fr 0.9fr 1.3fr 1fr;
   gap: 1rem;
   align-items: center;
   background: var(--color-surface);
@@ -91,20 +91,24 @@ select {
   min-width: 140px;
 }
 
-.status {
+.account-cell {
+  color: var(--color-muted);
+  font-weight: 700;
+}
+
+.account-linked {
   display: inline-flex;
-  padding: 0.25rem 0.6rem;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
   border-radius: 999px;
   background: #ecfdf3;
   color: #027a48;
-  font-weight: 600;
-  font-size: 0.85rem;
+  border: 1px solid #abefc6;
+  font-size: 0.8rem;
 }
 
-.status.inactive {
-  background: #f2f4f7;
-  color: #475467;
-}
 
 .state {
   background: var(--color-surface);

@@ -82,8 +82,8 @@ export class TraineesComponent implements OnInit {
     return displayValue(trainee.phone);
   }
 
-  formatAccount(trainee: TraineeProfile): string {
-    return trainee.accountId ? 'Linked' : 'Unlinked';
+  hasLinkedAccount(trainee: TraineeProfile): boolean {
+    return Boolean(trainee.accountId);
   }
 
   formatGymSubscription(trainee: TraineeProfile): string {

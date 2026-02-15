@@ -58,7 +58,7 @@ export class TrainersComponent implements OnInit {
     return displayValue(trainer.nickname);
   }
 
-  formatAccount(trainer: TrainerProfile): string {
-    return trainer.accountId ? 'Linked' : 'Unlinked';
+  hasLinkedAccount(trainer: TrainerProfile): boolean {
+    return Boolean(trainer.accountId);
   }
 }

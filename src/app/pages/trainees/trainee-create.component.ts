@@ -40,7 +40,6 @@ export class TraineeCreateComponent implements OnInit {
     nickname: FormControl<string | null>;
     phone: FormControl<string | null>;
     gymSubscriptionId: FormControl<string | null>;
-    isActive: FormControl<boolean>;
   }>;
 
   gymSubscriptions: GymSubscription[] = [];
@@ -62,8 +61,7 @@ export class TraineeCreateComponent implements OnInit {
       ]),
       nickname: this.formBuilder.control<string | null>(null, [optionalMinLength(1)]),
       phone: this.formBuilder.control<string | null>(null, [optionalMinLength(1)]),
-      gymSubscriptionId: this.formBuilder.control<string | null>(null),
-      isActive: this.formBuilder.nonNullable.control(true)
+      gymSubscriptionId: this.formBuilder.control<string | null>(null)
     });
   }
 
@@ -94,7 +92,7 @@ export class TraineeCreateComponent implements OnInit {
       nickname: this.normalizeOptional(raw.nickname),
       phone: this.normalizeOptional(raw.phone),
       gymSubscriptionId: raw.gymSubscriptionId,
-      isActive: raw.isActive
+      isActive: true
     };
 
     this.submitting = true;

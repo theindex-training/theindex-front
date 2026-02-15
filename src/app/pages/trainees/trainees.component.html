@@ -34,7 +34,6 @@
         <span>Phone</span>
         <span>Account</span>
         <span>Gym subscription</span>
-        <span>Status</span>
         <span class="table-actions">Details</span>
       </div>
       @for (trainee of trainees; track trainee.id) {
@@ -42,13 +41,14 @@
           <span class="title">{{ trainee.name }}</span>
           <span>{{ formatNickname(trainee) }}</span>
           <span>{{ formatPhone(trainee) }}</span>
-          <span class="notes">{{ formatAccount(trainee) }}</span>
-          <span>{{ formatGymSubscription(trainee) }}</span>
-          <span>
-            <span class="status" [class.inactive]="!trainee.isActive">
-              {{ trainee.isActive ? 'Active' : 'Inactive' }}
-            </span>
+          <span class="account-cell">
+            @if (hasLinkedAccount(trainee)) {
+              <span class="account-linked" title="Linked account" aria-label="Linked account">✓</span>
+            } @else {
+              -
+            }
           </span>
+          <span>{{ formatGymSubscription(trainee) }}</span>
           <span class="table-actions">
             <a class="button button-secondary" [routerLink]="['/trainees', trainee.id]">
               Open details

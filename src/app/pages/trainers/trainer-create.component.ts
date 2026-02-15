@@ -34,7 +34,6 @@ export class TrainerCreateComponent {
   readonly form: FormGroup<{
     name: FormControl<string>;
     nickname: FormControl<string | null>;
-    isActive: FormControl<boolean>;
   }>;
 
   submitting = false;
@@ -50,8 +49,7 @@ export class TrainerCreateComponent {
         Validators.required,
         Validators.minLength(2)
       ]),
-      nickname: this.formBuilder.control<string | null>(null, [optionalMinLength(1)]),
-      isActive: this.formBuilder.nonNullable.control(true)
+      nickname: this.formBuilder.control<string | null>(null, [optionalMinLength(1)])
     });
   }
 
@@ -65,7 +63,7 @@ export class TrainerCreateComponent {
     const payload: CreateTrainerPayload = {
       name: raw.name.trim(),
       nickname: this.normalizeOptional(raw.nickname),
-      isActive: raw.isActive
+      isActive: true
     };
 
     this.submitting = true;

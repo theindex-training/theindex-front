@@ -1,8 +1,14 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Create trainee account</h1>
-      <p>Provision login credentials for the selected trainee.</p>
+      <h1>{{ isEditMode ? 'Manage trainee account' : 'Create trainee account' }}</h1>
+      <p>
+        {{
+          isEditMode
+            ? 'Update login credentials for this trainee account.'
+            : 'Provision login credentials for the selected trainee.'
+        }}
+      </p>
     </div>
     <a class="button button-ghost" routerLink="/trainees">Back to trainees</a>
   </header>
@@ -27,86 +33,88 @@
           <strong>{{ formatPhone() }}</strong>
         </div>
         <div>
-          <span class="label">Status</span>
+          <span class="label">Profile status</span>
           <strong>{{ trainee.isActive ? 'Active' : 'Inactive' }}</strong>
         </div>
       </div>
 
-      @if (trainee.accountId) {
-        <div class="state">This trainee already has an account linked.</div>
-      } @else {
-        <form class="form" [formGroup]="form" (ngSubmit)="handleSubmit()">
-          <div class="form-grid">
-            <label class="field">
-              <span>Email</span>
-              <input type="email" formControlName="email" placeholder="trainee@example.com" />
-              @if (form.controls.email.touched && form.controls.email.invalid) {
-                <small class="error">Enter a valid email address.</small>
-              }
-            </label>
+      <form class="form" [formGroup]="form" (ngSubmit)="handleSubmit()">
+        <div class="form-grid">
+          <label class="field">
+            <span>Email</span>
+            <input type="email" formControlName="email" placeholder="trainee@example.com" />
+            @if (form.controls.email.touched && form.controls.email.invalid) {
+              <small class="error">Enter a valid email address.</small>
+            }
+          </label>
 
-            <label class="field">
-              <span>Status</span>
-              <select formControlName="status">
-                @for (option of statusOptions; track option.value) {
-                  <option [value]="option.value">{{ option.label }}</option>
-                }
-              </select>
-            </label>
+          <label class="field">
+            <span>{{ isEditMode ? 'New password (optional)' : 'Password' }}</span>
+            <div class="password-field">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                [placeholder]="isEditMode ? 'Leave blank to keep current password' : 'Minimum 8 characters'"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                [title]="showPassword ? 'Hide password' : 'Show password'"
+                (click)="togglePasswordVisibility()"
+              >
+                {{ showPassword ? '🙈' : '👁️' }}
+              </button>
+            </div>
+          </label>
 
-            <label class="field">
-              <span>Password</span>
-              <div class="password-field">
-                <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Minimum 8 characters" />
-                <button
-                  type="button"
-                  class="password-toggle"
-                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-                  [title]="showPassword ? 'Hide password' : 'Show password'"
-                  (click)="togglePasswordVisibility()"
-                >
-                  {{ showPassword ? '🙈' : '👁️' }}
-                </button>
-              </div>
-              @if (form.controls.password.touched && form.controls.password.invalid) {
-                <small class="error">Password must be at least 8 characters.</small>
-              }
-            </label>
+          <label class="field">
+            <span>{{ isEditMode ? 'Confirm new password' : 'Confirm password' }}</span>
+            <div class="password-field">
+              <input
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                formControlName="confirmPassword"
+                [placeholder]="isEditMode ? 'Repeat new password if changed' : 'Repeat password'"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                [title]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                (click)="toggleConfirmPasswordVisibility()"
+              >
+                {{ showConfirmPassword ? '🙈' : '👁️' }}
+              </button>
+            </div>
+            @if (showPasswordLengthError) {
+              <small class="error">Password fields must contain at least 8 characters.</small>
+            }
+            @if (showPasswordMismatch) {
+              <small class="error">Passwords do not match.</small>
+            }
+          </label>
+        </div>
 
-            <label class="field">
-              <span>Confirm password</span>
-              <div class="password-field">
-                <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Repeat password" />
-                <button
-                  type="button"
-                  class="password-toggle"
-                  [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
-                  [title]="showConfirmPassword ? 'Hide password' : 'Show password'"
-                  (click)="toggleConfirmPasswordVisibility()"
-                >
-                  {{ showConfirmPassword ? '🙈' : '👁️' }}
-                </button>
-              </div>
-              @if (form.controls.confirmPassword.touched && form.controls.confirmPassword.invalid) {
-                <small class="error">Confirmation must be at least 8 characters.</small>
-              }
-              @if (showPasswordMismatch) {
-                <small class="error">Passwords do not match.</small>
-              }
-            </label>
-          </div>
+        @if (errorMessage) {
+          <div class="state error">{{ errorMessage }}</div>
+        }
 
-          @if (errorMessage) {
-            <div class="state error">{{ errorMessage }}</div>
-          }
-
-          <div class="form-actions">
-            <button class="button button-primary" type="submit" [disabled]="submitting">
-              {{ submitting ? 'Provisioning...' : 'Create account' }}
+        <div class="form-actions">
+          @if (isEditMode) {
+            <button
+              class="button button-danger"
+              type="button"
+              [disabled]="deactivating"
+              (click)="deactivateAccount()"
+            >
+              {{ deactivating ? 'Deactivating...' : 'Deactivate account' }}
             </button>
-          </div>
-        </form>
-      }
+          }
+          <button class="button button-primary" type="submit" [disabled]="submitting">
+            {{ submitting ? 'Saving...' : isEditMode ? 'Save account changes' : 'Create account' }}
+          </button>
+        </div>
+      </form>
     </div>
   }
 </section>

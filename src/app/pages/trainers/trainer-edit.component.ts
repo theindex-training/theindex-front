@@ -38,7 +38,6 @@ export class TrainerEditComponent implements OnInit {
   readonly form: FormGroup<{
     name: FormControl<string>;
     nickname: FormControl<string | null>;
-    isActive: FormControl<boolean>;
   }>;
 
   trainer: TrainerProfile | null = null;
@@ -58,8 +57,7 @@ export class TrainerEditComponent implements OnInit {
         Validators.required,
         Validators.minLength(2)
       ]),
-      nickname: this.formBuilder.control<string | null>(null, [optionalMinLength(1)]),
-      isActive: this.formBuilder.nonNullable.control(true)
+      nickname: this.formBuilder.control<string | null>(null, [optionalMinLength(1)])
     });
   }
 
@@ -76,8 +74,7 @@ export class TrainerEditComponent implements OnInit {
         this.trainer = trainer;
         this.form.patchValue({
           name: trainer.name,
-          nickname: trainer.nickname,
-          isActive: trainer.isActive
+          nickname: trainer.nickname
         });
         this.loading = false;
         this.changeDetector.detectChanges();
@@ -103,8 +100,7 @@ export class TrainerEditComponent implements OnInit {
     const raw = this.form.getRawValue();
     const payload: UpdateTrainerPayload = {
       name: raw.name.trim(),
-      nickname: this.normalizeOptional(raw.nickname),
-      isActive: raw.isActive
+      nickname: this.normalizeOptional(raw.nickname)
     };
 
     this.submitting = true;
