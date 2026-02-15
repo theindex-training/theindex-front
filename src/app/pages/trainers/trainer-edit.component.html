@@ -2,7 +2,7 @@
   <header class="page-header">
     <div>
       <h1>Edit trainer</h1>
-      <p>Update trainer details, account link, or status.</p>
+      <p>Update trainer profile information.</p>
     </div>
     <a class="button button-ghost" routerLink="/trainers">Back to trainers</a>
   </header>
@@ -30,10 +30,6 @@
           }
         </label>
 
-        <label class="field checkbox">
-          <input type="checkbox" formControlName="isActive" />
-          <span>Active trainer</span>
-        </label>
       </div>
 
       @if (errorMessage) {

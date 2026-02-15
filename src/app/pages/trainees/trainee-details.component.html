@@ -28,7 +28,13 @@
         </div>
         <div>
           <span class="label">Account</span>
-          <strong>{{ formatAccount() }}</strong>
+          <strong>
+            @if (hasLinkedAccount()) {
+              <span class="account-linked" title="Linked account" aria-label="Linked account">✓</span>
+            } @else {
+              -
+            }
+          </strong>
         </div>
         <div>
           <span class="label">Status</span>
@@ -36,15 +42,33 @@
         </div>
       </div>
 
+      @if (account) {
+        <div class="account-box">
+          <h2>Account information</h2>
+          <div class="details">
+            <div>
+              <span class="label">Email</span>
+              <strong>{{ account.email }}</strong>
+            </div>
+            <div>
+              <span class="label">Role</span>
+              <strong>{{ account.role }}</strong>
+            </div>
+            <div>
+              <span class="label">Status</span>
+              <strong>{{ account.status }}</strong>
+            </div>
+          </div>
+        </div>
+      }
+
       <div class="details-actions">
         <a class="button button-secondary" [routerLink]="['/trainees', trainee.id, 'edit']">
           Edit trainee
         </a>
-        @if (!trainee.accountId) {
-          <a class="button button-primary" [routerLink]="['/trainees', trainee.id, 'account']">
-            Create account
-          </a>
-        }
+        <a class="button button-primary" [routerLink]="['/trainees', trainee.id, 'account']">
+          {{ trainee.accountId ? 'Manage account' : 'Create account' }}
+        </a>
         <a class="button button-ghost" [routerLink]="['/trainees', trainee.id, 'delete']">
           Deactivate trainee
         </a>
@@ -76,10 +100,20 @@
             <span>Paid</span>
           </div>
           @for (subscription of subscriptions; track subscription.id) {
-            <div class="table-row" [class.row-exhausted]="isExhausted(subscription)">
+            <div
+              class="table-row"
+              [class.row-exhausted]="isExhausted(subscription)"
+              [class.row-active]="isActiveSubscription(subscription)"
+            >
               <span class="title">{{ formatPlanLabel(subscription) }}</span>
               <span>{{ subscription.type }}</span>
-              <span class="subscription-status" [class.status-exhausted]="isExhausted(subscription)">{{ subscription.status }}</span>
+              <span
+                class="subscription-status"
+                [class.status-exhausted]="isExhausted(subscription)"
+                [class.status-active]="isActiveSubscription(subscription)"
+              >
+                {{ subscription.status }}
+              </span>
               <span>{{ formatDate(subscription.startsAt) }}</span>
               <span>{{ formatEndsOrCredits(subscription) }}</span>
               <span>{{ formatPrice(subscription.paidCents) }}</span>

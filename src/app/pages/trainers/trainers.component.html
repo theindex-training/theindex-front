@@ -32,18 +32,18 @@
         <span>Name</span>
         <span>Nickname</span>
         <span>Account</span>
-        <span>Status</span>
         <span class="table-actions">Details</span>
       </div>
       @for (trainer of trainers; track trainer.id) {
         <div class="table-row">
           <span class="title">{{ trainer.name }}</span>
           <span>{{ formatNickname(trainer) }}</span>
-          <span class="notes">{{ formatAccount(trainer) }}</span>
-          <span>
-            <span class="status" [class.inactive]="!trainer.isActive">
-              {{ trainer.isActive ? 'Active' : 'Inactive' }}
-            </span>
+          <span class="account-cell">
+            @if (hasLinkedAccount(trainer)) {
+              <span class="account-linked" title="Linked account" aria-label="Linked account">✓</span>
+            } @else {
+              -
+            }
           </span>
           <span class="table-actions">
             <a class="button button-secondary" [routerLink]="['/trainers', trainer.id]">

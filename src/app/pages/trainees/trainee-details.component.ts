@@ -13,6 +13,10 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Plan, PlansService } from '../../services/plans.service';
 import { SubscriptionsService, Subscription } from '../../services/subscriptions.service';
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
+import {
+  AccountProvisioningService,
+  ProvisionedAccount
+} from '../../services/account-provisioning.service';
 
 const currencyValidator: ValidatorFn = (control: AbstractControl) => {
   const value = control.value;
@@ -41,6 +45,7 @@ import { displayValue } from '../../utils/display.util';
 })
 export class TraineeDetailsComponent implements OnInit {
   trainee: TraineeProfile | null = null;
+  account: ProvisionedAccount | null = null;
   subscriptions: Subscription[] = [];
   plans: Plan[] = [];
   loading = true;
@@ -60,6 +65,7 @@ export class TraineeDetailsComponent implements OnInit {
     private readonly traineesService: TraineesService,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly plansService: PlansService,
+    private readonly accountsService: AccountProvisioningService,
     private readonly route: ActivatedRoute,
     private readonly changeDetector: ChangeDetectorRef,
     private readonly formBuilder: FormBuilder
@@ -134,11 +140,8 @@ export class TraineeDetailsComponent implements OnInit {
     return displayValue(this.trainee?.phone);
   }
 
-  formatAccount(): string {
-    if (!this.trainee) {
-      return '—';
-    }
-    return this.trainee.accountId ? 'Linked' : 'Unlinked';
+  hasLinkedAccount(): boolean {
+    return Boolean(this.trainee?.accountId);
   }
 
   formatPlanOption(plan: Plan): string {
@@ -165,6 +168,10 @@ export class TraineeDetailsComponent implements OnInit {
     return subscription.status.toUpperCase() === 'EXHAUSTED';
   }
 
+  isActiveSubscription(subscription: Subscription): boolean {
+    return subscription.status.toUpperCase() === 'ACTIVE';
+  }
+
   formatDate(value: string | null | undefined): string {
     if (!value) {
       return '—';
@@ -188,12 +195,31 @@ export class TraineeDetailsComponent implements OnInit {
       next: (trainee) => {
         this.trainee = trainee;
         this.loading = false;
+
+        if (trainee.accountId) {
+          this.loadAccount(trainee.accountId);
+        }
+
         this.changeDetector.detectChanges();
       },
       error: (error) => {
         this.errorMessage =
           error?.error?.message || 'Unable to load this trainee.';
         this.loading = false;
+        this.changeDetector.detectChanges();
+      }
+    });
+  }
+
+
+  private loadAccount(accountId: string): void {
+    this.accountsService.getById(accountId).subscribe({
+      next: (account) => {
+        this.account = account;
+        this.changeDetector.detectChanges();
+      },
+      error: () => {
+        this.account = null;
         this.changeDetector.detectChanges();
       }
     });

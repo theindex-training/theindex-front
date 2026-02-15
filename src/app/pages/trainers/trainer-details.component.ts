@@ -1,6 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import {
+  AccountProvisioningService,
+  ProvisionedAccount
+} from '../../services/account-provisioning.service';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
 
 import { displayValue } from '../../utils/display.util';
@@ -14,11 +18,13 @@ import { displayValue } from '../../utils/display.util';
 })
 export class TrainerDetailsComponent implements OnInit {
   trainer: TrainerProfile | null = null;
+  account: ProvisionedAccount | null = null;
   loading = true;
   errorMessage = '';
 
   constructor(
     private readonly trainersService: TrainersService,
+    private readonly accountsService: AccountProvisioningService,
     private readonly route: ActivatedRoute,
     private readonly changeDetector: ChangeDetectorRef
   ) {}
@@ -35,6 +41,11 @@ export class TrainerDetailsComponent implements OnInit {
       next: (trainer) => {
         this.trainer = trainer;
         this.loading = false;
+
+        if (trainer.accountId) {
+          this.loadAccount(trainer.accountId);
+        }
+
         this.changeDetector.detectChanges();
       },
       error: (error) => {
@@ -50,10 +61,20 @@ export class TrainerDetailsComponent implements OnInit {
     return displayValue(this.trainer?.nickname);
   }
 
-  formatAccount(): string {
-    if (!this.trainer) {
-      return '—';
-    }
-    return this.trainer.accountId ? 'Linked' : 'Unlinked';
+  hasLinkedAccount(): boolean {
+    return Boolean(this.trainer?.accountId);
+  }
+
+  private loadAccount(accountId: string): void {
+    this.accountsService.getById(accountId).subscribe({
+      next: (account) => {
+        this.account = account;
+        this.changeDetector.detectChanges();
+      },
+      error: () => {
+        this.account = null;
+        this.changeDetector.detectChanges();
+      }
+    });
   }
 }

@@ -4,14 +4,19 @@ import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
 
 export type AccountRole = 'ADMIN' | 'TRAINER' | 'TRAINEE';
-export type AccountStatus = 'ACTIVE' | 'INACTIVE';
+export type AccountStatus = 'ACTIVE' | 'DISABLED';
 
 export interface ProvisionAccountPayload {
   email: string;
   role: AccountRole;
-  status: AccountStatus;
   password: string;
   confirmPassword: string;
+}
+
+export interface UpdateAccountPayload {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
 }
 
 export interface ProvisionedAccount {
@@ -19,14 +24,17 @@ export interface ProvisionedAccount {
   email: string;
   role: AccountRole;
   status: AccountStatus;
+  trainerProfileId?: string | null;
+  traineeProfileId?: string | null;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccountProvisioningService {
-  private readonly baseUrl = `${environment.apiUrl}/accounts/provision`;
+  private readonly baseUrl = `${environment.apiUrl}/accounts`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -39,5 +47,17 @@ export class AccountProvisioningService {
       `${this.baseUrl}/${profileType}/${profileId}`,
       payload
     );
+  }
+
+  getById(accountId: string): Observable<ProvisionedAccount | null> {
+    return this.http.get<ProvisionedAccount | null>(`${this.baseUrl}/${accountId}`);
+  }
+
+  update(accountId: string, payload: UpdateAccountPayload): Observable<ProvisionedAccount> {
+    return this.http.patch<ProvisionedAccount>(`${this.baseUrl}/${accountId}`, payload);
+  }
+
+  deactivate(accountId: string): Observable<ProvisionedAccount> {
+    return this.http.delete<ProvisionedAccount>(`${this.baseUrl}/${accountId}`);
   }
 }
