@@ -1,0 +1,37 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Edit gym subscription</h1>
+      <p>Update gym subscription details.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/gym-subscriptions">Back to gym subscriptions</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading gym subscription...</div>
+  } @else if (errorMessage && !gymSubscription) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (gymSubscription) {
+    <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <div class="form-grid">
+        <label class="field">
+          <span>Name</span>
+          <input type="text" formControlName="name" />
+          @if (form.controls.name.touched && form.controls.name.invalid) {
+            <small class="error">Name is required and must be between 2 and 120 characters.</small>
+          }
+        </label>
+      </div>
+
+      @if (errorMessage) {
+        <div class="state error">{{ errorMessage }}</div>
+      }
+
+      <div class="form-actions">
+        <button class="button button-primary" type="submit" [disabled]="submitting">
+          {{ submitting ? 'Saving...' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

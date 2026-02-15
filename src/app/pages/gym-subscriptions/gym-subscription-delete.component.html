@@ -1,0 +1,51 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Deactivate gym subscription</h1>
+      <p>Gym subscriptions are archived by marking them inactive.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/gym-subscriptions">Back to gym subscriptions</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading gym subscription...</div>
+  } @else if (errorMessage && !gymSubscription) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (gymSubscription) {
+    <div class="card">
+      <div class="details">
+        <div>
+          <span class="label">Name</span>
+          <strong>{{ gymSubscription.name }}</strong>
+        </div>
+        <div>
+          <span class="label">Status</span>
+          <strong>{{ gymSubscription.isActive ? 'Active' : 'Inactive' }}</strong>
+        </div>
+      </div>
+
+      <p class="warning">
+        Deactivating a gym subscription hides it from new trainee assignments.
+      </p>
+
+      @if (errorMessage) {
+        <div class="state error">{{ errorMessage }}</div>
+      }
+
+      <div class="form-actions">
+        <button
+          class="button button-danger"
+          type="button"
+          (click)="confirmDeactivate()"
+          [disabled]="submitting || !gymSubscription.isActive"
+        >
+          {{
+            gymSubscription.isActive
+              ? (submitting ? 'Deactivating...' : 'Deactivate gym subscription')
+              : 'Gym subscription inactive'
+          }}
+        </button>
+      </div>
+    </div>
+  }
+</section>

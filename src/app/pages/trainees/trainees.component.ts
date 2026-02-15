@@ -2,6 +2,10 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import {
+  GymSubscription,
+  GymSubscriptionsService
+} from '../../services/gym-subscriptions.service';
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
 
 import { displayValue } from '../../utils/display.util';
@@ -15,17 +19,33 @@ import { displayValue } from '../../utils/display.util';
 })
 export class TraineesComponent implements OnInit {
   trainees: TraineeProfile[] = [];
+  gymSubscriptions: GymSubscription[] = [];
   activeFilter: 'all' | 'active' | 'inactive' = 'all';
   loading = true;
   errorMessage = '';
 
   constructor(
     private readonly traineesService: TraineesService,
+    private readonly gymSubscriptionsService: GymSubscriptionsService,
     private readonly changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.loadGymSubscriptions();
     this.loadTrainees();
+  }
+
+  loadGymSubscriptions(): void {
+    this.gymSubscriptionsService.list(true).subscribe({
+      next: (gymSubscriptions) => {
+        this.gymSubscriptions = gymSubscriptions;
+        this.changeDetector.detectChanges();
+      },
+      error: () => {
+        this.gymSubscriptions = [];
+        this.changeDetector.detectChanges();
+      }
+    });
   }
 
   loadTrainees(): void {
@@ -64,5 +84,16 @@ export class TraineesComponent implements OnInit {
 
   formatAccount(trainee: TraineeProfile): string {
     return trainee.accountId ? 'Linked' : 'Unlinked';
+  }
+
+  formatGymSubscription(trainee: TraineeProfile): string {
+    if (!trainee.gymSubscriptionId) {
+      return '—';
+    }
+
+    return (
+      this.gymSubscriptions.find((gymSubscription) => gymSubscription.id === trainee.gymSubscriptionId)
+        ?.name || '—'
+    );
   }
 }

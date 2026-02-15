@@ -12,6 +12,10 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
+  GymSubscription,
+  GymSubscriptionsService
+} from '../../services/gym-subscriptions.service';
+import {
   TraineeProfile,
   TraineesService,
   UpdateTraineePayload
@@ -39,10 +43,12 @@ export class TraineeEditComponent implements OnInit {
     name: FormControl<string>;
     nickname: FormControl<string | null>;
     phone: FormControl<string | null>;
+    gymSubscriptionId: FormControl<string | null>;
     isActive: FormControl<boolean>;
   }>;
 
   trainee: TraineeProfile | null = null;
+  gymSubscriptions: GymSubscription[] = [];
   loading = true;
   submitting = false;
   errorMessage = '';
@@ -50,6 +56,7 @@ export class TraineeEditComponent implements OnInit {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly traineesService: TraineesService,
+    private readonly gymSubscriptionsService: GymSubscriptionsService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly changeDetector: ChangeDetectorRef
@@ -61,6 +68,7 @@ export class TraineeEditComponent implements OnInit {
       ]),
       nickname: this.formBuilder.control<string | null>(null, [optionalMinLength(1)]),
       phone: this.formBuilder.control<string | null>(null, [optionalMinLength(1)]),
+      gymSubscriptionId: this.formBuilder.control<string | null>(null),
       isActive: this.formBuilder.nonNullable.control(true)
     });
   }
@@ -73,6 +81,17 @@ export class TraineeEditComponent implements OnInit {
       return;
     }
 
+    this.gymSubscriptionsService.list(true).subscribe({
+      next: (gymSubscriptions) => {
+        this.gymSubscriptions = gymSubscriptions;
+        this.changeDetector.detectChanges();
+      },
+      error: () => {
+        this.gymSubscriptions = [];
+        this.changeDetector.detectChanges();
+      }
+    });
+
     this.traineesService.getById(id).subscribe({
       next: (trainee) => {
         this.trainee = trainee;
@@ -80,6 +99,7 @@ export class TraineeEditComponent implements OnInit {
           name: trainee.name,
           nickname: trainee.nickname,
           phone: trainee.phone,
+          gymSubscriptionId: trainee.gymSubscriptionId,
           isActive: trainee.isActive
         });
         this.loading = false;
@@ -108,6 +128,7 @@ export class TraineeEditComponent implements OnInit {
       name: raw.name.trim(),
       nickname: this.normalizeOptional(raw.nickname),
       phone: this.normalizeOptional(raw.phone),
+      gymSubscriptionId: raw.gymSubscriptionId,
       isActive: raw.isActive
     };
 

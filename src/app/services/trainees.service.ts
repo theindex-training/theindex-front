@@ -10,6 +10,7 @@ export interface TraineeProfile {
   nickname: string | null;
   phone: string | null;
   accountId: string | null;
+  gymSubscriptionId: string | null;
   isActive: boolean;
   createdAt?: string;
 }
@@ -19,6 +20,7 @@ export interface CreateTraineePayload {
   nickname?: string | null;
   phone?: string | null;
   isActive?: boolean;
+  gymSubscriptionId?: string | null;
 }
 
 export interface UpdateTraineePayload {
@@ -26,6 +28,7 @@ export interface UpdateTraineePayload {
   nickname?: string | null;
   phone?: string | null;
   isActive?: boolean;
+  gymSubscriptionId?: string | null;
 }
 
 @Injectable({

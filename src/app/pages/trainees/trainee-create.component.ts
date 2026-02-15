@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -11,6 +11,10 @@ import {
   Validators
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import {
+  GymSubscription,
+  GymSubscriptionsService
+} from '../../services/gym-subscriptions.service';
 import { CreateTraineePayload, TraineesService } from '../../services/trainees.service';
 
 const optionalMinLength = (minLength: number): ValidatorFn => {
@@ -30,21 +34,26 @@ const optionalMinLength = (minLength: number): ValidatorFn => {
   templateUrl: './trainee-create.component.html',
   styleUrl: './trainee-create.component.scss'
 })
-export class TraineeCreateComponent {
+export class TraineeCreateComponent implements OnInit {
   readonly form: FormGroup<{
     name: FormControl<string>;
     nickname: FormControl<string | null>;
     phone: FormControl<string | null>;
+    gymSubscriptionId: FormControl<string | null>;
     isActive: FormControl<boolean>;
   }>;
 
+  gymSubscriptions: GymSubscription[] = [];
+  gymSubscriptionsLoading = true;
   submitting = false;
   errorMessage = '';
 
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly traineesService: TraineesService,
-    private readonly router: Router
+    private readonly gymSubscriptionsService: GymSubscriptionsService,
+    private readonly router: Router,
+    private readonly changeDetector: ChangeDetectorRef
   ) {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
@@ -53,7 +62,23 @@ export class TraineeCreateComponent {
       ]),
       nickname: this.formBuilder.control<string | null>(null, [optionalMinLength(1)]),
       phone: this.formBuilder.control<string | null>(null, [optionalMinLength(1)]),
+      gymSubscriptionId: this.formBuilder.control<string | null>(null),
       isActive: this.formBuilder.nonNullable.control(true)
+    });
+  }
+
+  ngOnInit(): void {
+    this.gymSubscriptionsService.list().subscribe({
+      next: (gymSubscriptions) => {
+        this.gymSubscriptions = gymSubscriptions;
+        this.gymSubscriptionsLoading = false;
+        this.changeDetector.detectChanges();
+      },
+      error: () => {
+        this.gymSubscriptions = [];
+        this.gymSubscriptionsLoading = false;
+        this.changeDetector.detectChanges();
+      }
     });
   }
 
@@ -68,6 +93,7 @@ export class TraineeCreateComponent {
       name: raw.name.trim(),
       nickname: this.normalizeOptional(raw.nickname),
       phone: this.normalizeOptional(raw.phone),
+      gymSubscriptionId: raw.gymSubscriptionId,
       isActive: raw.isActive
     };
 

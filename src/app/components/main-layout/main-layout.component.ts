@@ -22,6 +22,7 @@ export class MainLayoutComponent {
     { label: 'Dashboard', route: '/home' },
     { label: 'Plans', route: '/plans' },
     { label: 'Gyms', route: '/gyms' },
+    { label: 'Gym subscriptions', route: '/gym-subscriptions' },
     { label: 'Trainers', route: '/trainers' },
     { label: 'Trainees', route: '/trainees' },
     { label: 'Attendance', route: '/attendance' },
