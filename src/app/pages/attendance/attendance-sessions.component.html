@@ -70,16 +70,20 @@
           class="tab"
           type="button"
           role="tab"
-          [attr.aria-selected]="selectedSessionKey === session.sessionKey"
-          [class.active]="selectedSessionKey === session.sessionKey"
-          (click)="selectSession(session.sessionKey)"
+          [attr.aria-selected]="isSessionSelected(session.sessionKey)"
+          [class.active]="isSessionSelected(session.sessionKey)"
+          (click)="toggleSession(session.sessionKey)"
         >
           {{ sessionTabTitle(session) }}
         </button>
       }
     </div>
 
-    @if (activeSession; as session) {
+    @if (!selectedSessions.length) {
+      <div class="state">Select one or more sessions to view attendance details.</div>
+    }
+
+    @for (session of selectedSessions; track trackBySession($index, session)) {
       <article class="card session-card">
         <header class="session-header">
           <h2>{{ formatDateTime(session.start) }} - {{ formatDateTime(session.end) }}</h2>

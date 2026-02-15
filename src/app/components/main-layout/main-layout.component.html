@@ -5,14 +5,44 @@
   </div>
 
   <nav class="nav-links" aria-label="Primary">
-    @for (item of navItems; track item.route) {
-      <a
-        [routerLink]="item.route"
-        routerLinkActive="is-active"
-        class="nav-link"
-      >
-        {{ item.label }}
-      </a>
+    @for (item of navItems; track item.label) {
+      @if (item.children?.length) {
+        <div class="nav-group">
+          <button
+            class="nav-link nav-trigger"
+            type="button"
+            [class.is-active]="isManageActive(item)"
+            [attr.aria-expanded]="isManageMenuOpen"
+            (click)="toggleManageMenu()"
+          >
+            {{ item.label }}
+          </button>
+
+          @if (isManageMenuOpen) {
+            <div class="subnav-panel">
+              @for (child of item.children; track child.route) {
+                <a
+                  [routerLink]="child.route"
+                  routerLinkActive="is-active"
+                  class="subnav-link"
+                  (click)="closeMenu()"
+                >
+                  {{ child.label }}
+                </a>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="is-active"
+          class="nav-link"
+          (click)="closeMenu()"
+        >
+          {{ item.label }}
+        </a>
+      }
     }
   </nav>
 
@@ -34,15 +64,42 @@
 
 <div class="mobile-panel" [class.is-open]="isMenuOpen">
   <nav class="mobile-nav" aria-label="Mobile">
-    @for (item of navItems; track item.route) {
-      <a
-        [routerLink]="item.route"
-        routerLinkActive="is-active"
-        class="nav-link"
-        (click)="closeMenu()"
-      >
-        {{ item.label }}
-      </a>
+    @for (item of navItems; track item.label) {
+      @if (item.children?.length) {
+        <button
+          class="nav-link nav-trigger"
+          type="button"
+          [class.is-active]="isManageActive(item)"
+          [attr.aria-expanded]="isManageMenuOpen"
+          (click)="toggleManageMenu()"
+        >
+          {{ item.label }}
+        </button>
+
+        @if (isManageMenuOpen) {
+          <div class="mobile-subnav">
+            @for (child of item.children; track child.route) {
+              <a
+                [routerLink]="child.route"
+                routerLinkActive="is-active"
+                class="subnav-link"
+                (click)="closeMenu()"
+              >
+                {{ child.label }}
+              </a>
+            }
+          </div>
+        }
+      } @else {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="is-active"
+          class="nav-link"
+          (click)="closeMenu()"
+        >
+          {{ item.label }}
+        </a>
+      }
     }
     <button class="logout-button" type="button" (click)="handleLogout()">Log out</button>
   </nav>
