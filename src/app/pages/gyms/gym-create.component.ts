@@ -5,23 +5,25 @@ import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { CreateGymLocationPayload, GymLocationsService } from '../../services/gym-locations.service';
+import {
+  CreateGymLocationPayload,
+  GymLocationsService,
+} from '../../services/gym-locations.service';
 
 @Component({
   selector: 'app-gym-create',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './gym-create.component.html',
-  styleUrl: './gym-create.component.scss'
+  styleUrl: './gym-create.component.scss',
 })
 export class GymCreateComponent {
   readonly form: FormGroup<{
     name: FormControl<string>;
     address: FormControl<string | null>;
-    notes: FormControl<string | null>;
   }>;
 
   submitting = false;
@@ -30,15 +32,14 @@ export class GymCreateComponent {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly gymsService: GymLocationsService,
-    private readonly router: Router
+    private readonly router: Router,
   ) {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        Validators.minLength(2)
+        Validators.minLength(2),
       ]),
       address: this.formBuilder.control<string | null>(null),
-      notes: this.formBuilder.control<string | null>(null)
     });
   }
 
@@ -52,7 +53,6 @@ export class GymCreateComponent {
     const payload: CreateGymLocationPayload = {
       name: raw.name.trim(),
       address: this.normalizeOptional(raw.address),
-      notes: this.normalizeOptional(raw.notes)
     };
 
     this.submitting = true;
@@ -64,10 +64,9 @@ export class GymCreateComponent {
         this.router.navigate(['/gyms']);
       },
       error: (error) => {
-        this.errorMessage =
-          error?.error?.message || 'Unable to create this gym right now.';
+        this.errorMessage = error?.error?.message || 'Unable to create this gym right now.';
         this.submitting = false;
-      }
+      },
     });
   }
 

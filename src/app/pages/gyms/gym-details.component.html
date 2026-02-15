@@ -23,19 +23,13 @@
           <strong>{{ formatAddress() }}</strong>
         </div>
         <div>
-          <span class="label">Notes</span>
-          <strong>{{ gym.notes?.trim() || '—' }}</strong>
-        </div>
-        <div>
           <span class="label">Status</span>
           <strong>{{ gym.isActive ? 'Active' : 'Inactive' }}</strong>
         </div>
       </div>
 
       <div class="details-actions">
-        <a class="button button-secondary" [routerLink]="['/gyms', gym.id, 'edit']">
-          Edit gym
-        </a>
+        <a class="button button-secondary" [routerLink]="['/gyms', gym.id, 'edit']"> Edit gym </a>
         <a class="button button-ghost" [routerLink]="['/gyms', gym.id, 'delete']">
           Deactivate gym
         </a>

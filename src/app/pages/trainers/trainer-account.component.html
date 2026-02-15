@@ -50,11 +50,14 @@
               <input
                 [type]="showPassword ? 'text' : 'password'"
                 formControlName="password"
-                [placeholder]="isEditMode ? 'Leave blank to keep current password' : 'Minimum 8 characters'"
+                [placeholder]="
+                  isEditMode ? 'Leave blank to keep current password' : 'Minimum 8 characters'
+                "
               />
               <button
                 type="button"
                 class="password-toggle"
+                tabindex="-1"
                 [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
                 [title]="showPassword ? 'Hide password' : 'Show password'"
                 (click)="togglePasswordVisibility()"
@@ -75,6 +78,7 @@
               <button
                 type="button"
                 class="password-toggle"
+                tabindex="-1"
                 [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
                 [title]="showConfirmPassword ? 'Hide password' : 'Show password'"
                 (click)="toggleConfirmPasswordVisibility()"

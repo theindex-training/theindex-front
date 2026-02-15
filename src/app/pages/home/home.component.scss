@@ -35,3 +35,22 @@ p {
 .card p {
   margin: 0;
 }
+
+.card ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.card li + li {
+  margin-top: 0.5rem;
+}
+
+.card a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.card a:hover {
+  text-decoration: underline;
+}

@@ -11,31 +11,26 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    UiButtonComponent,
-    UiInputComponent
-  ]
+  imports: [CommonModule, ReactiveFormsModule, UiButtonComponent, UiInputComponent],
 })
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
 
-  errorMessage = '';
+  authErrorMessage = '';
   isSubmitting = false;
 
   readonly loginForm = this.fb.group({
     email: ['', [Validators.required]],
-    password: ['', [Validators.required, Validators.minLength(3)]]
+    password: ['', [Validators.required, Validators.minLength(3)]],
   });
 
   constructor(
     private readonly router: Router,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
   ) {}
 
   handleLogin(): void {
-    this.errorMessage = '';
+    this.authErrorMessage = '';
 
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -56,10 +51,10 @@ export class LoginComponent {
       },
       error: (error: unknown) => {
         this.isSubmitting = false;
-        this.errorMessage =
+        this.authErrorMessage =
           (error as { error?: { message?: string } })?.error?.message ??
           'Unable to sign in with those credentials.';
-      }
+      },
     });
   }
 }

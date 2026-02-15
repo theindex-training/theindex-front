@@ -5,13 +5,13 @@ import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   GymLocation,
   GymLocationsService,
-  UpdateGymLocationPayload
+  UpdateGymLocationPayload,
 } from '../../services/gym-locations.service';
 
 @Component({
@@ -19,13 +19,12 @@ import {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './gym-edit.component.html',
-  styleUrl: './gym-edit.component.scss'
+  styleUrl: './gym-edit.component.scss',
 })
 export class GymEditComponent implements OnInit {
   readonly form: FormGroup<{
     name: FormControl<string>;
     address: FormControl<string | null>;
-    notes: FormControl<string | null>;
   }>;
 
   gym: GymLocation | null = null;
@@ -38,15 +37,14 @@ export class GymEditComponent implements OnInit {
     private readonly gymsService: GymLocationsService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        Validators.minLength(2)
+        Validators.minLength(2),
       ]),
       address: this.formBuilder.control<string | null>(null),
-      notes: this.formBuilder.control<string | null>(null)
     });
   }
 
@@ -64,17 +62,15 @@ export class GymEditComponent implements OnInit {
         this.form.patchValue({
           name: gym.name,
           address: gym.address,
-          notes: gym.notes
         });
         this.loading = false;
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          error?.error?.message || 'Unable to load this gym.';
+        this.errorMessage = error?.error?.message || 'Unable to load this gym.';
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -91,7 +87,6 @@ export class GymEditComponent implements OnInit {
     const payload: UpdateGymLocationPayload = {
       name: raw.name.trim(),
       address: this.normalizeOptional(raw.address),
-      notes: this.normalizeOptional(raw.notes)
     };
 
     this.submitting = true;
@@ -103,10 +98,9 @@ export class GymEditComponent implements OnInit {
         this.router.navigate(['/gyms']);
       },
       error: (error) => {
-        this.errorMessage =
-          error?.error?.message || 'Unable to update this gym right now.';
+        this.errorMessage = error?.error?.message || 'Unable to update this gym right now.';
         this.submitting = false;
-      }
+      },
     });
   }
 
