@@ -1,32 +1,32 @@
 <section class="dashboard">
   <header>
-    <h1>Dashboard</h1>
-    <p>Welcome back! Shortcuts and key metrics will appear here.</p>
+    <h1>{{ 'home.dashboard' | translate }}</h1>
+    <p>{{ 'home.welcome' | translate }}</p>
   </header>
 
   @if (canSeeQuickLinks) {
     <article class="card">
-      <h2>Quick links</h2>
+      <h2>{{ 'home.quickLinks' | translate }}</h2>
       <ul>
-        <li><a routerLink="/attendance/new">Register attendance</a></li>
-        <li><a routerLink="/training-times">List of trainings</a></li>
-        <li><a routerLink="/settlements">Settlement reports</a></li>
+        <li><a routerLink="/attendance/new">{{ 'home.registerAttendance' | translate }}</a></li>
+        <li><a routerLink="/training-times">{{ 'home.listOfTrainings' | translate }}</a></li>
+        <li><a routerLink="/settlements">{{ 'home.settlementReports' | translate }}</a></li>
       </ul>
     </article>
   }
 
   <div class="card-grid">
     <article class="card">
-      <h2>Quick actions</h2>
-      <p>Add plans, gyms, trainers, or trainees from the navigation.</p>
+      <h2>{{ 'home.quickActions' | translate }}</h2>
+      <p>{{ 'home.quickActionsText' | translate }}</p>
     </article>
     <article class="card">
-      <h2>Upcoming work</h2>
-      <p>Attendance and settlement reports will surface here soon.</p>
+      <h2>{{ 'home.upcomingWork' | translate }}</h2>
+      <p>{{ 'home.upcomingWorkText' | translate }}</p>
     </article>
     <article class="card">
-      <h2>Subscriptions</h2>
-      <p>Subscription insights will live on this dashboard.</p>
+      <h2>{{ 'home.subscriptions' | translate }}</h2>
+      <p>{{ 'home.subscriptionsText' | translate }}</p>
     </article>
   </div>
 </section>

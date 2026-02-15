@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
+import { LanguageSwitcherComponent } from '../language-switcher/language-switcher.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AuthService } from '../../services/auth.service';
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   route?: string;
   children?: NavItem[];
 }
@@ -12,7 +14,7 @@ interface NavItem {
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe, LanguageSwitcherComponent],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
 })
@@ -21,20 +23,20 @@ export class MainLayoutComponent {
   isManageMenuOpen = false;
 
   readonly navItems: NavItem[] = [
-    { label: 'Dashboard', route: '/home' },
+    { labelKey: 'nav.dashboard', route: '/home' },
     {
-      label: 'Manage',
+      labelKey: 'nav.manage',
       children: [
-        { label: 'Plans', route: '/plans' },
-        { label: 'Gyms', route: '/gyms' },
-        { label: 'Gym subscriptions', route: '/gym-subscriptions' },
-        { label: 'Trainers', route: '/trainers' },
-        { label: 'Training times', route: '/training-times' }
+        { labelKey: 'nav.plans', route: '/plans' },
+        { labelKey: 'nav.gyms', route: '/gyms' },
+        { labelKey: 'nav.gymSubscriptions', route: '/gym-subscriptions' },
+        { labelKey: 'nav.trainers', route: '/trainers' },
+        { labelKey: 'nav.trainingTimes', route: '/training-times' }
       ]
     },
-    { label: 'Trainees', route: '/trainees' },
-    { label: 'Attendance', route: '/attendance' },
-    { label: 'Settlements', route: '/settlements' }
+    { labelKey: 'nav.trainees', route: '/trainees' },
+    { labelKey: 'nav.attendance', route: '/attendance' },
+    { labelKey: 'nav.settlements', route: '/settlements' }
   ];
 
   constructor(

@@ -32,18 +32,30 @@
   max-width: 420px;
 }
 
+.login__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0;
+}
+
+.login__toolbar app-language-switcher {
+  color: #f8fafc;
+}
+
 .login__eyebrow {
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-weight: 600;
   color: rgba(248, 250, 252, 0.78);
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .login__brand h1 {
   font-size: 2.4rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .login__copy {
