@@ -23,6 +23,7 @@ export class UiInputComponent implements ControlValueAccessor {
 
   value = '';
   isDisabled = false;
+  showPassword = false;
 
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
@@ -43,6 +44,18 @@ export class UiInputComponent implements ControlValueAccessor {
     this.isDisabled = isDisabled;
   }
 
+  get isPasswordField(): boolean {
+    return this.type === 'password';
+  }
+
+  get inputType(): 'text' | 'email' | 'password' {
+    if (this.isPasswordField && this.showPassword) {
+      return 'text';
+    }
+
+    return this.type;
+  }
+
   handleInput(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.value = target.value;
@@ -51,5 +64,9 @@ export class UiInputComponent implements ControlValueAccessor {
 
   handleBlur(): void {
     this.onTouched();
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 }

@@ -122,3 +122,31 @@ p {
   color: #475467;
   border-color: var(--color-border);
 }
+
+
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 2.5rem;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.65rem;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  font-size: 1rem;
+}
+
+.password-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  border-radius: 0.35rem;
+}

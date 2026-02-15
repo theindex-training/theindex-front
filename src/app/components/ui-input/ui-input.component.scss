@@ -25,3 +25,30 @@
   border-color: var(--color-primary);
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
 }
+
+
+.ui-input__control {
+  position: relative;
+}
+
+.ui-input__toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.65rem;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  font-size: 1rem;
+}
+
+.ui-input__toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  border-radius: 0.35rem;
+}
+
+.ui-input__field--with-toggle {
+  padding-right: 2.5rem;
+}
