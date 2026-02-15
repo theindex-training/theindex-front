@@ -56,7 +56,7 @@ select {
 
 .table-row {
   display: grid;
-  grid-template-columns: 1.3fr 0.8fr 0.9fr 1fr 1.2fr 0.8fr 1fr;
+  grid-template-columns: 1.5fr 0.8fr 1fr;
   gap: 1rem;
   align-items: center;
   background: var(--color-surface);
@@ -77,18 +77,14 @@ select {
   font-weight: 600;
 }
 
+.notes {
+  color: var(--color-muted);
+}
+
 .table-actions {
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
-}
-
-.table-actions .button {
-  white-space: nowrap;
-}
-
-.table-actions .button-primary {
-  min-width: 140px;
 }
 
 .status {

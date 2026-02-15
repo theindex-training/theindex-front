@@ -33,6 +33,17 @@
         }
       </label>
 
+
+      <label class="field">
+        <span>Gym subscription</span>
+        <select formControlName="gymSubscriptionId" [disabled]="gymSubscriptionsLoading">
+          <option [ngValue]="null">No gym subscription</option>
+          @for (gymSubscription of gymSubscriptions; track gymSubscription.id) {
+            <option [value]="gymSubscription.id">{{ gymSubscription.name }}</option>
+          }
+        </select>
+      </label>
+
       <label class="field checkbox">
         <input type="checkbox" formControlName="isActive" />
         <span>Active trainee</span>

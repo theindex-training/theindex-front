@@ -1,0 +1,53 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Gym subscriptions</h1>
+      <p>Track gym subscription methods and availability.</p>
+    </div>
+    <div class="page-actions">
+      <a class="button button-primary" routerLink="/gym-subscriptions/new">New gym subscription</a>
+    </div>
+  </header>
+
+  <section class="filters">
+    <label class="field">
+      <span>Status</span>
+      <select [(ngModel)]="activeFilter" (change)="loadGymSubscriptions()">
+        <option value="all">All</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </label>
+  </section>
+
+  @if (loading) {
+    <div class="state">Loading gym subscriptions...</div>
+  } @else if (errorMessage) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (!gymSubscriptions.length) {
+    <div class="state">No gym subscriptions found yet.</div>
+  } @else {
+    <div class="table">
+      <div class="table-row table-header">
+        <span>Name</span>
+        <span>Status</span>
+        <span class="table-actions">Details</span>
+      </div>
+      @for (gymSubscription of gymSubscriptions; track gymSubscription.id) {
+        <div class="table-row">
+          <span class="title">{{ gymSubscription.name }}</span>
+          <span>
+            <span class="status" [class.inactive]="!gymSubscription.isActive">
+              {{ gymSubscription.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </span>
+          <span class="table-actions">
+            <a class="button button-secondary" [routerLink]="['/gym-subscriptions', gymSubscription.id]">
+              Open details
+            </a>
+          </span>
+        </div>
+      }
+    </div>
+  }
+</section>

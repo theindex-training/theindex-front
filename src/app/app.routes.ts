@@ -103,6 +103,51 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
       {
+        path: 'gym-subscriptions/new',
+        loadComponent: () =>
+          import('./pages/gym-subscriptions/gym-subscription-create.component').then(
+            m => m.GymSubscriptionCreateComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'gym-subscriptions/:id/edit',
+        loadComponent: () =>
+          import('./pages/gym-subscriptions/gym-subscription-edit.component').then(
+            m => m.GymSubscriptionEditComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'gym-subscriptions/:id/delete',
+        loadComponent: () =>
+          import('./pages/gym-subscriptions/gym-subscription-delete.component').then(
+            m => m.GymSubscriptionDeleteComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'gym-subscriptions/:id',
+        loadComponent: () =>
+          import('./pages/gym-subscriptions/gym-subscription-details.component').then(
+            m => m.GymSubscriptionDetailsComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'gym-subscriptions',
+        loadComponent: () =>
+          import('./pages/gym-subscriptions/gym-subscriptions.component').then(
+            m => m.GymSubscriptionsComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
         path: 'trainers/new',
         loadComponent: () =>
           import('./pages/trainers/trainer-create.component').then(m => m.TrainerCreateComponent),

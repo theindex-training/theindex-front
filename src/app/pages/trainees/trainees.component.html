@@ -33,6 +33,7 @@
         <span>Nickname</span>
         <span>Phone</span>
         <span>Account</span>
+        <span>Gym subscription</span>
         <span>Status</span>
         <span class="table-actions">Details</span>
       </div>
@@ -42,6 +43,7 @@
           <span>{{ formatNickname(trainee) }}</span>
           <span>{{ formatPhone(trainee) }}</span>
           <span class="notes">{{ formatAccount(trainee) }}</span>
+          <span>{{ formatGymSubscription(trainee) }}</span>
           <span>
             <span class="status" [class.inactive]="!trainee.isActive">
               {{ trainee.isActive ? 'Active' : 'Inactive' }}
