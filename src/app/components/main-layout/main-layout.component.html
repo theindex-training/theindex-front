@@ -11,14 +11,14 @@
           <button
             class="nav-link nav-trigger"
             type="button"
-            [class.is-active]="isManageActive(item)"
-            [attr.aria-expanded]="isManageMenuOpen"
-            (click)="toggleManageMenu()"
+            [class.is-active]="isParentActive(item)"
+            [attr.aria-expanded]="isSubmenuOpen(item)"
+            (click)="toggleSubmenu(item)"
           >
             {{ item.label }}
           </button>
 
-          @if (isManageMenuOpen) {
+          @if (isSubmenuOpen(item)) {
             <div class="subnav-panel">
               @for (child of item.children; track child.route) {
                 <a
@@ -69,14 +69,14 @@
         <button
           class="nav-link nav-trigger"
           type="button"
-          [class.is-active]="isManageActive(item)"
-          [attr.aria-expanded]="isManageMenuOpen"
-          (click)="toggleManageMenu()"
+          [class.is-active]="isParentActive(item)"
+          [attr.aria-expanded]="isSubmenuOpen(item)"
+          (click)="toggleSubmenu(item)"
         >
           {{ item.label }}
         </button>
 
-        @if (isManageMenuOpen) {
+        @if (isSubmenuOpen(item)) {
           <div class="mobile-subnav">
             @for (child of item.children; track child.route) {
               <a
