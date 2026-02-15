@@ -9,6 +9,7 @@ export type AccountStatus = 'ACTIVE' | 'DISABLED';
 export interface ProvisionAccountPayload {
   email: string;
   role: AccountRole;
+  status: AccountStatus;
   password: string;
   confirmPassword: string;
 }

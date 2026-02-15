@@ -142,6 +142,7 @@ export class TraineeAccountComponent implements OnInit {
             error?.error?.message ||
             'Unable to update this account right now.';
           this.submitting = false;
+          this.changeDetector.detectChanges();
         }
       });
       return;
@@ -150,6 +151,7 @@ export class TraineeAccountComponent implements OnInit {
     const payload: ProvisionAccountPayload = {
       email: raw.email.trim(),
       role: 'TRAINEE',
+      status: 'ACTIVE',
       password: raw.password,
       confirmPassword: raw.confirmPassword
     };
@@ -166,6 +168,7 @@ export class TraineeAccountComponent implements OnInit {
             error?.error?.message ||
             'Unable to provision an account for this trainee.';
           this.submitting = false;
+          this.changeDetector.detectChanges();
         }
       });
   }
@@ -187,6 +190,7 @@ export class TraineeAccountComponent implements OnInit {
         this.errorMessage =
           error?.error?.message || 'Unable to deactivate this account.';
         this.deactivating = false;
+        this.changeDetector.detectChanges();
       }
     });
   }
