@@ -1,0 +1,43 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Edit training time</h1>
+      <p>Update this attendance training slot.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/training-times">Back to training times</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading training time...</div>
+  } @else {
+    <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <div class="form-grid">
+        <label class="field">
+          <span>Start time</span>
+          <input type="time" formControlName="startTime" />
+          @if (form.controls.startTime.touched && form.controls.startTime.invalid) {
+            <small class="error">Start time is required.</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>End time</span>
+          <input type="time" formControlName="endTime" />
+          @if (form.controls.endTime.touched && form.controls.endTime.invalid) {
+            <small class="error">End time is required.</small>
+          }
+        </label>
+      </div>
+
+      @if (errorMessage) {
+        <div class="state error">{{ errorMessage }}</div>
+      }
+
+      <div class="form-actions">
+        <button class="button button-primary" type="submit" [disabled]="submitting">
+          {{ submitting ? 'Saving...' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

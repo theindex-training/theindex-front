@@ -1,0 +1,37 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Training time details</h1>
+      <p>Review this configured training slot.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/training-times">Back to training times</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading training time...</div>
+  } @else if (errorMessage && !trainingTime) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (trainingTime) {
+    <div class="card">
+      <div class="details">
+        <div>
+          <span class="label">Start time</span>
+          <strong>{{ trainingTime.startTime }}</strong>
+        </div>
+        <div>
+          <span class="label">End time</span>
+          <strong>{{ trainingTime.endTime }}</strong>
+        </div>
+      </div>
+
+      <div class="details-actions">
+        <a class="button button-secondary" [routerLink]="['/training-times', trainingTime.id, 'edit']">
+          Edit training time
+        </a>
+        <a class="button button-ghost" [routerLink]="['/training-times', trainingTime.id, 'delete']">
+          Delete training time
+        </a>
+      </div>
+    </div>
+  }
+</section>

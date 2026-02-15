@@ -28,7 +28,8 @@ export class MainLayoutComponent {
         { label: 'Plans', route: '/plans' },
         { label: 'Gyms', route: '/gyms' },
         { label: 'Gym subscriptions', route: '/gym-subscriptions' },
-        { label: 'Trainers', route: '/trainers' }
+        { label: 'Trainers', route: '/trainers' },
+        { label: 'Training times', route: '/training-times' }
       ]
     },
     { label: 'Trainees', route: '/trainees' },

@@ -50,7 +50,14 @@
 
         <label class="field">
           <span>Training time (optional)</span>
-          <input type="time" formControlName="trainedTime" />
+          <select formControlName="trainedTime">
+            <option value="">Not specified</option>
+            @for (trainingTime of trainingTimes; track trainingTime.id) {
+              <option [value]="trainingTime.startTime">
+                {{ formatTrainingTimeOption(trainingTime) }}
+              </option>
+            }
+          </select>
         </label>
       </div>
 
