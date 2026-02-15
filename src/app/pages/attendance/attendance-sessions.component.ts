@@ -29,7 +29,7 @@ export class AttendanceSessionsComponent implements OnInit {
   trainerNicknameById = new Map<string, string | null>();
   locationNameById = new Map<string, string>();
 
-  selectedStartDate = this.todayIsoDate();
+  selectedStartDate = this.isoDateDaysAgo(7);
   selectedEndDate = this.todayIsoDate();
   selectedStartTime = '';
   selectedEndTime = '';
@@ -43,6 +43,8 @@ export class AttendanceSessionsComponent implements OnInit {
   errorMessage = '';
   deletingAttendanceId: string | null = null;
   readonly canDeleteAttendance: boolean;
+  readonly isAdmin: boolean;
+  private readonly currentTrainerId: string | null;
 
   constructor(
     private readonly attendanceService: AttendanceService,
@@ -51,11 +53,22 @@ export class AttendanceSessionsComponent implements OnInit {
     private readonly changeDetector: ChangeDetectorRef
   ) {
     const userRole = this.authService.getUserRole();
-    this.canDeleteAttendance = userRole === 'ADMIN' || userRole === 'TRAINER';
+    this.isAdmin = userRole === 'ADMIN';
+    this.canDeleteAttendance = this.isAdmin || userRole === 'TRAINER';
+    this.currentTrainerId = this.authService.getTrainerProfileId();
+
+    if (!this.isAdmin && this.currentTrainerId) {
+      this.selectedTrainerId = this.currentTrainerId;
+    }
   }
 
   ngOnInit(): void {
-    this.loadTrainers();
+    if (this.isAdmin) {
+      this.loadTrainers();
+    } else {
+      this.loadingTrainers = false;
+    }
+
     this.loadSessions();
   }
 
@@ -65,6 +78,39 @@ export class AttendanceSessionsComponent implements OnInit {
     }
 
     return this.sessions.filter(session => this.selectedSessionKeys.includes(session.sessionKey));
+  }
+
+  get selectedSessionsSummary(): {
+    sessions: number;
+    attendance: number;
+    paid: number;
+    unpaid: number;
+    finalPriceCents: number;
+  } {
+    return this.selectedSessions.reduce(
+      (summary, session) => {
+        summary.sessions += 1;
+        summary.attendance += session.totals.count;
+        summary.paid += session.totals.paid;
+        summary.unpaid += session.totals.unpaid;
+        summary.finalPriceCents += session.attendance.reduce((sum, item) => {
+          if (!item.price?.isFinal) {
+            return sum;
+          }
+
+          return sum + item.price.priceCents;
+        }, 0);
+
+        return summary;
+      },
+      {
+        sessions: 0,
+        attendance: 0,
+        paid: 0,
+        unpaid: 0,
+        finalPriceCents: 0
+      }
+    );
   }
 
   loadSessions(): void {
@@ -84,8 +130,9 @@ export class AttendanceSessionsComponent implements OnInit {
       query.endTime = this.selectedEndTime;
     }
 
-    if (this.selectedTrainerId) {
-      query.trainerId = this.selectedTrainerId;
+    const trainerId = this.isAdmin ? this.selectedTrainerId : this.currentTrainerId;
+    if (trainerId) {
+      query.trainerId = trainerId;
     }
 
     if (this.selectedBucketMinutes) {
@@ -133,6 +180,41 @@ export class AttendanceSessionsComponent implements OnInit {
     }).format(new Date(value));
   }
 
+  formatDate(value: string): string {
+    return new Intl.DateTimeFormat('en-GB', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date(value));
+  }
+
+  formatPrice(priceCents: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(priceCents / 100);
+  }
+
+  attendancePrice(item: AttendanceSessionAttendanceItem): string {
+    if (!item.price?.isFinal) {
+      return '—';
+    }
+
+    return this.formatPrice(item.price.priceCents);
+  }
+
+  sessionTotalPrice(session: AttendanceSession): string {
+    const totalCents = session.attendance.reduce((sum, item) => {
+      if (!item.price?.isFinal) {
+        return sum;
+      }
+
+      return sum + item.price.priceCents;
+    }, 0);
+
+    return this.formatPrice(totalCents);
+  }
+
   sessionTabTitle(session: AttendanceSession): string {
     return `${this.formatDateTime(session.start)} - ${this.formatDateTime(session.end)}, ${this.formatTrainerNickname(session.trainerId)}`;
   }
@@ -162,8 +244,16 @@ export class AttendanceSessionsComponent implements OnInit {
     return this.locationNameById.get(locationId) || '—';
   }
 
+  canDeleteSessionAttendance(session: AttendanceSession): boolean {
+    if (this.isAdmin) {
+      return true;
+    }
+
+    return Boolean(this.currentTrainerId && this.currentTrainerId === session.trainerId);
+  }
+
   deleteAttendance(session: AttendanceSession, item: AttendanceSessionAttendanceItem): void {
-    if (!this.canDeleteAttendance || this.deletingAttendanceId) {
+    if (!this.canDeleteSessionAttendance(session) || this.deletingAttendanceId) {
       return;
     }
 
@@ -219,7 +309,7 @@ export class AttendanceSessionsComponent implements OnInit {
     this.selectedSessionKeys = this.selectedSessionKeys.filter(key => availableSessionKeys.has(key));
 
     if (!this.selectedSessionKeys.length) {
-      this.selectedSessionKeys = [this.sessions[0].sessionKey];
+      this.selectedSessionKeys = this.sessions.map(session => session.sessionKey);
     }
   }
 
@@ -251,10 +341,16 @@ export class AttendanceSessionsComponent implements OnInit {
   }
 
   private todayIsoDate(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
+    return this.isoDateDaysAgo(0);
+  }
+
+  private isoDateDaysAgo(daysAgo: number): string {
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 }

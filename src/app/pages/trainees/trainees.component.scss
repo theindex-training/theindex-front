@@ -41,12 +41,25 @@ p {
   color: var(--color-muted);
 }
 
-select {
+select,
+input[type='search'] {
   padding: 0.5rem 0.75rem;
   border-radius: 0.75rem;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   font-size: 0.95rem;
+}
+
+input[type='search'] {
+  min-width: 260px;
+  appearance: none;
+}
+
+input[type='search']:focus,
+select:focus {
+  outline: none;
+  border-color: #84caff;
+  box-shadow: 0 0 0 3px #eff8ff;
 }
 
 .table {
