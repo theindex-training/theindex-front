@@ -115,18 +115,18 @@
         </header>
 
         <div class="attendees">
-          <div class="attendees-header" [class.with-actions]="canDeleteAttendance">
+          <div class="attendees-header" [class.with-actions]="canDeleteSessionAttendance(session)">
             <span>Trainee</span>
             <span>Nickname</span>
             <span>Status</span>
             <span>Price</span>
-            @if (canDeleteAttendance) {
+            @if (canDeleteSessionAttendance(session)) {
               <span>Actions</span>
             }
           </div>
 
           @for (item of session.attendance; track item.id) {
-            <div class="attendee-row" [class.with-actions]="canDeleteAttendance">
+            <div class="attendee-row" [class.with-actions]="canDeleteSessionAttendance(session)">
               <span>{{ traineeName(item.traineeId) }}</span>
               <span>{{ traineeNickname(item.traineeId) }}</span>
               <span>
@@ -135,7 +135,7 @@
                 </span>
               </span>
               <span>{{ attendancePrice(item) }}</span>
-              @if (canDeleteAttendance) {
+              @if (canDeleteSessionAttendance(session)) {
                 <span class="action-cell">
                   <button
                     class="button button-danger button-small"

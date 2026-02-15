@@ -24,6 +24,7 @@
                 <a
                   [routerLink]="child.route"
                   routerLinkActive="is-active"
+                  [routerLinkActiveOptions]="{ exact: true }"
                   class="subnav-link"
                   (click)="closeMenu()"
                 >
@@ -82,6 +83,7 @@
               <a
                 [routerLink]="child.route"
                 routerLinkActive="is-active"
+                [routerLinkActiveOptions]="{ exact: true }"
                 class="subnav-link"
                 (click)="closeMenu()"
               >

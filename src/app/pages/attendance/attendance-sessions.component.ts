@@ -29,7 +29,7 @@ export class AttendanceSessionsComponent implements OnInit {
   trainerNicknameById = new Map<string, string | null>();
   locationNameById = new Map<string, string>();
 
-  selectedStartDate = this.todayIsoDate();
+  selectedStartDate = this.isoDateDaysAgo(7);
   selectedEndDate = this.todayIsoDate();
   selectedStartTime = '';
   selectedEndTime = '';
@@ -244,8 +244,16 @@ export class AttendanceSessionsComponent implements OnInit {
     return this.locationNameById.get(locationId) || '—';
   }
 
+  canDeleteSessionAttendance(session: AttendanceSession): boolean {
+    if (this.isAdmin) {
+      return true;
+    }
+
+    return Boolean(this.currentTrainerId && this.currentTrainerId === session.trainerId);
+  }
+
   deleteAttendance(session: AttendanceSession, item: AttendanceSessionAttendanceItem): void {
-    if (!this.canDeleteAttendance || this.deletingAttendanceId) {
+    if (!this.canDeleteSessionAttendance(session) || this.deletingAttendanceId) {
       return;
     }
 
@@ -333,10 +341,16 @@ export class AttendanceSessionsComponent implements OnInit {
   }
 
   private todayIsoDate(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
+    return this.isoDateDaysAgo(0);
+  }
+
+  private isoDateDaysAgo(daysAgo: number): string {
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 }
