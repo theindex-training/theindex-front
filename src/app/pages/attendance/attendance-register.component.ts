@@ -15,6 +15,7 @@ import { GymLocation, GymLocationsService } from '../../services/gym-locations.s
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
 import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
+import { formatTimeWithoutSeconds } from '../../utils/time-display';
 
 @Component({
   selector: 'app-attendance-register',
@@ -165,7 +166,7 @@ export class AttendanceRegisterComponent implements OnInit {
   }
 
   formatTrainingTimeOption(trainingTime: TrainingTime): string {
-    return `${trainingTime.startTime} - ${trainingTime.endTime}`;
+    return `${formatTimeWithoutSeconds(trainingTime.startTime)} - ${formatTimeWithoutSeconds(trainingTime.endTime)}`;
   }
 
   private preselectDefaultLocation(): void {

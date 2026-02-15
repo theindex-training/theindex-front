@@ -17,6 +17,7 @@ import {
   ProvisionAccountPayload
 } from '../../services/account-provisioning.service';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
+import { displayValue } from '../../utils/display.util';
 
 const matchPasswordsValidator: ValidatorFn = (
   control: AbstractControl
@@ -30,8 +31,6 @@ const matchPasswordsValidator: ValidatorFn = (
 
   return password === confirmPassword ? null : { passwordsMismatch: true };
 };
-
-import { displayValue } from '../../utils/display.util';
 
 @Component({
   selector: 'app-trainer-account',
@@ -52,6 +51,8 @@ export class TrainerAccountComponent implements OnInit {
   loading = true;
   submitting = false;
   errorMessage = '';
+  showPassword = false;
+  showConfirmPassword = false;
 
   readonly statusOptions: { value: AccountStatus; label: string }[] = [
     { value: 'ACTIVE', label: 'Active' },
@@ -156,5 +157,13 @@ export class TrainerAccountComponent implements OnInit {
 
   formatNickname(): string {
     return displayValue(this.trainer?.nickname);
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 }

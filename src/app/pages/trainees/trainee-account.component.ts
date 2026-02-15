@@ -17,6 +17,7 @@ import {
   ProvisionAccountPayload
 } from '../../services/account-provisioning.service';
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
+import { displayValue } from '../../utils/display.util';
 
 const matchPasswordsValidator: ValidatorFn = (
   control: AbstractControl
@@ -30,8 +31,6 @@ const matchPasswordsValidator: ValidatorFn = (
 
   return password === confirmPassword ? null : { passwordsMismatch: true };
 };
-
-import { displayValue } from '../../utils/display.util';
 
 @Component({
   selector: 'app-trainee-account',
@@ -52,6 +51,8 @@ export class TraineeAccountComponent implements OnInit {
   loading = true;
   submitting = false;
   errorMessage = '';
+  showPassword = false;
+  showConfirmPassword = false;
 
   readonly statusOptions: { value: AccountStatus; label: string }[] = [
     { value: 'ACTIVE', label: 'Active' },
@@ -160,5 +161,13 @@ export class TraineeAccountComponent implements OnInit {
 
   formatPhone(): string {
     return displayValue(this.trainee?.phone);
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 }
