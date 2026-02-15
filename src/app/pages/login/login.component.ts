@@ -5,13 +5,22 @@ import { Router } from '@angular/router';
 import { UiButtonComponent } from '../../components/ui-button/ui-button.component';
 import { UiInputComponent } from '../../components/ui-input/ui-input.component';
 import { AuthService } from '../../services/auth.service';
+import { LanguageSwitcherComponent } from '../../components/language-switcher/language-switcher.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, UiButtonComponent, UiInputComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    UiButtonComponent,
+    UiInputComponent,
+    LanguageSwitcherComponent,
+    TranslatePipe,
+  ],
 })
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
@@ -53,7 +62,7 @@ export class LoginComponent {
         this.isSubmitting = false;
         this.authErrorMessage =
           (error as { error?: { message?: string } })?.error?.message ??
-          'Unable to sign in with those credentials.';
+          'login.signInError';
       },
     });
   }

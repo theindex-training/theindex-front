@@ -1,0 +1,11 @@
+<label class="language-switcher" for="language-select">
+  <span>{{ 'common.language' | translate }}:</span>
+  <select
+    id="language-select"
+    [ngModel]="i18nService.language()"
+    (ngModelChange)="handleLanguageChange($event)"
+  >
+    <option value="en">{{ 'common.english' | translate }}</option>
+    <option value="bg">{{ 'common.bulgarian' | translate }}</option>
+  </select>
+</label>

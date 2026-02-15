@@ -1,12 +1,15 @@
 <section class="login">
   <div class="login__panel login__panel--brand">
     <div class="login__brand">
-      <p class="login__eyebrow">The Index</p>
-      <h1>Welcome back</h1>
-      <p class="login__copy">Sign in to access TheIndex.</p>
+      <div class="login__toolbar">
+        <p class="login__eyebrow">The Index</p>
+        <app-language-switcher />
+      </div>
+      <h1>{{ 'login.welcomeBack' | translate }}</h1>
+      <p class="login__copy">{{ 'login.signInToAccess' | translate }}</p>
       <ul class="login__highlights">
-        <li>Trainers to manage trainings</li>
-        <li>Trainee to track their personal progress</li>
+        <li>{{ 'login.highlights1' | translate }}</li>
+        <li>{{ 'login.highlights2' | translate }}</li>
       </ul>
     </div>
   </div>
@@ -14,16 +17,16 @@
   <div class="login__panel login__panel--form">
     <div class="login__card">
       <div class="login__header">
-        <h2>Sign in</h2>
-        <p>Use your The Index account credentials to continue.</p>
+        <h2>{{ 'login.signIn' | translate }}</h2>
+        <p>{{ 'login.credentialsInfo' | translate }}</p>
       </div>
 
       <form class="login__form" novalidate [formGroup]="loginForm" (ngSubmit)="handleLogin()">
         <app-ui-input
           id="email"
-          label="Email"
+          [label]="'login.email' | translate"
           type="email"
-          placeholder="you@company.com"
+          [placeholder]="'login.emailPlaceholder' | translate"
           autocomplete="email"
           formControlName="email"
         />
@@ -31,12 +34,12 @@
           class="login__error"
           *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')"
         >
-          Email is required.
+          {{ 'login.emailRequired' | translate }}
         </p>
 
         <app-ui-input
           id="password"
-          label="Password"
+          [label]="'login.password' | translate"
           type="password"
           placeholder="••••••••"
           autocomplete="current-password"
@@ -48,7 +51,7 @@
             loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')
           "
         >
-          Password is required.
+          {{ 'login.passwordRequired' | translate }}
         </p>
         <p
           class="login__error"
@@ -56,7 +59,7 @@
             loginForm.get('password')?.touched && loginForm.get('password')?.hasError('minlength')
           "
         >
-          Password must be at least 3 characters.
+          {{ 'login.passwordLength' | translate }}
         </p>
 
         <p
@@ -65,14 +68,14 @@
           aria-live="polite"
           *ngIf="authErrorMessage"
         >
-          {{ authErrorMessage }}
+          {{ authErrorMessage | translate }}
         </p>
 
-        <app-ui-button type="submit">Sign in</app-ui-button>
+        <app-ui-button type="submit">{{ 'login.signIn' | translate }}</app-ui-button>
       </form>
 
       <div class="login__footer">
-        <p>Need access? Contact admin</p>
+        <p>{{ 'login.needAccess' | translate }}</p>
       </div>
     </div>
   </div>

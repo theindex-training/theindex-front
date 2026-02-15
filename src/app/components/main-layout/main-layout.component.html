@@ -5,7 +5,7 @@
   </div>
 
   <nav class="nav-links" aria-label="Primary">
-    @for (item of navItems; track item.label) {
+    @for (item of navItems; track item.labelKey) {
       @if (item.children?.length) {
         <div class="nav-group">
           <button
@@ -15,7 +15,7 @@
             [attr.aria-expanded]="isManageMenuOpen"
             (click)="toggleManageMenu()"
           >
-            {{ item.label }}
+            {{ item.labelKey | translate }}
           </button>
 
           @if (isManageMenuOpen) {
@@ -27,7 +27,7 @@
                   class="subnav-link"
                   (click)="closeMenu()"
                 >
-                  {{ child.label }}
+                  {{ child.labelKey | translate }}
                 </a>
               }
             </div>
@@ -40,18 +40,19 @@
           class="nav-link"
           (click)="closeMenu()"
         >
-          {{ item.label }}
+          {{ item.labelKey | translate }}
         </a>
       }
     }
   </nav>
 
   <div class="actions">
-    <button class="logout-button" type="button" (click)="handleLogout()">Log out</button>
+    <app-language-switcher />
+    <button class="logout-button" type="button" (click)="handleLogout()">{{ 'common.logout' | translate }}</button>
     <button
       class="menu-toggle"
       type="button"
-      aria-label="Toggle navigation"
+      [attr.aria-label]="'nav.toggleNavigation' | translate"
       [attr.aria-expanded]="isMenuOpen"
       (click)="toggleMenu()"
     >
@@ -64,7 +65,7 @@
 
 <div class="mobile-panel" [class.is-open]="isMenuOpen">
   <nav class="mobile-nav" aria-label="Mobile">
-    @for (item of navItems; track item.label) {
+    @for (item of navItems; track item.labelKey) {
       @if (item.children?.length) {
         <button
           class="nav-link nav-trigger"
@@ -73,7 +74,7 @@
           [attr.aria-expanded]="isManageMenuOpen"
           (click)="toggleManageMenu()"
         >
-          {{ item.label }}
+          {{ item.labelKey | translate }}
         </button>
 
         @if (isManageMenuOpen) {
@@ -85,7 +86,7 @@
                 class="subnav-link"
                 (click)="closeMenu()"
               >
-                {{ child.label }}
+                {{ child.labelKey | translate }}
               </a>
             }
           </div>
@@ -97,11 +98,12 @@
           class="nav-link"
           (click)="closeMenu()"
         >
-          {{ item.label }}
+          {{ item.labelKey | translate }}
         </a>
       }
     }
-    <button class="logout-button" type="button" (click)="handleLogout()">Log out</button>
+    <app-language-switcher />
+    <button class="logout-button" type="button" (click)="handleLogout()">{{ 'common.logout' | translate }}</button>
   </nav>
 </div>
 

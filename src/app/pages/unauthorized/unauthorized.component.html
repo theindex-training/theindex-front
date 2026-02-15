@@ -1,7 +1,7 @@
 <section class="unauthorized">
   <div class="card">
-    <h1>Access restricted</h1>
-    <p>You do not have permission to access the administrative areas yet.</p>
-    <button type="button" (click)="handleLogout()">Log out</button>
+    <h1>{{ 'common.unauthorized' | translate }}</h1>
+    <p>{{ 'common.noPermission' | translate }}</p>
+    <button type="button" (click)="handleLogout()">{{ 'common.logout' | translate }}</button>
   </div>
 </section>

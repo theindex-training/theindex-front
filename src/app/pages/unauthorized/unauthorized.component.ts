@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-unauthorized',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './unauthorized.component.html',
   styleUrl: './unauthorized.component.scss'
 })
