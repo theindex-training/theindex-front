@@ -44,6 +44,8 @@ export class AttendanceRegisterComponent implements OnInit {
   filteredTrainees: TraineeProfile[] = [];
   selectedTraineeIds = new Set<string>();
 
+  readonly formatTimeWithoutSeconds = formatTimeWithoutSeconds;
+
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly trainersService: TrainersService,
@@ -115,7 +117,7 @@ export class AttendanceRegisterComponent implements OnInit {
     }
 
     const raw = this.form.getRawValue();
-    const trainedTime = raw.trainedTime.trim();
+    const trainedTime = formatTimeWithoutSeconds(raw.trainedTime.trim());
 
     this.submitting = true;
 
