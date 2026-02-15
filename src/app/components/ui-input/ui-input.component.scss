@@ -1,3 +1,8 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
 .ui-input {
   display: flex;
   flex-direction: column;
@@ -11,11 +16,15 @@
 }
 
 .ui-input__field {
+  width: 100%;
+  box-sizing: border-box;
   border: 1px solid var(--color-border);
   border-radius: 0.75rem;
   padding: 0.85rem 1rem;
   font-size: 1rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   background: var(--color-surface);
   color: var(--color-text);
 }
@@ -25,7 +34,6 @@
   border-color: var(--color-primary);
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
 }
-
 
 .ui-input__control {
   position: relative;

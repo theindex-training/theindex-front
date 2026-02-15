@@ -27,7 +27,10 @@
           autocomplete="email"
           formControlName="email"
         />
-        <p class="login__error" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')">
+        <p
+          class="login__error"
+          *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')"
+        >
           Email is required.
         </p>
 
@@ -39,14 +42,31 @@
           autocomplete="current-password"
           formControlName="password"
         />
-        <p class="login__error" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')">
+        <p
+          class="login__error"
+          *ngIf="
+            loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')
+          "
+        >
           Password is required.
         </p>
-        <p class="login__error" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('minlength')">
+        <p
+          class="login__error"
+          *ngIf="
+            loginForm.get('password')?.touched && loginForm.get('password')?.hasError('minlength')
+          "
+        >
           Password must be at least 3 characters.
         </p>
 
-        <p class="login__error" *ngIf="errorMessage">{{ errorMessage }}</p>
+        <p
+          class="login__error login__error--auth"
+          role="alert"
+          aria-live="polite"
+          *ngIf="authErrorMessage"
+        >
+          {{ authErrorMessage }}
+        </p>
 
         <app-ui-button type="submit">Sign in</app-ui-button>
       </form>

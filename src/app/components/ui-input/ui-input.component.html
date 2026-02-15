@@ -18,6 +18,7 @@
       <button
         class="ui-input__toggle"
         type="button"
+        tabindex="-1"
         [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
         [title]="showPassword ? 'Hide password' : 'Show password'"
         (click)="togglePasswordVisibility()"

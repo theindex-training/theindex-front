@@ -18,13 +18,23 @@
         <option value="inactive">Inactive</option>
       </select>
     </label>
+
+    <label class="field">
+      <span>Search</span>
+      <input
+        type="search"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="applySearch()"
+        placeholder="Search by name or nickname"
+      />
+    </label>
   </section>
 
   @if (loading) {
     <div class="state">Loading trainees...</div>
   } @else if (errorMessage) {
     <div class="state error">{{ errorMessage }}</div>
-  } @else if (!trainees.length) {
+  } @else if (!filteredTrainees.length) {
     <div class="state">No trainees found yet.</div>
   } @else {
     <div class="table">
@@ -36,14 +46,16 @@
         <span>Gym subscription</span>
         <span class="table-actions">Details</span>
       </div>
-      @for (trainee of trainees; track trainee.id) {
+      @for (trainee of filteredTrainees; track trainee.id) {
         <div class="table-row">
           <span class="title">{{ trainee.name }}</span>
           <span>{{ formatNickname(trainee) }}</span>
           <span>{{ formatPhone(trainee) }}</span>
           <span class="account-cell">
             @if (hasLinkedAccount(trainee)) {
-              <span class="account-linked" title="Linked account" aria-label="Linked account">✓</span>
+              <span class="account-linked" title="Linked account" aria-label="Linked account"
+                >✓</span
+              >
             } @else {
               -
             }

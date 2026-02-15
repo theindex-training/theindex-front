@@ -4,6 +4,17 @@
     <p>Welcome back! Shortcuts and key metrics will appear here.</p>
   </header>
 
+  @if (canSeeQuickLinks) {
+    <article class="card">
+      <h2>Quick links</h2>
+      <ul>
+        <li><a routerLink="/attendance/new">Register attendance</a></li>
+        <li><a routerLink="/training-times">List of trainings</a></li>
+        <li><a routerLink="/settlements">Settlement reports</a></li>
+      </ul>
+    </article>
+  }
+
   <div class="card-grid">
     <article class="card">
       <h2>Quick actions</h2>

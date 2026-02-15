@@ -31,7 +31,6 @@
       <div class="table-row table-header">
         <span>Name</span>
         <span>Address</span>
-        <span>Notes</span>
         <span>Status</span>
         <span class="table-actions">Details</span>
       </div>
@@ -39,16 +38,13 @@
         <div class="table-row">
           <span class="title">{{ gym.name }}</span>
           <span>{{ formatAddress(gym) }}</span>
-          <span class="notes">{{ gym.notes?.trim() || '—' }}</span>
           <span>
             <span class="status" [class.inactive]="!gym.isActive">
               {{ gym.isActive ? 'Active' : 'Inactive' }}
             </span>
           </span>
           <span class="table-actions">
-            <a class="button button-secondary" [routerLink]="['/gyms', gym.id]">
-              Open details
-            </a>
+            <a class="button button-secondary" [routerLink]="['/gyms', gym.id]"> Open details </a>
           </span>
         </div>
       }
