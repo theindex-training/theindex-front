@@ -93,6 +93,28 @@ p {
   font-weight: 600;
 }
 
+.row-exhausted {
+  border-color: #fda29b;
+  background: #fef3f2;
+}
+
+.subscription-status {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.status-exhausted {
+  border-color: #fda29b;
+  color: #b42318;
+  background: #fff5f4;
+}
+
+
 .form {
   display: flex;
   flex-direction: column;

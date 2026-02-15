@@ -72,14 +72,14 @@
             <span>Type</span>
             <span>Status</span>
             <span>Starts</span>
-            <span>Ends / Credits</span>
+            <span>Ends / Used</span>
             <span>Paid</span>
           </div>
           @for (subscription of subscriptions; track subscription.id) {
-            <div class="table-row">
+            <div class="table-row" [class.row-exhausted]="isExhausted(subscription)">
               <span class="title">{{ formatPlanLabel(subscription) }}</span>
               <span>{{ subscription.type }}</span>
-              <span>{{ subscription.status }}</span>
+              <span class="subscription-status" [class.status-exhausted]="isExhausted(subscription)">{{ subscription.status }}</span>
               <span>{{ formatDate(subscription.startsAt) }}</span>
               <span>{{ formatEndsOrCredits(subscription) }}</span>
               <span>{{ formatPrice(subscription.paidCents) }}</span>

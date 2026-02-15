@@ -36,7 +36,7 @@ export class AttendanceSessionsComponent implements OnInit {
   selectedTrainerId = '';
   selectedBucketMinutes: number | null = null;
 
-  selectedSessionKey = '';
+  selectedSessionKeys: string[] = [];
 
   loading = true;
   loadingTrainers = true;
@@ -59,12 +59,12 @@ export class AttendanceSessionsComponent implements OnInit {
     this.loadSessions();
   }
 
-  get activeSession(): AttendanceSession | null {
+  get selectedSessions(): AttendanceSession[] {
     if (!this.sessions.length) {
-      return null;
+      return [];
     }
 
-    return this.sessions.find(session => session.sessionKey === this.selectedSessionKey) ?? this.sessions[0];
+    return this.sessions.filter(session => this.selectedSessionKeys.includes(session.sessionKey));
   }
 
   loadSessions(): void {
@@ -112,8 +112,18 @@ export class AttendanceSessionsComponent implements OnInit {
     return session.sessionKey;
   }
 
-  selectSession(sessionKey: string): void {
-    this.selectedSessionKey = sessionKey;
+  toggleSession(sessionKey: string): void {
+    const isSelected = this.selectedSessionKeys.includes(sessionKey);
+    if (isSelected) {
+      this.selectedSessionKeys = this.selectedSessionKeys.filter(key => key !== sessionKey);
+      return;
+    }
+
+    this.selectedSessionKeys = [...this.selectedSessionKeys, sessionKey];
+  }
+
+  isSessionSelected(sessionKey: string): boolean {
+    return this.selectedSessionKeys.includes(sessionKey);
   }
 
   formatDateTime(value: string): string {
@@ -201,13 +211,15 @@ export class AttendanceSessionsComponent implements OnInit {
 
   private ensureSelectedSession(): void {
     if (!this.sessions.length) {
-      this.selectedSessionKey = '';
+      this.selectedSessionKeys = [];
       return;
     }
 
-    const hasSelectedSession = this.sessions.some(session => session.sessionKey === this.selectedSessionKey);
-    if (!hasSelectedSession) {
-      this.selectedSessionKey = this.sessions[0].sessionKey;
+    const availableSessionKeys = new Set(this.sessions.map(session => session.sessionKey));
+    this.selectedSessionKeys = this.selectedSessionKeys.filter(key => availableSessionKeys.has(key));
+
+    if (!this.selectedSessionKeys.length) {
+      this.selectedSessionKeys = [this.sessions[0].sessionKey];
     }
   }
 

@@ -155,9 +155,14 @@ export class TraineeDetailsComponent implements OnInit {
       return subscription.endsAt ? this.formatDate(subscription.endsAt) : '—';
     }
 
-    const remaining = subscription.remainingCredits ?? 0;
     const initial = subscription.initialCredits ?? 0;
-    return `${remaining} / ${initial} credits`;
+    const remaining = subscription.remainingCredits ?? 0;
+    const used = Math.max(initial - remaining, 0);
+    return `${used} / ${initial} trainings`;
+  }
+
+  isExhausted(subscription: Subscription): boolean {
+    return subscription.status.toUpperCase() === 'EXHAUSTED';
   }
 
   formatDate(value: string | null | undefined): string {

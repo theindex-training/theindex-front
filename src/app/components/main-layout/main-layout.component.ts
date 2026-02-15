@@ -5,7 +5,8 @@ import { AuthService } from '../../services/auth.service';
 
 interface NavItem {
   label: string;
-  route: string;
+  route?: string;
+  children?: NavItem[];
 }
 
 @Component({
@@ -17,13 +18,19 @@ interface NavItem {
 })
 export class MainLayoutComponent {
   isMenuOpen = false;
+  isManageMenuOpen = false;
 
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', route: '/home' },
-    { label: 'Plans', route: '/plans' },
-    { label: 'Gyms', route: '/gyms' },
-    { label: 'Gym subscriptions', route: '/gym-subscriptions' },
-    { label: 'Trainers', route: '/trainers' },
+    {
+      label: 'Manage',
+      children: [
+        { label: 'Plans', route: '/plans' },
+        { label: 'Gyms', route: '/gyms' },
+        { label: 'Gym subscriptions', route: '/gym-subscriptions' },
+        { label: 'Trainers', route: '/trainers' }
+      ]
+    },
     { label: 'Trainees', route: '/trainees' },
     { label: 'Attendance', route: '/attendance' },
     { label: 'Settlements', route: '/settlements' }
@@ -38,8 +45,17 @@ export class MainLayoutComponent {
     this.isMenuOpen = !this.isMenuOpen;
   }
 
+  toggleManageMenu(): void {
+    this.isManageMenuOpen = !this.isManageMenuOpen;
+  }
+
   closeMenu(): void {
     this.isMenuOpen = false;
+    this.isManageMenuOpen = false;
+  }
+
+  isManageActive(item: NavItem): boolean {
+    return !!item.children?.some(child => child.route && this.router.url.startsWith(child.route));
   }
 
   handleLogout(): void {
