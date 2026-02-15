@@ -18,7 +18,7 @@ interface NavItem {
 })
 export class MainLayoutComponent {
   isMenuOpen = false;
-  isManageMenuOpen = false;
+  openSubmenuLabel: string | null = null;
 
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', route: '/home' },
@@ -33,7 +33,13 @@ export class MainLayoutComponent {
       ]
     },
     { label: 'Trainees', route: '/trainees' },
-    { label: 'Attendance', route: '/attendance' },
+    {
+      label: 'Attendance',
+      children: [
+        { label: 'Register', route: '/attendance/new' },
+        { label: 'List attendance', route: '/attendance' }
+      ]
+    },
     { label: 'Settlements', route: '/settlements' }
   ];
 
@@ -46,16 +52,20 @@ export class MainLayoutComponent {
     this.isMenuOpen = !this.isMenuOpen;
   }
 
-  toggleManageMenu(): void {
-    this.isManageMenuOpen = !this.isManageMenuOpen;
+  toggleSubmenu(item: NavItem): void {
+    this.openSubmenuLabel = this.openSubmenuLabel === item.label ? null : item.label;
+  }
+
+  isSubmenuOpen(item: NavItem): boolean {
+    return this.openSubmenuLabel === item.label;
   }
 
   closeMenu(): void {
     this.isMenuOpen = false;
-    this.isManageMenuOpen = false;
+    this.openSubmenuLabel = null;
   }
 
-  isManageActive(item: NavItem): boolean {
+  isParentActive(item: NavItem): boolean {
     return !!item.children?.some(child => child.route && this.router.url.startsWith(child.route));
   }
 
