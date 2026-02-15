@@ -67,6 +67,40 @@ export class AttendanceSessionsComponent implements OnInit {
     return this.sessions.filter(session => this.selectedSessionKeys.includes(session.sessionKey));
   }
 
+
+  get selectedSessionsSummary(): {
+    sessions: number;
+    attendance: number;
+    paid: number;
+    unpaid: number;
+    finalPriceCents: number;
+  } {
+    return this.selectedSessions.reduce(
+      (summary, session) => {
+        summary.sessions += 1;
+        summary.attendance += session.totals.count;
+        summary.paid += session.totals.paid;
+        summary.unpaid += session.totals.unpaid;
+        summary.finalPriceCents += session.attendance.reduce((sum, item) => {
+          if (!item.price?.isFinal) {
+            return sum;
+          }
+
+          return sum + item.price.priceCents;
+        }, 0);
+
+        return summary;
+      },
+      {
+        sessions: 0,
+        attendance: 0,
+        paid: 0,
+        unpaid: 0,
+        finalPriceCents: 0
+      }
+    );
+  }
+
   loadSessions(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -131,6 +165,41 @@ export class AttendanceSessionsComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     }).format(new Date(value));
+  }
+
+  formatDate(value: string): string {
+    return new Intl.DateTimeFormat('en-GB', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date(value));
+  }
+
+  formatPrice(priceCents: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(priceCents / 100);
+  }
+
+  attendancePrice(item: AttendanceSessionAttendanceItem): string {
+    if (!item.price?.isFinal) {
+      return '—';
+    }
+
+    return this.formatPrice(item.price.priceCents);
+  }
+
+  sessionTotalPrice(session: AttendanceSession): string {
+    const totalCents = session.attendance.reduce((sum, item) => {
+      if (!item.price?.isFinal) {
+        return sum;
+      }
+
+      return sum + item.price.priceCents;
+    }, 0);
+
+    return this.formatPrice(totalCents);
   }
 
   sessionTabTitle(session: AttendanceSession): string {
@@ -219,7 +288,7 @@ export class AttendanceSessionsComponent implements OnInit {
     this.selectedSessionKeys = this.selectedSessionKeys.filter(key => availableSessionKeys.has(key));
 
     if (!this.selectedSessionKeys.length) {
-      this.selectedSessionKeys = [this.sessions[0].sessionKey];
+      this.selectedSessionKeys = this.sessions.map(session => session.sessionKey);
     }
   }
 

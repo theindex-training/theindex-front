@@ -66,6 +66,21 @@
   color: #175cd3;
 }
 
+.selection-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-surface);
+  color: var(--color-muted);
+}
+
+.selection-summary strong {
+  color: #101828;
+}
+
 .card {
   background: var(--color-surface);
   border-radius: 1rem;
@@ -93,14 +108,14 @@
 .attendees-header,
 .attendee-row {
   display: grid;
-  grid-template-columns: 1.2fr 0.9fr 0.7fr;
+  grid-template-columns: 1.2fr 0.9fr 0.7fr 0.8fr;
   gap: 0.5rem;
   padding: 0.6rem 0.75rem;
 }
 
 .attendees-header.with-actions,
 .attendee-row.with-actions {
-  grid-template-columns: 1.2fr 0.9fr 0.7fr auto;
+  grid-template-columns: 1.2fr 0.9fr 0.7fr 0.8fr auto;
 }
 
 .attendees-header {

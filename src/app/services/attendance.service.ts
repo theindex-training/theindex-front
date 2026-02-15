@@ -34,6 +34,12 @@ export interface AttendanceSessionAttendanceItem {
   paymentStatus: 'PAID' | 'UNPAID';
   traineeId: string;
   subscriptionId: string | null;
+  price: {
+    priceCents: number;
+    calculation: string;
+    subscriptionType: string | null;
+    isFinal: boolean;
+  };
 }
 
 export interface AttendanceSession {
