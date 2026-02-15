@@ -43,6 +43,8 @@ export class AttendanceSessionsComponent implements OnInit {
   errorMessage = '';
   deletingAttendanceId: string | null = null;
   readonly canDeleteAttendance: boolean;
+  readonly isAdmin: boolean;
+  private readonly currentTrainerId: string | null;
 
   constructor(
     private readonly attendanceService: AttendanceService,
@@ -51,11 +53,22 @@ export class AttendanceSessionsComponent implements OnInit {
     private readonly changeDetector: ChangeDetectorRef
   ) {
     const userRole = this.authService.getUserRole();
-    this.canDeleteAttendance = userRole === 'ADMIN' || userRole === 'TRAINER';
+    this.isAdmin = userRole === 'ADMIN';
+    this.canDeleteAttendance = this.isAdmin || userRole === 'TRAINER';
+    this.currentTrainerId = this.authService.getTrainerProfileId();
+
+    if (!this.isAdmin && this.currentTrainerId) {
+      this.selectedTrainerId = this.currentTrainerId;
+    }
   }
 
   ngOnInit(): void {
-    this.loadTrainers();
+    if (this.isAdmin) {
+      this.loadTrainers();
+    } else {
+      this.loadingTrainers = false;
+    }
+
     this.loadSessions();
   }
 
@@ -66,7 +79,6 @@ export class AttendanceSessionsComponent implements OnInit {
 
     return this.sessions.filter(session => this.selectedSessionKeys.includes(session.sessionKey));
   }
-
 
   get selectedSessionsSummary(): {
     sessions: number;
@@ -118,8 +130,9 @@ export class AttendanceSessionsComponent implements OnInit {
       query.endTime = this.selectedEndTime;
     }
 
-    if (this.selectedTrainerId) {
-      query.trainerId = this.selectedTrainerId;
+    const trainerId = this.isAdmin ? this.selectedTrainerId : this.currentTrainerId;
+    if (trainerId) {
+      query.trainerId = trainerId;
     }
 
     if (this.selectedBucketMinutes) {

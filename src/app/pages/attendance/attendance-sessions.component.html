@@ -30,17 +30,19 @@
       <input type="time" [(ngModel)]="selectedEndTime" />
     </label>
 
-    <label class="field">
-      <span>Trainer</span>
-      <select [(ngModel)]="selectedTrainerId" [disabled]="loadingTrainers">
-        <option value="">All trainers</option>
-        @for (trainer of trainers; track trainer.id) {
-          <option [value]="trainer.id">
-            {{ trainer.name }}{{ trainer.nickname ? ' (' + trainer.nickname + ')' : '' }}
-          </option>
-        }
-      </select>
-    </label>
+    @if (isAdmin) {
+      <label class="field">
+        <span>Trainer</span>
+        <select [(ngModel)]="selectedTrainerId" [disabled]="loadingTrainers">
+          <option value="">All trainers</option>
+          @for (trainer of trainers; track trainer.id) {
+            <option [value]="trainer.id">
+              {{ trainer.name }}{{ trainer.nickname ? ' (' + trainer.nickname + ')' : '' }}
+            </option>
+          }
+        </select>
+      </label>
+    }
 
     <label class="field">
       <span>Session bucket</span>
