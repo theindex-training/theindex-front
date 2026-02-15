@@ -53,7 +53,7 @@
           <select formControlName="trainedTime">
             <option value="">Not specified</option>
             @for (trainingTime of trainingTimes; track trainingTime.id) {
-              <option [value]="trainingTime.startTime">
+              <option [value]="formatTimeWithoutSeconds(trainingTime.startTime)">
                 {{ formatTrainingTimeOption(trainingTime) }}
               </option>
             }
