@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
+import { formatTimeWithoutSeconds } from '../../utils/time-display';
 
 @Component({
   selector: 'app-training-times',
@@ -40,5 +41,9 @@ export class TrainingTimesComponent implements OnInit {
         this.changeDetector.detectChanges();
       }
     });
+  }
+
+  formatTime(value: string): string {
+    return formatTimeWithoutSeconds(value);
   }
 }
