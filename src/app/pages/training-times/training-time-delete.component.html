@@ -1,0 +1,40 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Delete training time</h1>
+      <p>This action removes the training time permanently.</p>
+    </div>
+    <a class="button button-ghost" routerLink="/training-times">Back to training times</a>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading training time...</div>
+  } @else if (errorMessage && !trainingTime) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (trainingTime) {
+    <div class="card">
+      <div class="details">
+        <div>
+          <span class="label">Start time</span>
+          <strong>{{ trainingTime.startTime }}</strong>
+        </div>
+        <div>
+          <span class="label">End time</span>
+          <strong>{{ trainingTime.endTime }}</strong>
+        </div>
+      </div>
+
+      <p class="warning">Deleting cannot be undone.</p>
+
+      @if (errorMessage) {
+        <div class="state error">{{ errorMessage }}</div>
+      }
+
+      <div class="form-actions">
+        <button class="button button-danger" type="button" (click)="confirmDelete()" [disabled]="submitting">
+          {{ submitting ? 'Deleting...' : 'Delete training time' }}
+        </button>
+      </div>
+    </div>
+  }
+</section>

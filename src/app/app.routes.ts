@@ -190,6 +190,51 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
       {
+        path: 'training-times/new',
+        loadComponent: () =>
+          import('./pages/training-times/training-time-create.component').then(
+            m => m.TrainingTimeCreateComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'training-times/:id/edit',
+        loadComponent: () =>
+          import('./pages/training-times/training-time-edit.component').then(
+            m => m.TrainingTimeEditComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'training-times/:id/delete',
+        loadComponent: () =>
+          import('./pages/training-times/training-time-delete.component').then(
+            m => m.TrainingTimeDeleteComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'training-times/:id',
+        loadComponent: () =>
+          import('./pages/training-times/training-time-details.component').then(
+            m => m.TrainingTimeDetailsComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
+        path: 'training-times',
+        loadComponent: () =>
+          import('./pages/training-times/training-times.component').then(
+            m => m.TrainingTimesComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] }
+      },
+      {
         path: 'attendance/new',
         loadComponent: () =>
           import('./pages/attendance/attendance-register.component').then(

@@ -14,6 +14,7 @@ import { AuthService } from '../../services/auth.service';
 import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
+import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
 
 @Component({
   selector: 'app-attendance-register',
@@ -37,6 +38,7 @@ export class AttendanceRegisterComponent implements OnInit {
 
   trainers: TrainerProfile[] = [];
   gymLocations: GymLocation[] = [];
+  trainingTimes: TrainingTime[] = [];
   trainees: TraineeProfile[] = [];
   filteredTrainees: TraineeProfile[] = [];
   selectedTraineeIds = new Set<string>();
@@ -45,6 +47,7 @@ export class AttendanceRegisterComponent implements OnInit {
     private readonly formBuilder: FormBuilder,
     private readonly trainersService: TrainersService,
     private readonly gymsService: GymLocationsService,
+    private readonly trainingTimesService: TrainingTimesService,
     private readonly traineesService: TraineesService,
     private readonly attendanceService: AttendanceService,
     private readonly authService: AuthService,
@@ -64,11 +67,15 @@ export class AttendanceRegisterComponent implements OnInit {
     forkJoin({
       trainers: this.trainersService.list(true),
       gymLocations: this.gymsService.list(false),
+      trainingTimes: this.trainingTimesService.list(),
       trainees: this.traineesService.list(true)
     }).subscribe({
-      next: ({ trainers, gymLocations, trainees }) => {
+      next: ({ trainers, gymLocations, trainingTimes, trainees }) => {
         this.trainers = trainers.filter(item => item.isActive);
         this.gymLocations = gymLocations.filter(item => item.isActive);
+        this.trainingTimes = [...trainingTimes].sort(
+          (first, second) => this.toMinutes(first.startTime) - this.toMinutes(second.startTime)
+        );
         this.trainees = trainees.filter(item => item.isActive);
         this.filteredTrainees = [...this.trainees];
         this.preselectCurrentTrainer();
@@ -78,7 +85,8 @@ export class AttendanceRegisterComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to load trainers, gyms, or trainees right now.';
+          error?.error?.message ||
+          'Unable to load trainers, gyms, training times, or trainees right now.';
         this.loading = false;
         this.changeDetector.detectChanges();
       }
@@ -156,6 +164,10 @@ export class AttendanceRegisterComponent implements OnInit {
     this.changeDetector.detectChanges();
   }
 
+  formatTrainingTimeOption(trainingTime: TrainingTime): string {
+    return `${trainingTime.startTime} - ${trainingTime.endTime}`;
+  }
+
   private preselectDefaultLocation(): void {
     const firstLocation = this.gymLocations[0];
     if (firstLocation) {
@@ -190,6 +202,11 @@ export class AttendanceRegisterComponent implements OnInit {
       const nicknameMatch = (trainee.nickname || '').toLowerCase().includes(normalizedSearch);
       return nameMatch || nicknameMatch;
     });
+  }
+
+  private toMinutes(value: string): number {
+    const [hours, minutes] = value.split(':').map((part) => Number(part));
+    return hours * 60 + minutes;
   }
 
   private todayIsoDate(): string {
