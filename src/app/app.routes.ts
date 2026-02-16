@@ -260,7 +260,7 @@ export const routes: Routes = [
             m => m.SettlementGenerateComponent
           ),
         canActivate: [roleGuard],
-        data: { roles: ['ADMIN', 'TRAINER'] }
+        data: { roles: ['ADMIN'] }
       },
       {
         path: 'settlements/:id',

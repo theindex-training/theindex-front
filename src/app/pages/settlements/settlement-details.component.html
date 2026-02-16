@@ -32,7 +32,7 @@
         </div>
       </div>
 
-      @if (settlement.status === 'DRAFT') {
+      @if (isAdmin && settlement.status === 'DRAFT') {
         <div class="actions">
           <button class="button button-primary" type="button" (click)="finalizeSettlement()" [disabled]="finalizing">
             {{ finalizing ? 'Finalizing...' : 'Finalize settlement' }}
@@ -75,17 +75,19 @@
 
     <section class="card">
       <h2>Allocations</h2>
-      <div class="filter-row">
-        <label class="field">
-          <span>Trainer filter</span>
-          <select [(ngModel)]="selectedTrainerId" (change)="loadAllocations()">
-            <option value="">All trainers</option>
-            @for (trainer of trainers; track trainer.id) {
-              <option [value]="trainer.id">{{ trainer.nickname || trainer.name }}</option>
-            }
-          </select>
-        </label>
-      </div>
+      @if (isAdmin) {
+        <div class="filter-row">
+          <label class="field">
+            <span>Trainer filter</span>
+            <select [(ngModel)]="selectedTrainerId" (change)="loadAllocations()">
+              <option value="">All trainers</option>
+              @for (trainer of trainers; track trainer.id) {
+                <option [value]="trainer.id">{{ trainer.nickname || trainer.name }}</option>
+              }
+            </select>
+          </label>
+        </div>
+      }
 
       @if (loadingAllocations) {
         <div class="state">Loading allocations...</div>
