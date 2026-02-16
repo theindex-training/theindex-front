@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 import { Settlement, SettlementsService } from '../../services/settlements.service';
 
 @Component({
@@ -16,13 +17,16 @@ export class SettlementsComponent implements OnInit {
   loading = true;
   errorMessage = '';
   deletingSettlementId: string | null = null;
+  canManageSettlements = false;
 
   constructor(
+    private readonly authService: AuthService,
     private readonly settlementsService: SettlementsService,
     private readonly changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.canManageSettlements = this.authService.getUserRole() === 'ADMIN';
     this.loadSettlements();
   }
 
@@ -45,6 +49,10 @@ export class SettlementsComponent implements OnInit {
   }
 
   deleteSettlement(settlement: Settlement): void {
+    if (!this.canManageSettlements) {
+      return;
+    }
+
     if (this.deletingSettlementId) {
       return;
     }

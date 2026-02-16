@@ -4,9 +4,11 @@
       <h1>Settlements</h1>
       <p>Review generated settlement reports and open detailed breakdowns.</p>
     </div>
-    <div class="page-actions">
-      <a class="button button-primary" routerLink="/settlements/new">Generate report</a>
-    </div>
+    @if (canManageSettlements) {
+      <div class="page-actions">
+        <a class="button button-primary" routerLink="/settlements/new">Generate report</a>
+      </div>
+    }
   </header>
 
   @if (loading) {
@@ -37,14 +39,16 @@
             <a class="button button-secondary" [routerLink]="['/settlements', settlement.id]">
               Open report
             </a>
-            <button
-              class="button button-danger"
-              type="button"
-              (click)="deleteSettlement(settlement)"
-              [disabled]="deletingSettlementId === settlement.id"
-            >
-              {{ deletingSettlementId === settlement.id ? 'Deleting...' : 'Delete' }}
-            </button>
+            @if (canManageSettlements) {
+              <button
+                class="button button-danger"
+                type="button"
+                (click)="deleteSettlement(settlement)"
+                [disabled]="deletingSettlementId === settlement.id"
+              >
+                {{ deletingSettlementId === settlement.id ? 'Deleting...' : 'Delete' }}
+              </button>
+            }
           </span>
         </div>
       }

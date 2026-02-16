@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 import { GymLocationsService } from '../../services/gym-locations.service';
 import {
   Settlement,
@@ -36,12 +37,14 @@ export class SettlementDetailsComponent implements OnInit {
   loadingAllocations = true;
   loadingEntities = true;
   finalizing = false;
+  isAdmin = false;
   errorMessage = '';
   allocationError = '';
 
   private settlementId = '';
 
   constructor(
+    private readonly authService: AuthService,
     private readonly settlementsService: SettlementsService,
     private readonly trainersService: TrainersService,
     private readonly traineesService: TraineesService,
@@ -59,6 +62,7 @@ export class SettlementDetailsComponent implements OnInit {
     }
 
     this.settlementId = id;
+    this.isAdmin = this.authService.getUserRole() === 'ADMIN';
     this.loadEntities();
     this.loadSettlement();
     this.loadAllocations();
@@ -109,7 +113,7 @@ export class SettlementDetailsComponent implements OnInit {
   }
 
   finalizeSettlement(): void {
-    if (!this.settlement || this.settlement.status !== 'DRAFT') {
+    if (!this.isAdmin || !this.settlement || this.settlement.status !== 'DRAFT') {
       return;
     }
 
@@ -167,28 +171,30 @@ export class SettlementDetailsComponent implements OnInit {
   private loadEntities(): void {
     this.loadingEntities = true;
 
-    this.trainersService.list().subscribe({
-      next: trainers => {
-        this.trainers = trainers;
-        this.trainerLabelById = new Map(
-          trainers.map(trainer => [trainer.id, trainer.nickname?.trim() || trainer.name])
-        );
-        this.changeDetector.detectChanges();
-      },
-      error: () => {
-        this.changeDetector.detectChanges();
-      }
-    });
+    if (this.isAdmin) {
+      this.trainersService.list().subscribe({
+        next: trainers => {
+          this.trainers = trainers;
+          this.trainerLabelById = new Map(
+            trainers.map(trainer => [trainer.id, trainer.nickname?.trim() || trainer.name])
+          );
+          this.changeDetector.detectChanges();
+        },
+        error: () => {
+          this.changeDetector.detectChanges();
+        }
+      });
 
-    this.traineesService.list().subscribe({
-      next: (trainees: TraineeProfile[]) => {
-        this.traineeNameById = new Map(trainees.map(trainee => [trainee.id, trainee.name]));
-        this.changeDetector.detectChanges();
-      },
-      error: () => {
-        this.changeDetector.detectChanges();
-      }
-    });
+      this.traineesService.list().subscribe({
+        next: (trainees: TraineeProfile[]) => {
+          this.traineeNameById = new Map(trainees.map(trainee => [trainee.id, trainee.name]));
+          this.changeDetector.detectChanges();
+        },
+        error: () => {
+          this.changeDetector.detectChanges();
+        }
+      });
+    }
 
     this.gymLocationsService.list(true).subscribe({
       next: locations => {
