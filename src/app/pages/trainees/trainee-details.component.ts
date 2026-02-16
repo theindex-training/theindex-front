@@ -7,15 +7,16 @@ import {
   FormGroup,
   ReactiveFormsModule,
   ValidatorFn,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 import { Plan, PlansService } from '../../services/plans.service';
 import { SubscriptionsService, Subscription } from '../../services/subscriptions.service';
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
 import {
   AccountProvisioningService,
-  ProvisionedAccount
+  ProvisionedAccount,
 } from '../../services/account-provisioning.service';
 
 const currencyValidator: ValidatorFn = (control: AbstractControl) => {
@@ -41,7 +42,7 @@ import { displayValue } from '../../utils/display.util';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './trainee-details.component.html',
-  styleUrl: './trainee-details.component.scss'
+  styleUrl: './trainee-details.component.scss',
 })
 export class TraineeDetailsComponent implements OnInit {
   trainee: TraineeProfile | null = null;
@@ -54,6 +55,8 @@ export class TraineeDetailsComponent implements OnInit {
   submitting = false;
   errorMessage = '';
   subscriptionErrorMessage = '';
+  deletingSubscriptionId: string | null = null;
+  canDeleteSubscriptions = false;
 
   readonly form: FormGroup<{
     planId: FormControl<string>;
@@ -66,23 +69,22 @@ export class TraineeDetailsComponent implements OnInit {
     private readonly subscriptionsService: SubscriptionsService,
     private readonly plansService: PlansService,
     private readonly accountsService: AccountProvisioningService,
+    private readonly authService: AuthService,
     private readonly route: ActivatedRoute,
     private readonly changeDetector: ChangeDetectorRef,
-    private readonly formBuilder: FormBuilder
+    private readonly formBuilder: FormBuilder,
   ) {
     this.form = this.formBuilder.group({
       planId: this.formBuilder.nonNullable.control('', [Validators.required]),
-      startsAt: this.formBuilder.nonNullable.control(this.todayString(), [
-        Validators.required
-      ]),
-      paid: this.formBuilder.nonNullable.control(0, [
-        Validators.required,
-        currencyValidator
-      ])
+      startsAt: this.formBuilder.nonNullable.control(this.todayString(), [Validators.required]),
+      paid: this.formBuilder.nonNullable.control(0, [Validators.required, currencyValidator]),
     });
   }
 
   ngOnInit(): void {
+    const role = this.authService.getUserRole();
+    this.canDeleteSubscriptions = role === 'ADMIN' || role === 'TRAINER';
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.errorMessage = 'Trainee ID is missing.';
@@ -112,7 +114,7 @@ export class TraineeDetailsComponent implements OnInit {
     const payload = {
       planId: raw.planId,
       startsAt: raw.startsAt || undefined,
-      paidCents: this.toCents(raw.paid)
+      paidCents: this.toCents(raw.paid),
     };
 
     this.submitting = true;
@@ -128,7 +130,7 @@ export class TraineeDetailsComponent implements OnInit {
         this.subscriptionErrorMessage =
           error?.error?.message || 'Unable to create subscription right now.';
         this.submitting = false;
-      }
+      },
     });
   }
 
@@ -172,6 +174,37 @@ export class TraineeDetailsComponent implements OnInit {
     return subscription.status.toUpperCase() === 'ACTIVE';
   }
 
+  deleteSubscription(subscription: Subscription): void {
+    if (!this.canDeleteSubscriptions || this.deletingSubscriptionId || !this.trainee) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Delete ${this.formatPlanLabel(subscription)} subscription from ${this.formatDate(subscription.startsAt)}?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.deletingSubscriptionId = subscription.id;
+    this.subscriptionErrorMessage = '';
+
+    this.subscriptionsService.delete(subscription.id).subscribe({
+      next: () => {
+        this.subscriptions = this.subscriptions.filter((entry) => entry.id !== subscription.id);
+        this.deletingSubscriptionId = null;
+        this.changeDetector.detectChanges();
+      },
+      error: (error) => {
+        this.subscriptionErrorMessage =
+          error?.error?.message || 'Unable to delete subscription right now.';
+        this.deletingSubscriptionId = null;
+        this.changeDetector.detectChanges();
+      },
+    });
+  }
+
   formatDate(value: string | null | undefined): string {
     if (!value) {
       return '—';
@@ -179,14 +212,14 @@ export class TraineeDetailsComponent implements OnInit {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     }).format(new Date(value));
   }
 
   formatPrice(priceCents: number): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'EUR',
     }).format(priceCents / 100);
   }
 
@@ -203,14 +236,12 @@ export class TraineeDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          error?.error?.message || 'Unable to load this trainee.';
+        this.errorMessage = error?.error?.message || 'Unable to load this trainee.';
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
-
 
   private loadAccount(accountId: string): void {
     this.accountsService.getById(accountId).subscribe({
@@ -221,7 +252,7 @@ export class TraineeDetailsComponent implements OnInit {
       error: () => {
         this.account = null;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -238,7 +269,7 @@ export class TraineeDetailsComponent implements OnInit {
           error?.error?.message || 'Unable to load subscriptions right now.';
         this.subscriptionsLoading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -252,11 +283,10 @@ export class TraineeDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.subscriptionErrorMessage =
-          error?.error?.message || 'Unable to load plans right now.';
+        this.subscriptionErrorMessage = error?.error?.message || 'Unable to load plans right now.';
         this.plansLoading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 

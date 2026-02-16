@@ -58,7 +58,6 @@ p {
   margin-bottom: 0.35rem;
 }
 
-
 .account-box {
   padding-top: 0.5rem;
   border-top: 1px solid var(--color-border);
@@ -91,7 +90,7 @@ p {
 
 .table-row {
   display: grid;
-  grid-template-columns: 1.4fr 0.7fr 0.7fr 0.8fr 1fr 0.7fr;
+  grid-template-columns: 1.4fr 0.7fr 0.7fr 0.8fr 1fr 0.7fr auto;
   gap: 1rem;
   align-items: center;
   background: var(--color-surface);
@@ -110,6 +109,11 @@ p {
 
 .title {
   font-weight: 600;
+}
+
+.table-actions {
+  display: inline-flex;
+  justify-content: flex-end;
 }
 
 .row-exhausted {
@@ -143,7 +147,6 @@ p {
   color: #067647;
   background: #ecfdf3;
 }
-
 
 .form {
   display: flex;
@@ -222,6 +225,12 @@ p {
   border-color: #c7d7fe;
 }
 
+.button-danger {
+  background: #fef3f2;
+  color: #b42318;
+  border-color: #fecdca;
+}
+
 .button-ghost {
   background: transparent;
   color: #475467;
@@ -236,5 +245,9 @@ p {
 
   .table-header {
     display: none;
+  }
+
+  .table-actions {
+    justify-content: flex-start;
   }
 }

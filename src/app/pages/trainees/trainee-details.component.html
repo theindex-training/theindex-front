@@ -30,7 +30,9 @@
           <span class="label">Account</span>
           <strong>
             @if (hasLinkedAccount()) {
-              <span class="account-linked" title="Linked account" aria-label="Linked account">✓</span>
+              <span class="account-linked" title="Linked account" aria-label="Linked account"
+                >✓</span
+              >
             } @else {
               -
             }
@@ -98,6 +100,7 @@
             <span>Starts</span>
             <span>Ends / Used</span>
             <span>Paid</span>
+            <span class="table-actions">Actions</span>
           </div>
           @for (subscription of subscriptions; track subscription.id) {
             <div
@@ -117,6 +120,18 @@
               <span>{{ formatDate(subscription.startsAt) }}</span>
               <span>{{ formatEndsOrCredits(subscription) }}</span>
               <span>{{ formatPrice(subscription.paidCents) }}</span>
+              <span class="table-actions">
+                @if (canDeleteSubscriptions) {
+                  <button
+                    class="button button-danger"
+                    type="button"
+                    (click)="deleteSubscription(subscription)"
+                    [disabled]="deletingSubscriptionId === subscription.id"
+                  >
+                    {{ deletingSubscriptionId === subscription.id ? 'Deleting...' : 'Delete' }}
+                  </button>
+                }
+              </span>
             </div>
           }
         </div>
@@ -164,7 +179,11 @@
         }
 
         <div class="form-actions">
-          <button class="button button-primary" type="submit" [disabled]="submitting || plansLoading">
+          <button
+            class="button button-primary"
+            type="submit"
+            [disabled]="submitting || plansLoading"
+          >
             {{ submitting ? 'Purchasing...' : 'Buy subscription' }}
           </button>
         </div>
