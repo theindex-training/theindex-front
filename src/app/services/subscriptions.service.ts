@@ -26,10 +26,11 @@ export interface CreateSubscriptionPayload {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SubscriptionsService {
   private readonly baseUrl = `${environment.apiUrl}/trainees`;
+  private readonly subscriptionsUrl = `${environment.apiUrl}/subscriptions`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -39,11 +40,12 @@ export class SubscriptionsService {
 
   createForTrainee(
     traineeId: string,
-    payload: CreateSubscriptionPayload
+    payload: CreateSubscriptionPayload,
   ): Observable<Subscription> {
-    return this.http.post<Subscription>(
-      `${this.baseUrl}/${traineeId}/subscriptions`,
-      payload
-    );
+    return this.http.post<Subscription>(`${this.baseUrl}/${traineeId}/subscriptions`, payload);
+  }
+
+  delete(subscriptionId: string): Observable<{ deleted: boolean }> {
+    return this.http.delete<{ deleted: boolean }>(`${this.subscriptionsUrl}/${subscriptionId}`);
   }
 }
