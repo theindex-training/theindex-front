@@ -1,32 +1,23 @@
 <section class="dashboard">
   <header>
     <h1>Dashboard</h1>
-    <p>Welcome back! Shortcuts and key metrics will appear here.</p>
+    <p>Welcome back! Use these shortcuts to jump to important features.</p>
   </header>
-
-  @if (canSeeQuickLinks) {
-    <article class="card">
-      <h2>Quick links</h2>
-      <ul>
-        <li><a routerLink="/attendance/new">Register attendance</a></li>
-        <li><a routerLink="/training-times">List of trainings</a></li>
-        <li><a routerLink="/settlements">Settlement reports</a></li>
-      </ul>
-    </article>
-  }
 
   <div class="card-grid">
     <article class="card">
-      <h2>Quick actions</h2>
-      <p>Add plans, gyms, trainers, or trainees from the navigation.</p>
+      <h2><a routerLink="/attendance/new">Register attendance</a></h2>
+      <p>Open the attendance register and log a new training session.</p>
     </article>
+
     <article class="card">
-      <h2>Upcoming work</h2>
-      <p>Attendance and settlement reports will surface here soon.</p>
+      <h2><a routerLink="/training-times">List of trainings</a></h2>
+      <p>Review training times and keep your schedule up to date.</p>
     </article>
+
     <article class="card">
-      <h2>Subscriptions</h2>
-      <p>Subscription insights will live on this dashboard.</p>
+      <h2><a routerLink="/settlements">Settlement reports</a></h2>
+      <p>Open settlement reports and inspect payout details.</p>
     </article>
   </div>
 </section>

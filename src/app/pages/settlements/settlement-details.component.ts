@@ -171,30 +171,28 @@ export class SettlementDetailsComponent implements OnInit {
   private loadEntities(): void {
     this.loadingEntities = true;
 
-    if (this.isAdmin) {
-      this.trainersService.list().subscribe({
-        next: trainers => {
-          this.trainers = trainers;
-          this.trainerLabelById = new Map(
-            trainers.map(trainer => [trainer.id, trainer.nickname?.trim() || trainer.name])
-          );
-          this.changeDetector.detectChanges();
-        },
-        error: () => {
-          this.changeDetector.detectChanges();
-        }
-      });
+    this.trainersService.list().subscribe({
+      next: trainers => {
+        this.trainers = trainers;
+        this.trainerLabelById = new Map(
+          trainers.map(trainer => [trainer.id, trainer.nickname?.trim() || trainer.name])
+        );
+        this.changeDetector.detectChanges();
+      },
+      error: () => {
+        this.changeDetector.detectChanges();
+      }
+    });
 
-      this.traineesService.list().subscribe({
-        next: (trainees: TraineeProfile[]) => {
-          this.traineeNameById = new Map(trainees.map(trainee => [trainee.id, trainee.name]));
-          this.changeDetector.detectChanges();
-        },
-        error: () => {
-          this.changeDetector.detectChanges();
-        }
-      });
-    }
+    this.traineesService.list().subscribe({
+      next: (trainees: TraineeProfile[]) => {
+        this.traineeNameById = new Map(trainees.map(trainee => [trainee.id, trainee.name]));
+        this.changeDetector.detectChanges();
+      },
+      error: () => {
+        this.changeDetector.detectChanges();
+      }
+    });
 
     this.gymLocationsService.list(true).subscribe({
       next: locations => {
