@@ -34,7 +34,6 @@ export class AttendanceSessionsComponent implements OnInit {
   selectedStartTime = '';
   selectedEndTime = '';
   selectedTrainerId = '';
-  selectedBucketMinutes: number | null = null;
 
   selectedSessionKeys: string[] = [];
 
@@ -135,10 +134,6 @@ export class AttendanceSessionsComponent implements OnInit {
       query.trainerId = trainerId;
     }
 
-    if (this.selectedBucketMinutes) {
-      query.bucketMinutes = this.selectedBucketMinutes;
-    }
-
     this.attendanceService.sessions(query).subscribe({
       next: (response) => {
         this.applyEntities(response);
@@ -216,7 +211,7 @@ export class AttendanceSessionsComponent implements OnInit {
   }
 
   sessionTabTitle(session: AttendanceSession): string {
-    return `${this.formatDateTime(session.start)} - ${this.formatDateTime(session.end)}, ${this.formatTrainerNickname(session.trainerId)}`;
+    return `${this.formatDate(session.start)} · ${this.formatDateTime(session.start)} - ${this.formatDateTime(session.end)}, ${this.formatTrainerNickname(session.trainerId)}`;
   }
 
   formatTrainer(session: AttendanceSession): string {
