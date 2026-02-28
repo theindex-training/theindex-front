@@ -50,7 +50,22 @@
   </nav>
 
   <div class="actions">
-    <button class="logout-button" type="button" (click)="handleLogout()">Log out</button>
+    <div class="user-menu">
+      <button
+        class="user-menu-trigger"
+        type="button"
+        [attr.aria-expanded]="isUserMenuOpen"
+        (click)="toggleUserMenu()"
+      >
+        {{ userEmail }}
+      </button>
+
+      @if (isUserMenuOpen) {
+        <div class="user-menu-panel">
+          <button class="user-menu-item is-danger" type="button" (click)="handleLogout()">Logout</button>
+        </div>
+      }
+    </div>
     <button
       class="menu-toggle"
       type="button"
@@ -107,7 +122,22 @@
         </a>
       }
     }
-    <button class="logout-button" type="button" (click)="handleLogout()">Log out</button>
+    <div class="user-menu mobile-user-menu">
+      <button
+        class="user-menu-trigger"
+        type="button"
+        [attr.aria-expanded]="isUserMenuOpen"
+        (click)="toggleUserMenu()"
+      >
+        {{ userEmail }}
+      </button>
+
+      @if (isUserMenuOpen) {
+        <div class="user-menu-panel">
+          <button class="user-menu-item is-danger" type="button" (click)="handleLogout()">Logout</button>
+        </div>
+      }
+    </div>
   </nav>
 </div>
 
