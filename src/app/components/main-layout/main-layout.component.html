@@ -21,6 +21,7 @@
           @if (isSubmenuOpen(item)) {
             <div class="subnav-panel">
               @for (child of item.children; track child.route) {
+                @if (canViewNavItem(child)) {
                 <a
                   [routerLink]="child.route"
                   routerLinkActive="is-active"
@@ -30,6 +31,7 @@
                 >
                   {{ child.label }}
                 </a>
+                }
               }
             </div>
           }
@@ -80,6 +82,7 @@
         @if (isSubmenuOpen(item)) {
           <div class="mobile-subnav">
             @for (child of item.children; track child.route) {
+              @if (canViewNavItem(child)) {
               <a
                 [routerLink]="child.route"
                 routerLinkActive="is-active"
@@ -89,6 +92,7 @@
               >
                 {{ child.label }}
               </a>
+              }
             }
           </div>
         }
