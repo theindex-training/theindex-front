@@ -25,7 +25,6 @@ export interface AttendanceSessionsQuery {
   startTime?: string;
   endTime?: string;
   trainerId?: string;
-  bucketMinutes?: number;
 }
 
 export interface AttendanceSessionAttendanceItem {
@@ -47,7 +46,6 @@ export interface AttendanceSession {
   date: string;
   start: string;
   end: string;
-  bucketMinutes: number;
   trainerId: string;
   locationId: string;
   attendance: AttendanceSessionAttendanceItem[];
@@ -72,7 +70,6 @@ export interface AttendanceSessionsResponse {
     endTime: string;
     trainerId: string | null;
   };
-  bucketMinutes: number;
   sessions: AttendanceSession[];
   entities: {
     trainees: AttendanceSessionEntity[];
@@ -99,8 +96,7 @@ export class AttendanceService {
       endDate: query.endDate,
       startTime: query.startTime,
       endTime: query.endTime,
-      trainerId: query.trainerId,
-      bucketMinutes: query.bucketMinutes
+      trainerId: query.trainerId
     });
 
     return this.http.get<AttendanceSessionsResponse>(`${this.baseUrl}/sessions`, { params });
