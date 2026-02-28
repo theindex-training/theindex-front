@@ -10,6 +10,7 @@ interface LoginResponse {
 
 interface TokenPayload {
   sub?: string;
+  email?: string;
   role?: string;
   trainerProfileId?: string | null;
   traineeProfileId?: string | null;
@@ -54,6 +55,18 @@ export class AuthService {
     }
 
     return this.decodeToken(token)?.role ?? null;
+  }
+
+  getUserEmail(): string | null {
+    const token = this.getToken();
+
+    if (!token) {
+      return null;
+    }
+
+    const payload = this.decodeToken(token);
+
+    return payload?.email ?? payload?.sub ?? null;
   }
 
   getTrainerProfileId(): string | null {

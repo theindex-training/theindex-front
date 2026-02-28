@@ -19,6 +19,8 @@ interface NavItem {
 export class MainLayoutComponent {
   isMenuOpen = false;
   openSubmenuLabel: string | null = null;
+  isUserMenuOpen = false;
+  readonly userEmail: string;
 
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', route: '/home' },
@@ -46,7 +48,9 @@ export class MainLayoutComponent {
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router
-  ) {}
+  ) {
+    this.userEmail = this.authService.getUserEmail() ?? 'User';
+  }
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;
@@ -63,6 +67,19 @@ export class MainLayoutComponent {
   closeMenu(): void {
     this.isMenuOpen = false;
     this.openSubmenuLabel = null;
+    this.isUserMenuOpen = false;
+  }
+
+  toggleUserMenu(): void {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
+  }
+
+  setLanguage(_language: 'en' | 'bg'): void {
+    this.isUserMenuOpen = false;
+  }
+
+  toggleDarkMode(): void {
+    this.isUserMenuOpen = false;
   }
 
   isParentActive(item: NavItem): boolean {
@@ -80,6 +97,7 @@ export class MainLayoutComponent {
   }
 
   handleLogout(): void {
+    this.isUserMenuOpen = false;
     this.authService.logout();
     this.router.navigate(['/login']);
   }

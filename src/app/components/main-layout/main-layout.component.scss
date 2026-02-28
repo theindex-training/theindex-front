@@ -117,20 +117,61 @@
   gap: 0.75rem;
 }
 
-.logout-button {
+.user-menu {
+  position: relative;
+}
+
+.user-menu-trigger {
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text);
   font-weight: 600;
-  padding: 0.45rem 1rem;
+  padding: 0.45rem 0.95rem;
   border-radius: 999px;
   cursor: pointer;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, color 0.2s ease;
 }
 
-.logout-button:hover {
+.user-menu-trigger:hover {
   box-shadow: 0 8px 16px rgba(15, 23, 42, 0.12);
   transform: translateY(-1px);
+}
+
+.user-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  min-width: 13rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-surface);
+  padding: 0.35rem;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.14);
+}
+
+.user-menu-item {
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  cursor: pointer;
+}
+
+.user-menu-item:hover {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+}
+
+.user-menu-item.is-danger:hover {
+  background: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
 }
 
 .menu-toggle {
@@ -186,14 +227,22 @@
     display: inline-flex;
   }
 
-  .logout-button {
+  .user-menu {
     display: none;
   }
 
-  .mobile-nav .logout-button {
-    display: inline-flex;
+  .mobile-nav .mobile-user-menu {
+    display: block;
+  }
+
+  .mobile-nav .user-menu-trigger {
     width: 100%;
-    justify-content: center;
+  }
+
+  .mobile-nav .user-menu-panel {
+    position: static;
+    margin-top: 0.4rem;
+    min-width: 0;
   }
 }
 
