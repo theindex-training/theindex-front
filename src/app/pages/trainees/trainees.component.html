@@ -9,25 +9,29 @@
     </div>
   </header>
 
-  <section class="filters">
-    <label class="field">
-      <span>Status</span>
-      <select [(ngModel)]="activeFilter" (change)="loadTrainees()">
-        <option value="all">All</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-      </select>
-    </label>
+  <section class="filters-bar">
+    <div class="filters">
+      <label class="field">
+        <span>Status</span>
+        <select [(ngModel)]="activeFilter" (change)="loadTrainees()">
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </label>
 
-    <label class="field">
-      <span>Search</span>
-      <input
-        type="search"
-        [(ngModel)]="searchTerm"
-        (ngModelChange)="applySearch()"
-        placeholder="Search by name or nickname"
-      />
-    </label>
+      <label class="field">
+        <span>Search</span>
+        <input
+          type="search"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="applySearch()"
+          placeholder="Search by name or nickname"
+        />
+      </label>
+    </div>
+
+    <p class="trainees-total">Total: <strong>{{ filteredTrainees.length }}</strong></p>
   </section>
 
   @if (loading) {

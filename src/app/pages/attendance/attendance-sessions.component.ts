@@ -253,7 +253,7 @@ export class AttendanceSessionsComponent implements OnInit {
     }
 
     const confirmed = window.confirm(
-      `Delete attendance for ${this.traineeName(item.traineeId)} at ${this.formatDateTime(item.trainedAt)}?`
+      `Delete attendance for ${this.traineeName(item.traineeId)} at ${this.formatDate(item.trainedAt)} · ${this.formatDateTime(item.trainedAt)}?`
     );
 
     if (!confirmed) {

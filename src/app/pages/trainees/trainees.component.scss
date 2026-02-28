@@ -28,9 +28,28 @@ p {
   gap: 0.75rem;
 }
 
+.filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
 .filters {
   display: flex;
   gap: 1rem;
+}
+
+
+.trainees-total {
+  margin: 0;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.trainees-total strong {
+  color: var(--color-text);
 }
 
 .field {
@@ -167,6 +186,14 @@ select:focus {
 }
 
 @media (max-width: 960px) {
+  .filters-bar {
+    align-items: flex-start;
+  }
+
+  .trainees-total {
+    width: 100%;
+  }
+
   .table-row {
     grid-template-columns: 1fr;
     align-items: flex-start;
