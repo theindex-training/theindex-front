@@ -74,14 +74,6 @@ export class MainLayoutComponent {
     this.isUserMenuOpen = !this.isUserMenuOpen;
   }
 
-  setLanguage(_language: 'en' | 'bg'): void {
-    this.isUserMenuOpen = false;
-  }
-
-  toggleDarkMode(): void {
-    this.isUserMenuOpen = false;
-  }
-
   isParentActive(item: NavItem): boolean {
     return !!item.children?.some(
       child => this.canViewNavItem(child) && child.route && this.router.url.startsWith(child.route)
