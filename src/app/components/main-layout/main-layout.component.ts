@@ -66,7 +66,17 @@ export class MainLayoutComponent {
   }
 
   isParentActive(item: NavItem): boolean {
-    return !!item.children?.some(child => child.route && this.router.url.startsWith(child.route));
+    return !!item.children?.some(
+      child => this.canViewNavItem(child) && child.route && this.router.url.startsWith(child.route)
+    );
+  }
+
+  canViewNavItem(item: NavItem): boolean {
+    if (item.route === '/trainers') {
+      return this.authService.getUserRole() === 'ADMIN';
+    }
+
+    return true;
   }
 
   handleLogout(): void {
