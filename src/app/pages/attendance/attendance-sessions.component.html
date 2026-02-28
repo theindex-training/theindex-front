@@ -88,8 +88,8 @@
       <article class="card session-card">
         <header class="session-header">
           <h2>
-            {{ formatDateTime(session.start) }} - {{ formatDateTime(session.end) }} ·
-            {{ formatDate(session.start) }}
+            {{ formatDate(session.start) }} · {{ formatDateTime(session.start) }} -
+            {{ formatDateTime(session.end) }}
           </h2>
           <p>
             Trainer: <strong>{{ formatTrainer(session) }}</strong>
