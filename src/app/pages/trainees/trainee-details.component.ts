@@ -10,7 +10,12 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import {
+  AttendanceService,
+  AttendanceTraineeTrainingItem,
+} from '../../services/attendance.service';
 import { Plan, PlansService } from '../../services/plans.service';
 import { SubscriptionsService, Subscription } from '../../services/subscriptions.service';
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
@@ -48,6 +53,8 @@ export class TraineeDetailsComponent implements OnInit {
   trainee: TraineeProfile | null = null;
   account: ProvisionedAccount | null = null;
   subscriptions: Subscription[] = [];
+  paidTrainings: AttendanceTraineeTrainingItem[] = [];
+  unpaidTrainings: AttendanceTraineeTrainingItem[] = [];
   plans: Plan[] = [];
   loading = true;
   plansLoading = true;
@@ -55,6 +62,8 @@ export class TraineeDetailsComponent implements OnInit {
   submitting = false;
   errorMessage = '';
   subscriptionErrorMessage = '';
+  trainingErrorMessage = '';
+  trainingsLoading = true;
   deletingSubscriptionId: string | null = null;
   canDeleteSubscriptions = false;
 
@@ -67,6 +76,7 @@ export class TraineeDetailsComponent implements OnInit {
   constructor(
     private readonly traineesService: TraineesService,
     private readonly subscriptionsService: SubscriptionsService,
+    private readonly attendanceService: AttendanceService,
     private readonly plansService: PlansService,
     private readonly accountsService: AccountProvisioningService,
     private readonly authService: AuthService,
@@ -94,6 +104,7 @@ export class TraineeDetailsComponent implements OnInit {
 
     this.loadTrainee(id);
     this.loadSubscriptions(id);
+    this.loadTrainings(id);
     this.loadPlans();
 
     this.form.controls.planId.valueChanges.subscribe((planId) => {
@@ -223,6 +234,24 @@ export class TraineeDetailsComponent implements OnInit {
     }).format(priceCents / 100);
   }
 
+  formatTrainingDateTime(value: string): string {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(value));
+  }
+
+  formatTrainingTrainer(training: AttendanceTraineeTrainingItem): string {
+    return displayValue(training.trainer.nickname || training.trainer.name);
+  }
+
+  formatTrainingLocation(training: AttendanceTraineeTrainingItem): string {
+    return displayValue(training.location.name);
+  }
+
   private loadTrainee(id: string): void {
     this.traineesService.getById(id).subscribe({
       next: (trainee) => {
@@ -285,6 +314,28 @@ export class TraineeDetailsComponent implements OnInit {
       error: (error) => {
         this.subscriptionErrorMessage = error?.error?.message || 'Unable to load plans right now.';
         this.plansLoading = false;
+        this.changeDetector.detectChanges();
+      },
+    });
+  }
+
+  private loadTrainings(id: string): void {
+    this.trainingsLoading = true;
+    this.trainingErrorMessage = '';
+
+    forkJoin({
+      paid: this.attendanceService.listPaidForTrainee(id),
+      unpaid: this.attendanceService.listUnpaidForTrainee(id),
+    }).subscribe({
+      next: ({ paid, unpaid }) => {
+        this.paidTrainings = paid;
+        this.unpaidTrainings = unpaid;
+        this.trainingsLoading = false;
+        this.changeDetector.detectChanges();
+      },
+      error: (error) => {
+        this.trainingErrorMessage = error?.error?.message || 'Unable to load trainings right now.';
+        this.trainingsLoading = false;
         this.changeDetector.detectChanges();
       },
     });
