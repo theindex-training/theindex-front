@@ -1,0 +1,160 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.page-header p {
+  margin: 0.5rem 0 0;
+  color: var(--color-muted);
+}
+
+.balance-card {
+  background: linear-gradient(135deg, #eef4ff 0%, #e0ebff 100%);
+  border: 1px solid #c7d7fe;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.balance-label {
+  font-size: 0.9rem;
+  color: #363f72;
+}
+
+.balance-value {
+  font-size: 2rem;
+  color: #3538cd;
+}
+
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.panel h2 {
+  margin: 0 0 1rem;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+label {
+  display: grid;
+  gap: 0.4rem;
+  font-weight: 600;
+}
+
+input,
+textarea,
+select {
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.8rem;
+  font: inherit;
+}
+
+.notes-field {
+  grid-column: 1 / -1;
+}
+
+.feedback {
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  font-weight: 600;
+}
+
+.feedback.error {
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+  color: #b42318;
+}
+
+.feedback.success {
+  background: #ecfdf3;
+  border: 1px solid #abefc6;
+  color: #027a48;
+}
+
+.actions {
+  display: flex;
+}
+
+.table {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 1.1fr 0.8fr 0.8fr 1fr 0.9fr 0.9fr 1.2fr;
+  gap: 1rem;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 0.7rem 0.9rem;
+}
+
+.table-header {
+  border: none;
+  padding: 0 0.25rem;
+  color: var(--color-muted);
+  font-weight: 700;
+}
+
+.amount-in {
+  color: #067647;
+  font-weight: 700;
+}
+
+.amount-out {
+  color: #b42318;
+  font-weight: 700;
+}
+
+.button {
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.button-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.state {
+  border: 1px dashed var(--color-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.state.error,
+.error {
+  color: #b42318;
+}
+
+@media (max-width: 1100px) {
+  .table-row {
+    grid-template-columns: 1fr;
+  }
+
+  .table-header {
+    display: none;
+  }
+}

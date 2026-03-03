@@ -279,6 +279,13 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
       {
+        path: 'cash-register',
+        loadComponent: () =>
+          import('./pages/cash-register/cash-register.component').then(m => m.CashRegisterComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      {
         path: 'trainees/new',
         loadComponent: () =>
           import('./pages/trainees/trainee-create.component').then(

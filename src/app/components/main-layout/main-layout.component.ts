@@ -7,6 +7,7 @@ interface NavItem {
   label: string;
   route?: string;
   children?: NavItem[];
+  roles?: string[];
 }
 
 @Component({
@@ -30,7 +31,7 @@ export class MainLayoutComponent {
         { label: 'Plans', route: '/plans' },
         { label: 'Gyms', route: '/gyms' },
         { label: 'Gym subscriptions', route: '/gym-subscriptions' },
-        { label: 'Trainers', route: '/trainers' },
+        { label: 'Trainers', route: '/trainers', roles: ['ADMIN'] },
         { label: 'Training times', route: '/training-times' }
       ]
     },
@@ -42,7 +43,8 @@ export class MainLayoutComponent {
         { label: 'List attendance', route: '/attendance' }
       ]
     },
-    { label: 'Settlements', route: '/settlements' }
+    { label: 'Settlements', route: '/settlements' },
+    { label: 'Cash register', route: '/cash-register', roles: ['ADMIN'] }
   ];
 
   constructor(
@@ -81,11 +83,12 @@ export class MainLayoutComponent {
   }
 
   canViewNavItem(item: NavItem): boolean {
-    if (item.route === '/trainers') {
-      return this.authService.getUserRole() === 'ADMIN';
+    if (!item.roles?.length) {
+      return true;
     }
 
-    return true;
+    const userRole = this.authService.getUserRole();
+    return !!userRole && item.roles.includes(userRole);
   }
 
   handleLogout(): void {
