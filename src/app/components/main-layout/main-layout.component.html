@@ -36,7 +36,7 @@
             </div>
           }
         </div>
-      } @else {
+      } @else if (canViewNavItem(item)) {
         <a
           [routerLink]="item.route"
           routerLinkActive="is-active"
@@ -111,7 +111,7 @@
             }
           </div>
         }
-      } @else {
+      } @else if (canViewNavItem(item)) {
         <a
           [routerLink]="item.route"
           routerLinkActive="is-active"
