@@ -95,7 +95,7 @@ export class SettlementDetailsComponent implements OnInit {
       .allocations(this.settlementId, {
         trainerId: this.selectedTrainerId || undefined,
         offset: 0,
-        limit: 50
+        limit: 500
       })
       .subscribe({
         next: response => {
