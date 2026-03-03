@@ -62,6 +62,28 @@ export interface AttendanceSessionEntity {
   nickname?: string | null;
 }
 
+export interface AttendanceTraineeTrainingItem {
+  id: string;
+  traineeId: string;
+  trainerId: string;
+  trainer: {
+    id: string;
+    name: string;
+    nickname?: string | null;
+  };
+  locationId: string;
+  location: {
+    id: string;
+    name: string;
+    address?: string | null;
+  };
+  trainedAt: string;
+  subscriptionId: string | null;
+  gymSubscriptionId: string | null;
+  paymentStatus: 'PAID' | 'UNPAID';
+  createdAt: string;
+}
+
 export interface AttendanceSessionsResponse {
   filters: {
     startDate: string;
@@ -79,7 +101,7 @@ export interface AttendanceSessionsResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AttendanceService {
   private readonly baseUrl = `${environment.apiUrl}/attendance`;
@@ -96,7 +118,7 @@ export class AttendanceService {
       endDate: query.endDate,
       startTime: query.startTime,
       endTime: query.endTime,
-      trainerId: query.trainerId
+      trainerId: query.trainerId,
     });
 
     return this.http.get<AttendanceSessionsResponse>(`${this.baseUrl}/sessions`, { params });
@@ -104,5 +126,17 @@ export class AttendanceService {
 
   deleteById(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  listPaidForTrainee(traineeId: string): Observable<AttendanceTraineeTrainingItem[]> {
+    return this.http.get<AttendanceTraineeTrainingItem[]>(
+      `${this.baseUrl}/trainees/${traineeId}/paid`,
+    );
+  }
+
+  listUnpaidForTrainee(traineeId: string): Observable<AttendanceTraineeTrainingItem[]> {
+    return this.http.get<AttendanceTraineeTrainingItem[]>(
+      `${this.baseUrl}/trainees/${traineeId}/unpaid`,
+    );
   }
 }
