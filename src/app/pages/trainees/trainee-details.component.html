@@ -193,40 +193,6 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <h2>Paid trainings</h2>
-          <p>Completed trainings that are marked as paid.</p>
-        </div>
-      </div>
-
-      @if (trainingsLoading) {
-        <div class="state">Loading trainings...</div>
-      } @else if (trainingErrorMessage) {
-        <div class="state error">{{ trainingErrorMessage }}</div>
-      } @else if (!paidTrainings.length) {
-        <div class="state">No paid trainings yet.</div>
-      } @else {
-        <div class="table trainings-table">
-          <div class="table-row table-header trainings-row">
-            <span>Trained at</span>
-            <span>Trainer</span>
-            <span>Location</span>
-            <span>Status</span>
-          </div>
-          @for (training of paidTrainings; track training.id) {
-            <div class="table-row trainings-row">
-              <span class="title">{{ formatTrainingDateTime(training.trainedAt) }}</span>
-              <span>{{ formatTrainingTrainer(training) }}</span>
-              <span>{{ formatTrainingLocation(training) }}</span>
-              <span class="training-status status-paid">{{ training.paymentStatus }}</span>
-            </div>
-          }
-        </div>
-      }
-    </div>
-
-    <div class="card">
-      <div class="card-header">
-        <div>
           <h2>Unpaid trainings</h2>
           <p>Completed trainings that are still unpaid.</p>
         </div>
@@ -252,6 +218,40 @@
               <span>{{ formatTrainingTrainer(training) }}</span>
               <span>{{ formatTrainingLocation(training) }}</span>
               <span class="training-status status-unpaid">{{ training.paymentStatus }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Paid trainings</h2>
+          <p>Completed trainings that are marked as paid.</p>
+        </div>
+      </div>
+
+      @if (trainingsLoading) {
+        <div class="state">Loading trainings...</div>
+      } @else if (trainingErrorMessage) {
+        <div class="state error">{{ trainingErrorMessage }}</div>
+      } @else if (!paidTrainings.length) {
+        <div class="state">No paid trainings yet.</div>
+      } @else {
+        <div class="table trainings-table">
+          <div class="table-row table-header trainings-row">
+            <span>Trained at</span>
+            <span>Trainer</span>
+            <span>Location</span>
+            <span>Status</span>
+          </div>
+          @for (training of paidTrainings; track training.id) {
+            <div class="table-row trainings-row">
+              <span class="title">{{ formatTrainingDateTime(training.trainedAt) }}</span>
+              <span>{{ formatTrainingTrainer(training) }}</span>
+              <span>{{ formatTrainingLocation(training) }}</span>
+              <span class="training-status status-paid">{{ training.paymentStatus }}</span>
             </div>
           }
         </div>
