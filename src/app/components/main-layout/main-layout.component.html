@@ -64,6 +64,9 @@
 
       @if (isUserMenuOpen) {
         <div class="user-menu-panel">
+          <a class="user-menu-item" routerLink="/change-password" (click)="closeMenu()"
+            >Change password</a
+          >
           <button class="user-menu-item is-danger" type="button" (click)="handleLogout()">Logout</button>
         </div>
       }
@@ -140,6 +143,9 @@
 
         @if (isUserMenuOpen) {
           <div class="user-menu-panel">
+            <a class="user-menu-item" routerLink="/change-password" (click)="closeMenu()"
+              >Change password</a
+            >
             <button class="user-menu-item is-danger" type="button" (click)="handleLogout()">Logout</button>
           </div>
         }
