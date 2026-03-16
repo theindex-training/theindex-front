@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, NgZone, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UiButtonComponent } from '../../components/ui-button/ui-button.component';
@@ -16,7 +16,6 @@ import { AuthService } from '../../services/auth.service';
 })
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
-  private readonly ngZone = inject(NgZone);
 
   authErrorMessage = '';
   isSubmitting = false;
@@ -30,6 +29,7 @@ export class LoginComponent {
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly accountSecurityService: AccountSecurityService,
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   handleLogin(): void {
@@ -59,26 +59,23 @@ export class LoginComponent {
 
         this.accountSecurityService.hasChangedPassword(accountId).subscribe({
           next: hasChangedPassword => {
-            this.ngZone.run(() => {
-              this.isSubmitting = false;
-              this.router.navigate([hasChangedPassword ? this.getDefaultRoute() : '/change-password']);
-            });
+            this.isSubmitting = false;
+            this.changeDetector.detectChanges();
+            this.router.navigate([hasChangedPassword ? this.getDefaultRoute() : '/change-password']);
           },
           error: () => {
-            this.ngZone.run(() => {
-              this.isSubmitting = false;
-              this.router.navigate([this.getDefaultRoute()]);
-            });
+            this.isSubmitting = false;
+            this.changeDetector.detectChanges();
+            this.router.navigate([this.getDefaultRoute()]);
           },
         });
       },
       error: (error: unknown) => {
-        this.ngZone.run(() => {
-          this.isSubmitting = false;
-          this.authErrorMessage =
-            (error as { error?: { message?: string } })?.error?.message ??
-            'Unable to sign in with those credentials.';
-        });
+        this.isSubmitting = false;
+        this.authErrorMessage =
+          (error as { error?: { message?: string } })?.error?.message ??
+          'Unable to sign in with those credentials.';
+        this.changeDetector.detectChanges();
       },
     });
   }
