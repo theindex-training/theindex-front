@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, NgZone, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UiButtonComponent } from '../../components/ui-button/ui-button.component';
@@ -16,6 +16,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly ngZone = inject(NgZone);
 
   authErrorMessage = '';
   isSubmitting = false;
@@ -58,20 +59,26 @@ export class LoginComponent {
 
         this.accountSecurityService.hasChangedPassword(accountId).subscribe({
           next: hasChangedPassword => {
-            this.isSubmitting = false;
-            this.router.navigate([hasChangedPassword ? this.getDefaultRoute() : '/change-password']);
+            this.ngZone.run(() => {
+              this.isSubmitting = false;
+              this.router.navigate([hasChangedPassword ? this.getDefaultRoute() : '/change-password']);
+            });
           },
           error: () => {
-            this.isSubmitting = false;
-            this.router.navigate([this.getDefaultRoute()]);
+            this.ngZone.run(() => {
+              this.isSubmitting = false;
+              this.router.navigate([this.getDefaultRoute()]);
+            });
           },
         });
       },
       error: (error: unknown) => {
-        this.isSubmitting = false;
-        this.authErrorMessage =
-          (error as { error?: { message?: string } })?.error?.message ??
-          'Unable to sign in with those credentials.';
+        this.ngZone.run(() => {
+          this.isSubmitting = false;
+          this.authErrorMessage =
+            (error as { error?: { message?: string } })?.error?.message ??
+            'Unable to sign in with those credentials.';
+        });
       },
     });
   }

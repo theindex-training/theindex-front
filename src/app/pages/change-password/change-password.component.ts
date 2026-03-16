@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, NgZone, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UiButtonComponent } from '../../components/ui-button/ui-button.component';
@@ -27,6 +27,7 @@ const passwordMatchValidator: ValidatorFn = control => {
 })
 export class ChangePasswordComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly ngZone = inject(NgZone);
 
   isSubmitting = false;
   successMessage = '';
@@ -79,16 +80,20 @@ export class ChangePasswordComponent {
       })
       .subscribe({
         next: () => {
-          this.isSubmitting = false;
-          this.successMessage = 'Password updated successfully.';
-          this.form.reset();
-          this.router.navigate([this.getDefaultRoute()]);
+          this.ngZone.run(() => {
+            this.isSubmitting = false;
+            this.successMessage = 'Password updated successfully.';
+            this.form.reset();
+            this.router.navigate([this.getDefaultRoute()]);
+          });
         },
         error: (error: unknown) => {
-          this.isSubmitting = false;
-          this.errorMessage =
-            (error as { error?: { message?: string } })?.error?.message ??
-            'Unable to update your password right now.';
+          this.ngZone.run(() => {
+            this.isSubmitting = false;
+            this.errorMessage =
+              (error as { error?: { message?: string } })?.error?.message ??
+              'Unable to update your password right now.';
+          });
         }
       });
   }
