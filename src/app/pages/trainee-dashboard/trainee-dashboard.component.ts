@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { TraineeSubscriptionsTableComponent } from '../../components/trainee-subscriptions-table/trainee-subscriptions-table.component';
 import { TraineeTrainingsTableComponent } from '../../components/trainee-trainings-table/trainee-trainings-table.component';
@@ -38,6 +38,7 @@ export class TraineeDashboardComponent implements OnInit {
     private readonly subscriptionsService: SubscriptionsService,
     private readonly plansService: PlansService,
     private readonly authService: AuthService,
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -52,6 +53,7 @@ export class TraineeDashboardComponent implements OnInit {
       this.loading = false;
       this.subscriptionsLoading = false;
       this.trainingsLoading = false;
+      this.changeDetector.detectChanges();
       return;
     }
 
@@ -72,6 +74,7 @@ export class TraineeDashboardComponent implements OnInit {
         this.subscriptionsLoading = false;
         this.trainingsLoading = false;
         this.loading = false;
+        this.changeDetector.detectChanges();
       },
       error: (error) => {
         const message =
@@ -82,6 +85,7 @@ export class TraineeDashboardComponent implements OnInit {
         this.subscriptionsLoading = false;
         this.trainingsLoading = false;
         this.loading = false;
+        this.changeDetector.detectChanges();
       },
     });
   }
