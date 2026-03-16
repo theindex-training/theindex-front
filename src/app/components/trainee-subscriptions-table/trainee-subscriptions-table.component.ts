@@ -18,6 +18,7 @@ export class TraineeSubscriptionsTableComponent {
   @Input() emptyMessage = 'No subscriptions yet.';
   @Input() canDeleteSubscriptions = false;
   @Input() deletingSubscriptionId: string | null = null;
+  @Input() showActionsColumn = true;
 
   @Output() deleteSubscriptionRequested = new EventEmitter<Subscription>();
 

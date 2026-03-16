@@ -6,18 +6,22 @@
   <div class="state">{{ emptyMessage }}</div>
 } @else {
   <div class="table">
-    <div class="table-row table-header">
+    <div class="table-row table-header"
+      [class.no-actions]="!showActionsColumn">
       <span>Plan</span>
       <span>Type</span>
       <span>Status</span>
       <span>Starts</span>
       <span>Ends / Used</span>
       <span>Paid</span>
-      <span class="table-actions">Actions</span>
+      @if (showActionsColumn) {
+        <span class="table-actions">Actions</span>
+      }
     </div>
     @for (subscription of subscriptions; track subscription.id) {
       <div
         class="table-row"
+        [class.no-actions]="!showActionsColumn"
         [class.row-exhausted]="isExhausted(subscription)"
         [class.row-active]="isActiveSubscription(subscription)"
       >
@@ -33,18 +37,20 @@
         <span>{{ formatDate(subscription.startsAt) }}</span>
         <span>{{ formatEndsOrCredits(subscription) }}</span>
         <span>{{ formatPrice(subscription.paidCents) }}</span>
-        <span class="table-actions">
-          @if (canDeleteSubscriptions) {
-            <button
-              class="button button-danger"
-              type="button"
-              (click)="onDelete(subscription)"
-              [disabled]="deletingSubscriptionId === subscription.id"
-            >
-              {{ deletingSubscriptionId === subscription.id ? 'Deleting...' : 'Delete' }}
-            </button>
-          }
-        </span>
+        @if (showActionsColumn) {
+          <span class="table-actions">
+            @if (canDeleteSubscriptions) {
+              <button
+                class="button button-danger"
+                type="button"
+                (click)="onDelete(subscription)"
+                [disabled]="deletingSubscriptionId === subscription.id"
+              >
+                {{ deletingSubscriptionId === subscription.id ? 'Deleting...' : 'Delete' }}
+              </button>
+            }
+          </span>
+        }
       </div>
     }
   </div>
