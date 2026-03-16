@@ -36,6 +36,16 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN', 'TRAINER'] }
       },
+
+      {
+        path: 'my-trainings',
+        loadComponent: () =>
+          import('./pages/trainee-dashboard/trainee-dashboard.component').then(
+            m => m.TraineeDashboardComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['TRAINEE'] }
+      },
       {
         path: 'plans/new',
         loadComponent: () =>
