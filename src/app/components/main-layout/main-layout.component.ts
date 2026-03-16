@@ -22,6 +22,7 @@ export class MainLayoutComponent {
   openSubmenuLabel: string | null = null;
   isUserMenuOpen = false;
   readonly userEmail: string;
+  readonly isTrainee: boolean;
 
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', route: '/home' },
@@ -52,6 +53,7 @@ export class MainLayoutComponent {
     private readonly router: Router
   ) {
     this.userEmail = this.authService.getUserEmail() ?? 'User';
+    this.isTrainee = this.authService.getUserRole() === 'TRAINEE';
   }
 
   toggleMenu(): void {
@@ -80,6 +82,14 @@ export class MainLayoutComponent {
     return !!item.children?.some(
       child => this.canViewNavItem(child) && child.route && this.router.url.startsWith(child.route)
     );
+  }
+
+  get visibleNavItems(): NavItem[] {
+    if (this.isTrainee) {
+      return [];
+    }
+
+    return this.navItems;
   }
 
   canViewNavItem(item: NavItem): boolean {

@@ -1,0 +1,50 @@
+<section class="trainee-dashboard">
+  <header>
+    <h1>My Trainings</h1>
+    <p>Overview of your paid and unpaid trainings.</p>
+  </header>
+
+  @if (loading) {
+    <p class="state-text">Loading trainings…</p>
+  } @else if (errorMessage) {
+    <p class="state-text is-error">{{ errorMessage }}</p>
+  } @else {
+    <div class="panel-grid">
+      <article class="panel">
+        <h2>Paid trainings</h2>
+
+        @if (!paidTrainings.length) {
+          <p class="state-text">No paid trainings found.</p>
+        } @else {
+          <ul>
+            @for (training of paidTrainings; track trackByTraining($index, training)) {
+              <li>
+                <span>{{ formatDateTime(training.trainedAt) }}</span>
+                <span>{{ training.location.name }}</span>
+                <span>{{ training.trainer.nickname || training.trainer.name }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </article>
+
+      <article class="panel">
+        <h2>Unpaid trainings</h2>
+
+        @if (!unpaidTrainings.length) {
+          <p class="state-text">No unpaid trainings found.</p>
+        } @else {
+          <ul>
+            @for (training of unpaidTrainings; track trackByTraining($index, training)) {
+              <li>
+                <span>{{ formatDateTime(training.trainedAt) }}</span>
+                <span>{{ training.location.name }}</span>
+                <span>{{ training.trainer.nickname || training.trainer.name }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </article>
+    </div>
+  }
+</section>
