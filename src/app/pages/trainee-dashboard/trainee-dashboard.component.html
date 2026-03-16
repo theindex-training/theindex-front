@@ -1,14 +1,69 @@
 <section class="trainee-dashboard">
   <header>
-    <h1>My Trainings</h1>
-    <p>Overview of your paid and unpaid trainings.</p>
+    <h1>My Dashboard</h1>
+    <p>Overview of your subscriptions and trainings.</p>
   </header>
 
   @if (loading) {
-    <p class="state-text">Loading trainings…</p>
+    <p class="state-text">Loading dashboard…</p>
   } @else if (errorMessage) {
     <p class="state-text is-error">{{ errorMessage }}</p>
   } @else {
+    <article class="subscriptions-panel">
+      <h2>Subscriptions</h2>
+
+      <div class="subscriptions-grid">
+        <section class="subscription-section">
+          <h3>Active subscriptions</h3>
+          @if (!activeSubscriptions.length) {
+            <p class="state-text">No active subscriptions.</p>
+          } @else {
+            <ul class="subscription-list">
+              @for (
+                subscription of activeSubscriptions;
+                track trackBySubscription($index, subscription)
+              ) {
+                <li>
+                  <span class="title">{{ formatPlanLabel(subscription) }}</span>
+                  <span>{{ subscription.type }}</span>
+                  <span>{{ subscription.status }}</span>
+                  <span>Start: {{ formatDate(subscription.startsAt) }}</span>
+                  <span>
+                    {{ subscription.type === 'TIME' ? 'Ends' : 'Usage' }}:
+                    {{ formatEndsOrCredits(subscription) }}
+                  </span>
+                  <span>Paid: {{ formatPrice(subscription.paidCents) }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <section class="subscription-section">
+          <h3>Past subscriptions</h3>
+          @if (!pastSubscriptions.length) {
+            <p class="state-text">No past subscriptions.</p>
+          } @else {
+            <ul class="subscription-list">
+              @for (subscription of pastSubscriptions; track trackBySubscription($index, subscription)) {
+                <li>
+                  <span class="title">{{ formatPlanLabel(subscription) }}</span>
+                  <span>{{ subscription.type }}</span>
+                  <span>{{ subscription.status }}</span>
+                  <span>Start: {{ formatDate(subscription.startsAt) }}</span>
+                  <span>
+                    {{ subscription.type === 'TIME' ? 'Ended' : 'Usage' }}:
+                    {{ formatEndsOrCredits(subscription) }}
+                  </span>
+                  <span>Paid: {{ formatPrice(subscription.paidCents) }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </div>
+    </article>
+
     <div class="panel-grid">
       <article class="panel">
         <h2>Paid trainings</h2>
