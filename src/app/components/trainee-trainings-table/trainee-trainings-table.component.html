@@ -1,0 +1,26 @@
+@if (loading) {
+  <div class="state">Loading trainings...</div>
+} @else if (errorMessage) {
+  <div class="state error">{{ errorMessage }}</div>
+} @else if (!trainings.length) {
+  <div class="state">{{ emptyMessage }}</div>
+} @else {
+  <div class="table trainings-table">
+    <div class="table-row table-header trainings-row">
+      <span>Trained at</span>
+      <span>Trainer</span>
+      <span>Location</span>
+      <span>Status</span>
+    </div>
+    @for (training of trainings; track training.id) {
+      <div class="table-row trainings-row">
+        <span class="title">{{ formatTrainingDateTime(training.trainedAt) }}</span>
+        <span>{{ formatTrainingTrainer(training) }}</span>
+        <span>{{ formatTrainingLocation(training) }}</span>
+        <span class="training-status" [ngClass]="statusClass(training)">
+          {{ training.paymentStatus }}
+        </span>
+      </div>
+    }
+  </div>
+}

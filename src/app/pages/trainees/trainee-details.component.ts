@@ -10,6 +10,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { TraineeSubscriptionsTableComponent } from '../../components/trainee-subscriptions-table/trainee-subscriptions-table.component';
+import { TraineeTrainingsTableComponent } from '../../components/trainee-trainings-table/trainee-trainings-table.component';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import {
@@ -45,7 +47,13 @@ import { displayValue } from '../../utils/display.util';
 @Component({
   selector: 'app-trainee-details',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    TraineeSubscriptionsTableComponent,
+    TraineeTrainingsTableComponent,
+  ],
   templateUrl: './trainee-details.component.html',
   styleUrl: './trainee-details.component.scss',
 })
@@ -166,25 +174,6 @@ export class TraineeDetailsComponent implements OnInit {
     return plan ? plan.title : subscription.planId;
   }
 
-  formatEndsOrCredits(subscription: Subscription): string {
-    if (subscription.type === 'TIME') {
-      return subscription.endsAt ? this.formatDate(subscription.endsAt) : '—';
-    }
-
-    const initial = subscription.initialCredits ?? 0;
-    const remaining = subscription.remainingCredits ?? 0;
-    const used = Math.max(initial - remaining, 0);
-    return `${used} / ${initial} trainings`;
-  }
-
-  isExhausted(subscription: Subscription): boolean {
-    return subscription.status.toUpperCase() === 'EXHAUSTED';
-  }
-
-  isActiveSubscription(subscription: Subscription): boolean {
-    return subscription.status.toUpperCase() === 'ACTIVE';
-  }
-
   deleteSubscription(subscription: Subscription): void {
     if (!this.canDeleteSubscriptions || this.deletingSubscriptionId || !this.trainee) {
       return;
@@ -232,24 +221,6 @@ export class TraineeDetailsComponent implements OnInit {
       style: 'currency',
       currency: 'EUR',
     }).format(priceCents / 100);
-  }
-
-  formatTrainingDateTime(value: string): string {
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(value));
-  }
-
-  formatTrainingTrainer(training: AttendanceTraineeTrainingItem): string {
-    return displayValue(training.trainer.nickname || training.trainer.name);
-  }
-
-  formatTrainingLocation(training: AttendanceTraineeTrainingItem): string {
-    return displayValue(training.location.name);
   }
 
   private loadTrainee(id: string): void {

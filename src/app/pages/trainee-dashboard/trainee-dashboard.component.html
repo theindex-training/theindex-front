@@ -1,105 +1,61 @@
-<section class="trainee-dashboard">
-  <header>
-    <h1>My Dashboard</h1>
-    <p>Overview of your subscriptions and trainings.</p>
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>My trainings</h1>
+      <p>Review your subscriptions and training attendance.</p>
+    </div>
   </header>
 
-  @if (loading) {
-    <p class="state-text">Loading dashboard…</p>
-  } @else if (errorMessage) {
-    <p class="state-text is-error">{{ errorMessage }}</p>
+  @if (errorMessage && loading) {
+    <div class="state error">{{ errorMessage }}</div>
   } @else {
-    <article class="subscriptions-panel">
-      <h2>Subscriptions</h2>
-
-      <div class="subscriptions-grid">
-        <section class="subscription-section">
-          <h3>Active subscriptions</h3>
-          @if (!activeSubscriptions.length) {
-            <p class="state-text">No active subscriptions.</p>
-          } @else {
-            <ul class="subscription-list">
-              @for (
-                subscription of activeSubscriptions;
-                track trackBySubscription($index, subscription)
-              ) {
-                <li>
-                  <span class="title">{{ formatPlanLabel(subscription) }}</span>
-                  <span>{{ subscription.type }}</span>
-                  <span>{{ subscription.status }}</span>
-                  <span>Start: {{ formatDate(subscription.startsAt) }}</span>
-                  <span>
-                    {{ subscription.type === 'TIME' ? 'Ends' : 'Usage' }}:
-                    {{ formatEndsOrCredits(subscription) }}
-                  </span>
-                  <span>Paid: {{ formatPrice(subscription.paidCents) }}</span>
-                </li>
-              }
-            </ul>
-          }
-        </section>
-
-        <section class="subscription-section">
-          <h3>Past subscriptions</h3>
-          @if (!pastSubscriptions.length) {
-            <p class="state-text">No past subscriptions.</p>
-          } @else {
-            <ul class="subscription-list">
-              @for (subscription of pastSubscriptions; track trackBySubscription($index, subscription)) {
-                <li>
-                  <span class="title">{{ formatPlanLabel(subscription) }}</span>
-                  <span>{{ subscription.type }}</span>
-                  <span>{{ subscription.status }}</span>
-                  <span>Start: {{ formatDate(subscription.startsAt) }}</span>
-                  <span>
-                    {{ subscription.type === 'TIME' ? 'Ended' : 'Usage' }}:
-                    {{ formatEndsOrCredits(subscription) }}
-                  </span>
-                  <span>Paid: {{ formatPrice(subscription.paidCents) }}</span>
-                </li>
-              }
-            </ul>
-          }
-        </section>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Subscriptions</h2>
+          <p>Track your current and past subscriptions.</p>
+        </div>
       </div>
-    </article>
 
-    <div class="panel-grid">
-      <article class="panel">
-        <h2>Paid trainings</h2>
+      <app-trainee-subscriptions-table
+        [subscriptions]="subscriptions"
+        [plans]="plans"
+        [loading]="subscriptionsLoading"
+        [errorMessage]="subscriptionErrorMessage"
+        [emptyMessage]="'No subscriptions yet.'"
+      ></app-trainee-subscriptions-table>
+    </div>
 
-        @if (!paidTrainings.length) {
-          <p class="state-text">No paid trainings found.</p>
-        } @else {
-          <ul>
-            @for (training of paidTrainings; track trackByTraining($index, training)) {
-              <li>
-                <span>{{ formatDateTime(training.trainedAt) }}</span>
-                <span>{{ training.location.name }}</span>
-                <span>{{ training.trainer.nickname || training.trainer.name }}</span>
-              </li>
-            }
-          </ul>
-        }
-      </article>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Unpaid trainings</h2>
+          <p>Completed trainings that still need payment.</p>
+        </div>
+      </div>
 
-      <article class="panel">
-        <h2>Unpaid trainings</h2>
+      <app-trainee-trainings-table
+        [trainings]="unpaidTrainings"
+        [loading]="trainingsLoading"
+        [errorMessage]="trainingErrorMessage"
+        [emptyMessage]="'No unpaid trainings yet.'"
+      ></app-trainee-trainings-table>
+    </div>
 
-        @if (!unpaidTrainings.length) {
-          <p class="state-text">No unpaid trainings found.</p>
-        } @else {
-          <ul>
-            @for (training of unpaidTrainings; track trackByTraining($index, training)) {
-              <li>
-                <span>{{ formatDateTime(training.trainedAt) }}</span>
-                <span>{{ training.location.name }}</span>
-                <span>{{ training.trainer.nickname || training.trainer.name }}</span>
-              </li>
-            }
-          </ul>
-        }
-      </article>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Paid trainings</h2>
+          <p>Completed trainings that are marked as paid.</p>
+        </div>
+      </div>
+
+      <app-trainee-trainings-table
+        [trainings]="paidTrainings"
+        [loading]="trainingsLoading"
+        [errorMessage]="trainingErrorMessage"
+        [emptyMessage]="'No paid trainings yet.'"
+      ></app-trainee-trainings-table>
     </div>
   }
 </section>

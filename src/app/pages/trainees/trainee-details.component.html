@@ -85,57 +85,16 @@
         </div>
       </div>
 
-      @if (subscriptionsLoading) {
-        <div class="state">Loading subscriptions...</div>
-      } @else if (subscriptionErrorMessage && !subscriptions.length) {
-        <div class="state error">{{ subscriptionErrorMessage }}</div>
-      } @else if (!subscriptions.length) {
-        <div class="state">No subscriptions yet.</div>
-      } @else {
-        <div class="table">
-          <div class="table-row table-header">
-            <span>Plan</span>
-            <span>Type</span>
-            <span>Status</span>
-            <span>Starts</span>
-            <span>Ends / Used</span>
-            <span>Paid</span>
-            <span class="table-actions">Actions</span>
-          </div>
-          @for (subscription of subscriptions; track subscription.id) {
-            <div
-              class="table-row"
-              [class.row-exhausted]="isExhausted(subscription)"
-              [class.row-active]="isActiveSubscription(subscription)"
-            >
-              <span class="title">{{ formatPlanLabel(subscription) }}</span>
-              <span>{{ subscription.type }}</span>
-              <span
-                class="subscription-status"
-                [class.status-exhausted]="isExhausted(subscription)"
-                [class.status-active]="isActiveSubscription(subscription)"
-              >
-                {{ subscription.status }}
-              </span>
-              <span>{{ formatDate(subscription.startsAt) }}</span>
-              <span>{{ formatEndsOrCredits(subscription) }}</span>
-              <span>{{ formatPrice(subscription.paidCents) }}</span>
-              <span class="table-actions">
-                @if (canDeleteSubscriptions) {
-                  <button
-                    class="button button-danger"
-                    type="button"
-                    (click)="deleteSubscription(subscription)"
-                    [disabled]="deletingSubscriptionId === subscription.id"
-                  >
-                    {{ deletingSubscriptionId === subscription.id ? 'Deleting...' : 'Delete' }}
-                  </button>
-                }
-              </span>
-            </div>
-          }
-        </div>
-      }
+      <app-trainee-subscriptions-table
+        [subscriptions]="subscriptions"
+        [plans]="plans"
+        [loading]="subscriptionsLoading"
+        [errorMessage]="subscriptionErrorMessage"
+        [emptyMessage]="'No subscriptions yet.'"
+        [canDeleteSubscriptions]="canDeleteSubscriptions"
+        [deletingSubscriptionId]="deletingSubscriptionId"
+        (deleteSubscriptionRequested)="deleteSubscription($event)"
+      ></app-trainee-subscriptions-table>
 
       <form class="form" [formGroup]="form" (ngSubmit)="handleCreateSubscription()">
         <div class="form-grid">
@@ -198,30 +157,12 @@
         </div>
       </div>
 
-      @if (trainingsLoading) {
-        <div class="state">Loading trainings...</div>
-      } @else if (trainingErrorMessage) {
-        <div class="state error">{{ trainingErrorMessage }}</div>
-      } @else if (!unpaidTrainings.length) {
-        <div class="state">No unpaid trainings yet.</div>
-      } @else {
-        <div class="table trainings-table">
-          <div class="table-row table-header trainings-row">
-            <span>Trained at</span>
-            <span>Trainer</span>
-            <span>Location</span>
-            <span>Status</span>
-          </div>
-          @for (training of unpaidTrainings; track training.id) {
-            <div class="table-row trainings-row">
-              <span class="title">{{ formatTrainingDateTime(training.trainedAt) }}</span>
-              <span>{{ formatTrainingTrainer(training) }}</span>
-              <span>{{ formatTrainingLocation(training) }}</span>
-              <span class="training-status status-unpaid">{{ training.paymentStatus }}</span>
-            </div>
-          }
-        </div>
-      }
+      <app-trainee-trainings-table
+        [trainings]="unpaidTrainings"
+        [loading]="trainingsLoading"
+        [errorMessage]="trainingErrorMessage"
+        [emptyMessage]="'No unpaid trainings yet.'"
+      ></app-trainee-trainings-table>
     </div>
 
     <div class="card">
@@ -232,30 +173,12 @@
         </div>
       </div>
 
-      @if (trainingsLoading) {
-        <div class="state">Loading trainings...</div>
-      } @else if (trainingErrorMessage) {
-        <div class="state error">{{ trainingErrorMessage }}</div>
-      } @else if (!paidTrainings.length) {
-        <div class="state">No paid trainings yet.</div>
-      } @else {
-        <div class="table trainings-table">
-          <div class="table-row table-header trainings-row">
-            <span>Trained at</span>
-            <span>Trainer</span>
-            <span>Location</span>
-            <span>Status</span>
-          </div>
-          @for (training of paidTrainings; track training.id) {
-            <div class="table-row trainings-row">
-              <span class="title">{{ formatTrainingDateTime(training.trainedAt) }}</span>
-              <span>{{ formatTrainingTrainer(training) }}</span>
-              <span>{{ formatTrainingLocation(training) }}</span>
-              <span class="training-status status-paid">{{ training.paymentStatus }}</span>
-            </div>
-          }
-        </div>
-      }
+      <app-trainee-trainings-table
+        [trainings]="paidTrainings"
+        [loading]="trainingsLoading"
+        [errorMessage]="trainingErrorMessage"
+        [emptyMessage]="'No paid trainings yet.'"
+      ></app-trainee-trainings-table>
     </div>
   }
 </section>
