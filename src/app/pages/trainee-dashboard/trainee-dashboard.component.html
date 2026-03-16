@@ -1,0 +1,63 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>My trainings</h1>
+      <p>Review your subscriptions and training attendance.</p>
+    </div>
+  </header>
+
+  @if (errorMessage && loading) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else {
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Subscriptions</h2>
+          <p>Track your current and past subscriptions.</p>
+        </div>
+      </div>
+
+      <app-trainee-subscriptions-table
+        [subscriptions]="subscriptions"
+        [plans]="plans"
+        [loading]="subscriptionsLoading"
+        [errorMessage]="subscriptionErrorMessage"
+        [emptyMessage]="'No subscriptions yet.'"
+        [showActionsColumn]="false"
+      ></app-trainee-subscriptions-table>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Paid trainings</h2>
+          <p>Completed trainings that are marked as paid.</p>
+        </div>
+      </div>
+
+      <app-trainee-trainings-table
+        [trainings]="paidTrainings"
+        [loading]="trainingsLoading"
+        [errorMessage]="trainingErrorMessage"
+        [emptyMessage]="'No paid trainings yet.'"
+      ></app-trainee-trainings-table>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Unpaid trainings</h2>
+          <p>Completed trainings that still need payment.</p>
+        </div>
+      </div>
+
+      <app-trainee-trainings-table
+        [trainings]="unpaidTrainings"
+        [loading]="trainingsLoading"
+        [errorMessage]="trainingErrorMessage"
+        [emptyMessage]="'No unpaid trainings yet.'"
+      ></app-trainee-trainings-table>
+    </div>
+
+  }
+</section>

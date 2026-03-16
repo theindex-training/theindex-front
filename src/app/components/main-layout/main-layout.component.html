@@ -4,50 +4,52 @@
     <span class="brand-text">The Index</span>
   </div>
 
-  <nav class="nav-links" aria-label="Primary">
-    @for (item of navItems; track item.label) {
-      @if (item.children?.length) {
-        <div class="nav-group">
-          <button
-            class="nav-link nav-trigger"
-            type="button"
-            [class.is-active]="isParentActive(item)"
-            [attr.aria-expanded]="isSubmenuOpen(item)"
-            (click)="toggleSubmenu(item)"
+  @if (!isTrainee) {
+    <nav class="nav-links" aria-label="Primary">
+      @for (item of visibleNavItems; track item.label) {
+        @if (item.children?.length) {
+          <div class="nav-group">
+            <button
+              class="nav-link nav-trigger"
+              type="button"
+              [class.is-active]="isParentActive(item)"
+              [attr.aria-expanded]="isSubmenuOpen(item)"
+              (click)="toggleSubmenu(item)"
+            >
+              {{ item.label }}
+            </button>
+
+            @if (isSubmenuOpen(item)) {
+              <div class="subnav-panel">
+                @for (child of item.children; track child.route) {
+                  @if (canViewNavItem(child)) {
+                    <a
+                      [routerLink]="child.route"
+                      routerLinkActive="is-active"
+                      [routerLinkActiveOptions]="{ exact: true }"
+                      class="subnav-link"
+                      (click)="closeMenu()"
+                    >
+                      {{ child.label }}
+                    </a>
+                  }
+                }
+              </div>
+            }
+          </div>
+        } @else if (canViewNavItem(item)) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="is-active"
+            class="nav-link"
+            (click)="closeMenu()"
           >
             {{ item.label }}
-          </button>
-
-          @if (isSubmenuOpen(item)) {
-            <div class="subnav-panel">
-              @for (child of item.children; track child.route) {
-                @if (canViewNavItem(child)) {
-                <a
-                  [routerLink]="child.route"
-                  routerLinkActive="is-active"
-                  [routerLinkActiveOptions]="{ exact: true }"
-                  class="subnav-link"
-                  (click)="closeMenu()"
-                >
-                  {{ child.label }}
-                </a>
-                }
-              }
-            </div>
-          }
-        </div>
-      } @else if (canViewNavItem(item)) {
-        <a
-          [routerLink]="item.route"
-          routerLinkActive="is-active"
-          class="nav-link"
-          (click)="closeMenu()"
-        >
-          {{ item.label }}
-        </a>
+          </a>
+        }
       }
-    }
-  </nav>
+    </nav>
+  }
 
   <div class="actions">
     <div class="user-menu">
@@ -66,80 +68,85 @@
         </div>
       }
     </div>
-    <button
-      class="menu-toggle"
-      type="button"
-      aria-label="Toggle navigation"
-      [attr.aria-expanded]="isMenuOpen"
-      (click)="toggleMenu()"
-    >
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
+
+    @if (!isTrainee) {
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-label="Toggle navigation"
+        [attr.aria-expanded]="isMenuOpen"
+        (click)="toggleMenu()"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    }
   </div>
 </header>
 
-<div class="mobile-panel" [class.is-open]="isMenuOpen">
-  <nav class="mobile-nav" aria-label="Mobile">
-    @for (item of navItems; track item.label) {
-      @if (item.children?.length) {
+@if (!isTrainee) {
+  <div class="mobile-panel" [class.is-open]="isMenuOpen">
+    <nav class="mobile-nav" aria-label="Mobile">
+      @for (item of visibleNavItems; track item.label) {
+        @if (item.children?.length) {
+          <button
+            class="nav-link nav-trigger"
+            type="button"
+            [class.is-active]="isParentActive(item)"
+            [attr.aria-expanded]="isSubmenuOpen(item)"
+            (click)="toggleSubmenu(item)"
+          >
+            {{ item.label }}
+          </button>
+
+          @if (isSubmenuOpen(item)) {
+            <div class="mobile-subnav">
+              @for (child of item.children; track child.route) {
+                @if (canViewNavItem(child)) {
+                  <a
+                    [routerLink]="child.route"
+                    routerLinkActive="is-active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    class="subnav-link"
+                    (click)="closeMenu()"
+                  >
+                    {{ child.label }}
+                  </a>
+                }
+              }
+            </div>
+          }
+        } @else if (canViewNavItem(item)) {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="is-active"
+            class="nav-link"
+            (click)="closeMenu()"
+          >
+            {{ item.label }}
+          </a>
+        }
+      }
+      <div class="user-menu mobile-user-menu">
         <button
-          class="nav-link nav-trigger"
+          class="user-menu-trigger"
           type="button"
-          [class.is-active]="isParentActive(item)"
-          [attr.aria-expanded]="isSubmenuOpen(item)"
-          (click)="toggleSubmenu(item)"
+          [attr.aria-expanded]="isUserMenuOpen"
+          (click)="toggleUserMenu()"
         >
-          {{ item.label }}
+          {{ userEmail }}
         </button>
 
-        @if (isSubmenuOpen(item)) {
-          <div class="mobile-subnav">
-            @for (child of item.children; track child.route) {
-              @if (canViewNavItem(child)) {
-              <a
-                [routerLink]="child.route"
-                routerLinkActive="is-active"
-                [routerLinkActiveOptions]="{ exact: true }"
-                class="subnav-link"
-                (click)="closeMenu()"
-              >
-                {{ child.label }}
-              </a>
-              }
-            }
+        @if (isUserMenuOpen) {
+          <div class="user-menu-panel">
+            <button class="user-menu-item is-danger" type="button" (click)="handleLogout()">Logout</button>
           </div>
         }
-      } @else if (canViewNavItem(item)) {
-        <a
-          [routerLink]="item.route"
-          routerLinkActive="is-active"
-          class="nav-link"
-          (click)="closeMenu()"
-        >
-          {{ item.label }}
-        </a>
-      }
-    }
-    <div class="user-menu mobile-user-menu">
-      <button
-        class="user-menu-trigger"
-        type="button"
-        [attr.aria-expanded]="isUserMenuOpen"
-        (click)="toggleUserMenu()"
-      >
-        {{ userEmail }}
-      </button>
-
-      @if (isUserMenuOpen) {
-        <div class="user-menu-panel">
-          <button class="user-menu-item is-danger" type="button" (click)="handleLogout()">Logout</button>
-        </div>
-      }
-    </div>
-  </nav>
-</div>
+      </div>
+    </nav>
+  </div>
+}
 
 <main class="layout-content" (click)="closeMenu()">
   <router-outlet></router-outlet>

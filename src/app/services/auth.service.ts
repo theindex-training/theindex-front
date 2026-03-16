@@ -79,6 +79,16 @@ export class AuthService {
     return this.decodeToken(token)?.trainerProfileId ?? null;
   }
 
+  getTraineeProfileId(): string | null {
+    const token = this.getToken();
+
+    if (!token) {
+      return null;
+    }
+
+    return this.decodeToken(token)?.traineeProfileId ?? null;
+  }
+
   private setToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
   }
