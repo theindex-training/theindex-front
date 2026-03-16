@@ -40,6 +40,6 @@ export class AccountSecurityService {
   }
 
   changePassword(accountId: string, payload: ChangePasswordPayload): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/${accountId}/password`, payload);
+    return this.http.post<void>(`${this.baseUrl}/${accountId}/change-password`, payload);
   }
 }
