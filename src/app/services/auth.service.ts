@@ -69,6 +69,16 @@ export class AuthService {
     return payload?.email ?? payload?.sub ?? null;
   }
 
+  getAccountId(): string | null {
+    const token = this.getToken();
+
+    if (!token) {
+      return null;
+    }
+
+    return this.decodeToken(token)?.sub ?? null;
+  }
+
   getTrainerProfileId(): string | null {
     const token = this.getToken();
 

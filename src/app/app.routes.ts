@@ -47,6 +47,13 @@ export const routes: Routes = [
         data: { roles: ['TRAINEE'] }
       },
       {
+        path: 'change-password',
+        loadComponent: () =>
+          import('./pages/change-password/change-password.component').then(
+            m => m.ChangePasswordComponent
+          )
+      },
+      {
         path: 'plans/new',
         loadComponent: () =>
           import('./pages/plans/plan-create.component').then(m => m.PlanCreateComponent),
