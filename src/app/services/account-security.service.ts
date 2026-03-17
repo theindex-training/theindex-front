@@ -4,16 +4,19 @@ import { environment } from '@environments/environment';
 import { map, Observable } from 'rxjs';
 
 interface PasswordStatusResponse {
-  hasUpdatedInitialPassword?: boolean;
-  hasChangedPassword?: boolean;
-  isChanged?: boolean;
-  passwordChanged?: boolean;
+  accountId: string;
+  hasUpdatedInitialPassword: boolean;
 }
 
 interface ChangePasswordPayload {
-  currentPassword: string;
+  currentPassword?: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+interface ChangePasswordResponse {
+  accountId: string;
+  hasUpdatedInitialPassword: boolean;
 }
 
 @Injectable({
@@ -26,24 +29,14 @@ export class AccountSecurityService {
 
   hasChangedPassword(accountId: string): Observable<boolean> {
     return this.http
-      .get<boolean | PasswordStatusResponse>(`${this.baseUrl}/${accountId}/password-status`)
-      .pipe(
-        map(response => {
-          if (typeof response === 'boolean') {
-            return response;
-          }
-
-          return Boolean(
-            response.hasUpdatedInitialPassword ??
-              response.hasChangedPassword ??
-              response.isChanged ??
-              response.passwordChanged
-          );
-        })
-      );
+      .get<PasswordStatusResponse>(`${this.baseUrl}/${accountId}/password-status`)
+      .pipe(map(response => response.hasUpdatedInitialPassword));
   }
 
-  changePassword(accountId: string, payload: ChangePasswordPayload): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/${accountId}/change-password`, payload);
+  changePassword(
+    accountId: string,
+    payload: ChangePasswordPayload
+  ): Observable<ChangePasswordResponse> {
+    return this.http.post<ChangePasswordResponse>(`${this.baseUrl}/${accountId}/change-password`, payload);
   }
 }

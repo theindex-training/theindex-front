@@ -53,6 +53,8 @@ export class LoginComponent {
         const accountId = this.authService.getAccountId();
 
         if (!accountId) {
+          this.isSubmitting = false;
+          this.changeDetector.detectChanges();
           this.router.navigate([this.getDefaultRoute()]);
           return;
         }
