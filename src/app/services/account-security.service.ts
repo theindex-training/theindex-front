@@ -4,6 +4,7 @@ import { environment } from '@environments/environment';
 import { map, Observable } from 'rxjs';
 
 interface PasswordStatusResponse {
+  hasUpdatedInitialPassword?: boolean;
   hasChangedPassword?: boolean;
   isChanged?: boolean;
   passwordChanged?: boolean;
@@ -33,7 +34,10 @@ export class AccountSecurityService {
           }
 
           return Boolean(
-            response.hasChangedPassword ?? response.isChanged ?? response.passwordChanged
+            response.hasUpdatedInitialPassword ??
+              response.hasChangedPassword ??
+              response.isChanged ??
+              response.passwordChanged
           );
         })
       );
