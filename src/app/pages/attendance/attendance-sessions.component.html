@@ -116,7 +116,9 @@
 
           @for (item of session.attendance; track item.id) {
             <div class="attendee-row" [class.with-actions]="canDeleteSessionAttendance(session)">
-              <span>{{ traineeName(item.traineeId) }}</span>
+              <span>
+                <a [routerLink]="['/trainees', item.traineeId]">{{ traineeName(item.traineeId) }}</a>
+              </span>
               <span>{{ traineeNickname(item.traineeId) }}</span>
               <span>
                 <span class="status" [class.unpaid]="item.paymentStatus === 'UNPAID'">
