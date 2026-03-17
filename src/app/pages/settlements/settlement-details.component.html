@@ -110,7 +110,9 @@
           @for (row of allocations; track row.id) {
             <div class="table-row allocations-row">
               <span>{{ formatTrainer(row.trainerId) }}</span>
-              <span>{{ formatTrainee(row.attendance?.traineeId) }}</span>
+              <span>
+                <a [routerLink]="['/trainees', row.attendance?.traineeId]">{{ formatTrainee(row.attendance?.traineeId) }}</a>
+              </span>
               <span>{{ row.subscriptionType || '—' }}</span>
               <span>{{ formatCurrency(row.valueCents) }}</span>
               <span>{{ formatGym(row.attendance?.locationId) }}</span>
