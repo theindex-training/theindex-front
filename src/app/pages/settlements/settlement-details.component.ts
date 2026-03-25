@@ -28,7 +28,7 @@ export class SettlementDetailsComponent implements OnInit {
 
   trainers: TrainerProfile[] = [];
   trainerLabelById = new Map<string, string>();
-  traineeNameById = new Map<string, string>();
+  traineeLabelById = new Map<string, string>();
   locationNameById = new Map<string, string>();
 
   selectedTrainerId = '';
@@ -142,7 +142,7 @@ export class SettlementDetailsComponent implements OnInit {
       return '—';
     }
 
-    return this.traineeNameById.get(traineeId) || traineeId;
+    return this.traineeLabelById.get(traineeId) || traineeId;
   }
 
   formatGym(locationId: string | null | undefined): string {
@@ -168,6 +168,12 @@ export class SettlementDetailsComponent implements OnInit {
     return date ? this.formatDate(date) : '—';
   }
 
+  private formatTraineeLabel(trainee: TraineeProfile): string {
+    const nickname = trainee.nickname?.trim();
+
+    return nickname ? `${trainee.name} (${nickname})` : trainee.name;
+  }
+
   private loadEntities(): void {
     this.loadingEntities = true;
 
@@ -186,7 +192,9 @@ export class SettlementDetailsComponent implements OnInit {
 
     this.traineesService.list().subscribe({
       next: (trainees: TraineeProfile[]) => {
-        this.traineeNameById = new Map(trainees.map(trainee => [trainee.id, trainee.name]));
+        this.traineeLabelById = new Map(
+          trainees.map(trainee => [trainee.id, this.formatTraineeLabel(trainee)])
+        );
         this.changeDetector.detectChanges();
       },
       error: () => {
