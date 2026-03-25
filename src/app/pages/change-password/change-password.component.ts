@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UiButtonComponent } from '../../components/ui-button/ui-button.component';
@@ -25,10 +25,12 @@ const passwordMatchValidator: ValidatorFn = control => {
   templateUrl: './change-password.component.html',
   styleUrl: './change-password.component.scss'
 })
-export class ChangePasswordComponent {
+export class ChangePasswordComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   isSubmitting = false;
+  isLoadingPasswordStatus = true;
+  requiresPhone = false;
   successMessage = '';
   errorMessage = '';
 
@@ -36,7 +38,8 @@ export class ChangePasswordComponent {
     {
       currentPassword: ['', [Validators.required, Validators.minLength(8)]],
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required, Validators.minLength(8)]]
+      confirmPassword: ['', [Validators.required, Validators.minLength(8)]],
+      phone: ['']
     },
     { validators: passwordMatchValidator }
   );
@@ -47,6 +50,28 @@ export class ChangePasswordComponent {
     private readonly router: Router,
     private readonly changeDetector: ChangeDetectorRef
   ) {}
+
+  ngOnInit(): void {
+    const accountId = this.authService.getAccountId();
+
+    if (!accountId) {
+      this.isLoadingPasswordStatus = false;
+      return;
+    }
+
+    this.accountSecurityService.hasChangedPassword(accountId).subscribe({
+      next: hasChangedPassword => {
+        this.requiresPhone = !hasChangedPassword;
+        this.updatePhoneValidators();
+        this.isLoadingPasswordStatus = false;
+        this.changeDetector.detectChanges();
+      },
+      error: () => {
+        this.isLoadingPasswordStatus = false;
+        this.changeDetector.detectChanges();
+      }
+    });
+  }
 
   handleSubmit(): void {
     this.errorMessage = '';
@@ -70,13 +95,21 @@ export class ChangePasswordComponent {
       return;
     }
 
+    const normalizedPhone = raw.phone?.trim() || null;
+
+    if (this.requiresPhone && !normalizedPhone) {
+      this.form.controls.phone.markAsTouched();
+      return;
+    }
+
     this.isSubmitting = true;
 
     this.accountSecurityService
       .changePassword(accountId, {
         currentPassword: raw.currentPassword,
         newPassword: raw.newPassword,
-        confirmPassword: raw.confirmPassword
+        confirmPassword: raw.confirmPassword,
+        phone: normalizedPhone
       })
       .subscribe({
         next: () => {
@@ -98,6 +131,16 @@ export class ChangePasswordComponent {
 
   get passwordMismatchError(): boolean {
     return Boolean(this.form.errors?.['passwordMismatch'] && this.form.controls.confirmPassword.touched);
+  }
+
+  private updatePhoneValidators(): void {
+    if (this.requiresPhone) {
+      this.form.controls.phone.setValidators([Validators.required]);
+    } else {
+      this.form.controls.phone.clearValidators();
+    }
+
+    this.form.controls.phone.updateValueAndValidity();
   }
 
   private getDefaultRoute(): string {

@@ -12,6 +12,7 @@ interface ChangePasswordPayload {
   currentPassword?: string;
   newPassword: string;
   confirmPassword: string;
+  phone?: string | null;
 }
 
 interface ChangePasswordResponse {
