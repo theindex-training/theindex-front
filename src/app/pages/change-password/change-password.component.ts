@@ -103,14 +103,23 @@ export class ChangePasswordComponent implements OnInit {
     }
 
     this.isSubmitting = true;
+    const payload: {
+      currentPassword: string;
+      newPassword: string;
+      confirmPassword: string;
+      phone?: string;
+    } = {
+      currentPassword: raw.currentPassword,
+      newPassword: raw.newPassword,
+      confirmPassword: raw.confirmPassword
+    };
+
+    if (this.requiresPhone && normalizedPhone) {
+      payload.phone = normalizedPhone;
+    }
 
     this.accountSecurityService
-      .changePassword(accountId, {
-        currentPassword: raw.currentPassword,
-        newPassword: raw.newPassword,
-        confirmPassword: raw.confirmPassword,
-        phone: normalizedPhone
-      })
+      .changePassword(accountId, payload)
       .subscribe({
         next: () => {
           this.isSubmitting = false;
