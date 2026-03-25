@@ -113,6 +113,16 @@ select {
   font-weight: 700;
 }
 
+.table-row a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.table-row a:hover {
+  color: var(--color-primary);
+}
+
 .amount-in {
   color: #067647;
   font-weight: 700;
