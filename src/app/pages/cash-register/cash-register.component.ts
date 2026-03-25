@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import {
   CashRegisterService,
@@ -25,7 +26,7 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
 @Component({
   selector: 'app-cash-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './cash-register.component.html',
   styleUrl: './cash-register.component.scss'
 })
@@ -147,26 +148,43 @@ export class CashRegisterComponent implements OnInit {
     }
 
     if (transaction.sourceType === 'SUBSCRIPTION') {
-      const buyerName = details.boughtBy?.nickname || details.boughtBy?.name;
-      const planTitle = details.planTitle;
-      const subscriptionType = details.subscriptionType
-        ? this.formatLabel(details.subscriptionType)
-        : undefined;
-
-      const parts = [
-        buyerName ? `Bought by ${buyerName}` : undefined,
-        planTitle ? `Plan: ${planTitle}` : undefined,
-        subscriptionType ? `Type: ${subscriptionType}` : undefined
-      ].filter((part): part is string => Boolean(part));
-
-      if (parts.length) {
-        return parts.join(' • ');
-      }
-
-      return 'Subscription purchase';
+      const parts = this.formatSubscriptionDetailParts(transaction);
+      return parts.length ? parts.join(' • ') : 'Subscription purchase';
     }
 
     return '-';
+  }
+
+  isSubscriptionTransaction(transaction: CashRegisterTransaction): boolean {
+    return transaction.sourceType === 'SUBSCRIPTION';
+  }
+
+  formatSubscriptionBuyerLabel(transaction: CashRegisterTransaction): string {
+    const boughtBy = transaction.sourceDetails?.boughtBy;
+    if (!boughtBy) {
+      return 'Unknown trainee';
+    }
+
+    const nickname = boughtBy.nickname?.trim();
+    return nickname ? `${boughtBy.name} (${nickname})` : boughtBy.name;
+  }
+
+  formatSubscriptionBuyerPath(transaction: CashRegisterTransaction): string[] {
+    const traineeId = transaction.sourceDetails?.boughtBy?.traineeId;
+    return traineeId ? ['/trainees', traineeId] : ['/trainees'];
+  }
+
+  formatSubscriptionDetailSuffix(transaction: CashRegisterTransaction): string {
+    const details = transaction.sourceDetails;
+    if (!details) {
+      return '';
+    }
+
+    const parts = this.formatSubscriptionDetailParts(transaction).filter(
+      part => !part.startsWith('Bought by ')
+    );
+
+    return parts.length ? ` • ${parts.join(' • ')}` : '';
   }
 
   formatTransactionType(type: string): string {
@@ -177,6 +195,27 @@ export class CashRegisterComponent implements OnInit {
     };
 
     return friendlyTypeMap[type] || type;
+  }
+
+  private formatSubscriptionDetailParts(transaction: CashRegisterTransaction): string[] {
+    const details = transaction.sourceDetails;
+    if (!details) {
+      return [];
+    }
+
+    const boughtByLabel = details.boughtBy
+      ? `Bought by ${this.formatSubscriptionBuyerLabel(transaction)}`
+      : undefined;
+    const planTitle = details.planTitle;
+    const subscriptionType = details.subscriptionType
+      ? this.formatLabel(details.subscriptionType)
+      : undefined;
+
+    return [
+      boughtByLabel,
+      planTitle ? `Plan: ${planTitle}` : undefined,
+      subscriptionType ? `Type: ${subscriptionType}` : undefined
+    ].filter((part): part is string => Boolean(part));
   }
 
   private toCents(amount: number): number {

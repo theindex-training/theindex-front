@@ -75,7 +75,16 @@
             <div class="table-row">
               <span>{{ formatDate(transaction.createdAt) }}</span>
               <span>{{ formatTransactionType(transaction.type) }}</span>
-              <span>{{ formatTransactionDetails(transaction) }}</span>
+              <span>
+                @if (isSubscriptionTransaction(transaction) && transaction.sourceDetails?.boughtBy?.traineeId) {
+                  Bought by
+                  <a [routerLink]="formatSubscriptionBuyerPath(transaction)">
+                    {{ formatSubscriptionBuyerLabel(transaction) }}
+                  </a>{{ formatSubscriptionDetailSuffix(transaction) }}
+                } @else {
+                  {{ formatTransactionDetails(transaction) }}
+                }
+              </span>
               <span [class.amount-in]="transaction.amountCents > 0" [class.amount-out]="transaction.amountCents < 0">
                 {{ formatCurrency(transaction.amountCents) }}
               </span>
