@@ -14,7 +14,21 @@ export interface CashRegisterTransaction {
   sourceId: string | null;
   notes: string | null;
   createdAt: string;
+  sourceDetails: CashRegisterTransactionSourceDetails | null;
   updatedAt?: string;
+}
+
+export interface CashRegisterTransactionSourceDetails {
+  periodStart?: string;
+  periodEnd?: string;
+  boughtBy?: {
+    traineeId: string;
+    name: string;
+    nickname: string | null;
+  };
+  purchasedAt?: string;
+  subscriptionType?: string;
+  planTitle?: string;
 }
 
 export interface CashRegisterState {

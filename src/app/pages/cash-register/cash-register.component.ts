@@ -131,7 +131,63 @@ export class CashRegisterComponent implements OnInit {
     return new Date(value).toLocaleString();
   }
 
+  formatTransactionDetails(transaction: CashRegisterTransaction): string {
+    const details = transaction.sourceDetails;
+
+    if (!details) {
+      return '-';
+    }
+
+    if (transaction.sourceType === 'SETTLEMENT') {
+      if (details.periodStart && details.periodEnd) {
+        return `Settlement period: ${details.periodStart} → ${details.periodEnd}`;
+      }
+
+      return 'Settlement transaction';
+    }
+
+    if (transaction.sourceType === 'SUBSCRIPTION') {
+      const buyerName = details.boughtBy?.nickname || details.boughtBy?.name;
+      const planTitle = details.planTitle;
+      const subscriptionType = details.subscriptionType
+        ? this.formatLabel(details.subscriptionType)
+        : undefined;
+
+      const parts = [
+        buyerName ? `Bought by ${buyerName}` : undefined,
+        planTitle ? `Plan: ${planTitle}` : undefined,
+        subscriptionType ? `Type: ${subscriptionType}` : undefined
+      ].filter((part): part is string => Boolean(part));
+
+      if (parts.length) {
+        return parts.join(' • ');
+      }
+
+      return 'Subscription purchase';
+    }
+
+    return '-';
+  }
+
+  formatTransactionType(type: string): string {
+    const friendlyTypeMap: Record<string, string> = {
+      SETTLEMENT_OUT: 'Settlement',
+      SUBSCRIPTION_IN: 'Subscription',
+      MANUAL_IN: 'Manual'
+    };
+
+    return friendlyTypeMap[type] || type;
+  }
+
   private toCents(amount: number): number {
     return Math.round(amount * 100);
+  }
+
+  private formatLabel(value: string): string {
+    return value
+      .toLowerCase()
+      .split('_')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
   }
 }
