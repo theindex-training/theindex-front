@@ -65,7 +65,6 @@
           <div class="table-row table-header">
             <span>Created at</span>
             <span>Type</span>
-            <span>Source</span>
             <span>Details</span>
             <span>Amount</span>
             <span>Balance after</span>
@@ -75,8 +74,7 @@
           @for (transaction of transactions; track transaction.id) {
             <div class="table-row">
               <span>{{ formatDate(transaction.createdAt) }}</span>
-              <span>{{ transaction.type }}</span>
-              <span>{{ transaction.sourceType }}</span>
+              <span>{{ formatTransactionType(transaction.type) }}</span>
               <span>{{ formatTransactionDetails(transaction) }}</span>
               <span [class.amount-in]="transaction.amountCents > 0" [class.amount-out]="transaction.amountCents < 0">
                 {{ formatCurrency(transaction.amountCents) }}

@@ -169,6 +169,16 @@ export class CashRegisterComponent implements OnInit {
     return '-';
   }
 
+  formatTransactionType(type: string): string {
+    const friendlyTypeMap: Record<string, string> = {
+      SETTLEMENT_OUT: 'Settlement',
+      SUBSCRIPTION_IN: 'Subscription',
+      MANUAL_IN: 'Manual'
+    };
+
+    return friendlyTypeMap[type] || type;
+  }
+
   private toCents(amount: number): number {
     return Math.round(amount * 100);
   }
