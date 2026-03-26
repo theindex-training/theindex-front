@@ -100,6 +100,10 @@ export interface AttendanceSessionsResponse {
   };
 }
 
+export interface InactiveTraineesReportQuery {
+  skipDays: number;
+}
+
 export interface AttendanceReportItem {
   traineeId?: string;
   id?: string;
@@ -154,8 +158,14 @@ export class AttendanceService {
     );
   }
 
-  getInactiveTraineesReport(): Observable<AttendanceReportItem[]> {
-    return this.http.get<AttendanceReportItem[]>(`${this.baseUrl}/reports/inactive-trainees`);
+  getInactiveTraineesReport(query: InactiveTraineesReportQuery): Observable<AttendanceReportItem[]> {
+    const params = buildHttpParams({
+      skipDays: query.skipDays,
+    });
+
+    return this.http.get<AttendanceReportItem[]>(`${this.baseUrl}/reports/inactive-trainees`, {
+      params,
+    });
   }
 
   getTraineesWithoutActiveSubscriptionReport(): Observable<AttendanceReportItem[]> {

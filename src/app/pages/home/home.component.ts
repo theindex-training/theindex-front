@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AttendanceReportItem, AttendanceService } from '../../services/attendance.service';
 import { AuthService } from '../../services/auth.service';
@@ -10,7 +11,7 @@ import { forkJoin, finalize } from 'rxjs';
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
 })
 export class HomeComponent implements OnInit {
   inactiveTrainees: AttendanceReportItem[] = [];
@@ -21,6 +22,12 @@ export class HomeComponent implements OnInit {
 
   loadingReports = false;
   reportsErrorMessage = '';
+  selectedInactiveSkipDays = 7;
+  readonly inactiveSkipDaysOptions = [
+    { label: 'Last 7 days', value: 7 },
+    { label: 'Last 30 days', value: 30 },
+    { label: 'Last 90 days', value: 90 },
+  ];
 
   readonly canViewAttendanceReports: boolean;
 
@@ -87,12 +94,18 @@ export class HomeComponent implements OnInit {
       .replace(/^./, value => value.toUpperCase());
   }
 
+  onInactiveSkipDaysChange(): void {
+    this.loadReports();
+  }
+
   private loadReports(): void {
     this.loadingReports = true;
     this.reportsErrorMessage = '';
 
     forkJoin({
-      inactive: this.attendanceService.getInactiveTraineesReport(),
+      inactive: this.attendanceService.getInactiveTraineesReport({
+        skipDays: this.selectedInactiveSkipDays,
+      }),
       withoutActiveSubscription:
         this.attendanceService.getTraineesWithoutActiveSubscriptionReport(),
     })

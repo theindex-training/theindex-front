@@ -64,6 +64,37 @@ p {
   margin: 0 0 1rem;
 }
 
+.report-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.report-card .report-title-row h3 {
+  margin: 0;
+}
+
+.report-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.report-filter span {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.report-filter select {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  background: #fff;
+}
+
 .table {
   display: flex;
   flex-direction: column;

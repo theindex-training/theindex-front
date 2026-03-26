@@ -34,7 +34,17 @@
         <div class="state error">{{ reportsErrorMessage }}</div>
       } @else {
         <article class="report-card">
-          <h3>Inactive trainees</h3>
+          <div class="report-title-row">
+            <h3>Inactive trainees</h3>
+            <label class="report-filter">
+              <span>Inactive for</span>
+              <select [(ngModel)]="selectedInactiveSkipDays" (ngModelChange)="onInactiveSkipDaysChange()">
+                @for (option of inactiveSkipDaysOptions; track option.value) {
+                  <option [ngValue]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </label>
+          </div>
           @if (!inactiveTrainees.length) {
             <div class="state">No inactive trainees found.</div>
           } @else {
