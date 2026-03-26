@@ -20,4 +20,85 @@
       <p>Open settlement reports and inspect payout details.</p>
     </article>
   </div>
+
+  @if (canViewAttendanceReports) {
+    <section class="reports-section">
+      <header>
+        <h2>Attendance reports</h2>
+        <p>Monitor inactive trainees and trainees with no active subscription.</p>
+      </header>
+
+      @if (loadingReports) {
+        <div class="state">Loading reports...</div>
+      } @else if (reportsErrorMessage) {
+        <div class="state error">{{ reportsErrorMessage }}</div>
+      } @else {
+        <article class="report-card">
+          <h3>Inactive trainees</h3>
+          @if (!inactiveTrainees.length) {
+            <div class="state">No inactive trainees found.</div>
+          } @else {
+            <div class="table">
+              <div class="table-row table-header" [style.gridTemplateColumns]="'minmax(220px, 1.4fr) repeat(' + inactiveColumns.length + ', minmax(140px, 1fr))'">
+                <span>Trainee</span>
+                @for (column of inactiveColumns; track column) {
+                  <span>{{ columnLabel(column) }}</span>
+                }
+              </div>
+
+              @for (item of inactiveTrainees; track $index) {
+                <div class="table-row" [style.gridTemplateColumns]="'minmax(220px, 1.4fr) repeat(' + inactiveColumns.length + ', minmax(140px, 1fr))'">
+                  <span>
+                    @if (resolveTraineeId(item); as traineeId) {
+                      <a class="link-inherit" [routerLink]="['/trainees', traineeId]">
+                        {{ traineeDisplayName(item) }}
+                      </a>
+                    } @else {
+                      {{ traineeDisplayName(item) }}
+                    }
+                  </span>
+                  @for (column of inactiveColumns; track column) {
+                    <span>{{ formatReportValue(item, column) }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </article>
+
+        <article class="report-card">
+          <h3>Trainees without active subscription</h3>
+          @if (!traineesWithoutActiveSubscription.length) {
+            <div class="state">No trainees without active subscription found.</div>
+          } @else {
+            <div class="table">
+              <div class="table-row table-header" [style.gridTemplateColumns]="'minmax(220px, 1.4fr) repeat(' + withoutSubscriptionColumns.length + ', minmax(140px, 1fr))'">
+                <span>Trainee</span>
+                @for (column of withoutSubscriptionColumns; track column) {
+                  <span>{{ columnLabel(column) }}</span>
+                }
+              </div>
+
+              @for (item of traineesWithoutActiveSubscription; track $index) {
+                <div class="table-row" [style.gridTemplateColumns]="'minmax(220px, 1.4fr) repeat(' + withoutSubscriptionColumns.length + ', minmax(140px, 1fr))'">
+                  <span>
+                    @if (resolveTraineeId(item); as traineeId) {
+                      <a class="link-inherit" [routerLink]="['/trainees', traineeId]">
+                        {{ traineeDisplayName(item) }}
+                      </a>
+                    } @else {
+                      {{ traineeDisplayName(item) }}
+                    }
+                  </span>
+                  @for (column of withoutSubscriptionColumns; track column) {
+                    <span>{{ formatReportValue(item, column) }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </article>
+      }
+    </section>
+  }
 </section>

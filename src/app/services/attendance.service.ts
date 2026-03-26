@@ -100,6 +100,20 @@ export interface AttendanceSessionsResponse {
   };
 }
 
+export interface AttendanceReportItem {
+  traineeId?: string;
+  id?: string;
+  name?: string;
+  nickname?: string | null;
+  trainee?: {
+    id?: string;
+    traineeId?: string;
+    name?: string;
+    nickname?: string | null;
+  };
+  [key: string]: unknown;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -137,6 +151,16 @@ export class AttendanceService {
   listUnpaidForTrainee(traineeId: string): Observable<AttendanceTraineeTrainingItem[]> {
     return this.http.get<AttendanceTraineeTrainingItem[]>(
       `${this.baseUrl}/trainees/${traineeId}/unpaid`,
+    );
+  }
+
+  getInactiveTraineesReport(): Observable<AttendanceReportItem[]> {
+    return this.http.get<AttendanceReportItem[]>(`${this.baseUrl}/reports/inactive-trainees`);
+  }
+
+  getTraineesWithoutActiveSubscriptionReport(): Observable<AttendanceReportItem[]> {
+    return this.http.get<AttendanceReportItem[]>(
+      `${this.baseUrl}/reports/without-active-subscription`,
     );
   }
 }
