@@ -48,6 +48,11 @@ export class MainLayoutComponent {
     { label: 'Cash register', route: '/cash-register', roles: ['ADMIN'] }
   ];
 
+  readonly traineeNavItems: NavItem[] = [
+    { label: 'Profile', route: '/my-profile' },
+    { label: 'Records', route: '/records' }
+  ];
+
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router
@@ -85,11 +90,7 @@ export class MainLayoutComponent {
   }
 
   get visibleNavItems(): NavItem[] {
-    if (this.isTrainee) {
-      return [];
-    }
-
-    return this.navItems;
+    return this.isTrainee ? this.traineeNavItems : this.navItems;
   }
 
   canViewNavItem(item: NavItem): boolean {

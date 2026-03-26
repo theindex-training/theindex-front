@@ -83,6 +83,6 @@ export class LoginComponent {
   }
 
   private getDefaultRoute(): string {
-    return this.authService.getUserRole() === 'TRAINEE' ? '/my-trainings' : '/home';
+    return this.authService.getUserRole() === 'TRAINEE' ? '/my-profile' : '/home';
   }
 }
