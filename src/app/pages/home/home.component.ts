@@ -2,9 +2,14 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AttendanceReportItem, AttendanceService } from '../../services/attendance.service';
+import {
+  AttendanceService,
+  AttendanceSubscriptionReport,
+  InactiveTraineeReportItem,
+  TraineeWithoutActiveSubscriptionReportItem,
+} from '../../services/attendance.service';
 import { AuthService } from '../../services/auth.service';
-import { forkJoin, finalize } from 'rxjs';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -14,14 +19,12 @@ import { forkJoin, finalize } from 'rxjs';
   imports: [CommonModule, FormsModule, RouterLink],
 })
 export class HomeComponent implements OnInit {
-  inactiveTrainees: AttendanceReportItem[] = [];
-  traineesWithoutActiveSubscription: AttendanceReportItem[] = [];
-
-  inactiveColumns: string[] = [];
-  withoutSubscriptionColumns: string[] = [];
-
-  loadingReports = false;
-  reportsErrorMessage = '';
+  inactiveTrainees: InactiveTraineeReportItem[] = [];
+  traineesWithoutActiveSubscription: TraineeWithoutActiveSubscriptionReportItem[] = [];
+  loadingInactiveReport = false;
+  loadingWithoutActiveSubscriptionReport = false;
+  inactiveReportErrorMessage = '';
+  withoutActiveSubscriptionReportErrorMessage = '';
   selectedInactiveSkipDays = 7;
   readonly inactiveSkipDaysOptions = [
     { label: 'Last 7 days', value: 7 },
@@ -45,103 +48,94 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    this.loadReports();
+    this.loadInactiveReport();
+    this.loadWithoutActiveSubscriptionReport();
   }
 
-  resolveTraineeId(item: AttendanceReportItem): string | null {
-    return (
-      this.readString(item.traineeId) ??
-      this.readString(item.id) ??
-      this.readString(item.trainee?.traineeId) ??
-      this.readString(item.trainee?.id) ??
-      null
-    );
-  }
-
-  traineeDisplayName(item: AttendanceReportItem): string {
-    const name = this.readString(item.name) ?? this.readString(item.trainee?.name) ?? 'Unknown';
-    const nickname = this.readString(item.nickname) ?? this.readString(item.trainee?.nickname);
+  traineeDisplayName(item: { name?: string; nickname?: string | null }): string {
+    const name = this.readString(item.name) ?? 'Unknown';
+    const nickname = this.readString(item.nickname);
     return nickname ? `${name} (${nickname})` : name;
   }
 
-  formatReportValue(item: AttendanceReportItem, key: string): string {
-    const value = item[key];
-
-    if (value === null || value === undefined || value === '') {
+  formatDateOrFallback(value: string | null): string {
+    if (!value) {
       return '—';
     }
 
-    if (typeof value === 'boolean') {
-      return value ? 'Yes' : 'No';
-    }
-
-    if (typeof value === 'number') {
-      return `${value}`;
-    }
-
-    if (typeof value === 'string') {
-      return value;
-    }
-
-    return JSON.stringify(value);
+    return new Date(value).toLocaleString();
   }
 
-  columnLabel(key: string): string {
-    return key
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/[_-]+/g, ' ')
-      .trim()
-      .replace(/^./, value => value.toUpperCase());
+  formatSubscriptionSummary(subscription: AttendanceSubscriptionReport | null): string {
+    if (!subscription) {
+      return '—';
+    }
+
+    const parts = [
+      subscription.planName ? `Plan: ${subscription.planName}` : null,
+      subscription.type ? `Type: ${subscription.type}` : null,
+      subscription.startDate ? `Start: ${this.formatDateOrFallback(subscription.startDate)}` : null,
+      subscription.endDate ? `End: ${this.formatDateOrFallback(subscription.endDate)}` : null,
+      subscription.remainingTrainings !== null
+        ? `Remaining trainings: ${subscription.remainingTrainings}`
+        : null,
+      subscription.remainingDays !== null ? `Remaining days: ${subscription.remainingDays}` : null,
+    ].filter((part): part is string => Boolean(part));
+
+    return parts.length ? parts.join(' • ') : '—';
   }
 
   onInactiveSkipDaysChange(): void {
-    this.loadReports();
+    this.loadInactiveReport();
   }
 
-  private loadReports(): void {
-    this.loadingReports = true;
-    this.reportsErrorMessage = '';
+  private loadInactiveReport(): void {
+    this.loadingInactiveReport = true;
+    this.inactiveReportErrorMessage = '';
 
-    forkJoin({
-      inactive: this.attendanceService.getInactiveTraineesReport({
+    this.attendanceService
+      .getInactiveTraineesReport({
         skipDays: this.selectedInactiveSkipDays,
-      }),
-      withoutActiveSubscription:
-        this.attendanceService.getTraineesWithoutActiveSubscriptionReport(),
-    })
+      })
       .pipe(
         finalize(() => {
-          this.loadingReports = false;
+          this.loadingInactiveReport = false;
           this.changeDetector.detectChanges();
         }),
       )
       .subscribe({
       next: result => {
-        this.inactiveTrainees = result.inactive;
-        this.traineesWithoutActiveSubscription = result.withoutActiveSubscription;
-        this.inactiveColumns = this.buildReportColumns(result.inactive);
-        this.withoutSubscriptionColumns = this.buildReportColumns(result.withoutActiveSubscription);
+        this.inactiveTrainees = result;
       },
       error: error => {
-        this.reportsErrorMessage =
-          error?.error?.message || 'Unable to load attendance reports right now.';
+        this.inactiveReportErrorMessage =
+          error?.error?.message || 'Unable to load inactive trainees report right now.';
       },
     });
   }
 
-  private buildReportColumns(rows: AttendanceReportItem[]): string[] {
-    const ignoredKeys = new Set(['id', 'traineeId', 'name', 'nickname', 'trainee']);
-    const columns = new Set<string>();
+  private loadWithoutActiveSubscriptionReport(): void {
+    this.loadingWithoutActiveSubscriptionReport = true;
+    this.withoutActiveSubscriptionReportErrorMessage = '';
 
-    rows.forEach(item => {
-      Object.keys(item).forEach(key => {
-        if (!ignoredKeys.has(key)) {
-          columns.add(key);
-        }
+    this.attendanceService
+      .getTraineesWithoutActiveSubscriptionReport()
+      .pipe(
+        finalize(() => {
+          this.loadingWithoutActiveSubscriptionReport = false;
+          this.changeDetector.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: result => {
+          this.traineesWithoutActiveSubscription = result;
+        },
+        error: error => {
+          this.withoutActiveSubscriptionReportErrorMessage =
+            error?.error?.message ||
+            'Unable to load trainees without active subscription report right now.';
+        },
       });
-    });
-
-    return [...columns];
   }
 
   private readString(value: unknown): string | null {

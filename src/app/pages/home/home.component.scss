@@ -112,6 +112,10 @@ p {
   min-width: max-content;
 }
 
+.report-grid {
+  grid-template-columns: minmax(220px, 1.2fr) minmax(180px, 1fr) minmax(280px, 2fr);
+}
+
 .table-header {
   font-weight: 700;
   color: #334155;
