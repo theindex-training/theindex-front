@@ -12,5 +12,5 @@ export const loginGuard: CanActivateFn = () => {
 
   const userRole = authService.getUserRole();
 
-  return router.parseUrl(userRole === 'TRAINEE' ? '/my-trainings' : '/home');
+  return router.parseUrl(userRole === 'TRAINEE' ? '/my-profile' : '/home');
 };

@@ -38,11 +38,17 @@ export const routes: Routes = [
       },
 
       {
-        path: 'my-trainings',
+        path: 'my-profile',
         loadComponent: () =>
           import('./pages/trainee-dashboard/trainee-dashboard.component').then(
             m => m.TraineeDashboardComponent
           ),
+        canActivate: [roleGuard],
+        data: { roles: ['TRAINEE'] }
+      },
+      {
+        path: 'records',
+        loadComponent: () => import('./pages/records/records.component').then(m => m.RecordsComponent),
         canActivate: [roleGuard],
         data: { roles: ['TRAINEE'] }
       },

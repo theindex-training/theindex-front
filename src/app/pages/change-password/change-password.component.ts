@@ -156,7 +156,7 @@ export class ChangePasswordComponent implements OnInit {
     const role = this.authService.getUserRole();
 
     if (role === 'TRAINEE') {
-      return '/my-trainings';
+      return '/my-profile';
     }
 
     return '/home';
