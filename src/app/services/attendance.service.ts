@@ -100,6 +100,35 @@ export interface AttendanceSessionsResponse {
   };
 }
 
+export interface InactiveTraineesReportQuery {
+  skipDays: number;
+}
+
+export interface AttendanceSubscriptionReport {
+  planName: string | null;
+  type: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  remainingTrainings: number | null;
+  remainingDays: number | null;
+}
+
+export interface InactiveTraineeReportItem {
+  name?: string;
+  nickname?: string | null;
+  traineeId?: string;
+  lastTrainingDate: string | null;
+  activeSubscription: AttendanceSubscriptionReport | null;
+}
+
+export interface TraineeWithoutActiveSubscriptionReportItem {
+  name?: string;
+  nickname?: string | null;
+  traineeId?: string;
+  lastTrainingDate: string | null;
+  lastActiveSubscription: AttendanceSubscriptionReport | null;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -137,6 +166,26 @@ export class AttendanceService {
   listUnpaidForTrainee(traineeId: string): Observable<AttendanceTraineeTrainingItem[]> {
     return this.http.get<AttendanceTraineeTrainingItem[]>(
       `${this.baseUrl}/trainees/${traineeId}/unpaid`,
+    );
+  }
+
+  getInactiveTraineesReport(
+    query: InactiveTraineesReportQuery,
+  ): Observable<InactiveTraineeReportItem[]> {
+    const params = buildHttpParams({
+      skipDays: query.skipDays,
+    });
+
+    return this.http.get<InactiveTraineeReportItem[]>(`${this.baseUrl}/reports/inactive-trainees`, {
+      params,
+    });
+  }
+
+  getTraineesWithoutActiveSubscriptionReport(): Observable<
+    TraineeWithoutActiveSubscriptionReportItem[]
+  > {
+    return this.http.get<TraineeWithoutActiveSubscriptionReportItem[]>(
+      `${this.baseUrl}/reports/without-active-subscription`,
     );
   }
 }

@@ -20,4 +20,93 @@
       <p>Open settlement reports and inspect payout details.</p>
     </article>
   </div>
+
+  @if (canViewAttendanceReports) {
+    <section class="reports-section">
+      <header>
+        <h2>Attendance reports</h2>
+        <p>Monitor inactive trainees and trainees with no active subscription.</p>
+      </header>
+
+      <article class="report-card">
+        <div class="report-title-row">
+          <h3>Inactive trainees</h3>
+          <label class="report-filter">
+            <span>Inactive for</span>
+            <select [(ngModel)]="selectedInactiveSkipDays" (ngModelChange)="onInactiveSkipDaysChange()">
+              @for (option of inactiveSkipDaysOptions; track option.value) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </label>
+        </div>
+        @if (loadingInactiveReport) {
+          <div class="state">Loading inactive trainees report...</div>
+        } @else if (inactiveReportErrorMessage) {
+          <div class="state error">{{ inactiveReportErrorMessage }}</div>
+        } @else if (!inactiveTrainees.length) {
+          <div class="state">No inactive trainees found.</div>
+        } @else {
+          <div class="table">
+            <div class="table-row table-header report-grid">
+              <span>Trainee</span>
+              <span>Last training date</span>
+              <span>Active subscription</span>
+            </div>
+
+            @for (item of inactiveTrainees; track $index) {
+              <div class="table-row report-grid">
+                <span>
+                  @if (item.traineeId) {
+                    <a class="link-inherit" [routerLink]="['/trainees', item.traineeId]">
+                      {{ traineeDisplayName(item) }}
+                    </a>
+                  } @else {
+                    {{ traineeDisplayName(item) }}
+                  }
+                </span>
+                <span>{{ formatDateOrFallback(item.lastTrainingDate) }}</span>
+                <span>{{ formatSubscriptionSummary(item.activeSubscription) }}</span>
+              </div>
+            }
+          </div>
+        }
+      </article>
+
+      <article class="report-card">
+        <h3>Trainees without active subscription</h3>
+        @if (loadingWithoutActiveSubscriptionReport) {
+          <div class="state">Loading trainees without active subscription report...</div>
+        } @else if (withoutActiveSubscriptionReportErrorMessage) {
+          <div class="state error">{{ withoutActiveSubscriptionReportErrorMessage }}</div>
+        } @else if (!traineesWithoutActiveSubscription.length) {
+          <div class="state">No trainees without active subscription found.</div>
+        } @else {
+          <div class="table">
+            <div class="table-row table-header report-grid">
+              <span>Trainee</span>
+              <span>Last training date</span>
+              <span>Last active subscription</span>
+            </div>
+
+            @for (item of traineesWithoutActiveSubscription; track $index) {
+              <div class="table-row report-grid">
+                <span>
+                  @if (item.traineeId) {
+                    <a class="link-inherit" [routerLink]="['/trainees', item.traineeId]">
+                      {{ traineeDisplayName(item) }}
+                    </a>
+                  } @else {
+                    {{ traineeDisplayName(item) }}
+                  }
+                </span>
+                <span>{{ formatDateOrFallback(item.lastTrainingDate) }}</span>
+                <span>{{ formatSubscriptionSummary(item.lastActiveSubscription) }}</span>
+              </div>
+            }
+          </div>
+        }
+      </article>
+    </section>
+  }
 </section>
