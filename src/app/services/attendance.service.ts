@@ -163,6 +163,10 @@ export class AttendanceService {
     );
   }
 
+  listForTrainee(traineeId: string): Observable<AttendanceTraineeTrainingItem[]> {
+    return this.http.get<AttendanceTraineeTrainingItem[]>(`${this.baseUrl}/trainees/${traineeId}`);
+  }
+
   listUnpaidForTrainee(traineeId: string): Observable<AttendanceTraineeTrainingItem[]> {
     return this.http.get<AttendanceTraineeTrainingItem[]>(
       `${this.baseUrl}/trainees/${traineeId}/unpaid`,

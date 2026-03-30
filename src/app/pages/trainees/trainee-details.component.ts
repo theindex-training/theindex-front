@@ -12,7 +12,6 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TraineeSubscriptionsTableComponent } from '../../components/trainee-subscriptions-table/trainee-subscriptions-table.component';
 import { TraineeTrainingsTableComponent } from '../../components/trainee-trainings-table/trainee-trainings-table.component';
-import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import {
   AttendanceService,
@@ -61,8 +60,7 @@ export class TraineeDetailsComponent implements OnInit {
   trainee: TraineeProfile | null = null;
   account: ProvisionedAccount | null = null;
   subscriptions: Subscription[] = [];
-  paidTrainings: AttendanceTraineeTrainingItem[] = [];
-  unpaidTrainings: AttendanceTraineeTrainingItem[] = [];
+  trainings: AttendanceTraineeTrainingItem[] = [];
   plans: Plan[] = [];
   loading = true;
   plansLoading = true;
@@ -294,13 +292,9 @@ export class TraineeDetailsComponent implements OnInit {
     this.trainingsLoading = true;
     this.trainingErrorMessage = '';
 
-    forkJoin({
-      paid: this.attendanceService.listPaidForTrainee(id),
-      unpaid: this.attendanceService.listUnpaidForTrainee(id),
-    }).subscribe({
-      next: ({ paid, unpaid }) => {
-        this.paidTrainings = paid;
-        this.unpaidTrainings = unpaid;
+    this.attendanceService.listForTrainee(id).subscribe({
+      next: (trainings) => {
+        this.trainings = trainings;
         this.trainingsLoading = false;
         this.changeDetector.detectChanges();
       },
