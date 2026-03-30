@@ -11,7 +11,7 @@ import { AuthService } from '../../services/auth.service';
 import { Plan, PlansService } from '../../services/plans.service';
 import { Subscription, SubscriptionsService } from '../../services/subscriptions.service';
 
-type SubscriptionFilter = 'PAID' | 'UNPAID' | 'ALL';
+type SubscriptionFilter = 'ACTIVE' | 'EXHAUSTED' | 'ALL';
 
 @Component({
   selector: 'app-trainee-dashboard',
@@ -21,7 +21,7 @@ type SubscriptionFilter = 'PAID' | 'UNPAID' | 'ALL';
   styleUrl: './trainee-dashboard.component.scss',
 })
 export class TraineeDashboardComponent implements OnInit {
-  subscriptionFilter: SubscriptionFilter = 'PAID';
+  subscriptionFilter: SubscriptionFilter = 'ACTIVE';
 
   loading = true;
   errorMessage = '';
@@ -53,18 +53,18 @@ export class TraineeDashboardComponent implements OnInit {
       return this.subscriptions;
     }
 
-    return this.subscriptions.filter((subscription) =>
-      this.subscriptionFilter === 'PAID' ? subscription.paidCents > 0 : subscription.paidCents <= 0,
+    return this.subscriptions.filter(
+      (subscription) => subscription.status.toUpperCase() === this.subscriptionFilter,
     );
   }
 
   get filteredSubscriptionsEmptyMessage(): string {
-    if (this.subscriptionFilter === 'PAID') {
-      return 'No paid subscriptions found for your profile.';
+    if (this.subscriptionFilter === 'ACTIVE') {
+      return 'No active subscriptions found for your profile.';
     }
 
-    if (this.subscriptionFilter === 'UNPAID') {
-      return 'No unpaid subscriptions found for your profile.';
+    if (this.subscriptionFilter === 'EXHAUSTED') {
+      return 'No exhausted subscriptions found for your profile.';
     }
 
     return 'No subscriptions found for your profile.';
