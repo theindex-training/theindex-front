@@ -25,6 +25,8 @@ import {
   ProvisionedAccount,
 } from '../../services/account-provisioning.service';
 
+type SubscriptionFilter = 'PAID' | 'UNPAID' | 'ALL';
+
 const currencyValidator: ValidatorFn = (control: AbstractControl) => {
   const value = control.value;
   if (value === null || value === undefined || value === '') {
@@ -57,6 +59,8 @@ import { displayValue } from '../../utils/display.util';
   styleUrl: './trainee-details.component.scss',
 })
 export class TraineeDetailsComponent implements OnInit {
+  subscriptionFilter: SubscriptionFilter = 'PAID';
+
   trainee: TraineeProfile | null = null;
   account: ProvisionedAccount | null = null;
   subscriptions: Subscription[] = [];
@@ -170,6 +174,28 @@ export class TraineeDetailsComponent implements OnInit {
   formatPlanLabel(subscription: Subscription): string {
     const plan = this.plans.find((entry) => entry.id === subscription.planId);
     return plan ? plan.title : subscription.planId;
+  }
+
+  get filteredSubscriptions(): Subscription[] {
+    if (this.subscriptionFilter === 'ALL') {
+      return this.subscriptions;
+    }
+
+    return this.subscriptions.filter((subscription) =>
+      this.subscriptionFilter === 'PAID' ? subscription.paidCents > 0 : subscription.paidCents <= 0,
+    );
+  }
+
+  get filteredSubscriptionsEmptyMessage(): string {
+    if (this.subscriptionFilter === 'PAID') {
+      return 'No paid subscriptions found for this trainee.';
+    }
+
+    if (this.subscriptionFilter === 'UNPAID') {
+      return 'No unpaid subscriptions found for this trainee.';
+    }
+
+    return 'No subscriptions found for this trainee.';
   }
 
   deleteSubscription(subscription: Subscription): void {
