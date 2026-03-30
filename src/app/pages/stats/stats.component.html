@@ -1,0 +1,164 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Stats</h1>
+      <p>Insights based on your training attendance.</p>
+    </div>
+  </header>
+
+  @if (loading) {
+    <div class="state">Loading stats...</div>
+  } @else if (errorMessage) {
+    <div class="state error">{{ errorMessage }}</div>
+  } @else if (insights) {
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Top training partners</h2>
+          <p>People you have trained with most often.</p>
+        </div>
+      </div>
+
+      @if (!insights.topTrainingPartners.length) {
+        <div class="state">No data available.</div>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>Partner</th>
+              <th>Trainings together</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (partner of insights.topTrainingPartners; track partner.traineeId) {
+              <tr>
+                <td>{{ partner.traineeName }}</td>
+                <td>{{ partner.trainingsTogether }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Top weekdays for trainings</h2>
+          <p>The weekdays you train on most often.</p>
+        </div>
+      </div>
+
+      @if (!insights.topWeekdays.length) {
+        <div class="state">No data available.</div>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>Weekday</th>
+              <th>Trainings</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (weekday of insights.topWeekdays; track weekday.weekdayNumber) {
+              <tr>
+                <td>{{ weekday.weekday }}</td>
+                <td>{{ weekday.trainingsCount }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Top timeslots for trainings</h2>
+          <p>Hours of day with the most training sessions.</p>
+        </div>
+      </div>
+
+      @if (!insights.topTimeSlots.length) {
+        <div class="state">No data available.</div>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>Timeslot</th>
+              <th>Trainings</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (slot of insights.topTimeSlots; track slot.timeSlot) {
+              <tr>
+                <td>{{ slot.timeSlot }}</td>
+                <td>{{ slot.trainingsCount }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Top trainers I train with</h2>
+          <p>Trainers you have the most sessions with.</p>
+        </div>
+      </div>
+
+      @if (!insights.topTrainers.length) {
+        <div class="state">No data available.</div>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>Trainer</th>
+              <th>Trainings</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (trainer of insights.topTrainers; track trainer.trainerId) {
+              <tr>
+                <td>{{ trainer.trainerName }}</td>
+                <td>{{ trainer.trainingsCount }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Top gyms I train in</h2>
+          <p>Gyms where you train most often.</p>
+        </div>
+      </div>
+
+      @if (!insights.topGyms.length) {
+        <div class="state">No data available.</div>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>Gym</th>
+              <th>Trainings</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (gym of insights.topGyms; track gym.gymId) {
+              <tr>
+                <td>{{ gym.gymName }}</td>
+                <td>{{ gym.trainingsCount }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  }
+</section>

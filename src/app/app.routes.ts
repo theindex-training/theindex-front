@@ -47,6 +47,12 @@ export const routes: Routes = [
         data: { roles: ['TRAINEE'] }
       },
       {
+        path: 'stats',
+        loadComponent: () => import('./pages/stats/stats.component').then(m => m.StatsComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['TRAINEE'] }
+      },
+      {
         path: 'records',
         loadComponent: () => import('./pages/records/records.component').then(m => m.RecordsComponent),
         canActivate: [roleGuard],

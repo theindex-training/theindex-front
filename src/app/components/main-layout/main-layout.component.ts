@@ -50,6 +50,7 @@ export class MainLayoutComponent {
 
   readonly traineeNavItems: NavItem[] = [
     { label: 'Profile', route: '/my-profile' },
+    { label: 'Stats', route: '/stats' },
     { label: 'Records', route: '/records' }
   ];
 
