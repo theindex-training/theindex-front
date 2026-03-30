@@ -11,6 +11,8 @@ import { AuthService } from '../../services/auth.service';
 import { Plan, PlansService } from '../../services/plans.service';
 import { Subscription, SubscriptionsService } from '../../services/subscriptions.service';
 
+type SubscriptionFilter = 'ACTIVE' | 'EXHAUSTED' | 'ALL';
+
 @Component({
   selector: 'app-trainee-dashboard',
   standalone: true,
@@ -19,6 +21,8 @@ import { Subscription, SubscriptionsService } from '../../services/subscriptions
   styleUrl: './trainee-dashboard.component.scss',
 })
 export class TraineeDashboardComponent implements OnInit {
+  subscriptionFilter: SubscriptionFilter = 'ACTIVE';
+
   loading = true;
   errorMessage = '';
 
@@ -42,6 +46,28 @@ export class TraineeDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDashboardData();
+  }
+
+  get filteredSubscriptions(): Subscription[] {
+    if (this.subscriptionFilter === 'ALL') {
+      return this.subscriptions;
+    }
+
+    return this.subscriptions.filter(
+      (subscription) => subscription.status.toUpperCase() === this.subscriptionFilter,
+    );
+  }
+
+  get filteredSubscriptionsEmptyMessage(): string {
+    if (this.subscriptionFilter === 'ACTIVE') {
+      return 'No active subscriptions found for your profile.';
+    }
+
+    if (this.subscriptionFilter === 'EXHAUSTED') {
+      return 'No exhausted subscriptions found for your profile.';
+    }
+
+    return 'No subscriptions found for your profile.';
   }
 
   private loadDashboardData(): void {

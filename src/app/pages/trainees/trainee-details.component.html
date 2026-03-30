@@ -83,14 +83,25 @@
           <h2>Subscriptions</h2>
           <p>Track current plans and purchase new subscriptions.</p>
         </div>
+        <label class="filter">
+          <span>Filter</span>
+          <select
+            [value]="subscriptionFilter"
+            (change)="subscriptionFilter = $any($event.target).value"
+          >
+            <option value="ACTIVE">Active</option>
+            <option value="EXHAUSTED">Exhausted</option>
+            <option value="ALL">All</option>
+          </select>
+        </label>
       </div>
 
       <app-trainee-subscriptions-table
-        [subscriptions]="subscriptions"
+        [subscriptions]="filteredSubscriptions"
         [plans]="plans"
         [loading]="subscriptionsLoading"
         [errorMessage]="subscriptionErrorMessage"
-        [emptyMessage]="'No subscriptions yet.'"
+        [emptyMessage]="filteredSubscriptionsEmptyMessage"
         [canDeleteSubscriptions]="canDeleteSubscriptions"
         [deletingSubscriptionId]="deletingSubscriptionId"
         (deleteSubscriptionRequested)="deleteSubscription($event)"
