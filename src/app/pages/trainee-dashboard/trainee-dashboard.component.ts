@@ -26,8 +26,7 @@ export class TraineeDashboardComponent implements OnInit {
   subscriptionsLoading = true;
   subscriptionErrorMessage = '';
 
-  paidTrainings: AttendanceTraineeTrainingItem[] = [];
-  unpaidTrainings: AttendanceTraineeTrainingItem[] = [];
+  trainings: AttendanceTraineeTrainingItem[] = [];
   trainingsLoading = true;
   trainingErrorMessage = '';
 
@@ -61,14 +60,12 @@ export class TraineeDashboardComponent implements OnInit {
     this.errorMessage = '';
 
     forkJoin({
-      paid: this.attendanceService.listPaidForTrainee(traineeId),
-      unpaid: this.attendanceService.listUnpaidForTrainee(traineeId),
+      trainings: this.attendanceService.listForTrainee(traineeId),
       subscriptions: this.subscriptionsService.listForTrainee(traineeId),
       plans: this.plansService.list(),
     }).subscribe({
-      next: ({ paid, unpaid, subscriptions, plans }) => {
-        this.paidTrainings = paid;
-        this.unpaidTrainings = unpaid;
+      next: ({ trainings, subscriptions, plans }) => {
+        this.trainings = trainings;
         this.subscriptions = subscriptions;
         this.plans = plans;
         this.subscriptionsLoading = false;

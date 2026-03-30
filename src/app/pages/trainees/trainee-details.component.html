@@ -152,32 +152,16 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <h2>Paid trainings</h2>
-          <p>Completed trainings that are marked as paid.</p>
+          <h2>Trainings</h2>
+          <p>Review completed trainings for this trainee.</p>
         </div>
       </div>
 
       <app-trainee-trainings-table
-        [trainings]="paidTrainings"
+        [trainings]="trainings"
         [loading]="trainingsLoading"
         [errorMessage]="trainingErrorMessage"
-        [emptyMessage]="'No paid trainings yet.'"
-      ></app-trainee-trainings-table>
-    </div>
-
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <h2>Unpaid trainings</h2>
-          <p>Completed trainings that are still unpaid.</p>
-        </div>
-      </div>
-
-      <app-trainee-trainings-table
-        [trainings]="unpaidTrainings"
-        [loading]="trainingsLoading"
-        [errorMessage]="trainingErrorMessage"
-        [emptyMessage]="'No unpaid trainings yet.'"
+        [emptyMessage]="'No trainings yet.'"
       ></app-trainee-trainings-table>
     </div>
 
