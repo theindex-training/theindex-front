@@ -23,6 +23,36 @@ export interface CreateTraineePayload {
   gymSubscriptionId?: string | null;
 }
 
+
+export interface TraineeTrainingInsights {
+  traineeId: string;
+  totalAttendances: number;
+  topTrainingPartners: {
+    traineeId: string;
+    traineeName: string;
+    trainingsTogether: number;
+  }[];
+  topTrainers: {
+    trainerId: string;
+    trainerName: string;
+    trainingsCount: number;
+  }[];
+  topGyms: {
+    gymId: string;
+    gymName: string;
+    trainingsCount: number;
+  }[];
+  topWeekdays: {
+    weekday: string;
+    weekdayNumber: number;
+    trainingsCount: number;
+  }[];
+  topTimeSlots: {
+    timeSlot: string;
+    trainingsCount: number;
+  }[];
+}
+
 export interface UpdateTraineePayload {
   name?: string;
   nickname?: string | null;
@@ -62,5 +92,9 @@ export class TraineesService {
 
   deactivate(id: string): Observable<TraineeProfile> {
     return this.http.delete<TraineeProfile>(`${this.baseUrl}/${id}`);
+  }
+
+  getMyTrainingInsights(): Observable<TraineeTrainingInsights> {
+    return this.http.get<TraineeTrainingInsights>(`${this.baseUrl}/me/training-insights`);
   }
 }
