@@ -50,7 +50,7 @@ public/                   # static assets
 - If you need an endpoint or field that doesn't exist, the change belongs in theindex-api first. Keep service interfaces in sync with the API's DTOs/entities, and flag cross-repo changes to the user.
 
 ## Design system ("Chalk & Iron")
-The app is being redesigned in phases. Phase 1 added tokens, fonts and theming. Phase 2 replaced the header with the navigation shell (sidebar on desktop, tab bar + sheet on mobile). Phase 3 redesigned the Trainees list and extracted the list page pattern below. Phase 4a applied it to the other list pages, 4b covered create/edit/details/delete pages and Register attendance, and 4c covers the trainee-facing pages, auth pages and dashboard.
+The app is being redesigned in phases. Phase 1 added tokens, fonts and theming. Phase 2 replaced the header with the navigation shell (sidebar on desktop, tab bar + sheet on mobile). Phase 3 redesigned the Trainees list and extracted the list page pattern below. Phase 4a applied it to the other list pages, 4b covered create/edit/details/delete pages and Register attendance, and 4c covered the trainee-facing pages, auth pages and dashboard. Every page now uses the design system.
 
 **Direction:** bold and athletic, fitting a CrossFit gym. Condensed uppercase headings, chalk-white (light) or near-black (dark) backgrounds, one orange accent, flat surfaces (no gradients), generous touch targets (44px minimum).
 
@@ -180,6 +180,7 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
 | `app-status-dot` | Dot + text label. `tone`: `success`, `warning`, `danger`, `neutral`. The text carries the meaning. |
 | `app-list-row` | Mobile row; the whole row is one link. Inputs: `link`, `title`, `titleSuffix` (muted), `avatarName`, `dimmed`. Slots: `[listRowMeta]` for the second line and `[listRowTrailing]` for a chip. Dimmed rows use `--muted` text instead of opacity, so contrast stays ≥4.5:1. |
 | `app-empty-state` | Icon, title, message, and actions in the default slot. `tone="danger"` uses the alert icon and `role="alert"`. |
+| `app-ranked-list` | Top-N card (Stats): `title`, `subtitle`, `items: { label, value }[]`, `unit`. It shows rank, label and count, plus a proportional bar that is `aria-hidden`. |
 | `app-skeleton-list` | Loading placeholder rows (`rows`, `label`). Announces `label` through `role="status"`; the blocks are `aria-hidden`. |
 
 **Global classes** (in `styles.scss`, shared without per-component budget):
@@ -213,6 +214,7 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
   - `.form-stack` is a vertical form layout.
   - `.panel-section` is a titled section inside a panel.
   - `.section-header` is a page section's heading row.
+- **`.solo-page` + `.solo-card`** (with `__code`, `__title` and `__text`): a full-page centered card for routes outside the app shell, such as Not found and Unauthorized. Wrap it in `<main>`, as Login does, so the page has a landmark.
 - **`.notice`** with `--success` / `--warning` / `--danger`: inline banners. Use `role="status"` for success and `role="alert"` for errors.
 - **`.toggle-chip`:** multi-select chip on a `<button aria-pressed>`, e.g. picking attendance sessions.
 - **`.icon-btn`** (and `--danger`): 44px icon-only button. It always needs an `aria-label`.
@@ -254,7 +256,7 @@ Create, edit, details and delete pages share one structure. They need no page SC
   - The panel holds a `detail-list`, a `.notice.notice--warning` explaining the consequence, and a `btn--danger-solid` confirm button.
   - Secondary destructive actions on other pages (e.g. "Deactivate account" next to Save) use the soft `btn--danger`.
 - **Password inputs:**
-  - Use `.password-field` with an icon `button.password-toggle`.
+  - Use `app-ui-input type="password"` (Login, Change password), or `.password-field` with an icon `button.password-toggle` in plain reactive forms.
   - The button shows the `eye` / `eye-off` icon, has an `aria-label` of "Show password" or "Hide password", and must stay keyboard reachable, so no `tabindex="-1"`.
 - **Detail pages with tables** (e.g. trainee details):
   - Put each table in its own `section.page-stack` with a `.section-header` (title, muted line and an optional control such as a segmented filter), instead of nesting the table card inside a panel.
