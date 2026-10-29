@@ -14,7 +14,6 @@
       (valueChange)="searchTerm = $event; applySearch()"
     />
     <app-segmented-control
-      class="status-filter"
       label="Status"
       [options]="statusOptions"
       [value]="activeFilter"
@@ -61,7 +60,7 @@
     </app-empty-state>
   } @else {
     <!-- Desktop / tablet (≥ 768px): table -->
-    <div class="data-table-wrap trainees-table" tabindex="0" role="region" aria-label="Trainees table">
+    <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Trainees table">
       <table class="data-table">
         <caption class="visually-hidden">Trainees</caption>
         <thead>
@@ -78,27 +77,27 @@
           @for (trainee of filteredTrainees; track trainee.id) {
             <tr>
               <td>
-                <div class="trainee-cell">
+                <div class="person-cell">
                   <app-avatar [name]="trainee.name" />
-                  <div class="trainee-cell__text">
-                    <a class="trainee-cell__name" [routerLink]="['/trainees', trainee.id]">{{ trainee.name }}</a>
-                    <span class="trainee-cell__nickname">{{ nicknameLabel(trainee) }}</span>
+                  <div class="person-cell__text">
+                    <a class="cell-link" [routerLink]="['/trainees', trainee.id]">{{ trainee.name }}</a>
+                    <span class="person-cell__sub">{{ nicknameLabel(trainee) }}</span>
                   </div>
                 </div>
               </td>
-              <td class="phone">{{ formatPhone(trainee) }}</td>
+              <td class="num">{{ formatPhone(trainee) }}</td>
               <td>
                 @if (gymCardName(trainee); as gymCard) {
                   <app-chip tone="accent">{{ gymCard }}</app-chip>
                 } @else {
-                  <span class="muted">None</span>
+                  <span class="text-muted">None</span>
                 }
               </td>
               <td>
                 @if (hasLinkedAccount(trainee)) {
-                  <span class="linked">Linked</span>
+                  <span class="linked-mark">Linked</span>
                 } @else {
-                  <span class="muted">Not linked</span>
+                  <span class="text-muted">Not linked</span>
                 }
               </td>
               <td>
@@ -119,7 +118,7 @@
     </div>
 
     <!-- Mobile (< 768px): tappable rows -->
-    <ul class="list-card trainees-list" aria-label="Trainees">
+    <ul class="list-card responsive-list" aria-label="Trainees">
       @for (trainee of filteredTrainees; track trainee.id) {
         <li>
           <app-list-row
@@ -129,9 +128,9 @@
             [avatarName]="trainee.name"
             [dimmed]="!trainee.isActive"
           >
-            <span listRowMeta class="phone">{{ formatPhone(trainee) }}</span>
+            <span listRowMeta class="num">{{ formatPhone(trainee) }}</span>
             @if (hasLinkedAccount(trainee)) {
-              <span listRowMeta class="app-linked">
+              <span listRowMeta class="linked-mark">
                 <app-icon name="check" />App<span class="visually-hidden"> account linked</span>
               </span>
             }

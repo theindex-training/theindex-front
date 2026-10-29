@@ -1,22 +1,48 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import {
+  SegmentedControlComponent,
+  SegmentedOption
+} from '../../components/segmented-control/segmented-control.component';
+import { SearchFieldComponent } from '../../components/search-field/search-field.component';
+import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { ChipComponent } from '../../components/chip/chip.component';
+import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
+import { ListRowComponent } from '../../components/list-row/list-row.component';
+import { IconComponent } from '../../components/icon/icon.component';
+import { AvatarComponent } from '../../components/avatar/avatar.component';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
 
-import { displayValue } from '../../utils/display.util';
 
 @Component({
   selector: 'app-trainers',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './trainers.component.html',
-  styleUrl: './trainers.component.scss',
+  imports: [
+    RouterLink,
+    PageHeaderComponent,
+    SegmentedControlComponent,
+    SearchFieldComponent,
+    SkeletonListComponent,
+    EmptyStateComponent,
+    ChipComponent,
+    StatusDotComponent,
+    ListRowComponent,
+    IconComponent,
+    AvatarComponent
+  ],
+  templateUrl: './trainers.component.html'
 })
 export class TrainersComponent implements OnInit {
   trainers: TrainerProfile[] = [];
   filteredTrainers: TrainerProfile[] = [];
   activeFilter: 'all' | 'active' | 'inactive' = 'all';
+  readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
+    { value: 'all', label: 'All' },
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' }
+  ];
   searchTerm = '';
   loading = true;
   errorMessage = '';
@@ -67,8 +93,9 @@ export class TrainersComponent implements OnInit {
     });
   }
 
-  formatNickname(trainer: TrainerProfile): string {
-    return displayValue(trainer.nickname);
+  nicknameLabel(trainer: TrainerProfile): string {
+    const nickname = trainer.nickname?.trim();
+    return nickname ? `“${nickname}”` : 'No nickname';
   }
 
   hasLinkedAccount(trainer: TrainerProfile): boolean {

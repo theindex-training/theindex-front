@@ -1,53 +1,88 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Gyms</h1>
-      <p>Track gym locations and training facilities.</p>
-    </div>
-    <div class="page-actions">
-      <a class="button button-primary" routerLink="/gyms/new">New gym</a>
-    </div>
-  </header>
+<section class="page-stack">
+  <app-page-header
+    title="Gyms"
+    subtitle="Gym locations where trainings take place."
+    [action]="{ label: 'New gym', link: '/gyms/new' }"
+  />
 
-  <section class="filters">
-    <label class="field">
-      <span>Status</span>
-      <select [(ngModel)]="activeFilter" (change)="loadGyms()">
-        <option value="all">All</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-      </select>
-    </label>
-  </section>
+  <div class="list-toolbar">
+    <app-segmented-control
+      label="Status"
+      [options]="statusOptions"
+      [value]="activeFilter"
+      (valueChange)="activeFilter = $event; loadGyms()"
+    />
+    @if (!loading && !errorMessage && gyms.length) {
+      <p class="list-toolbar__count" aria-live="polite">{{ gyms.length }} gyms</p>
+    }
+  </div>
 
   @if (loading) {
-    <div class="state">Loading gyms...</div>
+    <app-skeleton-list label="Loading gyms" [rows]="3" />
   } @else if (errorMessage) {
-    <div class="state error">{{ errorMessage }}</div>
+    <app-empty-state tone="danger" title="Couldn't load gyms" [message]="errorMessage">
+      <button class="btn btn--secondary" type="button" (click)="loadGyms()">Try again</button>
+    </app-empty-state>
   } @else if (!gyms.length) {
-    <div class="state">No gyms found yet.</div>
+    @if (activeFilter === 'all') {
+      <app-empty-state icon="dumbbell" title="No gyms yet" message="Add the locations where you train.">
+        <a class="btn btn--primary" routerLink="/gyms/new">New gym</a>
+      </app-empty-state>
+    } @else {
+      <app-empty-state
+        icon="dumbbell"
+        [title]="activeFilter === 'active' ? 'No active gyms' : 'No inactive gyms'"
+        message="Try a different status filter."
+      >
+        <button class="btn btn--secondary" type="button" (click)="activeFilter = 'all'; loadGyms()">
+          Show all gyms
+        </button>
+      </app-empty-state>
+    }
   } @else {
-    <div class="table">
-      <div class="table-row table-header">
-        <span>Name</span>
-        <span>Address</span>
-        <span>Status</span>
-        <span class="table-actions">Details</span>
-      </div>
-      @for (gym of gyms; track gym.id) {
-        <div class="table-row">
-          <span class="title">{{ gym.name }}</span>
-          <span>{{ formatAddress(gym) }}</span>
-          <span>
-            <span class="status" [class.inactive]="!gym.isActive">
-              {{ gym.isActive ? 'Active' : 'Inactive' }}
-            </span>
-          </span>
-          <span class="table-actions">
-            <a class="button button-secondary" [routerLink]="['/gyms', gym.id]"> Open details </a>
-          </span>
-        </div>
-      }
+    <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Gyms table">
+      <table class="data-table">
+        <caption class="visually-hidden">Gyms</caption>
+        <thead>
+          <tr>
+            <th scope="col">Gym</th>
+            <th scope="col">Address</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="cell-fit"><span class="visually-hidden">Details</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (gym of gyms; track gym.id) {
+            <tr>
+              <td><a class="cell-link" [routerLink]="['/gyms', gym.id]">{{ gym.name }}</a></td>
+              <td>{{ formatAddress(gym) }}</td>
+              <td>
+                <app-status-dot [tone]="gym.isActive ? 'success' : 'neutral'">
+                  {{ gym.isActive ? 'Active' : 'Inactive' }}
+                </app-status-dot>
+              </td>
+              <td class="cell-fit">
+                <a class="row-chevron" [routerLink]="['/gyms', gym.id]" tabindex="-1" aria-hidden="true">
+                  <app-icon name="chevron-right" />
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
+
+    <ul class="list-card responsive-list" aria-label="Gyms">
+      @for (gym of gyms; track gym.id) {
+        <li>
+          <app-list-row [link]="['/gyms', gym.id]" [title]="gym.name" [dimmed]="!gym.isActive">
+            <span listRowMeta>{{ formatAddress(gym) }}</span>
+            @if (!gym.isActive) {
+              <app-chip listRowTrailing>Inactive</app-chip>
+            }
+          </app-list-row>
+        </li>
+      }
+    </ul>
   }
 </section>

@@ -1,146 +1,187 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Attendance</h1>
-      <p>Review training sessions and all registered attendees.</p>
-    </div>
-    <div class="page-actions">
-      <a class="button button-primary" routerLink="/attendance/new">Register attendance</a>
-    </div>
-  </header>
+<section class="page-stack">
+  <app-page-header
+    title="Attendance history"
+    subtitle="Training sessions and everyone who attended."
+    [action]="{ label: 'Register attendance', link: '/attendance/new' }"
+  />
 
-  <section class="filters">
-    <label class="field">
-      <span>Start date</span>
-      <input type="date" [(ngModel)]="selectedStartDate" />
-    </label>
-
-    <label class="field">
-      <span>End date</span>
-      <input type="date" [(ngModel)]="selectedEndDate" />
-    </label>
-
-    <label class="field">
-      <span>Start time</span>
-      <input type="time" [(ngModel)]="selectedStartTime" />
-    </label>
-
-    <label class="field">
-      <span>End time</span>
-      <input type="time" [(ngModel)]="selectedEndTime" />
-    </label>
-
-    @if (isAdmin) {
-      <label class="field">
-        <span>Trainer</span>
-        <select [(ngModel)]="selectedTrainerId" [disabled]="loadingTrainers">
-          <option value="">All trainers</option>
-          @for (trainer of trainers; track trainer.id) {
-            <option [value]="trainer.id">
-              {{ trainer.name }}{{ trainer.nickname ? ' (' + trainer.nickname + ')' : '' }}
-            </option>
-          }
-        </select>
+  <section class="panel" aria-label="Filters">
+    <div class="filters">
+      <label class="form-field">
+        <span class="form-field__label">From</span>
+        <input type="date" [(ngModel)]="selectedStartDate" />
       </label>
-    }
-
-
-    <button class="button button-secondary" type="button" (click)="loadSessions()">Apply</button>
+      <label class="form-field">
+        <span class="form-field__label">To</span>
+        <input type="date" [(ngModel)]="selectedEndDate" />
+      </label>
+      <label class="form-field">
+        <span class="form-field__label">Start time</span>
+        <input type="time" [(ngModel)]="selectedStartTime" />
+      </label>
+      <label class="form-field">
+        <span class="form-field__label">End time</span>
+        <input type="time" [(ngModel)]="selectedEndTime" />
+      </label>
+      @if (isAdmin) {
+        <label class="form-field filters__trainer">
+          <span class="form-field__label">Trainer</span>
+          <select [(ngModel)]="selectedTrainerId" [disabled]="loadingTrainers">
+            <option value="">All trainers</option>
+            @for (trainer of trainers; track trainer.id) {
+              <option [value]="trainer.id">
+                {{ trainer.name }}{{ trainer.nickname ? ' (' + trainer.nickname + ')' : '' }}
+              </option>
+            }
+          </select>
+        </label>
+      }
+      <button class="btn btn--secondary filters__apply" type="button" (click)="loadSessions()">Apply</button>
+    </div>
   </section>
 
   @if (loading) {
-    <div class="state">Loading attendance sessions...</div>
-  } @else if (errorMessage) {
-    <div class="state error">{{ errorMessage }}</div>
+    <app-skeleton-list label="Loading attendance sessions" [rows]="4" />
+  } @else if (errorMessage && !sessions.length) {
+    <app-empty-state tone="danger" title="Couldn't load sessions" [message]="errorMessage">
+      <button class="btn btn--secondary" type="button" (click)="loadSessions()">Try again</button>
+    </app-empty-state>
   } @else if (!sessions.length) {
-    <div class="state">No attendance sessions found for the selected filters.</div>
+    <app-empty-state
+      icon="history"
+      title="No sessions found"
+      message="No attendance was registered for these filters. Try a wider date range."
+    />
   } @else {
-    <div class="tabs" role="tablist" aria-label="Attendance sessions">
-      @for (session of sessions; track trackBySession($index, session)) {
-        <button
-          class="tab"
-          type="button"
-          role="tab"
-          [attr.aria-selected]="isSessionSelected(session.sessionKey)"
-          [class.active]="isSessionSelected(session.sessionKey)"
-          (click)="toggleSession(session.sessionKey)"
-        >
-          {{ sessionTabTitle(session) }}
-        </button>
-      }
-    </div>
-
-    @if (selectedSessions.length) {
-      <section class="selection-summary" aria-label="Selected sessions summary">
-        <span>Selected sessions: <strong>{{ selectedSessionsSummary.sessions }}</strong></span>
-        <span>Attendance: <strong>{{ selectedSessionsSummary.attendance }}</strong></span>
-        <span>Paid: <strong>{{ selectedSessionsSummary.paid }}</strong></span>
-        <span>Unpaid: <strong>{{ selectedSessionsSummary.unpaid }}</strong></span>
-        <span>Final price total: <strong>{{ formatPrice(selectedSessionsSummary.finalPriceCents) }}</strong></span>
-      </section>
+    @if (errorMessage) {
+      <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
     }
 
-    @if (!selectedSessions.length) {
-      <div class="state">Select one or more sessions to view attendance details.</div>
+    <section class="session-picker" aria-labelledby="sessions-label">
+      <h2 class="form-field__label" id="sessions-label">Sessions ({{ sessions.length }})</h2>
+      <div class="session-picker__chips">
+        @for (session of sessions; track trackBySession($index, session)) {
+          <button
+            class="toggle-chip"
+            type="button"
+            [attr.aria-pressed]="isSessionSelected(session.sessionKey)"
+            (click)="toggleSession(session.sessionKey)"
+          >
+            @if (isSessionSelected(session.sessionKey)) {
+              <app-icon name="check" />
+            }
+            <span class="num">{{ sessionTabTitle(session) }}</span>
+          </button>
+        }
+      </div>
+    </section>
+
+    @if (selectedSessions.length) {
+      <dl class="stats" aria-label="Selected sessions summary">
+        <div class="stat"><dt class="stat__label">Sessions</dt><dd class="stat__value">{{ selectedSessionsSummary.sessions }}</dd></div>
+        <div class="stat"><dt class="stat__label">Attendance</dt><dd class="stat__value">{{ selectedSessionsSummary.attendance }}</dd></div>
+        <div class="stat"><dt class="stat__label">Paid</dt><dd class="stat__value">{{ selectedSessionsSummary.paid }}</dd></div>
+        <div class="stat"><dt class="stat__label">Unpaid</dt><dd class="stat__value" [class.text-danger]="selectedSessionsSummary.unpaid > 0">{{ selectedSessionsSummary.unpaid }}</dd></div>
+        <div class="stat"><dt class="stat__label">Final price total</dt><dd class="stat__value">{{ formatPrice(selectedSessionsSummary.finalPriceCents) }}</dd></div>
+      </dl>
+    } @else {
+      <p class="notice">Select one or more sessions to see who attended.</p>
     }
 
     @for (session of selectedSessions; track trackBySession($index, session)) {
-      <article class="card session-card">
-        <header class="session-header">
-          <h2>
-            {{ formatDate(session.start) }} · {{ formatDateTime(session.start) }} -
-            {{ formatDateTime(session.end) }}
+      <article class="panel session" [attr.aria-label]="sessionTabTitle(session)">
+        <header class="session__header">
+          <h2 class="panel__title num">
+            {{ formatDate(session.start) }} · {{ formatDateTime(session.start) }} – {{ formatDateTime(session.end) }}
           </h2>
-          <p>
-            Trainer: <strong>{{ formatTrainer(session) }}</strong>
-            · Gym: <strong>{{ locationName(session.locationId) }}</strong>
+          <p class="session__meta">
+            <span>Trainer <strong>{{ formatTrainer(session) }}</strong></span>
+            <span>Gym <strong>{{ locationName(session.locationId) }}</strong></span>
           </p>
-          <p>
-            Total: <strong>{{ session.totals.count }}</strong>
-            · Paid: <strong>{{ session.totals.paid }}</strong>
-            · Unpaid: <strong>{{ session.totals.unpaid }}</strong>
-            · Price total: <strong>{{ sessionTotalPrice(session) }}</strong>
+          <p class="session__meta">
+            <span>Total <strong>{{ session.totals.count }}</strong></span>
+            <span>Paid <strong>{{ session.totals.paid }}</strong></span>
+            <span>Unpaid <strong>{{ session.totals.unpaid }}</strong></span>
+            <span>Price total <strong class="num">{{ sessionTotalPrice(session) }}</strong></span>
           </p>
         </header>
 
-        <div class="attendees">
-          <div class="attendees-header" [class.with-actions]="canDeleteSessionAttendance(session)">
-            <span>Trainee</span>
-            <span>Nickname</span>
-            <span>Status</span>
-            <span>Price</span>
-            @if (canDeleteSessionAttendance(session)) {
-              <span>Actions</span>
-            }
-          </div>
-
-          @for (item of session.attendance; track item.id) {
-            <div class="attendee-row" [class.with-actions]="canDeleteSessionAttendance(session)">
-              <span>
-                <a [routerLink]="['/trainees', item.traineeId]">{{ traineeName(item.traineeId) }}</a>
-              </span>
-              <span>{{ traineeNickname(item.traineeId) }}</span>
-              <span>
-                <span class="status" [class.unpaid]="item.paymentStatus === 'UNPAID'">
-                  {{ item.paymentStatus }}
-                </span>
-              </span>
-              <span>{{ attendancePrice(item) }}</span>
-              @if (canDeleteSessionAttendance(session)) {
-                <span class="action-cell">
-                  <button
-                    class="button button-danger button-small"
-                    type="button"
-                    (click)="deleteAttendance(session, item)"
-                    [disabled]="deletingAttendanceId === item.id"
-                  >
-                    {{ deletingAttendanceId === item.id ? 'Deleting...' : 'Delete' }}
-                  </button>
-                </span>
+        <div class="responsive-table session__table">
+          <table class="data-table">
+            <caption class="visually-hidden">Attendees</caption>
+            <thead>
+              <tr>
+                <th scope="col">Trainee</th>
+                <th scope="col">Payment</th>
+                <th scope="col" class="cell-right">Price</th>
+                @if (canDeleteSessionAttendance(session)) {
+                  <th scope="col" class="cell-fit"><span class="visually-hidden">Actions</span></th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of session.attendance; track item.id) {
+                <tr>
+                  <td>
+                    <div class="person-cell">
+                      <app-avatar [name]="traineeName(item.traineeId)" />
+                      <div class="person-cell__text">
+                        <a class="cell-link" [routerLink]="['/trainees', item.traineeId]">{{ traineeName(item.traineeId) }}</a>
+                        <span class="person-cell__sub">{{ traineeNickname(item.traineeId) }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <app-chip [tone]="item.paymentStatus === 'UNPAID' ? 'danger' : 'success'">{{ item.paymentStatus }}</app-chip>
+                  </td>
+                  <td class="num cell-right">{{ attendancePrice(item) }}</td>
+                  @if (canDeleteSessionAttendance(session)) {
+                    <td class="cell-fit">
+                      <button
+                        class="icon-btn icon-btn--danger"
+                        type="button"
+                        [attr.aria-label]="'Delete attendance for ' + traineeName(item.traineeId)"
+                        [disabled]="deletingAttendanceId === item.id"
+                        [attr.aria-busy]="deletingAttendanceId === item.id"
+                        (click)="deleteAttendance(session, item)"
+                      >
+                        <app-icon name="trash" />
+                      </button>
+                    </td>
+                  }
+                </tr>
               }
-            </div>
-          }
+            </tbody>
+          </table>
         </div>
+
+        <ul class="list-card responsive-list" aria-label="Attendees">
+          @for (item of session.attendance; track item.id) {
+            <li class="record">
+              <app-avatar [name]="traineeName(item.traineeId)" />
+              <div class="record__main">
+                <a class="record__title attendee-link" [routerLink]="['/trainees', item.traineeId]">{{ traineeName(item.traineeId) }}</a>
+                <span class="record__meta">{{ traineeNickname(item.traineeId) }}</span>
+              </div>
+              <div class="record__aside">
+                <app-chip [tone]="item.paymentStatus === 'UNPAID' ? 'danger' : 'success'">{{ item.paymentStatus }}</app-chip>
+                <span class="record__meta num">{{ attendancePrice(item) }}</span>
+              </div>
+              @if (canDeleteSessionAttendance(session)) {
+                <button
+                  class="icon-btn icon-btn--danger"
+                  type="button"
+                  [attr.aria-label]="'Delete attendance for ' + traineeName(item.traineeId)"
+                  [disabled]="deletingAttendanceId === item.id"
+                  [attr.aria-busy]="deletingAttendanceId === item.id"
+                  (click)="deleteAttendance(session, item)"
+                >
+                  <app-icon name="trash" />
+                </button>
+              }
+            </li>
+          }
+        </ul>
       </article>
     }
   }

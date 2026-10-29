@@ -340,6 +340,62 @@ html:has(dialog[open]) {
   background: var(--surface-2);
 }
 
+.btn--danger {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.btn--danger:hover {
+  border-color: var(--danger);
+}
+
+// Solid fill for the confirm button of a destructive action (e.g. "Deactivate").
+.btn--danger-solid {
+  background: var(--danger);
+  color: var(--on-danger);
+}
+
+.btn--danger-solid:hover {
+  background: color-mix(in srgb, var(--danger) 88%, var(--text));
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+// Square icon-only button; give it an aria-label.
+.icon-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--muted);
+  --icon-size: 1.25rem;
+}
+
+.icon-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.icon-btn--danger {
+  color: var(--danger);
+}
+
+.icon-btn--danger:hover {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
 // Vertical rhythm for a page: header, toolbar, content.
 .page-stack {
   display: flex;
@@ -365,6 +421,20 @@ html:has(dialog[open]) {
   color: var(--muted);
   font-size: var(--text-sm);
   white-space: nowrap;
+}
+
+.list-toolbar > app-segmented-control {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 767.98px) {
+  .list-toolbar > app-segmented-control {
+    flex-basis: 100%;
+  }
+
+  .list-toolbar__count {
+    margin-left: 0;
+  }
 }
 
 // Card that holds a .data-table. Scrolls horizontally inside itself when narrow.
@@ -426,6 +496,88 @@ html:has(dialog[open]) {
   white-space: nowrap;
 }
 
+// The row's primary link (usually the first cell). Other cells stay plain text.
+.data-table .cell-link {
+  color: var(--text);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.data-table .cell-link:hover {
+  text-decoration: underline;
+}
+
+// Trailing chevron that repeats the row link for the mouse (tabindex="-1", aria-hidden="true").
+.row-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--muted);
+  --icon-size: 1.25rem;
+}
+
+.row-chevron:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+// Person cell: <div class="person-cell"><app-avatar/><div class="person-cell__text"><a class="cell-link">Name</a><span class="person-cell__sub">“Nick”</span></div></div>
+.person-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 14rem;
+}
+
+.person-cell__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.person-cell__sub {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+// "✓ App": a linked app account, in tables and list-row meta lines.
+.linked-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--success);
+  font-weight: 600;
+  --icon-size: 1rem;
+}
+
+// Buttons at the end of a table row (e.g. delete + chevron).
+.row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+// Table at >= 768px, list below. Put both in the page; one is display: none.
+.responsive-list {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .responsive-table {
+    display: none;
+  }
+
+  .responsive-list {
+    display: block;
+  }
+}
+
 // Card that holds a <ul> of app-list-row items on mobile.
 .list-card {
   margin: 0;
@@ -447,6 +599,234 @@ html:has(dialog[open]) {
   main:has(.fab) {
     --fab-clearance: 4.5rem;
   }
+}
+
+// Card section inside a page (forms, summaries, grouped content).
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.panel__title {
+  margin: 0;
+  font-size: var(--text-xl);
+}
+
+@media (min-width: 768px) {
+  .panel {
+    padding: var(--space-6);
+  }
+}
+
+// Key figures: <div class="stats"><div class="stat"><span class="stat__label">…</span><span class="stat__value">…</span></div></div>
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.stat__label {
+  color: var(--muted);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+}
+
+.stat__value {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+// Forms: .form-grid lays out .form-field blocks (label > label text + control + hint/error).
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.form-field--wide {
+  grid-column: 1 / -1;
+}
+
+.form-field__label {
+  color: var(--muted);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+}
+
+.form-field :is(input, select, textarea) {
+  width: 100%;
+  min-height: 3rem;
+}
+
+.form-field__hint {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.form-field__error {
+  color: var(--danger);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+// Row of form buttons; the primary action goes last (rightmost on desktop).
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+// Inline feedback banners. Use role="alert" for errors, role="status" for success.
+.notice {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  font-weight: 600;
+}
+
+.notice--success {
+  border-color: var(--success-border);
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.notice--warning {
+  border-color: var(--warning-border);
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.notice--danger {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+// Mobile row for records that are not a single link (they hold their own links/buttons).
+// Use inside ul.list-card: <li class="record"><div class="record__main">…</div><div class="record__aside">…</div></li>
+.record {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 4.5rem;
+  padding: var(--space-3) var(--space-4);
+}
+
+.record__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.record__title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.record__meta {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.record__aside {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  text-align: right;
+}
+
+// An app-list-row with an extra button next to it (e.g. delete).
+.list-card > li.row-with-action {
+  display: flex;
+  align-items: center;
+  padding-right: var(--space-3);
+}
+
+.row-with-action > app-list-row {
+  flex: 1;
+  min-width: 0;
+}
+
+// Multi-select toggle chip (aria-pressed button).
+.toggle-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  text-align: left;
+  --icon-size: 1rem;
+}
+
+.toggle-chip[aria-pressed='true'] {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+// Money and other figures that should line up in columns.
+.num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.text-muted {
+  color: var(--muted);
+}
+
+.text-success {
+  color: var(--success);
+}
+
+.text-danger {
+  color: var(--danger);
 }
 
 // Placeholder block for loading states. Size it with width/height.

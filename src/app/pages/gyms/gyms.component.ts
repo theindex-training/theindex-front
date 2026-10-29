@@ -1,7 +1,16 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import {
+  SegmentedControlComponent,
+  SegmentedOption
+} from '../../components/segmented-control/segmented-control.component';
+import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { ChipComponent } from '../../components/chip/chip.component';
+import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
+import { ListRowComponent } from '../../components/list-row/list-row.component';
+import { IconComponent } from '../../components/icon/icon.component';
 import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
 
 import { displayValue } from '../../utils/display.util';
@@ -9,13 +18,27 @@ import { displayValue } from '../../utils/display.util';
 @Component({
   selector: 'app-gyms',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './gyms.component.html',
-  styleUrl: './gyms.component.scss'
+  imports: [
+    RouterLink,
+    PageHeaderComponent,
+    SegmentedControlComponent,
+    SkeletonListComponent,
+    EmptyStateComponent,
+    ChipComponent,
+    StatusDotComponent,
+    ListRowComponent,
+    IconComponent
+  ],
+  templateUrl: './gyms.component.html'
 })
 export class GymsComponent implements OnInit {
   gyms: GymLocation[] = [];
   activeFilter: 'all' | 'active' | 'inactive' = 'all';
+  readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
+    { value: 'all', label: 'All' },
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' }
+  ];
   loading = true;
   errorMessage = '';
 
