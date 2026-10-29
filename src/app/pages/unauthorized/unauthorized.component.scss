@@ -7,12 +7,12 @@
 }
 
 .card {
-  background: var(--color-surface);
+  background: var(--surface);
   border-radius: 1.5rem;
   padding: 2.5rem;
   max-width: 420px;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 h1 {
@@ -22,13 +22,13 @@ h1 {
 
 p {
   margin: 0 0 1.5rem;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 button {
   border: none;
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
   font-weight: 600;
   padding: 0.65rem 1.5rem;
   border-radius: 999px;

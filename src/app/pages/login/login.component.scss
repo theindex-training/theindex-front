@@ -1,9 +1,8 @@
 :host {
   display: block;
   min-height: 100vh;
-  background: var(--color-background);
-  color: var(--color-text);
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
 }
 
 .login {
@@ -20,12 +19,12 @@
 }
 
 .login__panel--brand {
-  background: linear-gradient(135deg, var(--color-brand-start) 0%, var(--color-brand-end) 100%);
-  color: #f8fafc;
+  background: var(--nav-bg);
+  color: var(--nav-text);
 }
 
 .login__panel--form {
-  background: var(--color-background);
+  background: var(--bg);
 }
 
 .login__brand {
@@ -37,20 +36,21 @@
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-weight: 600;
-  color: rgba(248, 250, 252, 0.78);
+  color: var(--nav-text);
   margin-bottom: 1rem;
 }
 
 .login__brand h1 {
-  font-size: 2.4rem;
+  font-size: var(--text-4xl);
   margin-bottom: 1rem;
+  color: var(--nav-text-strong);
 }
 
 .login__copy {
   font-size: 1.05rem;
   line-height: 1.6;
   margin-bottom: 1.5rem;
-  color: rgba(248, 250, 252, 0.9);
+  color: var(--nav-text);
 }
 
 .login__highlights {
@@ -70,17 +70,17 @@
   content: '•';
   position: absolute;
   left: 0;
-  color: var(--color-accent);
+  color: var(--accent);
   font-size: 1.5rem;
   line-height: 1;
 }
 
 .login__card {
-  background: var(--color-surface);
+  background: var(--surface);
   border-radius: 1.25rem;
   padding: 2.5rem;
   width: min(420px, 100%);
-  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.12);
+  box-shadow: var(--shadow-md);
 }
 
 .login__header h2 {
@@ -90,7 +90,7 @@
 
 .login__header p {
   margin: 0 0 2rem;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 .login__form {
@@ -101,7 +101,7 @@
 
 .login__error {
   margin: -0.75rem 0 0;
-  color: #dc2626;
+  color: var(--danger);
   font-size: 0.85rem;
 }
 
@@ -118,7 +118,7 @@
 }
 
 .login__link {
-  color: var(--color-primary);
+  color: var(--accent-text);
   text-decoration: none;
   font-weight: 600;
 }
@@ -131,11 +131,11 @@
   margin-top: 2rem;
   text-align: center;
   font-size: 0.9rem;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 .login__footer a {
-  color: var(--color-primary);
+  color: var(--accent-text);
   font-weight: 600;
   text-decoration: none;
 }

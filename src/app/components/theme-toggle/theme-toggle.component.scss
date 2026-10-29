@@ -1,0 +1,46 @@
+:host {
+  display: inline-flex;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.theme-toggle:hover {
+  border-color: var(--border-strong);
+}
+
+.theme-toggle svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.theme-toggle__fill {
+  fill: currentColor;
+}
+
+// Icon-only on narrow screens, where the header has the least room.
+@media (max-width: 900px) {
+  .theme-toggle {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .theme-toggle__text {
+    display: none;
+  }
+}

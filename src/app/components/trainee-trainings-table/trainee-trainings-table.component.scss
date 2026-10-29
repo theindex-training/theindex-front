@@ -8,10 +8,10 @@
   grid-template-columns: 1.4fr 0.7fr 0.7fr 0.8fr 1fr 0.7fr auto;
   gap: 1rem;
   align-items: center;
-  background: var(--color-surface);
+  background: var(--surface);
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
 }
 
 .trainings-row {
@@ -20,7 +20,7 @@
 
 .table-header {
   font-weight: 700;
-  color: var(--color-muted);
+  color: var(--muted);
   background: transparent;
   border: none;
   padding: 0 0.25rem;
@@ -35,36 +35,36 @@
   width: fit-content;
   padding: 0.15rem 0.55rem;
   border-radius: 999px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   font-weight: 700;
   font-size: 0.8rem;
 }
 
 .status-paid {
-  border-color: #abefc6;
-  color: #067647;
-  background: #ecfdf3;
+  border-color: var(--success-border);
+  color: var(--success);
+  background: var(--success-soft);
 }
 
 .status-unpaid {
-  border-color: #fecdca;
-  color: #b42318;
-  background: #fff5f4;
+  border-color: var(--danger-border);
+  color: var(--danger);
+  background: var(--danger-soft);
 }
 
 .state {
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-muted);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
   font-weight: 600;
 }
 
 .state.error {
-  border-color: #fda29b;
-  background: #fef3f2;
-  color: #b42318;
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
 @media (max-width: 960px) {

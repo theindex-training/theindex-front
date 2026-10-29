@@ -19,13 +19,13 @@
 
 .page-header p {
   margin: 0.5rem 0 0;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 .card {
-  background: var(--color-surface);
+  background: var(--surface);
   border-radius: 1rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -43,14 +43,14 @@
   flex-direction: column;
   gap: 0.5rem;
   font-weight: 600;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 .field input,
 .field select {
   padding: 0.6rem 0.75rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-strong);
   font-size: 0.95rem;
 }
 
@@ -80,11 +80,11 @@
 
 .selection-hint {
   margin: 0;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 .trainee-list {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   border-radius: 0.75rem;
   overflow: auto;
   max-height: 360px;
@@ -96,7 +96,7 @@
   gap: 0.75rem;
   align-items: center;
   padding: 0.65rem 0.8rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
 }
 
 .trainee-item:last-child {
@@ -104,18 +104,18 @@
 }
 
 .trainee-name {
-  color: var(--color-text);
+  color: var(--text);
   font-weight: 600;
 }
 
 .trainee-nickname {
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 .error {
-  border: 1px solid #fda29b;
-  background: #fef3f2;
-  color: #b42318;
+  border: 1px solid var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
 
@@ -140,12 +140,12 @@
 }
 
 .button-primary {
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .button-ghost {
   background: transparent;
-  color: #475467;
-  border-color: var(--color-border);
+  color: var(--muted);
+  border-color: var(--border);
 }
