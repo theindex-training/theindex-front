@@ -1,13 +1,27 @@
+// Palette taken from The Index logo: deep red badge, near-black ink, concrete off-white.
 :root {
-  --color-primary: #2563eb;
-  --color-accent: #38bdf8;
-  --color-background: #f4f6f8;
+  --color-primary: #8b0d0d;
+  --color-primary-hover: #6f0a0a;
+  --color-primary-soft: #fbefef;
+  --color-primary-soft-border: #ecc5c5;
+  --color-primary-ring: rgba(139, 13, 13, 0.16);
+  --color-accent: #d12a2a;
+  --color-background: #f3f2f0;
   --color-surface: #ffffff;
-  --color-text: #101828;
-  --color-muted: #475467;
-  --color-border: #d0d5dd;
-  --color-brand-start: #0f172a;
-  --color-brand-end: #1d4ed8;
+  --color-surface-subtle: #f8f7f5;
+  --color-text: #141414;
+  --color-muted: #57534e;
+  --color-border: #d9d6d1;
+  --color-neutral-soft: #efedea;
+  --color-neutral-border: #d2cec8;
+  --color-ink: #111111;
+  --color-on-ink: #f5f4f2;
+  --color-on-ink-muted: rgba(245, 244, 242, 0.72);
+  --color-brand-start: #0b0b0b;
+  --color-brand-end: #2a2a2a;
+  --shadow-color: rgba(17, 17, 17, 0.12);
+  --font-display: 'Bebas Neue', 'Oswald', 'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue',
+    Arial, sans-serif;
 }
 
 * {
@@ -18,4 +32,28 @@ body {
   margin: 0;
   background: var(--color-background);
   color: var(--color-text);
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+::selection {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+// Hexagonal badge echoing the logo shape.
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55em 1.1em;
+  background: var(--color-primary);
+  color: var(--color-ink);
+  clip-path: polygon(0 17%, 50% 0, 100% 17%, 100% 83%, 50% 100%, 0 83%);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: condensed;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  white-space: nowrap;
 }

@@ -24,7 +24,7 @@ p {
   background: var(--color-surface);
   border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 8px 24px rgba(17, 17, 17, 0.08);
 }
 
 .card h2 {
@@ -57,7 +57,7 @@ p {
   background: var(--color-surface);
   border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 8px 24px rgba(17, 17, 17, 0.08);
 }
 
 .report-card h3 {
@@ -89,7 +89,7 @@ p {
 }
 
 .report-filter select {
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   padding: 0.35rem 0.5rem;
   background: #fff;
@@ -108,7 +108,7 @@ p {
   gap: 1rem;
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
-  background: #f8fafc;
+  background: var(--color-surface-subtle);
   min-width: max-content;
 }
 
@@ -118,13 +118,13 @@ p {
 
 .table-header {
   font-weight: 700;
-  color: #334155;
+  color: var(--color-text);
 }
 
 .state {
   padding: 0.75rem;
   border-radius: 0.5rem;
-  background: #f8fafc;
+  background: var(--color-surface-subtle);
 }
 
 .state.error {

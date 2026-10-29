@@ -32,7 +32,7 @@
 .ui-input__field:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 4px var(--color-primary-ring);
 }
 
 .ui-input__control {

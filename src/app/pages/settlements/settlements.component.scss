@@ -70,8 +70,8 @@
   display: inline-flex;
   padding: 0.25rem 0.6rem;
   border-radius: 999px;
-  background: #eff8ff;
-  color: #175cd3;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
   font-weight: 600;
   font-size: 0.85rem;
 }
@@ -99,9 +99,9 @@
 }
 
 .button-secondary {
-  background: #eef4ff;
-  color: #3538cd;
-  border-color: #c7d7fe;
+  background: var(--color-neutral-soft);
+  color: var(--color-text);
+  border-color: var(--color-neutral-border);
 }
 
 .button-danger {

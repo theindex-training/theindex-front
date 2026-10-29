@@ -15,8 +15,9 @@
 }
 
 .balance-card {
-  background: linear-gradient(135deg, #eef4ff 0%, #e0ebff 100%);
-  border: 1px solid #c7d7fe;
+  background: linear-gradient(135deg, var(--color-brand-start) 0%, var(--color-brand-end) 100%);
+  border: 1px solid var(--color-ink);
+  border-left: 4px solid var(--color-primary);
   border-radius: 1rem;
   padding: 1rem 1.25rem;
   display: flex;
@@ -26,12 +27,12 @@
 
 .balance-label {
   font-size: 0.9rem;
-  color: #363f72;
+  color: var(--color-on-ink-muted);
 }
 
 .balance-value {
   font-size: 2rem;
-  color: #3538cd;
+  color: var(--color-on-ink);
 }
 
 .panel {

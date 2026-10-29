@@ -110,13 +110,13 @@ h2 {
 }
 
 .button-secondary {
-  background: #eef4ff;
-  color: #3538cd;
-  border-color: #c7d7fe;
+  background: var(--color-neutral-soft);
+  color: var(--color-text);
+  border-color: var(--color-neutral-border);
 }
 
 .button-ghost {
   background: transparent;
-  color: #475467;
+  color: var(--color-muted);
   border-color: var(--color-border);
 }

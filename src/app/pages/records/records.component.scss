@@ -8,10 +8,10 @@
   width: min(34rem, 100%);
   border: 1px solid var(--color-border);
   border-radius: 1rem;
-  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  background: linear-gradient(145deg, #ffffff, var(--color-surface-subtle));
   padding: 3rem 2rem;
   text-align: center;
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 16px 32px rgba(17, 17, 17, 0.12);
 }
 
 h1 {
