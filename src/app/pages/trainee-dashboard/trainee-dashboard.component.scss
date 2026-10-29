@@ -24,13 +24,13 @@ h2 {
 
 p {
   margin: 0.5rem 0 0;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 .card {
-  background: var(--color-surface);
+  background: var(--surface);
   border-radius: 1rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -49,13 +49,13 @@ p {
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 .filter select {
   padding: 0.5rem 0.65rem;
   border-radius: 0.6rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-strong);
   font-size: 0.9rem;
   font-family: inherit;
 }
@@ -63,14 +63,14 @@ p {
 .state {
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-muted);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
   font-weight: 600;
 }
 
 .state.error {
-  border-color: #fda29b;
-  background: #fef3f2;
-  color: #b42318;
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
 }

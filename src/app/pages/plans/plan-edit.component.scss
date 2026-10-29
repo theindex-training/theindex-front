@@ -19,13 +19,13 @@ h1 {
 
 p {
   margin: 0.5rem 0 0;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 .card {
-  background: var(--color-surface);
+  background: var(--surface);
   border-radius: 1rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -43,14 +43,14 @@ p {
   flex-direction: column;
   gap: 0.5rem;
   font-weight: 600;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
 .field input,
 .field select {
   padding: 0.6rem 0.75rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-strong);
   font-size: 0.95rem;
 }
 
@@ -62,23 +62,23 @@ p {
 }
 
 .error {
-  color: #b42318;
+  color: var(--danger);
   font-size: 0.85rem;
 }
 
 .state {
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-muted);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
   font-weight: 600;
 }
 
 .state.error {
-  border-color: #fda29b;
-  background: #fef3f2;
-  color: #b42318;
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
 .form-actions {
@@ -99,12 +99,12 @@ p {
 }
 
 .button-primary {
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .button-ghost {
   background: transparent;
-  color: #475467;
-  border-color: var(--color-border);
+  color: var(--muted);
+  border-color: var(--border);
 }
