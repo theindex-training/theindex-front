@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { BrandComponent } from '../../components/brand/brand.component';
 
 @Component({
   selector: 'app-not-found',
-  imports: [],
+  imports: [RouterLink, BrandComponent],
   templateUrl: './not-found.component.html',
-  styleUrl: './not-found.component.scss',
   standalone: true
 })
 export class NotFoundComponent {

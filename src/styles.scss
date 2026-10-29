@@ -946,6 +946,46 @@ html:has(dialog[open]) {
   color: var(--danger);
 }
 
+// Full-page centered card for pages outside the app shell (not found, unauthorized).
+.solo-page {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100dvh;
+  place-items: center;
+  padding: var(--space-6) var(--space-4);
+}
+
+.solo-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: min(30rem, 100%);
+  padding: var(--space-8);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.solo-card__code {
+  margin: var(--space-4) 0 0;
+  color: var(--accent-text);
+  font-family: var(--font-heading);
+  font-size: 5rem;
+  font-weight: 700;
+  line-height: 0.9;
+}
+
+.solo-card__title {
+  margin: 0;
+  font-size: var(--text-3xl);
+}
+
+.solo-card__text {
+  margin: 0 0 var(--space-3);
+  color: var(--muted);
+}
+
 // Placeholder block for loading states. Size it with width/height.
 .skeleton {
   display: block;

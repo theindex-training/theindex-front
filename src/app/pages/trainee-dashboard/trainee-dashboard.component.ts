@@ -1,6 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import {
+  SegmentedControlComponent,
+  SegmentedOption
+} from '../../components/segmented-control/segmented-control.component';
 import { TraineeSubscriptionsTableComponent } from '../../components/trainee-subscriptions-table/trainee-subscriptions-table.component';
 import { TraineeTrainingsTableComponent } from '../../components/trainee-trainings-table/trainee-trainings-table.component';
 import {
@@ -16,12 +22,23 @@ type SubscriptionFilter = 'ACTIVE' | 'EXHAUSTED' | 'ALL';
 @Component({
   selector: 'app-trainee-dashboard',
   standalone: true,
-  imports: [CommonModule, TraineeSubscriptionsTableComponent, TraineeTrainingsTableComponent],
+  imports: [
+    CommonModule,
+    EmptyStateComponent,
+    PageHeaderComponent,
+    SegmentedControlComponent,
+    TraineeSubscriptionsTableComponent,
+    TraineeTrainingsTableComponent,
+  ],
   templateUrl: './trainee-dashboard.component.html',
-  styleUrl: './trainee-dashboard.component.scss',
 })
 export class TraineeDashboardComponent implements OnInit {
   subscriptionFilter: SubscriptionFilter = 'ACTIVE';
+  readonly subscriptionFilterOptions: SegmentedOption<SubscriptionFilter>[] = [
+    { value: 'ACTIVE', label: 'Active' },
+    { value: 'EXHAUSTED', label: 'Exhausted' },
+    { value: 'ALL', label: 'All' },
+  ];
 
   loading = true;
   errorMessage = '';

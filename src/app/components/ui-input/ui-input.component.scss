@@ -55,9 +55,13 @@
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
+  color: var(--muted);
   cursor: pointer;
-  line-height: 1;
-  font-size: var(--text-base);
+  --icon-size: 1.25rem;
+}
+
+.ui-input__toggle:hover {
+  color: var(--text);
 }
 
 .ui-input__field--with-toggle {

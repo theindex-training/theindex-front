@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -10,13 +10,23 @@ import {
 } from '../../services/attendance.service';
 import { AuthService } from '../../services/auth.service';
 import { finalize } from 'rxjs';
+import { IconComponent } from '../../components/icon/icon.component';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [
+    NgTemplateOutlet,
+    FormsModule,
+    RouterLink,
+    IconComponent,
+    PageHeaderComponent,
+    SkeletonListComponent,
+  ],
 })
 export class HomeComponent implements OnInit {
   inactiveTrainees: InactiveTraineeReportItem[] = [];

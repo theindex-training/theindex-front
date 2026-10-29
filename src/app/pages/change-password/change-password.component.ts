@@ -6,6 +6,7 @@ import { UiButtonComponent } from '../../components/ui-button/ui-button.componen
 import { UiInputComponent } from '../../components/ui-input/ui-input.component';
 import { AccountSecurityService } from '../../services/account-security.service';
 import { AuthService } from '../../services/auth.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 const passwordMatchValidator: ValidatorFn = control => {
   const newPassword = (control.get('newPassword')?.value as string | null) ?? '';
@@ -21,7 +22,7 @@ const passwordMatchValidator: ValidatorFn = control => {
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, UiInputComponent, UiButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, UiInputComponent, UiButtonComponent, PageHeaderComponent],
   templateUrl: './change-password.component.html',
   styleUrl: './change-password.component.scss'
 })

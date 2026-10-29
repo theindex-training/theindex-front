@@ -32,12 +32,28 @@
 }
 
 .login__eyebrow {
-  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-6);
+  color: var(--nav-text-strong);
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  letter-spacing: var(--heading-tracking);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-weight: 600;
-  color: var(--nav-text);
-  margin-bottom: 1rem;
+}
+
+.login__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: var(--text-xl);
 }
 
 .login__brand h1 {
@@ -77,10 +93,10 @@
 
 .login__card {
   background: var(--surface);
-  border-radius: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
   padding: 2.5rem;
   width: min(420px, 100%);
-  box-shadow: var(--shadow-md);
 }
 
 .login__header h2 {
@@ -161,6 +177,28 @@
 
   .login__card {
     padding: 2rem 1.5rem;
+  }
+
+  // Phones: a compact brand header so the form is visible without scrolling.
+  .login__panel--brand {
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .login__eyebrow {
+    margin-bottom: var(--space-4);
+  }
+
+  .login__brand h1 {
+    margin-bottom: var(--space-1);
+    font-size: var(--text-3xl);
+  }
+
+  .login__copy {
+    margin-bottom: 0;
+  }
+
+  .login__highlights {
+    display: none;
   }
 
   .login__options {
