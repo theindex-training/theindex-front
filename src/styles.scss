@@ -360,6 +360,17 @@ html:has(dialog[open]) {
   background: color-mix(in srgb, var(--danger) 88%, var(--text));
 }
 
+.btn--ghost {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+.btn--ghost:hover {
+  border-color: var(--border-strong);
+  background: var(--surface);
+}
+
 .btn:disabled {
   cursor: not-allowed;
   opacity: 0.55;
@@ -658,6 +669,36 @@ html:has(dialog[open]) {
   font-variant-numeric: tabular-nums;
 }
 
+// Form and detail pages read better at a limited width.
+.page-narrow {
+  max-width: 60rem;
+}
+
+// Label/value pairs: <dl class="detail-list"><div><dt>Label</dt><dd>Value</dd></div>…</dl>
+.detail-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-5) var(--space-4);
+  margin: 0;
+}
+
+.detail-list dt {
+  margin-bottom: var(--space-1);
+  color: var(--muted);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+}
+
+.detail-list dd {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
 // Forms: .form-grid lays out .form-field blocks (label > label text + control + hint/error).
 .form-grid {
   display: grid;
@@ -689,6 +730,82 @@ html:has(dialog[open]) {
 .form-field :is(input, select, textarea) {
   width: 100%;
   min-height: 3rem;
+}
+
+// Checkbox row: <label class="form-field form-field--check"><input type="checkbox" /><span>Label</span></label>
+.form-field--check {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--touch-target);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.form-field--check input {
+  width: 1.25rem;
+  min-height: 0;
+  height: 1.25rem;
+  margin: 0;
+}
+
+// Password input with a show/hide button: <div class="password-field"><input …/><button class="password-toggle" aria-label="Show password"><app-icon name="eye"/></button></div>
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  padding-right: calc(var(--touch-target) + var(--space-2));
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--muted);
+  transform: translateY(-50%);
+  --icon-size: 1.25rem;
+}
+
+.password-toggle:hover {
+  color: var(--text);
+}
+
+// Vertical stack inside a panel or form (fields, notices, actions).
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+// Heading row for a page section: title (+ muted line) on the left, a control on the right.
+.section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+}
+
+.section-header__sub {
+  margin: var(--space-1) 0 0;
+}
+
+// A titled section inside a .panel, separated from what's above it.
+.panel-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
 }
 
 .form-field__hint {

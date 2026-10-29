@@ -1,40 +1,42 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Deactivate gym subscription</h1>
-      <p>Gym subscriptions are archived by marking them inactive.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/gym-subscriptions">Back to gym subscriptions</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Deactivate gym subscription"
+    subtitle="Gym subscriptions are archived by marking them inactive."
+    [back]="{ label: 'Back to gym subscriptions', link: '/gym-subscriptions' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading gym subscription...</div>
+    <p class="notice" role="status">Loading gym subscription...</p>
   } @else if (errorMessage && !gymSubscription) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (gymSubscription) {
-    <div class="card">
-      <div class="details">
+    <div class="panel">
+      <dl class="detail-list">
         <div>
-          <span class="label">Name</span>
-          <strong>{{ gymSubscription.name }}</strong>
+          <dt>Name</dt>
+          <dd>{{ gymSubscription.name }}</dd>
         </div>
         <div>
-          <span class="label">Status</span>
-          <strong>{{ gymSubscription.isActive ? 'Active' : 'Inactive' }}</strong>
+          <dt>Status</dt>
+          <dd>
+            <app-status-dot [tone]="gymSubscription.isActive ? 'success' : 'neutral'">
+              {{ gymSubscription.isActive ? 'Active' : 'Inactive' }}
+            </app-status-dot>
+          </dd>
         </div>
-      </div>
+      </dl>
 
-      <p class="warning">
+      <p class="notice notice--warning">
         Deactivating a gym subscription hides it from new trainee assignments.
       </p>
 
       @if (errorMessage) {
-        <div class="state error">{{ errorMessage }}</div>
+        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
       }
 
       <div class="form-actions">
         <button
-          class="button button-danger"
+          class="btn btn--danger-solid"
           type="button"
           (click)="confirmDeactivate()"
           [disabled]="submitting || !gymSubscription.isActive"

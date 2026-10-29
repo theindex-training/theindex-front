@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Plan, PlansService } from '../../services/plans.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 
 @Component({
   selector: 'app-plan-delete',
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './plan-delete.component.html',
-  styleUrl: './plan-delete.component.scss'
+  imports: [CommonModule, PageHeaderComponent, StatusDotComponent],
+  templateUrl: './plan-delete.component.html'
 })
 export class PlanDeleteComponent implements OnInit {
   plan: Plan | null = null;

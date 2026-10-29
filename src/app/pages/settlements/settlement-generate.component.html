@@ -1,33 +1,31 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Generate settlement report</h1>
-      <p>Create a new settlement using period start and period end dates.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/settlements">Back to settlements</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Generate settlement report"
+    subtitle="Create a new settlement using period start and period end dates."
+    [back]="{ label: 'Back to settlements', link: '/settlements' }"
+  />
 
-  <article class="card">
-    <div class="form-row">
-      <label class="field">
-        <span>Period start</span>
+  <article class="panel">
+    <div class="form-grid">
+      <label class="form-field">
+        <span class="form-field__label">Period start</span>
         <input type="date" [(ngModel)]="periodStart" />
       </label>
 
-      <label class="field">
-        <span>Period end</span>
+      <label class="form-field">
+        <span class="form-field__label">Period end</span>
         <input type="date" [(ngModel)]="periodEnd" />
       </label>
     </div>
 
-    <div class="actions">
-      <button class="button button-primary" type="button" (click)="generateSettlement()" [disabled]="generating">
+    @if (errorMessage) {
+      <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    }
+
+    <div class="form-actions">
+      <button class="btn btn--primary" type="button" (click)="generateSettlement()" [disabled]="generating">
         {{ generating ? 'Generating...' : 'Generate report' }}
       </button>
     </div>
-
-    @if (errorMessage) {
-      <p class="feedback error">{{ errorMessage }}</p>
-    }
   </article>
 </section>

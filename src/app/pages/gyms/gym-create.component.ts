@@ -7,18 +7,18 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   CreateGymLocationPayload,
   GymLocationsService,
 } from '../../services/gym-locations.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 @Component({
   selector: 'app-gym-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './gym-create.component.html',
-  styleUrl: './gym-create.component.scss',
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  templateUrl: './gym-create.component.html'
 })
 export class GymCreateComponent {
   readonly form: FormGroup<{

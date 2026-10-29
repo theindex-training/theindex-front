@@ -50,7 +50,7 @@ public/                   # static assets
 - If you need an endpoint or field that doesn't exist, the change belongs in theindex-api first. Keep service interfaces in sync with the API's DTOs/entities, and flag cross-repo changes to the user.
 
 ## Design system ("Chalk & Iron")
-The app is being redesigned in phases. Phase 1 added tokens, fonts and theming. Phase 2 replaced the header with the navigation shell (sidebar on desktop, tab bar + sheet on mobile). Phase 3 redesigned the Trainees list and extracted the list page pattern below; phase 4 applies it to the other list pages.
+The app is being redesigned in phases. Phase 1 added tokens, fonts and theming. Phase 2 replaced the header with the navigation shell (sidebar on desktop, tab bar + sheet on mobile). Phase 3 redesigned the Trainees list and extracted the list page pattern below. Phase 4a applied it to the other list pages, 4b covered create/edit/details/delete pages and Register attendance, and 4c covers the trainee-facing pages, auth pages and dashboard.
 
 **Direction:** bold and athletic, fitting a CrossFit gym. Condensed uppercase headings, chalk-white (light) or near-black (dark) backgrounds, one orange accent, flat surfaces (no gradients), generous touch targets (44px minimum).
 
@@ -172,7 +172,7 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
 
 | Component | Use |
 |---|---|
-| `app-page-header` | `title`, `subtitle`, optional `action: { label, link }`. It renders the desktop button and the mobile FAB. With a FAB, `<main>` gets `--fab-clearance` bottom room via a global rule, so the last row isn't covered. |
+| `app-page-header` | `title`, `subtitle`, optional `back: { label, link }` (a "← Back to …" link above the title) and optional `action: { label, link }`. It renders the desktop button and the mobile FAB. With a FAB, `<main>` gets `--fab-clearance` bottom room via a global rule, so the last row isn't covered. |
 | `app-search-field` | Search input with icon and its own 44px clear button (the native one is hidden). Takes `label` (visually hidden, required) and `placeholder`; use `[value]` + `(valueChange)`. |
 | `app-segmented-control` | Single choice built on native radios (announced as a group, arrow keys work). Takes `label` (legend, required), `options: SegmentedOption[]`, `[value]` + `(valueChange)`. |
 | `app-chip` | Uppercase label. `tone`: `accent` (e.g. gym card), `neutral` (e.g. Inactive), `success`, `warning`, `danger`. |
@@ -205,14 +205,65 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
   - `.form-field--wide` spans the full row.
   - `.form-actions` holds the buttons, primary last.
   - Link an error to its input with `aria-describedby` and set `aria-invalid`.
+- **Form and detail layout:**
+  - `.page-narrow` caps form and detail pages at 60rem.
+  - `.detail-list` holds label/value pairs.
+  - `.form-field--check` is a checkbox row.
+  - `.password-field` + `.password-toggle` is a password input with a show/hide button.
+  - `.form-stack` is a vertical form layout.
+  - `.panel-section` is a titled section inside a panel.
+  - `.section-header` is a page section's heading row.
 - **`.notice`** with `--success` / `--warning` / `--danger`: inline banners. Use `role="status"` for success and `role="alert"` for errors.
 - **`.toggle-chip`:** multi-select chip on a `<button aria-pressed>`, e.g. picking attendance sessions.
 - **`.icon-btn`** (and `--danger`): 44px icon-only button. It always needs an `aria-label`.
 - **Text helpers:** `.num` (tabular numbers, no wrap), `.text-muted`, `.text-success`, `.text-danger`.
 - **`.skeleton`:** pulsing placeholder block.
-- **`.btn`** + `.btn--primary` / `.btn--secondary` / `.btn--danger` (soft) / `.btn--danger-solid` (confirming a destructive action): link or button actions in page content. `ui-button` stays the full-width form button.
+- **`.btn`** + `.btn--primary` / `.btn--secondary` / `.btn--ghost` (low emphasis) / `.btn--danger` (soft) / `.btn--danger-solid` (confirming a destructive action): link or button actions in page content. `ui-button` stays the full-width form button.
 
-**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-right, plus, alert, trash.
+**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-right, plus, alert, trash, arrow-left, eye, eye-off.
+
+### Form and detail page pattern (reference: `pages/plans/plan-*.component.html`)
+Create, edit, details and delete pages share one structure. They need no page SCSS:
+
+```html
+<section class="page-stack page-narrow">
+  <app-page-header title="Edit plan" subtitle="…" [back]="{ label: 'Back to plans', link: '/plans' }" />
+  @if (loading) { <p class="notice" role="status">Loading plan...</p> }
+  @else if (errorMessage && !plan) { <p class="notice notice--danger" role="alert">{{ errorMessage }}</p> }
+  @else {
+    <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <div class="form-grid">
+        <label class="form-field">
+          <span class="form-field__label">Title</span>
+          <input formControlName="title" />
+          @if (…invalid) { <span class="form-field__error">Title is required.</span> }
+        </label>
+        <label class="form-field form-field--check"><input type="checkbox" formControlName="isActive" /><span>Active plan</span></label>
+      </div>
+      @if (errorMessage) { <p class="notice notice--danger" role="alert">{{ errorMessage }}</p> }
+      <div class="form-actions"><button class="btn btn--primary" type="submit">Save plan</button></div>
+    </form>
+  }
+</section>
+```
+- **Details pages:**
+  - Use a `.panel` containing a `<dl class="detail-list">`, with `<div><dt>Label</dt><dd>Value</dd></div>` pairs. Status uses `app-status-dot`.
+  - Extra sections inside the panel go in `section.panel-section` with an `h2.panel__title`.
+  - Actions sit in `.form-actions`: least important first and primary last, e.g. Deactivate (`btn--ghost`), Edit (`btn--secondary`), Manage account (`btn--primary`).
+- **Delete/deactivate pages:**
+  - The panel holds a `detail-list`, a `.notice.notice--warning` explaining the consequence, and a `btn--danger-solid` confirm button.
+  - Secondary destructive actions on other pages (e.g. "Deactivate account" next to Save) use the soft `btn--danger`.
+- **Password inputs:**
+  - Use `.password-field` with an icon `button.password-toggle`.
+  - The button shows the `eye` / `eye-off` icon, has an `aria-label` of "Show password" or "Hide password", and must stay keyboard reachable, so no `tabindex="-1"`.
+- **Detail pages with tables** (e.g. trainee details):
+  - Put each table in its own `section.page-stack` with a `.section-header` (title, muted line and an optional control such as a segmented filter), instead of nesting the table card inside a panel.
+- **Register attendance** (`pages/attendance/attendance-register`) is the phone-first exception:
+  - Compact session fields.
+  - Full-width tappable trainee rows (a `label` around a real checkbox; `.is-selected` adds the accent tint and a left bar).
+  - A sticky save bar that sits above the tab bar on mobile and at the bottom of the viewport on desktop.
+  - Keep it usable one-handed when changing it.
+- **Behaviour:** when restyling a form, keep `formControlName`s, validators, button labels' meaning and submit flow exactly as they were. The phase 4 PRs verified this by diffing every API request body against the previous build.
 
 ### Rules for components
 - **Use tokens, never hard-coded colors.** No hex, `rgb()`, named colors or gradients in component SCSS. If a token is missing, add it to both themes in `src/styles.scss` and document it here; don't inline a value.

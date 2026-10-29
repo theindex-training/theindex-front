@@ -1,34 +1,36 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Gym subscription details</h1>
-      <p>Review gym subscription information and manage availability.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/gym-subscriptions">Back to gym subscriptions</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Gym subscription details"
+    subtitle="Review gym subscription information and manage availability."
+    [back]="{ label: 'Back to gym subscriptions', link: '/gym-subscriptions' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading gym subscription...</div>
+    <p class="notice" role="status">Loading gym subscription...</p>
   } @else if (errorMessage && !gymSubscription) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (gymSubscription) {
-    <div class="card">
-      <div class="details">
+    <div class="panel">
+      <dl class="detail-list">
         <div>
-          <span class="label">Name</span>
-          <strong>{{ gymSubscription.name }}</strong>
+          <dt>Name</dt>
+          <dd>{{ gymSubscription.name }}</dd>
         </div>
         <div>
-          <span class="label">Status</span>
-          <strong>{{ gymSubscription.isActive ? 'Active' : 'Inactive' }}</strong>
+          <dt>Status</dt>
+          <dd>
+            <app-status-dot [tone]="gymSubscription.isActive ? 'success' : 'neutral'">
+              {{ gymSubscription.isActive ? 'Active' : 'Inactive' }}
+            </app-status-dot>
+          </dd>
         </div>
-      </div>
+      </dl>
 
-      <div class="details-actions">
-        <a class="button button-secondary" [routerLink]="['/gym-subscriptions', gymSubscription.id, 'edit']">
+      <div class="form-actions">
+        <a class="btn btn--secondary" [routerLink]="['/gym-subscriptions', gymSubscription.id, 'edit']">
           Edit gym subscription
         </a>
-        <a class="button button-ghost" [routerLink]="['/gym-subscriptions', gymSubscription.id, 'delete']">
+        <a class="btn btn--ghost" [routerLink]="['/gym-subscriptions', gymSubscription.id, 'delete']">
           Deactivate gym subscription
         </a>
       </div>

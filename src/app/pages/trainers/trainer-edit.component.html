@@ -1,43 +1,41 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Edit trainer</h1>
-      <p>Update trainer profile information.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/trainers">Back to trainers</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Edit trainer"
+    subtitle="Update trainer profile information."
+    [back]="{ label: 'Back to trainers', link: '/trainers' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading trainer...</div>
+    <p class="notice" role="status">Loading trainer...</p>
   } @else if (errorMessage && !trainer) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (trainer) {
-    <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
+    <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <div class="form-grid">
-        <label class="field">
-          <span>Name</span>
+        <label class="form-field">
+          <span class="form-field__label">Name</span>
           <input type="text" formControlName="name" />
           @if (form.controls.name.touched && form.controls.name.invalid) {
-            <small class="error">Name is required and must be at least 2 characters.</small>
+            <span class="form-field__error">Name is required and must be at least 2 characters.</span>
           }
         </label>
 
-        <label class="field">
-          <span>Nickname</span>
+        <label class="form-field">
+          <span class="form-field__label">Nickname</span>
           <input type="text" formControlName="nickname" />
           @if (form.controls.nickname.touched && form.controls.nickname.invalid) {
-            <small class="error">Nickname must be at least 1 character.</small>
+            <span class="form-field__error">Nickname must be at least 1 character.</span>
           }
         </label>
 
       </div>
 
       @if (errorMessage) {
-        <div class="state error">{{ errorMessage }}</div>
+        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
       }
 
       <div class="form-actions">
-        <button class="button button-primary" type="submit" [disabled]="submitting">
+        <button class="btn btn--primary" type="submit" [disabled]="submitting">
           {{ submitting ? 'Saving...' : 'Save changes' }}
         </button>
       </div>

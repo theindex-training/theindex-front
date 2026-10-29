@@ -3,13 +3,13 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
 import { formatTimeWithoutSeconds } from '../../utils/time-display';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 @Component({
   selector: 'app-training-time-details',
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './training-time-details.component.html',
-  styleUrl: './training-time-details.component.scss'
+  imports: [CommonModule, RouterLink, PageHeaderComponent],
+  templateUrl: './training-time-details.component.html'
 })
 export class TrainingTimeDetailsComponent implements OnInit {
   trainingTime: TrainingTime | null = null;

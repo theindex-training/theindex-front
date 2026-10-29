@@ -1,16 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
 
 import { displayValue } from '../../utils/display.util';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 @Component({
   selector: 'app-trainer-delete',
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './trainer-delete.component.html',
-  styleUrl: './trainer-delete.component.scss'
+  imports: [CommonModule, PageHeaderComponent],
+  templateUrl: './trainer-delete.component.html'
 })
 export class TrainerDeleteComponent implements OnInit {
   trainer: TrainerProfile | null = null;

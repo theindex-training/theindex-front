@@ -1,41 +1,39 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Create trainee</h1>
-      <p>Add a new trainee profile and optional account link.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/trainees">Back to trainees</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Create trainee"
+    subtitle="Add a new trainee profile and optional account link."
+    [back]="{ label: 'Back to trainees', link: '/trainees' }"
+  />
 
-  <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
+  <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
     <div class="form-grid">
-      <label class="field">
-        <span>Name</span>
+      <label class="form-field">
+        <span class="form-field__label">Name</span>
         <input type="text" formControlName="name" placeholder="Anton" />
         @if (form.controls.name.touched && form.controls.name.invalid) {
-          <small class="error">Name is required and must be at least 2 characters.</small>
+          <span class="form-field__error">Name is required and must be at least 2 characters.</span>
         }
       </label>
 
-      <label class="field">
-        <span>Nickname</span>
+      <label class="form-field">
+        <span class="form-field__label">Nickname</span>
         <input type="text" formControlName="nickname" placeholder="Toni" />
         @if (form.controls.nickname.touched && form.controls.nickname.invalid) {
-          <small class="error">Nickname must be at least 1 character.</small>
+          <span class="form-field__error">Nickname must be at least 1 character.</span>
         }
       </label>
 
-      <label class="field">
-        <span>Phone</span>
+      <label class="form-field">
+        <span class="form-field__label">Phone</span>
         <input type="text" formControlName="phone" placeholder="0877777777" />
         @if (form.controls.phone.touched && form.controls.phone.invalid) {
-          <small class="error">Phone must be at least 1 character.</small>
+          <span class="form-field__error">Phone must be at least 1 character.</span>
         }
       </label>
 
 
-      <label class="field">
-        <span>Gym subscription</span>
+      <label class="form-field">
+        <span class="form-field__label">Gym subscription</span>
         <select formControlName="gymSubscriptionId" [disabled]="gymSubscriptionsLoading">
           <option [ngValue]="null">No gym subscription</option>
           @for (gymSubscription of gymSubscriptions; track gymSubscription.id) {
@@ -47,11 +45,11 @@
     </div>
 
     @if (errorMessage) {
-      <div class="state error">{{ errorMessage }}</div>
+      <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
     }
 
     <div class="form-actions">
-      <button class="button button-primary" type="submit" [disabled]="submitting">
+      <button class="btn btn--primary" type="submit" [disabled]="submitting">
         {{ submitting ? 'Saving...' : 'Create trainee' }}
       </button>
     </div>

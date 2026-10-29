@@ -1,26 +1,51 @@
 @if (loading) {
-  <div class="state">Loading trainings...</div>
+  <app-skeleton-list label="Loading trainings" [rows]="3" />
 } @else if (errorMessage) {
-  <div class="state error">{{ errorMessage }}</div>
+  <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
 } @else if (!trainings.length) {
-  <div class="state">{{ emptyMessage }}</div>
+  <p class="notice" role="status">{{ emptyMessage }}</p>
 } @else {
-  <div class="table trainings-table">
-    <div class="table-row table-header trainings-row">
-      <span>Trained at</span>
-      <span>Trainer</span>
-      <span>Location</span>
-      <span>Status</span>
-    </div>
-    @for (training of trainings; track training.id) {
-      <div class="table-row trainings-row">
-        <span class="title">{{ formatTrainingDateTime(training.trainedAt) }}</span>
-        <span>{{ formatTrainingTrainer(training) }}</span>
-        <span>{{ formatTrainingLocation(training) }}</span>
-        <span class="training-status" [ngClass]="statusClass(training)">
-          {{ training.paymentStatus }}
-        </span>
-      </div>
-    }
+  <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Trainings table">
+    <table class="data-table">
+      <caption class="visually-hidden">Trainings</caption>
+      <thead>
+        <tr>
+          <th scope="col">Trained at</th>
+          <th scope="col">Trainer</th>
+          <th scope="col">Location</th>
+          <th scope="col">Payment</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (training of trainings; track training.id) {
+          <tr>
+            <td class="num"><strong>{{ formatTrainingDateTime(training.trainedAt) }}</strong></td>
+            <td>{{ formatTrainingTrainer(training) }}</td>
+            <td>{{ formatTrainingLocation(training) }}</td>
+            <td>
+              <app-chip [tone]="training.paymentStatus === 'UNPAID' ? 'danger' : 'success'">
+                {{ training.paymentStatus }}
+              </app-chip>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
   </div>
+
+  <ul class="list-card responsive-list" aria-label="Trainings">
+    @for (training of trainings; track training.id) {
+      <li class="record">
+        <div class="record__main">
+          <span class="record__title num">{{ formatTrainingDateTime(training.trainedAt) }}</span>
+          <span class="record__meta">{{ formatTrainingTrainer(training) }} · {{ formatTrainingLocation(training) }}</span>
+        </div>
+        <div class="record__aside">
+          <app-chip [tone]="training.paymentStatus === 'UNPAID' ? 'danger' : 'success'">
+            {{ training.paymentStatus }}
+          </app-chip>
+        </div>
+      </li>
+    }
+  </ul>
 }

@@ -1,49 +1,51 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Deactivate plan</h1>
-      <p>Plans are archived by marking them inactive.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/plans">Back to plans</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Deactivate plan"
+    subtitle="Plans are archived by marking them inactive."
+    [back]="{ label: 'Back to plans', link: '/plans' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading plan...</div>
+    <p class="notice" role="status">Loading plan...</p>
   } @else if (errorMessage && !plan) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (plan) {
-    <div class="card">
-      <div class="details">
+    <div class="panel">
+      <dl class="detail-list">
         <div>
-          <span class="label">Title</span>
-          <strong>{{ plan.title }}</strong>
+          <dt>Title</dt>
+          <dd>{{ plan.title }}</dd>
         </div>
         <div>
-          <span class="label">Type</span>
-          <strong>{{ plan.type }}</strong>
+          <dt>Type</dt>
+          <dd>{{ plan.type }}</dd>
         </div>
         <div>
-          <span class="label">Price</span>
-          <strong>{{ formatPrice(plan.priceCents) }}</strong>
+          <dt>Price</dt>
+          <dd>{{ formatPrice(plan.priceCents) }}</dd>
         </div>
         <div>
-          <span class="label">Status</span>
-          <strong>{{ plan.isActive ? 'Active' : 'Inactive' }}</strong>
+          <dt>Status</dt>
+          <dd>
+            <app-status-dot [tone]="plan.isActive ? 'success' : 'neutral'">
+              {{ plan.isActive ? 'Active' : 'Inactive' }}
+            </app-status-dot>
+          </dd>
         </div>
-      </div>
+      </dl>
 
-      <p class="warning">
+      <p class="notice notice--warning">
         Deactivating a plan hides it from new sign-ups, but existing subscriptions remain
         unchanged.
       </p>
 
       @if (errorMessage) {
-        <div class="state error">{{ errorMessage }}</div>
+        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
       }
 
       <div class="form-actions">
         <button
-          class="button button-danger"
+          class="btn btn--danger-solid"
           type="button"
           (click)="confirmDeactivate()"
           [disabled]="submitting || !plan.isActive"

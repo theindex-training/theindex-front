@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
 import { formatTimeWithoutSeconds } from '../../utils/time-display';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 @Component({
   selector: 'app-training-time-delete',
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './training-time-delete.component.html',
-  styleUrl: './training-time-delete.component.scss'
+  imports: [CommonModule, PageHeaderComponent],
+  templateUrl: './training-time-delete.component.html'
 })
 export class TrainingTimeDeleteComponent implements OnInit {
   trainingTime: TrainingTime | null = null;

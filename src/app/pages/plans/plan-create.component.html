@@ -1,68 +1,66 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Create plan</h1>
-      <p>Define the pricing and duration for a new training plan.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/plans">Back to plans</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Create plan"
+    subtitle="Define the pricing and duration for a new training plan."
+    [back]="{ label: 'Back to plans', link: '/plans' }"
+  />
 
-  <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
+  <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
     <div class="form-grid">
-      <label class="field">
-        <span>Plan type</span>
+      <label class="form-field">
+        <span class="form-field__label">Plan type</span>
         <select formControlName="type">
           <option value="PUNCH">Punch (credits)</option>
           <option value="TIME">Time (days)</option>
         </select>
       </label>
 
-      <label class="field">
-        <span>Title</span>
+      <label class="form-field">
+        <span class="form-field__label">Title</span>
         <input type="text" formControlName="title" placeholder="12 trainings" />
         @if (form.controls.title.touched && form.controls.title.invalid) {
-          <small class="error">Title is required.</small>
+          <span class="form-field__error">Title is required.</span>
         }
       </label>
 
-      <label class="field">
-        <span>Price (EUR)</span>
+      <label class="form-field">
+        <span class="form-field__label">Price (EUR)</span>
         <input type="number" formControlName="price" min="0" step="0.01" />
         @if (form.controls.price.touched && form.controls.price.invalid) {
-          <small class="error">Enter a valid price (up to two decimals).</small>
+          <span class="form-field__error">Enter a valid price (up to two decimals).</span>
         }
       </label>
 
       @if (form.controls.type.value === 'PUNCH') {
-        <label class="field">
-          <span>Credits</span>
+        <label class="form-field">
+          <span class="form-field__label">Credits</span>
           <input type="number" formControlName="credits" min="1" step="1" />
           @if (form.controls.credits.touched && form.controls.credits.invalid) {
-            <small class="error">Credits must be at least 1.</small>
+            <span class="form-field__error">Credits must be at least 1.</span>
           }
         </label>
       } @else {
-        <label class="field">
-          <span>Duration (days)</span>
+        <label class="form-field">
+          <span class="form-field__label">Duration (days)</span>
           <input type="number" formControlName="durationDays" min="1" step="1" />
           @if (form.controls.durationDays.touched && form.controls.durationDays.invalid) {
-            <small class="error">Duration must be at least 1 day.</small>
+            <span class="form-field__error">Duration must be at least 1 day.</span>
           }
         </label>
       }
 
-      <label class="field checkbox">
+      <label class="form-field form-field--check">
         <input type="checkbox" formControlName="isActive" />
         <span>Active plan</span>
       </label>
     </div>
 
     @if (errorMessage) {
-      <div class="state error">{{ errorMessage }}</div>
+      <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
     }
 
     <div class="form-actions">
-      <button class="button button-primary" type="submit" [disabled]="submitting">
+      <button class="btn btn--primary" type="submit" [disabled]="submitting">
         {{ submitting ? 'Saving...' : 'Create plan' }}
       </button>
     </div>

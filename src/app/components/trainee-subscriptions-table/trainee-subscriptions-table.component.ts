@@ -1,12 +1,15 @@
-import { CommonModule } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChipComponent, ChipTone } from '../chip/chip.component';
+import { IconComponent } from '../icon/icon.component';
+import { SkeletonListComponent } from '../skeleton-list/skeleton-list.component';
 import { Plan } from '../../services/plans.service';
 import { Subscription } from '../../services/subscriptions.service';
 
 @Component({
   selector: 'app-trainee-subscriptions-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [NgTemplateOutlet, ChipComponent, IconComponent, SkeletonListComponent],
   templateUrl: './trainee-subscriptions-table.component.html',
   styleUrl: './trainee-subscriptions-table.component.scss',
 })
@@ -36,6 +39,13 @@ export class TraineeSubscriptionsTableComponent {
     const remaining = subscription.remainingCredits ?? 0;
     const used = Math.max(initial - remaining, 0);
     return `${used} / ${initial} trainings`;
+  }
+
+  statusTone(subscription: Subscription): ChipTone {
+    if (this.isActiveSubscription(subscription)) {
+      return 'success';
+    }
+    return this.isExhausted(subscription) ? 'danger' : 'neutral';
   }
 
   isExhausted(subscription: Subscription): boolean {

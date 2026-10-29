@@ -10,7 +10,7 @@ import {
   ValidatorFn,
   Validators
 } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   AccountProvisioningService,
   ProvisionAccountPayload,
@@ -19,6 +19,9 @@ import {
 } from '../../services/account-provisioning.service';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
 import { displayValue } from '../../utils/display.util';
+import { IconComponent } from '../../components/icon/icon.component';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 
 const accountPasswordValidator: ValidatorFn = (
   control: AbstractControl
@@ -40,9 +43,8 @@ const accountPasswordValidator: ValidatorFn = (
 @Component({
   selector: 'app-trainer-account',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './trainer-account.component.html',
-  styleUrl: './trainer-account.component.scss'
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent, IconComponent, StatusDotComponent],
+  templateUrl: './trainer-account.component.html'
 })
 export class TrainerAccountComponent implements OnInit {
   readonly form: FormGroup<{
