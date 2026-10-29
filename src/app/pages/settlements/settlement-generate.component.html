@@ -1,4 +1,4 @@
-<section class="page-stack page-narrow">
+<section class="page-stack">
   <app-page-header
     title="Generate settlement report"
     subtitle="Create a new settlement using period start and period end dates."
@@ -7,15 +7,17 @@
 
   <article class="panel">
     <div class="form-grid">
-      <label class="form-field">
-        <span class="form-field__label">Period start</span>
-        <input type="date" [(ngModel)]="periodStart" />
-      </label>
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-field__label" for="settlement-period-start">Period start</label>
+          <input id="settlement-period-start" type="date" [(ngModel)]="periodStart" />
+        </div>
 
-      <label class="form-field">
-        <span class="form-field__label">Period end</span>
-        <input type="date" [(ngModel)]="periodEnd" />
-      </label>
+        <div class="form-field">
+          <label class="form-field__label" for="settlement-period-end">Period end</label>
+          <input id="settlement-period-end" type="date" [(ngModel)]="periodEnd" />
+        </div>
+      </div>
     </div>
 
     @if (errorMessage) {

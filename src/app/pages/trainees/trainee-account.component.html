@@ -1,4 +1,4 @@
-<section class="page-stack page-narrow">
+<section class="page-stack">
   <app-page-header
     [title]="isEditMode ? 'Manage trainee account' : 'Create trainee account'"
     [subtitle]="isEditMode ? 'Update login credentials for this trainee account.' : 'Provision login credentials for the selected trainee.'"
@@ -36,61 +36,102 @@
 
       <form class="form-stack panel-section" [formGroup]="form" (ngSubmit)="handleSubmit()">
         <div class="form-grid">
-          <label class="form-field">
-            <span class="form-field__label">Email</span>
-            <input type="email" formControlName="email" placeholder="trainee@example.com" />
-            @if (form.controls.email.touched && form.controls.email.invalid) {
-              <span class="form-field__error">Enter a valid email address.</span>
-            }
-          </label>
-
-          <label class="form-field">
-            <span class="form-field__label">{{ isEditMode ? 'New password (optional)' : 'Password' }}</span>
-            <div class="password-field">
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-field__label" for="trainee-account-email">Email</label>
               <input
-                [type]="showPassword ? 'text' : 'password'"
-                formControlName="password"
-                [placeholder]="
-                  isEditMode ? 'Leave blank to keep current password' : 'Minimum 8 characters'
-                "
+                id="trainee-account-email"
+                type="email"
+                autocomplete="off"
+                formControlName="email"
+                aria-describedby="trainee-account-email-help"
+                [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
               />
-              <button
-                type="button"
-                class="password-toggle"
-                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-                [title]="showPassword ? 'Hide password' : 'Show password'"
-                (click)="togglePasswordVisibility()"
-              >
-                <app-icon [name]="showPassword ? 'eye-off' : 'eye'" />
-              </button>
+              @if (form.controls.email.touched && form.controls.email.invalid) {
+                <span class="form-field__error" id="trainee-account-email-help">
+                  @if (form.controls.email.hasError('required')) {
+                    Email is required.
+                  } @else {
+                    Enter a valid email address, e.g. trainee&#64;example.com.
+                  }
+                </span>
+              } @else {
+                <span class="form-field__hint" id="trainee-account-email-help">
+                  Used to log in, e.g. trainee&#64;example.com.
+                </span>
+              }
             </div>
-          </label>
+          </div>
 
-          <label class="form-field">
-            <span class="form-field__label">{{ isEditMode ? 'Confirm new password' : 'Confirm password' }}</span>
-            <div class="password-field">
-              <input
-                [type]="showConfirmPassword ? 'text' : 'password'"
-                formControlName="confirmPassword"
-                [placeholder]="isEditMode ? 'Repeat new password if changed' : 'Repeat password'"
-              />
-              <button
-                type="button"
-                class="password-toggle"
-                [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
-                [title]="showConfirmPassword ? 'Hide password' : 'Show password'"
-                (click)="toggleConfirmPasswordVisibility()"
-              >
-                <app-icon [name]="showConfirmPassword ? 'eye-off' : 'eye'" />
-              </button>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-field__label" for="trainee-account-password">
+                @if (isEditMode) {
+                  New password <span class="form-field__optional">(optional)</span>
+                } @else {
+                  Password
+                }
+              </label>
+              <div class="password-field">
+                <input
+                  id="trainee-account-password"
+                  [type]="showPassword ? 'text' : 'password'"
+                  autocomplete="new-password"
+                  formControlName="password"
+                  aria-describedby="trainee-account-password-help"
+                  [attr.aria-invalid]="!!passwordError"
+                />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                  [title]="showPassword ? 'Hide password' : 'Show password'"
+                  (click)="togglePasswordVisibility()"
+                >
+                  <app-icon [name]="showPassword ? 'eye-off' : 'eye'" />
+                </button>
+              </div>
+              @if (passwordError) {
+                <span class="form-field__error" id="trainee-account-password-help">{{ passwordError }}</span>
+              } @else {
+                <span class="form-field__hint" id="trainee-account-password-help">
+                  At least 8 characters.{{ isEditMode ? ' Leave blank to keep the current password.' : '' }}
+                </span>
+              }
             </div>
-            @if (showPasswordLengthError) {
-              <span class="form-field__error">Password fields must contain at least 8 characters.</span>
-            }
-            @if (showPasswordMismatch) {
-              <span class="form-field__error">Passwords do not match.</span>
-            }
-          </label>
+
+            <div class="form-field">
+              <label class="form-field__label" for="trainee-account-confirm-password">
+                {{ isEditMode ? 'Confirm new password' : 'Confirm password' }}
+              </label>
+              <div class="password-field">
+                <input
+                  id="trainee-account-confirm-password"
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  autocomplete="new-password"
+                  formControlName="confirmPassword"
+                  aria-describedby="trainee-account-confirm-password-help"
+                  [attr.aria-invalid]="!!confirmPasswordError"
+                />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                  [title]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                  (click)="toggleConfirmPasswordVisibility()"
+                >
+                  <app-icon [name]="showConfirmPassword ? 'eye-off' : 'eye'" />
+                </button>
+              </div>
+              @if (confirmPasswordError) {
+                <span class="form-field__error" id="trainee-account-confirm-password-help">{{ confirmPasswordError }}</span>
+              } @else {
+                <span class="form-field__hint" id="trainee-account-confirm-password-help">
+                  Must match the {{ isEditMode ? 'new password' : 'password' }}.
+                </span>
+              }
+            </div>
+          </div>
         </div>
 
         @if (errorMessage) {

@@ -1,13 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import {
-  AbstractControl,
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn,
   Validators
 } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -17,16 +14,7 @@ import {
 } from '../../services/gym-subscriptions.service';
 import { CreateTraineePayload, TraineesService } from '../../services/trainees.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
-
-const optionalMinLength = (minLength: number): ValidatorFn => {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const value = control.value as string | null;
-    if (!value) {
-      return null;
-    }
-    return value.trim().length >= minLength ? null : { minlength: true };
-  };
-};
+import { trimmedLength } from '../../utils/form-validators.util';
 
 @Component({
   selector: 'app-trainee-create',
@@ -57,10 +45,10 @@ export class TraineeCreateComponent implements OnInit {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        Validators.minLength(2)
+        trimmedLength(2, 100)
       ]),
-      nickname: this.formBuilder.control<string | null>(null, [optionalMinLength(1)]),
-      phone: this.formBuilder.control<string | null>(null, [optionalMinLength(1)]),
+      nickname: this.formBuilder.control<string | null>(null, [trimmedLength(1, 50)]),
+      phone: this.formBuilder.control<string | null>(null),
       gymSubscriptionId: this.formBuilder.control<string | null>(null)
     });
   }

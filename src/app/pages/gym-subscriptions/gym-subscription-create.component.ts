@@ -13,6 +13,7 @@ import {
   GymSubscriptionsService
 } from '../../services/gym-subscriptions.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { trimmedLength } from '../../utils/form-validators.util';
 
 @Component({
   selector: 'app-gym-subscription-create',
@@ -36,8 +37,7 @@ export class GymSubscriptionCreateComponent {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        Validators.minLength(2),
-        Validators.maxLength(120)
+        trimmedLength(2, 120)
       ])
     });
   }

@@ -8,6 +8,8 @@
       [type]="inputType"
       [placeholder]="placeholder"
       [autocomplete]="autocomplete"
+      [attr.aria-describedby]="describedBy"
+      [attr.aria-invalid]="invalid"
       [value]="value"
       [disabled]="isDisabled"
       (input)="handleInput($event)"

@@ -38,6 +38,10 @@
   box-shadow: var(--focus-ring);
 }
 
+.ui-input__field[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
 .ui-input__control {
   position: relative;
 }

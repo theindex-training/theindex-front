@@ -14,6 +14,7 @@ import {
   UpdateGymLocationPayload,
 } from '../../services/gym-locations.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { trimmedLength } from '../../utils/form-validators.util';
 
 @Component({
   selector: 'app-gym-edit',
@@ -42,9 +43,9 @@ export class GymEditComponent implements OnInit {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        Validators.minLength(2),
+        trimmedLength(2, 120),
       ]),
-      address: this.formBuilder.control<string | null>(null),
+      address: this.formBuilder.control<string | null>(null, [trimmedLength(2, 250)]),
     });
   }
 

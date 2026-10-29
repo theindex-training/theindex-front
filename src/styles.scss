@@ -701,23 +701,34 @@ html:has(dialog[open]) {
   overflow-wrap: anywhere;
 }
 
-// Forms: .form-grid lays out .form-field blocks (label > label text + control + hint/error).
+// Forms: .form-grid stacks rows. Each .form-row holds the fields that belong together and splits
+// the width evenly between them from 768px up; on phones every field gets its own line.
 .form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.form-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-  gap: var(--space-4);
+  gap: var(--space-5) var(--space-4);
   align-items: start;
 }
 
+@media (min-width: 768px) {
+  .form-row {
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+  }
+}
+
+// One field: <div class="form-field"><label class="form-field__label" for="…">…</label>, the control,
+// then either .form-field__hint or .form-field__error (same id, referenced by aria-describedby).
 .form-field {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   min-width: 0;
-}
-
-.form-field--wide {
-  grid-column: 1 / -1;
 }
 
 .form-field__label {
@@ -729,9 +740,21 @@ html:has(dialog[open]) {
   text-transform: uppercase;
 }
 
+// "(optional)" suffix inside a label; required is the default, so only optional fields are marked.
+.form-field__optional {
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
 .form-field :is(input, select, textarea) {
   width: 100%;
   min-height: var(--control-height);
+}
+
+.form-field [aria-invalid='true'] {
+  border-color: var(--danger);
 }
 
 // Checkbox row: <label class="form-field form-field--check"><input type="checkbox" /><span>Label</span></label>

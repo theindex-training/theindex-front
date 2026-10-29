@@ -1,4 +1,4 @@
-<section class="page-stack page-narrow">
+<section class="page-stack">
   <app-page-header
     title="Edit gym subscription"
     subtitle="Update gym subscription details."
@@ -12,13 +12,23 @@
   } @else if (gymSubscription) {
     <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <div class="form-grid">
-        <label class="form-field">
-          <span class="form-field__label">Name</span>
-          <input type="text" formControlName="name" />
-          @if (form.controls.name.touched && form.controls.name.invalid) {
-            <span class="form-field__error">Name is required and must be between 2 and 120 characters.</span>
-          }
-        </label>
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="gym-subscription-name">Name</label>
+            <input
+              id="gym-subscription-name"
+              type="text"
+              formControlName="name"
+              aria-describedby="gym-subscription-name-help"
+              [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+            />
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+              <span class="form-field__error" id="gym-subscription-name-help">Enter a name of 2–120 characters.</span>
+            } @else {
+              <span class="form-field__hint" id="gym-subscription-name-help">2–120 characters.</span>
+            }
+          </div>
+        </div>
       </div>
 
       @if (errorMessage) {

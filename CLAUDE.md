@@ -204,12 +204,14 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
 - **`.panel` + `.panel__title`:** card section for forms, summaries and grouped content.
 - **`.stats` > `.stat`** (with `__label` and `__value`): key-figure tiles. A `<dl>` with `dt`/`dd` works too.
 - **Forms:**
-  - `.form-grid` lays out `label.form-field` blocks, each containing `.form-field__label`, the control, then `.form-field__hint` or `.form-field__error`.
-  - `.form-field--wide` spans the full row.
+  - `.form-grid` stacks rows. A `.form-row` holds the 1–3 fields that belong together (Name + Nickname, Start + End, Plan type + Credits + Price) and splits the width evenly from 768px up; on phones every field gets its own line. Pick rows deliberately, in reading order; don't rely on auto-wrapping. A checkbox (`.form-field--check`) gets its own row, placed directly in `.form-grid`.
+  - A field is `div.form-field` with `label.form-field__label[for]`, the control (`id`, `aria-describedby="<id>-help"`, `[attr.aria-invalid]`), then **either** `.form-field__error` (when touched and invalid) **or** `.form-field__hint` (otherwise), both with `id="<id>-help"`. Use `@if … } @else {` so the hint never shows next to an error that says the same thing.
+  - Required is the default and is not marked. Optional fields end the label with `<span class="form-field__optional">(optional)</span>`.
+  - Any rule beyond "required" (length, number range, decimals, format) gets a hint stating the expected format, e.g. "2–100 characters.", "Whole number, 1 or more.", "0 or more, up to two decimals, e.g. 45.50." Take the limits from the API DTOs and enforce the same ones client-side; `utils/form-validators.util.ts` has `trimmedLength(min, max)` for text that gets trimmed before sending.
+  - Invalid fields (`[aria-invalid='true']`) get a `--danger` border automatically. `app-ui-input` takes `describedBy` and `invalid` for the same wiring.
   - `.form-actions` holds the buttons, least important first and primary last. Below 768px they stack full width with the primary on top.
-  - Link an error to its input with `aria-describedby` and set `aria-invalid`.
 - **Form and detail layout:**
-  - `.page-narrow` caps form and detail pages at 60rem.
+  - Form pages use the full content width. `.page-narrow` caps detail and delete pages at 60rem.
   - `.detail-list` holds label/value pairs.
   - `.form-field--check` is a checkbox row.
   - `.password-field` + `.password-toggle` is a password input with a show/hide button.
@@ -227,21 +229,28 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
 **Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-right, plus, alert, trash, arrow-left, eye, eye-off.
 
 ### Form and detail page pattern (reference: `pages/plans/plan-*.component.html`)
-Create, edit, details and delete pages share one structure. They need no page SCSS:
+Create, edit, details and delete pages share one structure. They need no page SCSS. Create/edit pages drop `page-narrow` and use the full width:
 
 ```html
-<section class="page-stack page-narrow">
+<section class="page-stack">
   <app-page-header title="Edit plan" subtitle="…" [back]="{ label: 'Back to plans', link: '/plans' }" />
   @if (loading) { <p class="notice" role="status">Loading plan...</p> }
   @else if (errorMessage && !plan) { <p class="notice notice--danger" role="alert">{{ errorMessage }}</p> }
   @else {
     <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <div class="form-grid">
-        <label class="form-field">
-          <span class="form-field__label">Title</span>
-          <input formControlName="title" />
-          @if (…invalid) { <span class="form-field__error">Title is required.</span> }
-        </label>
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="plan-price">Price (EUR)</label>
+            <input id="plan-price" type="number" formControlName="price" aria-describedby="plan-price-help" [attr.aria-invalid]="…invalid" />
+            @if (…invalid) { <span class="form-field__error" id="plan-price-help">Enter a price of 0 or more, with up to two decimals.</span> }
+            @else { <span class="form-field__hint" id="plan-price-help">0 or more, up to two decimals, e.g. 45.50.</span> }
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="plan-notes">Notes <span class="form-field__optional">(optional)</span></label>
+            <input id="plan-notes" formControlName="notes" />
+          </div>
+        </div>
         <label class="form-field form-field--check"><input type="checkbox" formControlName="isActive" /><span>Active plan</span></label>
       </div>
       @if (errorMessage) { <p class="notice notice--danger" role="alert">{{ errorMessage }}</p> }

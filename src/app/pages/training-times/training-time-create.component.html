@@ -1,4 +1,4 @@
-<section class="page-stack page-narrow">
+<section class="page-stack">
   <app-page-header
     title="Create training time"
     subtitle="Add a new attendance training slot."
@@ -7,21 +7,35 @@
 
   <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
     <div class="form-grid">
-      <label class="form-field">
-        <span class="form-field__label">Start time</span>
-        <input type="time" formControlName="startTime" />
-        @if (form.controls.startTime.touched && form.controls.startTime.invalid) {
-          <span class="form-field__error">Start time is required.</span>
-        }
-      </label>
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-field__label" for="training-time-start-time">Start time</label>
+          <input
+            id="training-time-start-time"
+            type="time"
+            formControlName="startTime"
+            aria-describedby="training-time-start-time-help"
+            [attr.aria-invalid]="form.controls.startTime.touched && form.controls.startTime.invalid"
+          />
+          @if (form.controls.startTime.touched && form.controls.startTime.invalid) {
+            <span class="form-field__error" id="training-time-start-time-help">Start time is required.</span>
+          }
+        </div>
 
-      <label class="form-field">
-        <span class="form-field__label">End time</span>
-        <input type="time" formControlName="endTime" />
-        @if (form.controls.endTime.touched && form.controls.endTime.invalid) {
-          <span class="form-field__error">End time is required.</span>
-        }
-      </label>
+        <div class="form-field">
+          <label class="form-field__label" for="training-time-end-time">End time</label>
+          <input
+            id="training-time-end-time"
+            type="time"
+            formControlName="endTime"
+            aria-describedby="training-time-end-time-help"
+            [attr.aria-invalid]="form.controls.endTime.touched && form.controls.endTime.invalid"
+          />
+          @if (form.controls.endTime.touched && form.controls.endTime.invalid) {
+            <span class="form-field__error" id="training-time-end-time-help">End time is required.</span>
+          }
+        </div>
+      </div>
     </div>
 
     @if (errorMessage) {

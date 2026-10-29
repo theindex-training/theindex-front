@@ -20,43 +20,50 @@
       <section class="panel" aria-labelledby="manual-transaction-title">
         <h2 class="panel__title" id="manual-transaction-title">Add manual transaction</h2>
         <form class="form-grid" [formGroup]="form" (ngSubmit)="createManualTransaction()">
-          <label class="form-field">
-            <span class="form-field__label">Direction</span>
-            <select formControlName="direction">
-              <option value="IN">IN (money in)</option>
-              <option value="OUT">OUT (money out)</option>
-            </select>
-          </label>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-field__label" for="cash-direction">Direction</label>
+              <select id="cash-direction" formControlName="direction">
+                <option value="IN">IN (money in)</option>
+                <option value="OUT">OUT (money out)</option>
+              </select>
+            </div>
 
-          <label class="form-field">
-            <span class="form-field__label">Amount (EUR)</span>
-            <input
-              type="number"
-              inputmode="decimal"
-              min="0.01"
-              step="0.01"
-              formControlName="amount"
-              [attr.aria-invalid]="form.controls.amount.touched && form.controls.amount.invalid"
-              aria-describedby="amount-error"
-            />
-            @if (form.controls.amount.touched && form.controls.amount.invalid) {
-              <span class="form-field__error" id="amount-error">Enter a valid amount (up to two decimals).</span>
-            }
-          </label>
+            <div class="form-field">
+              <label class="form-field__label" for="cash-amount">Amount (EUR)</label>
+              <input
+                id="cash-amount"
+                type="number"
+                inputmode="decimal"
+                min="0.01"
+                step="0.01"
+                formControlName="amount"
+                [attr.aria-invalid]="form.controls.amount.touched && form.controls.amount.invalid"
+                aria-describedby="cash-amount-help"
+              />
+              @if (form.controls.amount.touched && form.controls.amount.invalid) {
+                <span class="form-field__error" id="cash-amount-help">Enter an amount above 0, with up to two decimals.</span>
+              } @else {
+                <span class="form-field__hint" id="cash-amount-help">Above 0, up to two decimals, e.g. 20.50.</span>
+              }
+            </div>
+          </div>
 
-          <label class="form-field form-field--wide">
-            <span class="form-field__label">Notes (optional)</span>
-            <textarea formControlName="notes" rows="2"></textarea>
-          </label>
+          <div class="form-field">
+            <label class="form-field__label" for="cash-notes">
+              Notes <span class="form-field__optional">(optional)</span>
+            </label>
+            <textarea id="cash-notes" formControlName="notes" rows="2"></textarea>
+          </div>
 
           @if (formErrorMessage) {
-            <p class="notice notice--danger form-field--wide" role="alert">{{ formErrorMessage }}</p>
+            <p class="notice notice--danger" role="alert">{{ formErrorMessage }}</p>
           }
           @if (formSuccessMessage) {
-            <p class="notice notice--success form-field--wide" role="status">{{ formSuccessMessage }}</p>
+            <p class="notice notice--success" role="status">{{ formSuccessMessage }}</p>
           }
 
-          <div class="form-actions form-field--wide">
+          <div class="form-actions">
             <button type="submit" class="btn btn--primary" [disabled]="creatingTransaction">
               {{ creatingTransaction ? 'Saving…' : 'Add transaction' }}
             </button>

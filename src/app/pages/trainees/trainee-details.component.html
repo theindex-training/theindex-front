@@ -100,40 +100,60 @@
       <form class="panel" [formGroup]="form" (ngSubmit)="handleCreateSubscription()" aria-labelledby="buy-title">
         <h3 class="panel__title" id="buy-title">Buy subscription</h3>
         <div class="form-grid">
-          <label class="form-field">
-            <span class="form-field__label">Plan</span>
-            <select formControlName="planId" [disabled]="plansLoading || submitting">
-              @for (plan of plans; track plan.id) {
-                <option [value]="plan.id">{{ formatPlanOption(plan) }}</option>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-field__label" for="buy-plan">Plan</label>
+              <select
+                id="buy-plan"
+                formControlName="planId"
+                [disabled]="plansLoading || submitting"
+                aria-describedby="buy-plan-help"
+                [attr.aria-invalid]="form.controls.planId.touched && form.controls.planId.invalid"
+              >
+                @for (plan of plans; track plan.id) {
+                  <option [value]="plan.id">{{ formatPlanOption(plan) }}</option>
+                }
+              </select>
+              @if (form.controls.planId.touched && form.controls.planId.invalid) {
+                <span class="form-field__error" id="buy-plan-help">Select a plan to purchase.</span>
               }
-            </select>
-            @if (form.controls.planId.touched && form.controls.planId.invalid) {
-              <span class="form-field__error">Select a plan to purchase.</span>
-            }
-          </label>
+            </div>
 
-          <label class="form-field">
-            <span class="form-field__label">Starts at</span>
-            <input type="date" formControlName="startsAt" [disabled]="submitting" />
-            @if (form.controls.startsAt.touched && form.controls.startsAt.invalid) {
-              <span class="form-field__error">Choose a start date.</span>
-            }
-          </label>
+            <div class="form-field">
+              <label class="form-field__label" for="buy-starts-at">Starts at</label>
+              <input
+                id="buy-starts-at"
+                type="date"
+                formControlName="startsAt"
+                [disabled]="submitting"
+                aria-describedby="buy-starts-at-help"
+                [attr.aria-invalid]="form.controls.startsAt.touched && form.controls.startsAt.invalid"
+              />
+              @if (form.controls.startsAt.touched && form.controls.startsAt.invalid) {
+                <span class="form-field__error" id="buy-starts-at-help">Choose a start date.</span>
+              }
+            </div>
 
-          <label class="form-field">
-            <span class="form-field__label">Paid amount (EUR)</span>
-            <input
-              type="number"
-              inputmode="decimal"
-              step="0.01"
-              formControlName="paid"
-              [disabled]="submitting"
-              placeholder="0.00"
-            />
-            @if (form.controls.paid.touched && form.controls.paid.invalid) {
-              <span class="form-field__error">Enter a valid amount.</span>
-            }
-          </label>
+            <div class="form-field">
+              <label class="form-field__label" for="buy-paid">Paid amount (EUR)</label>
+              <input
+                id="buy-paid"
+                type="number"
+                inputmode="decimal"
+                step="0.01"
+                formControlName="paid"
+                [disabled]="submitting"
+                placeholder="0.00"
+                aria-describedby="buy-paid-help"
+                [attr.aria-invalid]="form.controls.paid.touched && form.controls.paid.invalid"
+              />
+              @if (form.controls.paid.touched && form.controls.paid.invalid) {
+                <span class="form-field__error" id="buy-paid-help">Enter an amount of 0 or more, with up to two decimals.</span>
+              } @else {
+                <span class="form-field__hint" id="buy-paid-help">Defaults to the plan price. Up to two decimals.</span>
+              }
+            </div>
+          </div>
         </div>
 
         @if (subscriptionErrorMessage) {

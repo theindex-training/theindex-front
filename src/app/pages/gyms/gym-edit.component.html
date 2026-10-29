@@ -1,4 +1,4 @@
-<section class="page-stack page-narrow">
+<section class="page-stack">
   <app-page-header
     title="Edit gym"
     subtitle="Update gym location details."
@@ -12,18 +12,41 @@
   } @else if (gym) {
     <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <div class="form-grid">
-        <label class="form-field">
-          <span class="form-field__label">Name</span>
-          <input type="text" formControlName="name" />
-          @if (form.controls.name.touched && form.controls.name.invalid) {
-            <span class="form-field__error">Name is required and must be at least 2 characters.</span>
-          }
-        </label>
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="gym-name">Name</label>
+            <input
+              id="gym-name"
+              type="text"
+              formControlName="name"
+              aria-describedby="gym-name-help"
+              [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+            />
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+              <span class="form-field__error" id="gym-name-help">Enter a name of 2–120 characters.</span>
+            } @else {
+              <span class="form-field__hint" id="gym-name-help">2–120 characters.</span>
+            }
+          </div>
 
-        <label class="form-field">
-          <span class="form-field__label">Address</span>
-          <input type="text" formControlName="address" />
-        </label>
+          <div class="form-field">
+            <label class="form-field__label" for="gym-address">
+              Address <span class="form-field__optional">(optional)</span>
+            </label>
+            <input
+              id="gym-address"
+              type="text"
+              formControlName="address"
+              aria-describedby="gym-address-help"
+              [attr.aria-invalid]="form.controls.address.touched && form.controls.address.invalid"
+            />
+            @if (form.controls.address.touched && form.controls.address.invalid) {
+              <span class="form-field__error" id="gym-address-help">Address must be 2–250 characters.</span>
+            } @else {
+              <span class="form-field__hint" id="gym-address-help">2–250 characters.</span>
+            }
+          </div>
+        </div>
       </div>
 
       @if (errorMessage) {
