@@ -1,0 +1,16 @@
+<a class="list-row" [class.list-row--dimmed]="dimmed" [routerLink]="link">
+  @if (avatarName) {
+    <app-avatar [name]="avatarName" [muted]="dimmed" />
+  }
+  <span class="list-row__body">
+    <span class="list-row__title">
+      {{ title }}
+      @if (titleSuffix) {
+        <span class="list-row__suffix">{{ titleSuffix }}</span>
+      }
+    </span>
+    <span class="list-row__meta"><ng-content select="[listRowMeta]" /></span>
+  </span>
+  <span class="list-row__trailing"><ng-content select="[listRowTrailing]" /></span>
+  <app-icon class="list-row__chevron" name="chevron-right" />
+</a>

@@ -1,0 +1,23 @@
+:host {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--avatar-size, 2.75rem);
+  height: var(--avatar-size, 2.75rem);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: var(--heading-tracking);
+}
+
+.avatar--muted {
+  color: var(--muted);
+}
