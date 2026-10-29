@@ -7,7 +7,7 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AttendanceService } from '../../services/attendance.service';
 import { AuthService } from '../../services/auth.service';
@@ -16,11 +16,22 @@ import { TraineeProfile, TraineesService } from '../../services/trainees.service
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
 import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
 import { formatTimeWithoutSeconds } from '../../utils/time-display';
+import { AvatarComponent } from '../../components/avatar/avatar.component';
+import { IconComponent } from '../../components/icon/icon.component';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 
 @Component({
   selector: 'app-attendance-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AvatarComponent,
+    IconComponent,
+    PageHeaderComponent,
+    SkeletonListComponent
+  ],
   templateUrl: './attendance-register.component.html',
   styleUrl: './attendance-register.component.scss'
 })

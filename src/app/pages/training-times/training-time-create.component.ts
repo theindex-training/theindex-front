@@ -7,15 +7,15 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { CreateTrainingTimePayload, TrainingTimesService } from '../../services/training-times.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 @Component({
   selector: 'app-training-time-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './training-time-create.component.html',
-  styleUrl: './training-time-create.component.scss'
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  templateUrl: './training-time-create.component.html'
 })
 export class TrainingTimeCreateComponent {
   readonly form: FormGroup<{

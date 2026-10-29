@@ -7,19 +7,19 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   TrainingTime,
   TrainingTimesService,
   UpdateTrainingTimePayload
 } from '../../services/training-times.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 @Component({
   selector: 'app-training-time-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './training-time-edit.component.html',
-  styleUrl: './training-time-edit.component.scss'
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  templateUrl: './training-time-edit.component.html'
 })
 export class TrainingTimeEditComponent implements OnInit {
   readonly form: FormGroup<{

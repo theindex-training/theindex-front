@@ -10,7 +10,7 @@ import {
   ValidatorFn,
   Validators
 } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   GymSubscription,
   GymSubscriptionsService
@@ -20,6 +20,7 @@ import {
   TraineesService,
   UpdateTraineePayload
 } from '../../services/trainees.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 const optionalMinLength = (minLength: number): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -34,9 +35,8 @@ const optionalMinLength = (minLength: number): ValidatorFn => {
 @Component({
   selector: 'app-trainee-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './trainee-edit.component.html',
-  styleUrl: './trainee-edit.component.scss'
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  templateUrl: './trainee-edit.component.html'
 })
 export class TraineeEditComponent implements OnInit {
   readonly form: FormGroup<{

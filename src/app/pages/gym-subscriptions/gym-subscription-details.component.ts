@@ -5,13 +5,14 @@ import {
   GymSubscription,
   GymSubscriptionsService
 } from '../../services/gym-subscriptions.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 
 @Component({
   selector: 'app-gym-subscription-details',
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './gym-subscription-details.component.html',
-  styleUrl: './gym-subscription-details.component.scss'
+  imports: [CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  templateUrl: './gym-subscription-details.component.html'
 })
 export class GymSubscriptionDetailsComponent implements OnInit {
   gymSubscription: GymSubscription | null = null;

@@ -23,4 +23,6 @@ export class PageHeaderComponent {
   @Input({ required: true }) title = '';
   @Input() subtitle = '';
   @Input() action?: PageHeaderAction;
+  /** "Back to …" link shown above the title on detail/form pages. */
+  @Input() back?: PageHeaderAction;
 }

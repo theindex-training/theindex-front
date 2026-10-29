@@ -1,39 +1,37 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Edit gym</h1>
-      <p>Update gym location details.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/gyms">Back to gyms</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Edit gym"
+    subtitle="Update gym location details."
+    [back]="{ label: 'Back to gyms', link: '/gyms' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading gym...</div>
+    <p class="notice" role="status">Loading gym...</p>
   } @else if (errorMessage && !gym) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (gym) {
-    <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
+    <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <div class="form-grid">
-        <label class="field">
-          <span>Name</span>
+        <label class="form-field">
+          <span class="form-field__label">Name</span>
           <input type="text" formControlName="name" />
           @if (form.controls.name.touched && form.controls.name.invalid) {
-            <small class="error">Name is required and must be at least 2 characters.</small>
+            <span class="form-field__error">Name is required and must be at least 2 characters.</span>
           }
         </label>
 
-        <label class="field">
-          <span>Address</span>
+        <label class="form-field">
+          <span class="form-field__label">Address</span>
           <input type="text" formControlName="address" />
         </label>
       </div>
 
       @if (errorMessage) {
-        <div class="state error">{{ errorMessage }}</div>
+        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
       }
 
       <div class="form-actions">
-        <button class="button button-primary" type="submit" [disabled]="submitting">
+        <button class="btn btn--primary" type="submit" [disabled]="submitting">
           {{ submitting ? 'Saving...' : 'Save changes' }}
         </button>
       </div>

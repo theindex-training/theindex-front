@@ -24,7 +24,10 @@ export type IconName =
   | 'chevron-right'
   | 'plus'
   | 'alert'
-  | 'trash';
+  | 'trash'
+  | 'arrow-left'
+  | 'eye'
+  | 'eye-off';
 
 /**
  * Inline stroke icons in the Lucide style (24px grid, 2px round strokes, currentColor).

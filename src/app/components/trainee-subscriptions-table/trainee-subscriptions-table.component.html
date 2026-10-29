@@ -1,57 +1,77 @@
 @if (loading) {
-  <div class="state">Loading subscriptions...</div>
+  <app-skeleton-list label="Loading subscriptions" [rows]="2" />
 } @else if (errorMessage && !subscriptions.length) {
-  <div class="state error">{{ errorMessage }}</div>
+  <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
 } @else if (!subscriptions.length) {
-  <div class="state">{{ emptyMessage }}</div>
+  <p class="notice" role="status">{{ emptyMessage }}</p>
 } @else {
-  <div class="table">
-    <div class="table-row table-header"
-      [class.no-actions]="!showActionsColumn">
-      <span>Plan</span>
-      <span>Type</span>
-      <span>Status</span>
-      <span>Starts</span>
-      <span>Ends / Used</span>
-      <span>Paid</span>
-      @if (showActionsColumn) {
-        <span class="table-actions">Actions</span>
-      }
-    </div>
-    @for (subscription of subscriptions; track subscription.id) {
-      <div
-        class="table-row"
-        [class.no-actions]="!showActionsColumn"
-        [class.row-exhausted]="isExhausted(subscription)"
-        [class.row-active]="isActiveSubscription(subscription)"
-      >
-        <span class="title">{{ formatPlanLabel(subscription) }}</span>
-        <span>{{ subscription.type }}</span>
-        <span
-          class="subscription-status"
-          [class.status-exhausted]="isExhausted(subscription)"
-          [class.status-active]="isActiveSubscription(subscription)"
-        >
-          {{ subscription.status }}
-        </span>
-        <span>{{ formatDate(subscription.startsAt) }}</span>
-        <span>{{ formatEndsOrCredits(subscription) }}</span>
-        <span>{{ formatPrice(subscription.paidCents) }}</span>
-        @if (showActionsColumn) {
-          <span class="table-actions">
-            @if (canDeleteSubscriptions) {
-              <button
-                class="button button-danger"
-                type="button"
-                (click)="onDelete(subscription)"
-                [disabled]="deletingSubscriptionId === subscription.id"
-              >
-                {{ deletingSubscriptionId === subscription.id ? 'Deleting...' : 'Delete' }}
-              </button>
+  <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Subscriptions table">
+    <table class="data-table">
+      <caption class="visually-hidden">Subscriptions</caption>
+      <thead>
+        <tr>
+          <th scope="col">Plan</th>
+          <th scope="col">Type</th>
+          <th scope="col">Status</th>
+          <th scope="col">Starts</th>
+          <th scope="col">Ends / used</th>
+          <th scope="col" class="cell-right">Paid</th>
+          @if (showActionsColumn) {
+            <th scope="col" class="cell-fit"><span class="visually-hidden">Actions</span></th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (subscription of subscriptions; track subscription.id) {
+          <tr>
+            <td><strong>{{ formatPlanLabel(subscription) }}</strong></td>
+            <td><app-chip>{{ subscription.type }}</app-chip></td>
+            <td><app-chip [tone]="statusTone(subscription)">{{ subscription.status }}</app-chip></td>
+            <td class="num">{{ formatDate(subscription.startsAt) }}</td>
+            <td class="num">{{ formatEndsOrCredits(subscription) }}</td>
+            <td class="num cell-right">{{ formatPrice(subscription.paidCents) }}</td>
+            @if (showActionsColumn) {
+              <td class="cell-fit">
+                @if (canDeleteSubscriptions) {
+                  <ng-container *ngTemplateOutlet="deleteButton; context: { $implicit: subscription }" />
+                }
+              </td>
             }
-          </span>
+          </tr>
         }
-      </div>
-    }
+      </tbody>
+    </table>
   </div>
+
+  <ul class="list-card responsive-list" aria-label="Subscriptions">
+    @for (subscription of subscriptions; track subscription.id) {
+      <li class="record">
+        <div class="record__main">
+          <span class="record__title">{{ formatPlanLabel(subscription) }}</span>
+          <span class="record__meta num">{{ formatEndsOrCredits(subscription) }}</span>
+          <span class="record__meta num">From {{ formatDate(subscription.startsAt) }} · Paid {{ formatPrice(subscription.paidCents) }}</span>
+        </div>
+        <div class="record__aside">
+          <app-chip [tone]="statusTone(subscription)">{{ subscription.status }}</app-chip>
+          <app-chip>{{ subscription.type }}</app-chip>
+        </div>
+        @if (showActionsColumn && canDeleteSubscriptions) {
+          <ng-container *ngTemplateOutlet="deleteButton; context: { $implicit: subscription }" />
+        }
+      </li>
+    }
+  </ul>
 }
+
+<ng-template #deleteButton let-subscription>
+  <button
+    class="icon-btn icon-btn--danger"
+    type="button"
+    [attr.aria-label]="'Delete subscription ' + formatPlanLabel(subscription)"
+    [disabled]="deletingSubscriptionId === subscription.id"
+    [attr.aria-busy]="deletingSubscriptionId === subscription.id"
+    (click)="onDelete(subscription)"
+  >
+    <app-icon name="trash" />
+  </button>
+</ng-template>

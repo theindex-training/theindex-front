@@ -1,37 +1,35 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Delete training time</h1>
-      <p>This action removes the training time permanently.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/training-times">Back to training times</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Delete training time"
+    subtitle="This action removes the training time permanently."
+    [back]="{ label: 'Back to training times', link: '/training-times' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading training time...</div>
+    <p class="notice" role="status">Loading training time...</p>
   } @else if (errorMessage && !trainingTime) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (trainingTime) {
-    <div class="card">
-      <div class="details">
+    <div class="panel">
+      <dl class="detail-list">
         <div>
-          <span class="label">Start time</span>
-          <strong>{{ formatTime(trainingTime.startTime) }}</strong>
+          <dt>Start time</dt>
+          <dd>{{ formatTime(trainingTime.startTime) }}</dd>
         </div>
         <div>
-          <span class="label">End time</span>
-          <strong>{{ formatTime(trainingTime.endTime) }}</strong>
+          <dt>End time</dt>
+          <dd>{{ formatTime(trainingTime.endTime) }}</dd>
         </div>
-      </div>
+      </dl>
 
-      <p class="warning">Deleting cannot be undone.</p>
+      <p class="notice notice--warning">Deleting cannot be undone.</p>
 
       @if (errorMessage) {
-        <div class="state error">{{ errorMessage }}</div>
+        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
       }
 
       <div class="form-actions">
-        <button class="button button-danger" type="button" (click)="confirmDelete()" [disabled]="submitting">
+        <button class="btn btn--danger-solid" type="button" (click)="confirmDelete()" [disabled]="submitting">
           {{ submitting ? 'Deleting...' : 'Delete training time' }}
         </button>
       </div>

@@ -7,19 +7,19 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   GymSubscription,
   GymSubscriptionsService,
   UpdateGymSubscriptionPayload
 } from '../../services/gym-subscriptions.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 @Component({
   selector: 'app-gym-subscription-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './gym-subscription-edit.component.html',
-  styleUrl: './gym-subscription-edit.component.scss'
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  templateUrl: './gym-subscription-edit.component.html'
 })
 export class GymSubscriptionEditComponent implements OnInit {
   readonly form: FormGroup<{

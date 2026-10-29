@@ -2,13 +2,14 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Plan, PlansService } from '../../services/plans.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 
 @Component({
   selector: 'app-plan-details',
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './plan-details.component.html',
-  styleUrl: './plan-details.component.scss'
+  imports: [CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  templateUrl: './plan-details.component.html'
 })
 export class PlanDetailsComponent implements OnInit {
   plan: Plan | null = null;

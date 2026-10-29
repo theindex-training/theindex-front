@@ -1,34 +1,32 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Training time details</h1>
-      <p>Review this configured training slot.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/training-times">Back to training times</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Training time details"
+    subtitle="Review this configured training slot."
+    [back]="{ label: 'Back to training times', link: '/training-times' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading training time...</div>
+    <p class="notice" role="status">Loading training time...</p>
   } @else if (errorMessage && !trainingTime) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (trainingTime) {
-    <div class="card">
-      <div class="details">
+    <div class="panel">
+      <dl class="detail-list">
         <div>
-          <span class="label">Start time</span>
-          <strong>{{ formatTime(trainingTime.startTime) }}</strong>
+          <dt>Start time</dt>
+          <dd>{{ formatTime(trainingTime.startTime) }}</dd>
         </div>
         <div>
-          <span class="label">End time</span>
-          <strong>{{ formatTime(trainingTime.endTime) }}</strong>
+          <dt>End time</dt>
+          <dd>{{ formatTime(trainingTime.endTime) }}</dd>
         </div>
-      </div>
+      </dl>
 
-      <div class="details-actions">
-        <a class="button button-secondary" [routerLink]="['/training-times', trainingTime.id, 'edit']">
+      <div class="form-actions">
+        <a class="btn btn--secondary" [routerLink]="['/training-times', trainingTime.id, 'edit']">
           Edit training time
         </a>
-        <a class="button button-ghost" [routerLink]="['/training-times', trainingTime.id, 'delete']">
+        <a class="btn btn--ghost" [routerLink]="['/training-times', trainingTime.id, 'delete']">
           Delete training time
         </a>
       </div>

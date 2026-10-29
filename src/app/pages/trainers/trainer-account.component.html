@@ -1,51 +1,47 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>{{ isEditMode ? 'Manage trainer account' : 'Create trainer account' }}</h1>
-      <p>
-        {{
-          isEditMode
-            ? 'Update login credentials for this trainer account.'
-            : 'Provision login credentials for the selected trainer.'
-        }}
-      </p>
-    </div>
-    <a class="button button-ghost" routerLink="/trainers">Back to trainers</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    [title]="isEditMode ? 'Manage trainer account' : 'Create trainer account'"
+    [subtitle]="isEditMode ? 'Update login credentials for this trainer account.' : 'Provision login credentials for the selected trainer.'"
+    [back]="{ label: 'Back to trainers', link: '/trainers' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading trainer...</div>
+    <p class="notice" role="status">Loading trainer...</p>
   } @else if (errorMessage && !trainer) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (trainer) {
-    <div class="card">
-      <div class="details">
+    <div class="panel">
+      <dl class="detail-list">
         <div>
-          <span class="label">Trainer</span>
-          <strong>{{ trainer.name }}</strong>
+          <dt>Trainer</dt>
+          <dd>{{ trainer.name }}</dd>
         </div>
         <div>
-          <span class="label">Nickname</span>
-          <strong>{{ formatNickname() }}</strong>
+          <dt>Nickname</dt>
+          <dd>{{ formatNickname() }}</dd>
         </div>
         <div>
-          <span class="label">Profile status</span>
-          <strong>{{ trainer.isActive ? 'Active' : 'Inactive' }}</strong>
+          <dt>Profile status</dt>
+          <dd>
+            <app-status-dot [tone]="trainer.isActive ? 'success' : 'neutral'">
+              {{ trainer.isActive ? 'Active' : 'Inactive' }}
+            </app-status-dot>
+          </dd>
         </div>
-      </div>
+      </dl>
 
-      <form class="form" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <form class="form-stack panel-section" [formGroup]="form" (ngSubmit)="handleSubmit()">
         <div class="form-grid">
-          <label class="field">
-            <span>Email</span>
+          <label class="form-field">
+            <span class="form-field__label">Email</span>
             <input type="email" formControlName="email" placeholder="trainer@example.com" />
             @if (form.controls.email.touched && form.controls.email.invalid) {
-              <small class="error">Enter a valid email address.</small>
+              <span class="form-field__error">Enter a valid email address.</span>
             }
           </label>
 
-          <label class="field">
-            <span>{{ isEditMode ? 'New password (optional)' : 'Password' }}</span>
+          <label class="form-field">
+            <span class="form-field__label">{{ isEditMode ? 'New password (optional)' : 'Password' }}</span>
             <div class="password-field">
               <input
                 [type]="showPassword ? 'text' : 'password'"
@@ -57,18 +53,17 @@
               <button
                 type="button"
                 class="password-toggle"
-                tabindex="-1"
                 [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
                 [title]="showPassword ? 'Hide password' : 'Show password'"
                 (click)="togglePasswordVisibility()"
               >
-                {{ showPassword ? '🙈' : '👁️' }}
+                <app-icon [name]="showPassword ? 'eye-off' : 'eye'" />
               </button>
             </div>
           </label>
 
-          <label class="field">
-            <span>{{ isEditMode ? 'Confirm new password' : 'Confirm password' }}</span>
+          <label class="form-field">
+            <span class="form-field__label">{{ isEditMode ? 'Confirm new password' : 'Confirm password' }}</span>
             <div class="password-field">
               <input
                 [type]="showConfirmPassword ? 'text' : 'password'"
@@ -78,31 +73,30 @@
               <button
                 type="button"
                 class="password-toggle"
-                tabindex="-1"
                 [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
                 [title]="showConfirmPassword ? 'Hide password' : 'Show password'"
                 (click)="toggleConfirmPasswordVisibility()"
               >
-                {{ showConfirmPassword ? '🙈' : '👁️' }}
+                <app-icon [name]="showConfirmPassword ? 'eye-off' : 'eye'" />
               </button>
             </div>
             @if (showPasswordLengthError) {
-              <small class="error">Password fields must contain at least 8 characters.</small>
+              <span class="form-field__error">Password fields must contain at least 8 characters.</span>
             }
             @if (showPasswordMismatch) {
-              <small class="error">Passwords do not match.</small>
+              <span class="form-field__error">Passwords do not match.</span>
             }
           </label>
         </div>
 
         @if (errorMessage) {
-          <div class="state error">{{ errorMessage }}</div>
+          <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
         }
 
         <div class="form-actions">
           @if (isEditMode) {
             <button
-              class="button button-danger"
+              class="btn btn--danger"
               type="button"
               [disabled]="deactivating"
               (click)="deactivateAccount()"
@@ -110,7 +104,7 @@
               {{ deactivating ? 'Deactivating...' : 'Deactivate account' }}
             </button>
           }
-          <button class="button button-primary" type="submit" [disabled]="submitting">
+          <button class="btn btn--primary" type="submit" [disabled]="submitting">
             {{ submitting ? 'Saving...' : isEditMode ? 'Save account changes' : 'Create account' }}
           </button>
         </div>

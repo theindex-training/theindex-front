@@ -8,13 +8,14 @@ import {
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
 
 import { displayValue } from '../../utils/display.util';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 
 @Component({
   selector: 'app-trainer-details',
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './trainer-details.component.html',
-  styleUrl: './trainer-details.component.scss'
+  imports: [CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  templateUrl: './trainer-details.component.html'
 })
 export class TrainerDetailsComponent implements OnInit {
   trainer: TrainerProfile | null = null;

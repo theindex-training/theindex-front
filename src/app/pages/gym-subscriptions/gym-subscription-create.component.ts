@@ -7,18 +7,18 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   CreateGymSubscriptionPayload,
   GymSubscriptionsService
 } from '../../services/gym-subscriptions.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 @Component({
   selector: 'app-gym-subscription-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './gym-subscription-create.component.html',
-  styleUrl: './gym-subscription-create.component.scss'
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  templateUrl: './gym-subscription-create.component.html'
 })
 export class GymSubscriptionCreateComponent {
   readonly form: FormGroup<{

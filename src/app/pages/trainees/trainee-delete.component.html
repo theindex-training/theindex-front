@@ -1,47 +1,45 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Deactivate trainee</h1>
-      <p>Disable access for a trainee while keeping their profile.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/trainees">Back to trainees</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Deactivate trainee"
+    subtitle="Disable access for a trainee while keeping their profile."
+    [back]="{ label: 'Back to trainees', link: '/trainees' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading trainee...</div>
+    <p class="notice" role="status">Loading trainee...</p>
   } @else if (errorMessage && !trainee) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (trainee) {
-    <div class="card">
-      <div class="details">
+    <div class="panel">
+      <dl class="detail-list">
         <div>
-          <span class="label">Name</span>
-          <strong>{{ trainee.name }}</strong>
+          <dt>Name</dt>
+          <dd>{{ trainee.name }}</dd>
         </div>
         <div>
-          <span class="label">Nickname</span>
-          <strong>{{ formatNickname() }}</strong>
+          <dt>Nickname</dt>
+          <dd>{{ formatNickname() }}</dd>
         </div>
         <div>
-          <span class="label">Phone</span>
-          <strong>{{ formatPhone() }}</strong>
+          <dt>Phone</dt>
+          <dd>{{ formatPhone() }}</dd>
         </div>
         <div>
-          <span class="label">Account</span>
-          <strong>{{ formatAccount() }}</strong>
+          <dt>Account</dt>
+          <dd>{{ formatAccount() }}</dd>
         </div>
-      </div>
+      </dl>
 
-      <div class="warning">
+      <p class="notice notice--warning">
         This trainee will no longer be active, but their profile can be reactivated later.
-      </div>
+      </p>
 
       @if (errorMessage) {
-        <div class="state error">{{ errorMessage }}</div>
+        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
       }
 
       <div class="form-actions">
-        <button class="button button-danger" type="button" (click)="confirmDeactivate()" [disabled]="submitting">
+        <button class="btn btn--danger-solid" type="button" (click)="confirmDeactivate()" [disabled]="submitting">
           {{ submitting ? 'Deactivating...' : 'Deactivate trainee' }}
         </button>
       </div>
