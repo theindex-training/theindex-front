@@ -1,0 +1,43 @@
+<div class="sidebar">
+  <div class="sidebar__brand">
+    <app-brand />
+  </div>
+
+  <nav class="sidebar__nav" aria-label="Main">
+    <ul class="nav-list">
+      @for (item of mainItems; track item.route) {
+        <li>
+          <ng-container *ngTemplateOutlet="link; context: { $implicit: item }" />
+        </li>
+      }
+    </ul>
+
+    @if (manageItems.length) {
+      <h2 class="nav-group-label" id="sidebar-manage">Manage</h2>
+      <ul class="nav-list" aria-labelledby="sidebar-manage">
+        @for (item of manageItems; track item.route) {
+          <li>
+            <ng-container *ngTemplateOutlet="link; context: { $implicit: item }" />
+          </li>
+        }
+      </ul>
+    }
+  </nav>
+
+  <div class="sidebar__footer">
+    <app-theme-switch />
+    <app-user-block />
+  </div>
+</div>
+
+<ng-template #link let-item>
+  <a
+    class="nav-link"
+    [routerLink]="item.route"
+    routerLinkActive="is-active"
+    ariaCurrentWhenActive="page"
+    [routerLinkActiveOptions]="{ exact: !!item.exact }"
+  >
+    {{ item.label }}
+  </a>
+</ng-template>

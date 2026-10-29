@@ -1,0 +1,33 @@
+<nav class="tab-bar" aria-label="Main">
+  <ul class="tab-bar__list">
+    @for (tab of tabs; track tab.route) {
+      <li>
+        <a
+          class="tab"
+          [class.tab--primary]="tab.primary"
+          [routerLink]="tab.route"
+          routerLinkActive="is-active"
+          ariaCurrentWhenActive="page"
+          [routerLinkActiveOptions]="{ exact: !!tab.exact }"
+        >
+          <span class="tab__icon"><app-icon [name]="tab.icon" /></span>
+          <span class="tab__label">{{ tab.tabLabel ?? tab.label }}</span>
+        </a>
+      </li>
+    }
+    <li>
+      <button
+        #sheetButton
+        class="tab"
+        type="button"
+        aria-haspopup="dialog"
+        [attr.aria-expanded]="sheetOpen"
+        [class.is-active]="sheetActive || sheetOpen"
+        (click)="openSheet.emit(sheetButton)"
+      >
+        <span class="tab__icon"><app-icon [name]="sheetLabel === 'More' ? 'more' : 'settings'" /></span>
+        <span class="tab__label">{{ sheetLabel }}</span>
+      </button>
+    </li>
+  </ul>
+</nav>

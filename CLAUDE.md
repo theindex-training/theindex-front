@@ -19,7 +19,7 @@ npx ng test --watch=false    # run unit tests once (`npm test` starts watch mode
 ```
 For a working UI locally, also run theindex-api (`npm run start:dev` there, with Postgres) and log in as the seeded admin (`admin`/`admin` with the API's `.env.example`).
 
-Known baseline (as of Oct 2026): build passes with no warnings. `ng test` has 2 failing tests in stale scaffold specs: `app.component.spec.ts` expects an `<h1>` "Hello, theindex-front", and `home.component.spec.ts` lacks router/HttpClient providers; `app.component.spec.ts` also logs an unhandled `/api/health` HttpErrorResponse. Don't treat these as regressions you caused, and don't hide them either.
+Known baseline (as of Oct 2026): build passes with no warnings and all `ng test` specs pass. Keep it that way; a failing spec is a regression.
 
 ## Folder structure
 ```
@@ -30,7 +30,7 @@ src/
     app.config.ts         # provideHttpClient(withInterceptors([authInterceptor])), provideRouter
     app.routes.ts         # all routes; role restrictions via data: { roles: [...] } + roleGuard
     pages/<feature>/      # one folder per feature: list, -create, -edit, -details, -delete components
-    components/           # shared UI (main-layout, theme-toggle, ui-button/input/checkbox, trainee tables)
+    components/           # shared UI: navigation shell (main-layout, sidebar, tab-bar, nav-sheet, brand, theme-switch, user-block, icon, navigation.ts), ui-button/input/checkbox, trainee tables
     services/             # one service per API resource + auth.service, auth.interceptor, theme.service
     guards/               # authGuard, loginGuard, roleGuard
     utils/                # buildHttpParams, display/time formatting helpers
@@ -50,7 +50,7 @@ public/                   # static assets
 - If you need an endpoint or field that doesn't exist, the change belongs in theindex-api first. Keep service interfaces in sync with the API's DTOs/entities, and flag cross-repo changes to the user.
 
 ## Design system ("Chalk & Iron")
-The app is being redesigned in phases. Phase 1 (this foundation) added tokens, fonts and theming; later phases rework navigation and page layouts on top of it.
+The app is being redesigned in phases. Phase 1 added tokens, fonts and theming. Phase 2 replaced the header with the navigation shell (sidebar on desktop, tab bar + sheet on mobile). Later phases rework page layouts.
 
 **Direction:** bold and athletic, fitting a CrossFit gym. Condensed uppercase headings, chalk-white (light) or near-black (dark) backgrounds, one orange accent, flat surfaces (no gradients), generous touch targets (44px minimum).
 
@@ -76,6 +76,10 @@ All tokens are CSS custom properties defined in `src/styles.scss` (global, so th
 | `--danger` / `--danger-soft` / `--danger-border` | errors, unpaid, destructive actions | `#B42318` / `#FCE8E6` / `#F1B4AC` | `#FF8F84` / `#3A1714` / `#6B2A24` |
 | `--on-danger` | text on a solid `--danger` fill | `#FFFFFF` | `#1A0D0B` |
 | `--nav-bg` / `--nav-text` / `--nav-text-strong` | the dark "iron" navigation shell (same feel in both themes) | `#121211` / `#B5B3AC` / `#F2F1EE` | `#070707` / `#A3A19A` / `#F2F1EE` |
+| `--nav-surface` | hover/active items, tiles and the theme switch track on the nav shell | `#262622` | `#1C1C1A` |
+| `--nav-border` | dividers on the nav shell (decorative) | `#3A3934` | `#2D2C29` |
+| `--nav-accent` | accent marks on the nav shell: active marker, focus outline. `--accent` is too dark on `--nav-bg` in light mode | `#FF7A33` | `#FF7A33` |
+| `--scrim` | backdrop behind modal sheets/dialogs | `rgba(18,18,17,.55)` | `rgba(0,0,0,.65)` |
 | `--shadow-sm` / `--shadow-md` | card lift / popovers and menus | | |
 
 Pairing rules (all checked at ≥4.5:1 for text):
@@ -106,13 +110,32 @@ Other scales:
 - `ThemeService` (`services/theme.service.ts`) has three modes: `light`, `dark`, `system`. The default is `system`, which follows `prefers-color-scheme` and reacts live to OS changes. It exposes `mode()` and `resolvedTheme()` signals plus `setMode()` and `cycleMode()`. Explicit choices are stored in `localStorage` under `theme`; choosing `system` clears the key.
 - An inline script in `src/index.html` applies the theme before Angular boots, so the wrong theme never flashes. If you change the storage key or mode values, update both places.
 - Because the theme depends on an attribute set at runtime, critical-CSS inlining is turned off in `angular.json` (`optimization.styles.inlineCritical: false`). With it on, only the light tokens would be inlined, and dark mode would flash light. Keep `styles.scss` small, since it is render-blocking.
-- `ThemeToggleComponent` (`components/theme-toggle`) is a temporary toggle that cycles light → dark → auto. It sits in the main-layout header until phase 2 moves it into the new navigation.
+- `ThemeSwitchComponent` (`components/theme-switch`) is the Light / Dark / Auto segmented control, built from native radios so arrow keys work. It lives in the sidebar footer and the mobile sheet, and is styled for the nav shell.
+
+### Navigation shell (`components/main-layout`)
+- **Data:** `components/navigation/navigation.ts`. `buildNavigation(role)` returns the sidebar items (`main`, `manage`), the mobile `tabs`, the sheet items (`moreMain`, `moreManage`) and the sheet's label. To add a page to the nav, add a `NavItem` there (with `roles` if it is restricted) and an `icon`. It is covered by `navigation.spec.ts`. Role filtering only shapes the UI; routes still need `roleGuard` + `data.roles`.
+- **Desktop (≥ 1024px):** `app-sidebar`, a sticky `--nav-bg` column with brand, main items, the "Manage" group, theme switch and `app-user-block`. The active item gets `--nav-surface` plus a small `--nav-accent` marker, and `aria-current="page"` via `routerLinkActive` + `ariaCurrentWhenActive`.
+- **Mobile (< 1024px):** a compact sticky top bar with `app-brand`, plus `app-tab-bar`, fixed to the bottom and padded for `env(safe-area-inset-*)` (`viewport-fit=cover` is set in `index.html`).
+  - Staff tabs: Home, Trainees, Register (accent square, the primary action), Settle, More.
+  - Trainees: Profile, Stats, Records, Account. They have no primary action, so no accent tab.
+  - The last tab opens `app-nav-sheet`, a native `<dialog>` opened with `showModal()`. It contains the remaining items as tiles, the theme switch and account actions. It gets focus containment and Escape for free, closes on backdrop tap, on navigation and when the window grows to desktop, and returns focus to the tab. The More/Account tab shows as active when the current page lives in the sheet.
+  - Page content gets bottom padding for the tab bar, so it never ends up underneath it.
+- The breakpoint is in two places: `main-layout.component.scss` and `DESKTOP_QUERY` in `main-layout.component.ts`.
+- **Icons:** `app-icon` renders inline Lucide-style SVG strokes (24px grid, 2px round strokes, `currentColor`, `aria-hidden`). Size them with `--icon-size`. To add an icon, add a name to `IconName` and an `@case` with the path data. Don't use icon fonts or emoji.
+- **Accessibility:**
+  - A "Skip to content" button is the first tab stop and focuses `<main>`. It is a button because `href="#…"` would navigate with `<base href="/">`.
+  - Nav landmarks are labelled "Main"; only one is rendered per breakpoint.
+  - Focus outlines on the nav shell use `--nav-accent`.
+- **Global helpers in `styles.scss`:**
+  - `.visually-hidden` hides content visually but keeps it for screen readers.
+  - `html:has(dialog[open])` locks page scroll while a modal dialog is open.
 
 ### Rules for components
 - **Use tokens, never hard-coded colors.** No hex, `rgb()`, named colors or gradients in component SCSS. If a token is missing, add it to both themes in `src/styles.scss` and document it here; don't inline a value.
 - Check a new pairing in both themes, at 4.5:1 for text and 3:1 for UI component boundaries.
 - Use the spacing, radius and type tokens for new styles instead of new magic numbers.
 - Interactive elements must be at least 44px tall or wide.
+- On the nav shell (`--nav-bg`), use the `--nav-*` tokens, not the page tokens.
 - Component styles budget is 4kB warn / 8kB error per component. Share patterns through global styles or shared components rather than copying them.
 
 ## Rules
