@@ -19,7 +19,11 @@ export type IconName =
   | 'settings'
   | 'key'
   | 'log-out'
-  | 'close';
+  | 'close'
+  | 'search'
+  | 'chevron-right'
+  | 'plus'
+  | 'alert';
 
 /**
  * Inline stroke icons in the Lucide style (24px grid, 2px round strokes, currentColor).

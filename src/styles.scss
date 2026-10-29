@@ -295,6 +295,174 @@ html:has(dialog[open]) {
   overflow: hidden;
 }
 
+// ---------------------------------------------------------------------------
+// List pages (see "List page pattern" in CLAUDE.md). Global so every list page
+// shares them without paying for them in its own component style budget.
+// ---------------------------------------------------------------------------
+
+// Buttons for page content (links or <button>). `ui-button` is the full-width form variant.
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  padding: 0 var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: var(--label-tracking);
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.btn--primary:hover {
+  background: color-mix(in srgb, var(--accent) 88%, var(--text));
+}
+
+.btn--secondary {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.btn--secondary:hover {
+  background: var(--surface-2);
+}
+
+// Vertical rhythm for a page: header, toolbar, content.
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+// Toolbar row above a list: search, filters, count. Wraps on narrow screens.
+.list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+}
+
+.list-toolbar__search {
+  flex: 1 1 18rem;
+  max-width: 40rem;
+}
+
+.list-toolbar__count {
+  margin: 0 0 0 auto;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+// Card that holds a .data-table. Scrolls horizontally inside itself when narrow.
+// Give it tabindex="0", role="region" and an aria-label so keyboard users can scroll it.
+.data-table-wrap {
+  // Containing block for absolutely positioned children (e.g. .visually-hidden header
+  // labels), so they are clipped by the scroll container instead of widening the page.
+  position: relative;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.data-table {
+  width: 100%;
+  min-width: 48rem;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--label-tracking);
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.data-table :is(th, td):first-child {
+  padding-left: var(--space-6);
+}
+
+.data-table :is(th, td):last-child {
+  padding-right: var(--space-6);
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.data-table tbody tr:hover {
+  background: var(--bg);
+}
+
+// Shrink-to-fit column, e.g. the trailing chevron.
+.data-table .cell-fit {
+  width: 1%;
+  white-space: nowrap;
+}
+
+// Card that holds a <ul> of app-list-row items on mobile.
+.list-card {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  list-style: none;
+}
+
+.list-card > li + li {
+  border-top: 1px solid var(--border);
+}
+
+// A page header with an action shows a floating "+" button below 1024px. Give <main> extra
+// bottom room then, so the button never covers the page's last row (used by main-layout).
+@media (max-width: 1023.98px) {
+  main:has(.fab) {
+    --fab-clearance: 4.5rem;
+  }
+}
+
+// Placeholder block for loading states. Size it with width/height.
+.skeleton {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
 ::selection {
   background: var(--accent);
   color: var(--on-accent);

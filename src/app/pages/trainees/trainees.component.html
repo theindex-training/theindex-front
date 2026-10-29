@@ -1,77 +1,146 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Trainees</h1>
-      <p>Manage trainee profiles and credentials.</p>
-    </div>
-    <div class="page-actions">
-      <a class="button button-primary" routerLink="/trainees/new">New trainee</a>
-    </div>
-  </header>
+<section class="page-stack">
+  <app-page-header
+    title="Trainees"
+    subtitle="Profiles, gym cards and app accounts for everyone who trains with you."
+    [action]="{ label: 'New trainee', link: '/trainees/new' }"
+  />
 
-  <section class="filters-bar">
-    <div class="filters">
-      <label class="field">
-        <span>Status</span>
-        <select [(ngModel)]="activeFilter" (change)="loadTrainees()">
-          <option value="all">All</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-      </label>
-
-      <label class="field">
-        <span>Search</span>
-        <input
-          type="search"
-          [(ngModel)]="searchTerm"
-          (ngModelChange)="applySearch()"
-          placeholder="Search by name or nickname"
-        />
-      </label>
-    </div>
-
-    <p class="trainees-total">Total: <strong>{{ filteredTrainees.length }}</strong></p>
-  </section>
+  <div class="list-toolbar">
+    <app-search-field
+      class="list-toolbar__search"
+      label="Search trainees"
+      placeholder="Search name or nickname"
+      [value]="searchTerm"
+      (valueChange)="searchTerm = $event; applySearch()"
+    />
+    <app-segmented-control
+      class="status-filter"
+      label="Status"
+      [options]="statusOptions"
+      [value]="activeFilter"
+      (valueChange)="activeFilter = $event; loadTrainees()"
+    />
+    @if (!loading && !errorMessage && trainees.length) {
+      <p class="list-toolbar__count" aria-live="polite">
+        {{ filteredTrainees.length }} of {{ trainees.length }} trainees
+      </p>
+    }
+  </div>
 
   @if (loading) {
-    <div class="state">Loading trainees...</div>
+    <app-skeleton-list label="Loading trainees" [rows]="6" />
   } @else if (errorMessage) {
-    <div class="state error">{{ errorMessage }}</div>
+    <app-empty-state tone="danger" title="Couldn't load trainees" [message]="errorMessage">
+      <button class="btn btn--secondary" type="button" (click)="loadTrainees()">Try again</button>
+    </app-empty-state>
+  } @else if (!trainees.length) {
+    @if (activeFilter === 'all') {
+      <app-empty-state
+        icon="users"
+        title="No trainees yet"
+        message="Add the people who train with you to track their gym cards, subscriptions and attendance."
+      >
+        <a class="btn btn--primary" routerLink="/trainees/new">New trainee</a>
+      </app-empty-state>
+    } @else {
+      <app-empty-state
+        icon="users"
+        [title]="activeFilter === 'active' ? 'No active trainees' : 'No inactive trainees'"
+        message="Try a different status filter."
+      >
+        <button class="btn btn--secondary" type="button" (click)="activeFilter = 'all'; loadTrainees()">
+          Show all trainees
+        </button>
+      </app-empty-state>
+    }
   } @else if (!filteredTrainees.length) {
-    <div class="state">No trainees found yet.</div>
+    <app-empty-state title="No matches" [message]="'No trainee matches “' + searchTerm.trim() + '”.'">
+      <button class="btn btn--secondary" type="button" (click)="searchTerm = ''; applySearch()">
+        Clear search
+      </button>
+    </app-empty-state>
   } @else {
-    <div class="table">
-      <div class="table-row table-header">
-        <span>Name</span>
-        <span>Nickname</span>
-        <span>Phone</span>
-        <span>Account</span>
-        <span>Gym subscription</span>
-        <span class="table-actions">Details</span>
-      </div>
-      @for (trainee of filteredTrainees; track trainee.id) {
-        <div class="table-row">
-          <span class="title">{{ trainee.name }}</span>
-          <span>{{ formatNickname(trainee) }}</span>
-          <span>{{ formatPhone(trainee) }}</span>
-          <span class="account-cell">
-            @if (hasLinkedAccount(trainee)) {
-              <span class="account-linked" title="Linked account" aria-label="Linked account"
-                >✓</span
-              >
-            } @else {
-              -
-            }
-          </span>
-          <span>{{ formatGymSubscription(trainee) }}</span>
-          <span class="table-actions">
-            <a class="button button-secondary" [routerLink]="['/trainees', trainee.id]">
-              Open details
-            </a>
-          </span>
-        </div>
-      }
+    <!-- Desktop / tablet (≥ 768px): table -->
+    <div class="data-table-wrap trainees-table" tabindex="0" role="region" aria-label="Trainees table">
+      <table class="data-table">
+        <caption class="visually-hidden">Trainees</caption>
+        <thead>
+          <tr>
+            <th scope="col">Trainee</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Gym card</th>
+            <th scope="col">App account</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="cell-fit"><span class="visually-hidden">Details</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (trainee of filteredTrainees; track trainee.id) {
+            <tr>
+              <td>
+                <div class="trainee-cell">
+                  <app-avatar [name]="trainee.name" />
+                  <div class="trainee-cell__text">
+                    <a class="trainee-cell__name" [routerLink]="['/trainees', trainee.id]">{{ trainee.name }}</a>
+                    <span class="trainee-cell__nickname">{{ nicknameLabel(trainee) }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="phone">{{ formatPhone(trainee) }}</td>
+              <td>
+                @if (gymCardName(trainee); as gymCard) {
+                  <app-chip tone="accent">{{ gymCard }}</app-chip>
+                } @else {
+                  <span class="muted">None</span>
+                }
+              </td>
+              <td>
+                @if (hasLinkedAccount(trainee)) {
+                  <span class="linked">Linked</span>
+                } @else {
+                  <span class="muted">Not linked</span>
+                }
+              </td>
+              <td>
+                <app-status-dot [tone]="trainee.isActive ? 'success' : 'neutral'">
+                  {{ trainee.isActive ? 'Active' : 'Inactive' }}
+                </app-status-dot>
+              </td>
+              <td class="cell-fit">
+                <!-- Mouse shortcut only; the name link is the accessible link for the row. -->
+                <a class="row-chevron" [routerLink]="['/trainees', trainee.id]" tabindex="-1" aria-hidden="true">
+                  <app-icon name="chevron-right" />
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
+
+    <!-- Mobile (< 768px): tappable rows -->
+    <ul class="list-card trainees-list" aria-label="Trainees">
+      @for (trainee of filteredTrainees; track trainee.id) {
+        <li>
+          <app-list-row
+            [link]="['/trainees', trainee.id]"
+            [title]="trainee.name"
+            [titleSuffix]="trainee.nickname ? '“' + trainee.nickname + '”' : ''"
+            [avatarName]="trainee.name"
+            [dimmed]="!trainee.isActive"
+          >
+            <span listRowMeta class="phone">{{ formatPhone(trainee) }}</span>
+            @if (hasLinkedAccount(trainee)) {
+              <span listRowMeta class="app-linked">
+                <app-icon name="check" />App<span class="visually-hidden"> account linked</span>
+              </span>
+            }
+            @if (trailingChip(trainee); as chip) {
+              <app-chip listRowTrailing [tone]="chip.tone">{{ chip.label }}</app-chip>
+            }
+          </app-list-row>
+        </li>
+      }
+    </ul>
   }
 </section>

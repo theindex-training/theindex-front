@@ -50,7 +50,7 @@
 
 .content {
   padding: var(--space-5) calc(var(--space-4) + env(safe-area-inset-right))
-    calc(var(--tab-bar-height) + env(safe-area-inset-bottom) + var(--space-8))
+    calc(var(--tab-bar-height) + env(safe-area-inset-bottom) + var(--space-8) + var(--fab-clearance, 0rem))
     calc(var(--space-4) + env(safe-area-inset-left));
 }
 

@@ -1,209 +1,94 @@
-.page {
+.status-filter {
+  flex: 0 0 auto;
+}
+
+.trainee-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 14rem;
+}
+
+.trainee-cell__text {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  min-width: 0;
 }
 
-.page-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-h1 {
-  margin: 0;
-  font-size: 2rem;
-}
-
-p {
-  margin: 0.5rem 0 0;
-  color: var(--muted);
-}
-
-.page-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.filters-bar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.filters {
-  display: flex;
-  gap: 1rem;
-}
-
-
-.trainees-total {
-  margin: 0;
-  color: var(--muted);
-  font-weight: 600;
-}
-
-.trainees-total strong {
+.trainee-cell__name {
   color: var(--text);
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  font-size: var(--text-lg);
   font-weight: 600;
+  text-decoration: none;
+}
+
+.trainee-cell__name:hover {
+  text-decoration: underline;
+}
+
+.trainee-cell__nickname {
   color: var(--muted);
+  font-size: var(--text-sm);
 }
 
-select,
-input[type='search'] {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  font-size: 0.95rem;
-}
-
-input[type='search'] {
-  min-width: 260px;
-  appearance: none;
-}
-
-input[type='search']:focus,
-select:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: var(--focus-ring);
-}
-
-.table {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.table-row {
-  display: grid;
-  grid-template-columns: 1.3fr 0.8fr 0.9fr 1fr 1.2fr 1fr;
-  gap: 1rem;
-  align-items: center;
-  background: var(--surface);
-  padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--border);
-}
-
-.table-header {
-  font-weight: 700;
-  color: var(--muted);
-  background: transparent;
-  border: none;
-  padding: 0 0.25rem;
-}
-
-.title {
-  font-weight: 600;
-}
-
-.table-actions {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-}
-
-.table-actions .button {
+.phone {
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.table-actions .button-primary {
-  min-width: 140px;
-}
-
-.account-cell {
+.muted {
   color: var(--muted);
-  font-weight: 700;
 }
 
-.account-linked {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  border-radius: 999px;
-  background: var(--success-soft);
+.linked {
   color: var(--success);
-  border: 1px solid var(--success-border);
-  font-size: 0.8rem;
-}
-
-
-.state {
-  background: var(--surface);
-  border: 1px dashed var(--border);
-  padding: 1.5rem;
-  border-radius: 1rem;
-  color: var(--muted);
   font-weight: 600;
 }
 
-.state.error {
-  border-color: var(--danger-border);
-  color: var(--danger);
-}
-
-.button {
-  border-radius: 999px;
-  padding: 0.4rem 1rem;
-  font-weight: 600;
-  border: 1px solid transparent;
-  cursor: pointer;
-  text-decoration: none;
+.row-chevron {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-.button-primary {
-  background: var(--accent);
-  color: var(--on-accent);
-}
-
-.button-secondary {
-  background: var(--accent-soft);
-  color: var(--accent-text);
-  border-color: var(--accent-border);
-}
-
-.button-ghost {
-  background: transparent;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   color: var(--muted);
-  border-color: var(--border);
+  --icon-size: 1.25rem;
 }
 
-@media (max-width: 960px) {
-  .filters-bar {
-    align-items: flex-start;
+.row-chevron:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.app-linked {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--success);
+  font-weight: 600;
+  --icon-size: 1rem;
+}
+
+.trainees-list {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .status-filter {
+    flex-basis: 100%;
   }
 
-  .trainees-total {
-    width: 100%;
+  .list-toolbar__count {
+    margin-left: 0;
   }
 
-  .table-row {
-    grid-template-columns: 1fr;
-    align-items: flex-start;
-  }
-
-  .table-header {
+  .trainees-table {
     display: none;
   }
 
-  .table-actions {
-    justify-content: flex-start;
+  .trainees-list {
+    display: block;
   }
 }

@@ -30,7 +30,7 @@ src/
     app.config.ts         # provideHttpClient(withInterceptors([authInterceptor])), provideRouter
     app.routes.ts         # all routes; role restrictions via data: { roles: [...] } + roleGuard
     pages/<feature>/      # one folder per feature: list, -create, -edit, -details, -delete components
-    components/           # shared UI: navigation shell (main-layout, sidebar, tab-bar, nav-sheet, brand, theme-switch, user-block, icon, navigation.ts), ui-button/input/checkbox, trainee tables
+    components/           # shared UI: navigation shell (main-layout, sidebar, tab-bar, nav-sheet, brand, theme-switch, user-block, icon, navigation.ts), list page pieces (page-header, search-field, segmented-control, chip, avatar, status-dot, list-row, empty-state, skeleton-list), ui-button/input/checkbox, trainee tables
     services/             # one service per API resource + auth.service, auth.interceptor, theme.service
     guards/               # authGuard, loginGuard, roleGuard
     utils/                # buildHttpParams, display/time formatting helpers
@@ -50,7 +50,7 @@ public/                   # static assets
 - If you need an endpoint or field that doesn't exist, the change belongs in theindex-api first. Keep service interfaces in sync with the API's DTOs/entities, and flag cross-repo changes to the user.
 
 ## Design system ("Chalk & Iron")
-The app is being redesigned in phases. Phase 1 added tokens, fonts and theming. Phase 2 replaced the header with the navigation shell (sidebar on desktop, tab bar + sheet on mobile). Later phases rework page layouts.
+The app is being redesigned in phases. Phase 1 added tokens, fonts and theming. Phase 2 replaced the header with the navigation shell (sidebar on desktop, tab bar + sheet on mobile). Phase 3 redesigned the Trainees list and extracted the list page pattern below; phase 4 applies it to the other list pages.
 
 **Direction:** bold and athletic, fitting a CrossFit gym. Condensed uppercase headings, chalk-white (light) or near-black (dark) backgrounds, one orange accent, flat surfaces (no gradients), generous touch targets (44px minimum).
 
@@ -129,6 +129,65 @@ Other scales:
 - **Global helpers in `styles.scss`:**
   - `.visually-hidden` hides content visually but keeps it for screen readers.
   - `html:has(dialog[open])` locks page scroll while a modal dialog is open.
+
+### List page pattern (reference: `pages/trainees/trainees.component.*`)
+Every list page (plans, gyms, trainers, settlements, …) follows the Trainees page. Copy its template structure:
+
+```html
+<section class="page-stack">
+  <app-page-header title="Plans" subtitle="One line about the page." [action]="{ label: 'New plan', link: '/plans/new' }" />
+
+  <div class="list-toolbar">
+    <app-search-field class="list-toolbar__search" label="Search plans" [value]="term" (valueChange)="term = $event; applySearch()" />
+    <app-segmented-control label="Status" [options]="statusOptions" [value]="filter" (valueChange)="filter = $event; load()" />
+    <p class="list-toolbar__count" aria-live="polite">{{ shown }} of {{ total }} plans</p>
+  </div>
+
+  @if (loading) { <app-skeleton-list label="Loading plans" /> }
+  @else if (errorMessage) { <app-empty-state tone="danger" title="Couldn't load plans" [message]="errorMessage"> <button class="btn btn--secondary" (click)="load()">Try again</button> </app-empty-state> }
+  @else if (!items.length) { <app-empty-state icon="…" title="No plans yet" message="…"> <a class="btn btn--primary" routerLink="/plans/new">New plan</a> </app-empty-state> }
+  @else if (!filtered.length) { <app-empty-state title="No matches" …> <button class="btn btn--secondary" …>Clear search</button> </app-empty-state> }
+  @else {
+    <div class="data-table-wrap plans-table" tabindex="0" role="region" aria-label="Plans table"> <table class="data-table">…</table> </div>
+    <ul class="list-card plans-list" aria-label="Plans"> <li><app-list-row …/></li> </ul>
+  }
+</section>
+```
+- **Breakpoints:** at 768px and up, show the table. Below 768px, show the `list-card` of `app-list-row`s; toggle them with `display` in the page SCSS (see `trainees.component.scss`). The create action is a header button at 1024px and up, and a floating "+" below that, where the tab bar shows.
+- **Data:** keep loading and filtering in the page component; these pieces are presentational only. A segmented filter that maps to an API param keeps calling the existing load method.
+- **States:** there are always four:
+  - loading → `app-skeleton-list`
+  - error → `app-empty-state tone="danger"` with "Try again"
+  - empty → `app-empty-state` with the create action, or "Show all" when a filter caused it
+  - no search matches → `app-empty-state` with "Clear search"
+  - Hide the count when nothing is loaded.
+
+**Components** (all standalone in `components/`, presentational, built on tokens):
+
+| Component | Use |
+|---|---|
+| `app-page-header` | `title`, `subtitle`, optional `action: { label, link }`. It renders the desktop button and the mobile FAB. With a FAB, `<main>` gets `--fab-clearance` bottom room via a global rule, so the last row isn't covered. |
+| `app-search-field` | Search input with icon and its own 44px clear button (the native one is hidden). Takes `label` (visually hidden, required) and `placeholder`; use `[value]` + `(valueChange)`. |
+| `app-segmented-control` | Single choice built on native radios (announced as a group, arrow keys work). Takes `label` (legend, required), `options: SegmentedOption[]`, `[value]` + `(valueChange)`. |
+| `app-chip` | Uppercase label. `tone`: `accent` (e.g. gym card), `neutral` (e.g. Inactive), `success`, `warning`, `danger`. |
+| `app-avatar` | Initials (first + last word) in a rounded square. Takes `name` and `muted`; size with `--avatar-size`. It is decorative, so always show the name as text. |
+| `app-status-dot` | Dot + text label. `tone`: `success`, `warning`, `danger`, `neutral`. The text carries the meaning. |
+| `app-list-row` | Mobile row; the whole row is one link. Inputs: `link`, `title`, `titleSuffix` (muted), `avatarName`, `dimmed`. Slots: `[listRowMeta]` for the second line and `[listRowTrailing]` for a chip. Dimmed rows use `--muted` text instead of opacity, so contrast stays ≥4.5:1. |
+| `app-empty-state` | Icon, title, message, and actions in the default slot. `tone="danger"` uses the alert icon and `role="alert"`. |
+| `app-skeleton-list` | Loading placeholder rows (`rows`, `label`). Announces `label` through `role="status"`; the blocks are `aria-hidden`. |
+
+**Global classes** (in `styles.scss`, shared without per-component budget):
+- **Page layout:** `.page-stack` stacks a page vertically. `.list-toolbar` and its `__search`/`__count` children form the toolbar row.
+- **`.data-table-wrap` + `.data-table`:**
+  - The wrap is a card that scrolls horizontally inside itself. Give it `tabindex="0"`, `role="region"` and an `aria-label`.
+  - It is `position: relative` on purpose. Without that, `.visually-hidden` header text escapes the scroll clip and widens the whole page.
+  - Use `th scope="col"`, a visually-hidden `<caption>`, and `.cell-fit` for shrink-to-fit columns.
+  - Row link pattern: the name cell holds the real link. A trailing chevron link may duplicate it for the mouse with `tabindex="-1"` and `aria-hidden="true"`, so keyboard and screen-reader users get one link per row.
+- **`.list-card`:** the bordered `<ul>` for `app-list-row`s.
+- **`.skeleton`:** pulsing placeholder block.
+- **`.btn` + `.btn--primary` / `.btn--secondary`:** link or button actions in page content. `ui-button` stays the full-width form button.
+
+**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-right, plus, alert.
 
 ### Rules for components
 - **Use tokens, never hard-coded colors.** No hex, `rgb()`, named colors or gradients in component SCSS. If a token is missing, add it to both themes in `src/styles.scss` and document it here; don't inline a value.
