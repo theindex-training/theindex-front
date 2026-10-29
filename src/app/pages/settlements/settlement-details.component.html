@@ -183,7 +183,7 @@
           @for (row of allocations; track row.id) {
             <li class="record">
               <div class="record__main">
-                <a class="record__title allocation-link" [routerLink]="['/trainees', row.attendance?.traineeId]">
+                <a class="record__title" [routerLink]="['/trainees', row.attendance?.traineeId]">
                   {{ formatTrainee(row.attendance?.traineeId) }}
                 </a>
                 <span class="record__meta num">{{ formatOptionalDate(row.attendance?.trainedAt) }}</span>

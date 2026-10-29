@@ -48,7 +48,7 @@
 
 .who__search input {
   width: 100%;
-  min-height: 3.25rem;
+  min-height: var(--control-height-lg);
   padding-left: calc(var(--space-4) + 1.25rem + var(--space-3));
   border-radius: var(--radius-lg);
   font-size: var(--text-lg);

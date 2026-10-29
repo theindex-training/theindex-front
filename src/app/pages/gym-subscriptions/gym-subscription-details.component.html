@@ -27,12 +27,8 @@
       </dl>
 
       <div class="form-actions">
-        <a class="btn btn--secondary" [routerLink]="['/gym-subscriptions', gymSubscription.id, 'edit']">
-          Edit gym subscription
-        </a>
-        <a class="btn btn--ghost" [routerLink]="['/gym-subscriptions', gymSubscription.id, 'delete']">
-          Deactivate gym subscription
-        </a>
+        <a class="btn btn--ghost" [routerLink]="['/gym-subscriptions', gymSubscription.id, 'delete']">Deactivate gym subscription</a>
+        <a class="btn btn--primary" [routerLink]="['/gym-subscriptions', gymSubscription.id, 'edit']">Edit gym subscription</a>
       </div>
     </div>
   }

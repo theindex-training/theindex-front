@@ -8,8 +8,7 @@ import { displayValue } from '../../utils/display.util';
   selector: 'app-trainee-trainings-table',
   standalone: true,
   imports: [ChipComponent, SkeletonListComponent],
-  templateUrl: './trainee-trainings-table.component.html',
-  styleUrl: './trainee-trainings-table.component.scss',
+  templateUrl: './trainee-trainings-table.component.html'
 })
 export class TraineeTrainingsTableComponent {
   @Input() trainings: AttendanceTraineeTrainingItem[] = [];

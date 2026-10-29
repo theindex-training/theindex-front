@@ -160,7 +160,7 @@
             <li class="record">
               <app-avatar [name]="traineeName(item.traineeId)" />
               <div class="record__main">
-                <a class="record__title attendee-link" [routerLink]="['/trainees', item.traineeId]">{{ traineeName(item.traineeId) }}</a>
+                <a class="record__title" [routerLink]="['/trainees', item.traineeId]">{{ traineeName(item.traineeId) }}</a>
                 <span class="record__meta">{{ traineeNickname(item.traineeId) }}</span>
               </div>
               <div class="record__aside">

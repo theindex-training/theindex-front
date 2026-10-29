@@ -47,6 +47,7 @@
   font-weight: 600;
   line-height: 1;
   text-transform: uppercase;
+  // Tighter than --label-tracking so five uppercase labels fit at 320–375px.
   letter-spacing: 0.04em;
 }
 

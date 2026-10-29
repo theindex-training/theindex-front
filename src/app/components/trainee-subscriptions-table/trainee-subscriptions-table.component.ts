@@ -10,8 +10,7 @@ import { Subscription } from '../../services/subscriptions.service';
   selector: 'app-trainee-subscriptions-table',
   standalone: true,
   imports: [NgTemplateOutlet, ChipComponent, IconComponent, SkeletonListComponent],
-  templateUrl: './trainee-subscriptions-table.component.html',
-  styleUrl: './trainee-subscriptions-table.component.scss',
+  templateUrl: './trainee-subscriptions-table.component.html'
 })
 export class TraineeSubscriptionsTableComponent {
   @Input() subscriptions: Subscription[] = [];

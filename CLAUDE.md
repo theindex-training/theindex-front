@@ -30,7 +30,7 @@ src/
     app.config.ts         # provideHttpClient(withInterceptors([authInterceptor])), provideRouter
     app.routes.ts         # all routes; role restrictions via data: { roles: [...] } + roleGuard
     pages/<feature>/      # one folder per feature: list, -create, -edit, -details, -delete components
-    components/           # shared UI: navigation shell (main-layout, sidebar, tab-bar, nav-sheet, brand, theme-switch, user-block, icon, navigation.ts), list page pieces (page-header, search-field, segmented-control, chip, avatar, status-dot, list-row, empty-state, skeleton-list), ui-button/input/checkbox, trainee tables
+    components/           # shared UI: navigation shell (main-layout, sidebar, tab-bar, nav-sheet, brand, theme-switch, user-block, icon, navigation.ts), list page pieces (page-header, search-field, segmented-control, chip, avatar, status-dot, list-row, empty-state, skeleton-list), ui-button/input, trainee tables, ranked-list
     services/             # one service per API resource + auth.service, auth.interceptor, theme.service
     guards/               # authGuard, loginGuard, roleGuard
     utils/                # buildHttpParams, display/time formatting helpers
@@ -50,7 +50,7 @@ public/                   # static assets
 - If you need an endpoint or field that doesn't exist, the change belongs in theindex-api first. Keep service interfaces in sync with the API's DTOs/entities, and flag cross-repo changes to the user.
 
 ## Design system ("Chalk & Iron")
-The app is being redesigned in phases. Phase 1 added tokens, fonts and theming. Phase 2 replaced the header with the navigation shell (sidebar on desktop, tab bar + sheet on mobile). Phase 3 redesigned the Trainees list and extracted the list page pattern below. Phase 4a applied it to the other list pages, 4b covered create/edit/details/delete pages and Register attendance, and 4c covered the trainee-facing pages, auth pages and dashboard. Every page now uses the design system.
+The app is being redesigned in phases. Phase 1 added tokens, fonts and theming. Phase 2 replaced the header with the navigation shell (sidebar on desktop, tab bar + sheet on mobile). Phase 3 redesigned the Trainees list and extracted the list page pattern below. Phase 4a applied it to the other list pages, 4b covered create/edit/details/delete pages and Register attendance, and 4c covered the trainee-facing pages, auth pages and dashboard. Phase 5 was a consistency pass over the whole app. Every page now uses the design system.
 
 **Direction:** bold and athletic, fitting a CrossFit gym. Condensed uppercase headings, chalk-white (light) or near-black (dark) backgrounds, one orange accent, flat surfaces (no gradients), generous touch targets (44px minimum).
 
@@ -93,6 +93,7 @@ Other scales:
 - **Radii:** `--radius-sm` 8px, `--radius-md` 10px (inputs), `--radius-lg` 12px (buttons), `--radius-xl` 16px (cards), `--radius-pill` 999px.
 - **Type:** `--text-xs` 12px, `--text-sm` 14, `--text-base` 16, `--text-lg` 18, `--text-xl` 22, `--text-2xl` 28, `--text-3xl` 36, `--text-4xl` fluid 40–56px for page titles. `--heading-tracking` (0.02em) for headings, `--label-tracking` (0.08em) for uppercase labels and buttons.
 - **Interaction:** `--touch-target` (44px), `--focus-ring` (box-shadow ring for fields), `--transition-fast`.
+- **Control heights:** `--control-height` (3rem) for inputs, selects and form buttons, including `ui-input` and `ui-button`. `--control-height-lg` (3.25rem) for search fields and the page header action.
 
 ### Fonts
 - **Barlow Condensed** 600/700 (`--font-heading`): headings, buttons, uppercase labels. Always uppercase with `--heading-tracking` or `--label-tracking`.
@@ -102,9 +103,9 @@ Other scales:
 ### Base styles (in `src/styles.scss`)
 - `h1`–`h6` use the heading font, uppercase, 700/600 weight. `a` uses `--accent-text`.
 - `input`, `select` and `textarea` get surface background, `--border-strong` border, `--radius-md` and a 44px min height. Checkboxes and radios use `accent-color: var(--accent)`.
-- Every `button` and `.button` has a 44px min height. `.button` is also `inline-flex` and centered.
+- Every `button` has a 44px min height. Style buttons and button-like links with `.btn` variants; the old per-page `.button` classes are gone.
 - Focus: `:focus-visible` gets a 2px `--accent` outline with a 2px offset. Fields use `border-color: var(--accent)` plus `box-shadow: var(--focus-ring)`. Don't remove focus styles without replacing them.
-- Shared components in `components/ui-button`, `ui-input` and `ui-checkbox` are already built on the tokens. Prefer them to one-off styles.
+- Shared form components `components/ui-button` and `ui-input` are already built on the tokens. Prefer them to one-off styles. Checkboxes use the `.form-field--check` pattern; there is no checkbox component.
 
 ### Theming
 - `ThemeService` (`services/theme.service.ts`) has three modes: `light`, `dark`, `system`. The default is `system`, which follows `prefers-color-scheme` and reacts live to OS changes. It exposes `mode()` and `resolvedTheme()` signals plus `setMode()` and `cycleMode()`. Explicit choices are stored in `localStorage` under `theme`; choosing `system` clears the key.
@@ -196,15 +197,16 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
   - `.data-table .cell-link` is the row's primary link.
   - `.row-chevron` is the mouse-only duplicate link.
   - `.row-actions` groups trailing buttons.
+  - `.cell-right` right-aligns numeric columns; put it on both the `th` and the `td`.
   - `.person-cell` (with `__text` and `__sub`) is the avatar + name + nickname cell.
   - `.linked-mark` is the success-colored "Linked" / "✓ App".
-- **Mobile rows that aren't one link:** `.record` (with `__main`, `__title`, `__meta`, `__aside`) and `li.row-with-action`.
+- **Mobile rows that aren't one link:** `.record` (with `__main`, `__title`, `__meta`, `__aside`) and `li.row-with-action`. An `a.record__title` is styled as a title link, so don't add per-page link classes.
 - **`.panel` + `.panel__title`:** card section for forms, summaries and grouped content.
 - **`.stats` > `.stat`** (with `__label` and `__value`): key-figure tiles. A `<dl>` with `dt`/`dd` works too.
 - **Forms:**
   - `.form-grid` lays out `label.form-field` blocks, each containing `.form-field__label`, the control, then `.form-field__hint` or `.form-field__error`.
   - `.form-field--wide` spans the full row.
-  - `.form-actions` holds the buttons, primary last.
+  - `.form-actions` holds the buttons, least important first and primary last. Below 768px they stack full width with the primary on top.
   - Link an error to its input with `aria-describedby` and set `aria-invalid`.
 - **Form and detail layout:**
   - `.page-narrow` caps form and detail pages at 60rem.
@@ -251,7 +253,9 @@ Create, edit, details and delete pages share one structure. They need no page SC
 - **Details pages:**
   - Use a `.panel` containing a `<dl class="detail-list">`, with `<div><dt>Label</dt><dd>Value</dd></div>` pairs. Status uses `app-status-dot`.
   - Extra sections inside the panel go in `section.panel-section` with an `h2.panel__title`.
-  - Actions sit in `.form-actions`: least important first and primary last, e.g. Deactivate (`btn--ghost`), Edit (`btn--secondary`), Manage account (`btn--primary`).
+  - Actions sit in `.form-actions`: least important first and primary last.
+  - With only edit and deactivate: Deactivate (`btn--ghost`), then Edit (`btn--primary`).
+  - With an account: Deactivate (`btn--ghost`), Edit (`btn--secondary`), then Manage account (`btn--primary`).
 - **Delete/deactivate pages:**
   - The panel holds a `detail-list`, a `.notice.notice--warning` explaining the consequence, and a `btn--danger-solid` confirm button.
   - Secondary destructive actions on other pages (e.g. "Deactivate account" next to Save) use the soft `btn--danger`.
@@ -270,7 +274,8 @@ Create, edit, details and delete pages share one structure. They need no page SC
 ### Rules for components
 - **Use tokens, never hard-coded colors.** No hex, `rgb()`, named colors or gradients in component SCSS. If a token is missing, add it to both themes in `src/styles.scss` and document it here; don't inline a value.
 - Check a new pairing in both themes, at 4.5:1 for text and 3:1 for UI component boundaries.
-- Use the spacing, radius and type tokens for new styles instead of new magic numbers.
+- Use the spacing, radius, type and control-height tokens for new styles instead of new magic numbers.
+- Only the system breakpoints: 768px (table ↔ list, form actions) and 1024px (sidebar ↔ tab bar).
 - Interactive elements must be at least 44px tall or wide.
 - On the nav shell (`--nav-bg`), use the `--nav-*` tokens, not the page tokens.
 - Component styles budget is 4kB warn / 8kB error per component. Share patterns through global styles or shared components rather than copying them.
@@ -283,3 +288,4 @@ Create, edit, details and delete pages share one structure. They need no page SC
 - Never hardcode API hosts. Always go through `environment.apiUrl`.
 - Never hardcode colors. Use the design tokens (see "Design system").
 - Run `npm run build` and `npx ng test --watch=false` before pushing.
+- Use the new control flow (`@if`, `@for`) in templates, not `*ngIf` / `*ngFor`.

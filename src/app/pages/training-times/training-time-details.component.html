@@ -23,12 +23,8 @@
       </dl>
 
       <div class="form-actions">
-        <a class="btn btn--secondary" [routerLink]="['/training-times', trainingTime.id, 'edit']">
-          Edit training time
-        </a>
-        <a class="btn btn--ghost" [routerLink]="['/training-times', trainingTime.id, 'delete']">
-          Delete training time
-        </a>
+        <a class="btn btn--ghost" [routerLink]="['/training-times', trainingTime.id, 'delete']">Delete training time</a>
+        <a class="btn btn--primary" [routerLink]="['/training-times', trainingTime.id, 'edit']">Edit training time</a>
       </div>
     </div>
   }
