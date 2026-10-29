@@ -1,0 +1,16 @@
+<fieldset class="theme-switch">
+  <legend class="visually-hidden">Theme</legend>
+  @for (option of options; track option.value) {
+    <label class="theme-switch__option" [class.is-selected]="themeService.mode() === option.value">
+      <input
+        class="visually-hidden"
+        type="radio"
+        [name]="name"
+        [value]="option.value"
+        [checked]="themeService.mode() === option.value"
+        (change)="themeService.setMode(option.value)"
+      />
+      {{ option.label }}
+    </label>
+  }
+</fieldset>

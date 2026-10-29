@@ -1,0 +1,120 @@
+.sheet {
+  width: 100%;
+  max-width: 40rem;
+  max-height: min(88dvh, 100% - env(safe-area-inset-top));
+  margin: auto auto 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: var(--nav-bg);
+  color: var(--nav-text-strong);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sheet[open] {
+  animation: sheet-in 0.22s ease-out;
+}
+
+.sheet::backdrop {
+  background: var(--scrim);
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+.sheet__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-2) var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+
+.sheet__handle {
+  width: 2.5rem;
+  height: 0.25rem;
+  margin: 0 auto;
+  border-radius: var(--radius-pill);
+  background: var(--nav-border);
+}
+
+.sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sheet__title {
+  margin: 0;
+  color: var(--nav-text-strong);
+  font-size: var(--text-3xl);
+}
+
+.sheet__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--nav-surface);
+  color: var(--nav-text-strong);
+}
+
+.sheet__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sheet__label {
+  margin: var(--space-2) 0 0;
+  color: var(--nav-text);
+  font-size: var(--text-sm);
+  letter-spacing: var(--label-tracking);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 100%;
+  min-height: 3.5rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  background: var(--nav-surface);
+  color: var(--nav-text-strong);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  --icon-size: 1.25rem;
+}
+
+.tile app-icon {
+  color: var(--nav-text);
+}
+
+.tile.is-active {
+  border-color: var(--nav-accent);
+}
+
+.tile.is-active app-icon {
+  color: var(--nav-accent);
+}
+
+:focus-visible {
+  outline-color: var(--nav-accent);
+}
