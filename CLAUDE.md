@@ -131,7 +131,7 @@ Other scales:
   - `html:has(dialog[open])` locks page scroll while a modal dialog is open.
 
 ### List page pattern (reference: `pages/trainees/trainees.component.*`)
-Every list page (plans, gyms, trainers, settlements, …) follows the Trainees page. Copy its template structure:
+Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, Gym subscriptions, Trainers, Training times, Attendance history, Settlements and Cash register. Copy its template structure:
 
 ```html
 <section class="page-stack">
@@ -148,13 +148,19 @@ Every list page (plans, gyms, trainers, settlements, …) follows the Trainees p
   @else if (!items.length) { <app-empty-state icon="…" title="No plans yet" message="…"> <a class="btn btn--primary" routerLink="/plans/new">New plan</a> </app-empty-state> }
   @else if (!filtered.length) { <app-empty-state title="No matches" …> <button class="btn btn--secondary" …>Clear search</button> </app-empty-state> }
   @else {
-    <div class="data-table-wrap plans-table" tabindex="0" role="region" aria-label="Plans table"> <table class="data-table">…</table> </div>
-    <ul class="list-card plans-list" aria-label="Plans"> <li><app-list-row …/></li> </ul>
+    <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Plans table"> <table class="data-table">…</table> </div>
+    <ul class="list-card responsive-list" aria-label="Plans"> <li><app-list-row …/></li> </ul>
   }
 </section>
 ```
-- **Breakpoints:** at 768px and up, show the table. Below 768px, show the `list-card` of `app-list-row`s; toggle them with `display` in the page SCSS (see `trainees.component.scss`). The create action is a header button at 1024px and up, and a floating "+" below that, where the tab bar shows.
+- **Breakpoints:** at 768px and up, show the table. Below 768px, show the `list-card` of `app-list-row`s. The global `.responsive-table` / `.responsive-list` classes do the toggling, so list pages usually need no SCSS of their own. The create action is a header button at 1024px and up, and a floating "+" below that, where the tab bar shows.
 - **Data:** keep loading and filtering in the page component; these pieces are presentational only. A segmented filter that maps to an API param keeps calling the existing load method.
+- **Only the controls a page already has:** don't add search or filters while restyling. Plans has a status filter but no search, and Training times has neither.
+- **Rows with their own actions** (delete, an inline link) can't be an `app-list-row`, which is a single link:
+  - A link row plus one button: `li.row-with-action` holding the `app-list-row` and an `.icon-btn`. Example: settlements with delete.
+  - Anything richer: `li.record` with `.record__main` and `.record__aside`. Examples: attendees and transactions.
+- **Destructive row actions:** an `.icon-btn.icon-btn--danger` with an `aria-label` that names the item, e.g. "Delete settlement 2026-10-01 to 2026-10-31".
+- **Errors after something is already loaded** (e.g. a failed delete): show a `.notice.notice--danger` above the list instead of replacing it.
 - **States:** there are always four:
   - loading → `app-skeleton-list`
   - error → `app-empty-state tone="danger"` with "Try again"
@@ -184,10 +190,29 @@ Every list page (plans, gyms, trainers, settlements, …) follows the Trainees p
   - Use `th scope="col"`, a visually-hidden `<caption>`, and `.cell-fit` for shrink-to-fit columns.
   - Row link pattern: the name cell holds the real link. A trailing chevron link may duplicate it for the mouse with `tabindex="-1"` and `aria-hidden="true"`, so keyboard and screen-reader users get one link per row.
 - **`.list-card`:** the bordered `<ul>` for `app-list-row`s.
+- **Tables:**
+  - `.responsive-table` / `.responsive-list` switch between table and list at 768px.
+  - `.data-table .cell-link` is the row's primary link.
+  - `.row-chevron` is the mouse-only duplicate link.
+  - `.row-actions` groups trailing buttons.
+  - `.person-cell` (with `__text` and `__sub`) is the avatar + name + nickname cell.
+  - `.linked-mark` is the success-colored "Linked" / "✓ App".
+- **Mobile rows that aren't one link:** `.record` (with `__main`, `__title`, `__meta`, `__aside`) and `li.row-with-action`.
+- **`.panel` + `.panel__title`:** card section for forms, summaries and grouped content.
+- **`.stats` > `.stat`** (with `__label` and `__value`): key-figure tiles. A `<dl>` with `dt`/`dd` works too.
+- **Forms:**
+  - `.form-grid` lays out `label.form-field` blocks, each containing `.form-field__label`, the control, then `.form-field__hint` or `.form-field__error`.
+  - `.form-field--wide` spans the full row.
+  - `.form-actions` holds the buttons, primary last.
+  - Link an error to its input with `aria-describedby` and set `aria-invalid`.
+- **`.notice`** with `--success` / `--warning` / `--danger`: inline banners. Use `role="status"` for success and `role="alert"` for errors.
+- **`.toggle-chip`:** multi-select chip on a `<button aria-pressed>`, e.g. picking attendance sessions.
+- **`.icon-btn`** (and `--danger`): 44px icon-only button. It always needs an `aria-label`.
+- **Text helpers:** `.num` (tabular numbers, no wrap), `.text-muted`, `.text-success`, `.text-danger`.
 - **`.skeleton`:** pulsing placeholder block.
-- **`.btn` + `.btn--primary` / `.btn--secondary`:** link or button actions in page content. `ui-button` stays the full-width form button.
+- **`.btn`** + `.btn--primary` / `.btn--secondary` / `.btn--danger` (soft) / `.btn--danger-solid` (confirming a destructive action): link or button actions in page content. `ui-button` stays the full-width form button.
 
-**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-right, plus, alert.
+**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-right, plus, alert, trash.
 
 ### Rules for components
 - **Use tokens, never hard-coded colors.** No hex, `rgb()`, named colors or gradients in component SCSS. If a token is missing, add it to both themes in `src/styles.scss` and document it here; don't inline a value.

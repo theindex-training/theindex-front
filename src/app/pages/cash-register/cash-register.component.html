@@ -1,99 +1,153 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Cash register</h1>
-      <p>Monitor current available money and review all cash register transactions.</p>
-    </div>
-  </header>
+<section class="page-stack">
+  <app-page-header
+    title="Cash register"
+    subtitle="Available money and every transaction that changed it."
+  />
 
   @if (loading) {
-    <div class="state">Loading cash register...</div>
+    <app-skeleton-list label="Loading cash register" [rows]="4" />
   } @else if (errorMessage) {
-    <div class="state error">{{ errorMessage }}</div>
+    <app-empty-state tone="danger" title="Couldn't load the cash register" [message]="errorMessage">
+      <button class="btn btn--secondary" type="button" (click)="loadState()">Try again</button>
+    </app-empty-state>
   } @else {
-    <section class="balance-card">
-      <span class="balance-label">Current cash register balance</span>
-      <strong class="balance-value">{{ formatCurrency(balanceCents) }}</strong>
-    </section>
+    <div class="cash-top">
+      <div class="stat balance">
+        <span class="stat__label">Current balance</span>
+        <span class="stat__value" [class.text-danger]="balanceCents < 0">{{ formatCurrency(balanceCents) }}</span>
+      </div>
 
-    <section class="panel">
-      <h2>Add manual transaction</h2>
-      <form [formGroup]="form" (ngSubmit)="createManualTransaction()" class="form-grid">
-        <label>
-          <span>Direction</span>
-          <select formControlName="direction">
-            <option value="IN">IN</option>
-            <option value="OUT">OUT</option>
-          </select>
-        </label>
+      <section class="panel" aria-labelledby="manual-transaction-title">
+        <h2 class="panel__title" id="manual-transaction-title">Add manual transaction</h2>
+        <form class="form-grid" [formGroup]="form" (ngSubmit)="createManualTransaction()">
+          <label class="form-field">
+            <span class="form-field__label">Direction</span>
+            <select formControlName="direction">
+              <option value="IN">IN (money in)</option>
+              <option value="OUT">OUT (money out)</option>
+            </select>
+          </label>
 
-        <label>
-          <span>Amount</span>
-          <input type="number" min="0.01" step="0.01" formControlName="amount" />
-          @if (form.controls.amount.touched && form.controls.amount.invalid) {
-            <small class="error">Enter a valid amount (up to two decimals).</small>
+          <label class="form-field">
+            <span class="form-field__label">Amount (EUR)</span>
+            <input
+              type="number"
+              inputmode="decimal"
+              min="0.01"
+              step="0.01"
+              formControlName="amount"
+              [attr.aria-invalid]="form.controls.amount.touched && form.controls.amount.invalid"
+              aria-describedby="amount-error"
+            />
+            @if (form.controls.amount.touched && form.controls.amount.invalid) {
+              <span class="form-field__error" id="amount-error">Enter a valid amount (up to two decimals).</span>
+            }
+          </label>
+
+          <label class="form-field form-field--wide">
+            <span class="form-field__label">Notes (optional)</span>
+            <textarea formControlName="notes" rows="2"></textarea>
+          </label>
+
+          @if (formErrorMessage) {
+            <p class="notice notice--danger form-field--wide" role="alert">{{ formErrorMessage }}</p>
           }
-        </label>
+          @if (formSuccessMessage) {
+            <p class="notice notice--success form-field--wide" role="status">{{ formSuccessMessage }}</p>
+          }
 
-        <label class="notes-field">
-          <span>Notes (optional)</span>
-          <textarea formControlName="notes" rows="3"></textarea>
-        </label>
-
-        @if (formErrorMessage) {
-          <div class="feedback error">{{ formErrorMessage }}</div>
-        }
-
-        @if (formSuccessMessage) {
-          <div class="feedback success">{{ formSuccessMessage }}</div>
-        }
-
-        <div class="actions">
-          <button type="submit" class="button button-primary" [disabled]="creatingTransaction">
-            {{ creatingTransaction ? 'Saving...' : 'Add manual transaction' }}
-          </button>
-        </div>
-      </form>
-    </section>
-
-    <section class="panel">
-      <h2>Transactions</h2>
-      @if (!transactions.length) {
-        <div class="state">No transactions available yet.</div>
-      } @else {
-        <div class="table">
-          <div class="table-row table-header">
-            <span>Created at</span>
-            <span>Type</span>
-            <span>Details</span>
-            <span>Amount</span>
-            <span>Balance after</span>
-            <span>Notes</span>
+          <div class="form-actions form-field--wide">
+            <button type="submit" class="btn btn--primary" [disabled]="creatingTransaction">
+              {{ creatingTransaction ? 'Saving…' : 'Add transaction' }}
+            </button>
           </div>
+        </form>
+      </section>
+    </div>
 
-          @for (transaction of transactions; track transaction.id) {
-            <div class="table-row">
-              <span>{{ formatDate(transaction.createdAt) }}</span>
-              <span>{{ formatTransactionType(transaction.type) }}</span>
-              <span>
-                @if (isSubscriptionTransaction(transaction) && transaction.sourceDetails?.boughtBy?.traineeId) {
-                  Bought by
-                  <a [routerLink]="formatSubscriptionBuyerPath(transaction)">
-                    {{ formatSubscriptionBuyerLabel(transaction) }}
-                  </a>{{ formatSubscriptionDetailSuffix(transaction) }}
-                } @else {
-                  {{ formatTransactionDetails(transaction) }}
-                }
-              </span>
-              <span [class.amount-in]="transaction.amountCents > 0" [class.amount-out]="transaction.amountCents < 0">
-                {{ formatCurrency(transaction.amountCents) }}
-              </span>
-              <span>{{ formatCurrency(transaction.balanceAfterCents) }}</span>
-              <span>{{ transaction.notes || '-' }}</span>
-            </div>
-          }
+    <section class="page-stack" aria-labelledby="transactions-title">
+      <h2 class="panel__title" id="transactions-title">Transactions</h2>
+
+      @if (!transactions.length) {
+        <app-empty-state
+          icon="banknote"
+          title="No transactions yet"
+          message="Subscription payments, settlements and manual entries will show up here."
+        />
+      } @else {
+        <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Transactions table">
+          <table class="data-table">
+            <caption class="visually-hidden">Transactions</caption>
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Type</th>
+                <th scope="col">Details</th>
+                <th scope="col" class="cell-right">Amount</th>
+                <th scope="col" class="cell-right">Balance after</th>
+                <th scope="col">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (transaction of transactions; track transaction.id) {
+                <tr>
+                  <td class="num">{{ formatDate(transaction.createdAt) }}</td>
+                  <td><app-chip>{{ formatTransactionType(transaction.type) }}</app-chip></td>
+                  <td class="details-cell">
+                    <ng-container *ngTemplateOutlet="details; context: { $implicit: transaction }" />
+                  </td>
+                  <td
+                    class="num cell-right amount"
+                    [class.text-success]="transaction.amountCents > 0"
+                    [class.text-danger]="transaction.amountCents < 0"
+                  >
+                    {{ formatCurrency(transaction.amountCents) }}
+                  </td>
+                  <td class="num cell-right">{{ formatCurrency(transaction.balanceAfterCents) }}</td>
+                  <td class="text-muted notes-cell">{{ transaction.notes || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
+
+        <ul class="list-card responsive-list" aria-label="Transactions">
+          @for (transaction of transactions; track transaction.id) {
+            <li class="record">
+              <div class="record__main">
+                <span class="record__title">{{ formatTransactionType(transaction.type) }}</span>
+                <span class="record__meta">
+                  <ng-container *ngTemplateOutlet="details; context: { $implicit: transaction }" />
+                </span>
+                <span class="record__meta num">{{ formatDate(transaction.createdAt) }}</span>
+                @if (transaction.notes) {
+                  <span class="record__meta">{{ transaction.notes }}</span>
+                }
+              </div>
+              <div class="record__aside">
+                <span
+                  class="num amount"
+                  [class.text-success]="transaction.amountCents > 0"
+                  [class.text-danger]="transaction.amountCents < 0"
+                >
+                  {{ formatCurrency(transaction.amountCents) }}
+                </span>
+                <span class="record__meta num">Balance {{ formatCurrency(transaction.balanceAfterCents) }}</span>
+              </div>
+            </li>
+          }
+        </ul>
       }
     </section>
   }
 </section>
+
+<ng-template #details let-transaction>
+  @if (isSubscriptionTransaction(transaction) && transaction.sourceDetails?.boughtBy?.traineeId) {
+    Bought by
+    <a [routerLink]="formatSubscriptionBuyerPath(transaction)">{{ formatSubscriptionBuyerLabel(transaction) }}</a
+    >{{ formatSubscriptionDetailSuffix(transaction) }}
+  } @else {
+    {{ formatTransactionDetails(transaction) }}
+  }
+</ng-template>

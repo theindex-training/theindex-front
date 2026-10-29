@@ -23,7 +23,8 @@ export type IconName =
   | 'search'
   | 'chevron-right'
   | 'plus'
-  | 'alert';
+  | 'alert'
+  | 'trash';
 
 /**
  * Inline stroke icons in the Lucide style (24px grid, 2px round strokes, currentColor).

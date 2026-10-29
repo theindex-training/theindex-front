@@ -1,57 +1,112 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Settlements</h1>
-      <p>Review generated settlement reports and open detailed breakdowns.</p>
-    </div>
-    @if (canManageSettlements) {
-      <div class="page-actions">
-        <a class="button button-primary" routerLink="/settlements/new">Generate report</a>
-      </div>
-    }
-  </header>
+<section class="page-stack">
+  <app-page-header
+    title="Settlements"
+    subtitle="Generated settlement reports and their breakdowns."
+    [action]="canManageSettlements ? { label: 'Generate report', link: '/settlements/new' } : undefined"
+  />
 
   @if (loading) {
-    <div class="state">Loading settlements...</div>
-  } @else if (errorMessage) {
-    <div class="state error">{{ errorMessage }}</div>
+    <app-skeleton-list label="Loading settlements" [rows]="4" />
+  } @else if (errorMessage && !settlements.length) {
+    <app-empty-state tone="danger" title="Couldn't load settlements" [message]="errorMessage">
+      <button class="btn btn--secondary" type="button" (click)="loadSettlements()">Try again</button>
+    </app-empty-state>
   } @else if (!settlements.length) {
-    <div class="state">No settlements available yet.</div>
-  } @else {
-    <div class="table">
-      <div class="table-row table-header">
-        <span>Period start</span>
-        <span>Period end</span>
-        <span>Generated at</span>
-        <span>Status</span>
-        <span class="table-actions">Actions</span>
-      </div>
-
-      @for (settlement of settlements; track settlement.id) {
-        <div class="table-row">
-          <span>{{ settlement.periodStart }}</span>
-          <span>{{ settlement.periodEnd }}</span>
-          <span>{{ formatDate(settlement.generatedAt) }}</span>
-          <span>
-            <span class="status" [class.final]="settlement.status === 'FINAL'">{{ settlement.status }}</span>
-          </span>
-          <span class="table-actions">
-            <a class="button button-secondary" [routerLink]="['/settlements', settlement.id]">
-              Open report
-            </a>
-            @if (canManageSettlements) {
-              <button
-                class="button button-danger"
-                type="button"
-                (click)="deleteSettlement(settlement)"
-                [disabled]="deletingSettlementId === settlement.id"
-              >
-                {{ deletingSettlementId === settlement.id ? 'Deleting...' : 'Delete' }}
-              </button>
-            }
-          </span>
-        </div>
+    <app-empty-state
+      icon="wallet"
+      title="No settlements yet"
+      [message]="canManageSettlements ? 'Generate a report to settle trainer payouts for a period.' : 'Reports appear here once an admin generates them.'"
+    >
+      @if (canManageSettlements) {
+        <a class="btn btn--primary" routerLink="/settlements/new">Generate report</a>
       }
+    </app-empty-state>
+  } @else {
+    @if (errorMessage) {
+      <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    }
+
+    <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Settlements table">
+      <table class="data-table">
+        <caption class="visually-hidden">Settlements</caption>
+        <thead>
+          <tr>
+            <th scope="col">Period</th>
+            <th scope="col">Generated</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="cell-fit"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (settlement of settlements; track settlement.id) {
+            <tr>
+              <td>
+                <a class="cell-link num" [routerLink]="['/settlements', settlement.id]">
+                  {{ settlement.periodStart }} → {{ settlement.periodEnd }}
+                </a>
+              </td>
+              <td class="num">{{ formatDate(settlement.generatedAt) }}</td>
+              <td>
+                <app-chip [tone]="settlement.status === 'FINAL' ? 'success' : 'warning'">
+                  {{ settlement.status === 'FINAL' ? 'Final' : 'Draft' }}
+                </app-chip>
+              </td>
+              <td class="cell-fit">
+                <div class="row-actions">
+                  @if (canManageSettlements) {
+                    <button
+                      class="icon-btn icon-btn--danger"
+                      type="button"
+                      [attr.aria-label]="'Delete settlement ' + settlement.periodStart + ' to ' + settlement.periodEnd"
+                      [disabled]="deletingSettlementId === settlement.id"
+                      [attr.aria-busy]="deletingSettlementId === settlement.id"
+                      (click)="deleteSettlement(settlement)"
+                    >
+                      <app-icon name="trash" />
+                    </button>
+                  }
+                  <a
+                    class="row-chevron"
+                    [routerLink]="['/settlements', settlement.id]"
+                    tabindex="-1"
+                    aria-hidden="true"
+                  >
+                    <app-icon name="chevron-right" />
+                  </a>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
+
+    <ul class="list-card responsive-list" aria-label="Settlements">
+      @for (settlement of settlements; track settlement.id) {
+        <li class="row-with-action">
+          <app-list-row
+            [link]="['/settlements', settlement.id]"
+            [title]="settlement.periodStart + ' → ' + settlement.periodEnd"
+          >
+            <span listRowMeta>Generated {{ formatDate(settlement.generatedAt) }}</span>
+            <app-chip listRowTrailing [tone]="settlement.status === 'FINAL' ? 'success' : 'warning'">
+              {{ settlement.status === 'FINAL' ? 'Final' : 'Draft' }}
+            </app-chip>
+          </app-list-row>
+          @if (canManageSettlements) {
+            <button
+              class="icon-btn icon-btn--danger"
+              type="button"
+              [attr.aria-label]="'Delete settlement ' + settlement.periodStart + ' to ' + settlement.periodEnd"
+              [disabled]="deletingSettlementId === settlement.id"
+              [attr.aria-busy]="deletingSettlementId === settlement.id"
+              (click)="deleteSettlement(settlement)"
+            >
+              <app-icon name="trash" />
+            </button>
+          }
+        </li>
+      }
+    </ul>
   }
 </section>

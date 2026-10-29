@@ -35,7 +35,6 @@ import { displayValue } from '../../utils/display.util';
     StatusDotComponent,
   ],
   templateUrl: './trainees.component.html',
-  styleUrl: './trainees.component.scss',
 })
 export class TraineesComponent implements OnInit {
   trainees: TraineeProfile[] = [];

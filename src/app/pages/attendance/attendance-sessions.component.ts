@@ -1,7 +1,12 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { ChipComponent } from '../../components/chip/chip.component';
+import { IconComponent } from '../../components/icon/icon.component';
+import { AvatarComponent } from '../../components/avatar/avatar.component';
 import {
   AttendanceService,
   AttendanceSession,
@@ -15,7 +20,16 @@ import { TrainerProfile, TrainersService } from '../../services/trainers.service
 @Component({
   selector: 'app-attendance-sessions',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [
+    FormsModule,
+    RouterLink,
+    PageHeaderComponent,
+    SkeletonListComponent,
+    EmptyStateComponent,
+    ChipComponent,
+    IconComponent,
+    AvatarComponent
+  ],
   templateUrl: './attendance-sessions.component.html',
   styleUrl: './attendance-sessions.component.scss'
 })
