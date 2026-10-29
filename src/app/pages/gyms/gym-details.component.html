@@ -31,10 +31,8 @@
       </dl>
 
       <div class="form-actions">
-        <a class="btn btn--secondary" [routerLink]="['/gyms', gym.id, 'edit']"> Edit gym </a>
-        <a class="btn btn--ghost" [routerLink]="['/gyms', gym.id, 'delete']">
-          Deactivate gym
-        </a>
+        <a class="btn btn--ghost" [routerLink]="['/gyms', gym.id, 'delete']">Deactivate gym</a>
+        <a class="btn btn--primary" [routerLink]="['/gyms', gym.id, 'edit']">Edit gym</a>
       </div>
     </div>
   }

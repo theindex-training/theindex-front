@@ -39,12 +39,8 @@
       </dl>
 
       <div class="form-actions">
-        <a class="btn btn--secondary" [routerLink]="['/plans', plan.id, 'edit']">
-          Edit plan
-        </a>
-        <a class="btn btn--ghost" [routerLink]="['/plans', plan.id, 'delete']">
-          Deactivate plan
-        </a>
+        <a class="btn btn--ghost" [routerLink]="['/plans', plan.id, 'delete']">Deactivate plan</a>
+        <a class="btn btn--primary" [routerLink]="['/plans', plan.id, 'edit']">Edit plan</a>
       </div>
     </div>
   }

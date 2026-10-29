@@ -20,7 +20,7 @@
 
 .ui-input__field {
   width: 100%;
-  min-height: 48px;
+  min-height: var(--control-height);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-4);

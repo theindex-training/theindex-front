@@ -61,14 +61,10 @@
       }
 
       <div class="form-actions">
-        <a class="btn btn--secondary" [routerLink]="['/trainers', trainer.id, 'edit']">
-          Edit trainer
-        </a>
+        <a class="btn btn--ghost" [routerLink]="['/trainers', trainer.id, 'delete']">Deactivate trainer</a>
+        <a class="btn btn--secondary" [routerLink]="['/trainers', trainer.id, 'edit']">Edit trainer</a>
         <a class="btn btn--primary" [routerLink]="['/trainers', trainer.id, 'account']">
           {{ trainer.accountId ? 'Manage account' : 'Create account' }}
-        </a>
-        <a class="btn btn--ghost" [routerLink]="['/trainers', trainer.id, 'delete']">
-          Deactivate trainer
         </a>
       </div>
     </div>

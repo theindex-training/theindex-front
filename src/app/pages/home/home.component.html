@@ -110,7 +110,7 @@
       <li class="record">
         <div class="record__main">
           @if (item.traineeId) {
-            <a class="record__title report__link" [routerLink]="['/trainees', item.traineeId]">{{ traineeDisplayName(item) }}</a>
+            <a class="record__title" [routerLink]="['/trainees', item.traineeId]">{{ traineeDisplayName(item) }}</a>
           } @else {
             <span class="record__title">{{ traineeDisplayName(item) }}</span>
           }

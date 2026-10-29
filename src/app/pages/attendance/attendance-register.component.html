@@ -83,7 +83,7 @@
         @if (filteredTrainees.length === 0) {
           <p class="notice" role="status">No trainees match this search.</p>
         } @else {
-          <ul class="list-card trainees" aria-label="Trainees">
+          <ul class="list-card" aria-label="Trainees">
             @for (trainee of filteredTrainees; track trainee.id) {
               <li>
                 <label class="trainee" [class.is-selected]="isSelected(trainee.id)">

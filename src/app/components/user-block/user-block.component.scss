@@ -91,7 +91,7 @@
 }
 
 .user--list .user__action {
-  min-height: 3rem;
+  min-height: var(--control-height);
   padding: 0 var(--space-3);
   border-radius: var(--radius-lg);
   color: var(--nav-text-strong);
