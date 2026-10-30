@@ -34,7 +34,7 @@ src/
     services/             # one service per API resource + auth.service, auth.interceptor, theme.service
     guards/               # authGuard, loginGuard, roleGuard
     utils/                # buildHttpParams, display/time formatting helpers
-public/                   # static assets
+public/                   # static assets; brand/ holds the official logo PNGs
 ```
 
 ## API conventions (how the app calls theindex-api)
@@ -79,7 +79,6 @@ All tokens are CSS custom properties defined in `src/styles.scss` (global, so th
 | `--nav-surface` | hover/active items, tiles and the theme switch track on the nav shell | `#262622` | `#1C1C1A` |
 | `--nav-border` | dividers on the nav shell (decorative) | `#3A3934` | `#2D2C29` |
 | `--nav-accent` | accent marks on the nav shell: active marker, focus outline. `--accent` is too dark on `--nav-bg` in light mode | `#FF4A3D` | `#FF4A3D` |
-| `--brand-red` / `--brand-ink` | the logo's red badge and ink lettering; only for `app-brand`, never for UI states | `#800000` / `#0E0E0E` | same |
 | `--scrim` | backdrop behind modal sheets/dialogs | `rgba(18,18,17,.55)` | `rgba(0,0,0,.65)` |
 | `--shadow-sm` / `--shadow-md` | card lift / popovers and menus | | |
 
@@ -95,6 +94,14 @@ Other scales:
 - **Type:** `--text-xs` 12px, `--text-sm` 14, `--text-base` 16, `--text-lg` 18, `--text-xl` 22, `--text-2xl` 28, `--text-3xl` 36, `--text-4xl` fluid 40–56px for page titles. `--heading-tracking` (0.02em) for headings, `--label-tracking` (0.08em) for uppercase labels and buttons.
 - **Interaction:** `--touch-target` (44px), `--focus-ring` (box-shadow ring for fields), `--transition-fast`.
 - **Control heights:** `--control-height` (3rem) for inputs, selects and form buttons, including `ui-input` and `ui-button`. `--control-height-lg` (3.25rem) for search fields and the page header action.
+
+### Brand
+- **Logos** (official artwork, transparent PNG, cropped to the badge, 640×270, about 10 kB each) in `public/brand/`, served at `/brand/…`:
+  - `the-index-logo-red.png`: red badge, black lettering. This is the one the app uses, in both themes and on the nav shell. `app-brand` (sidebar, mobile top bar, Not found / Unauthorized) and the Login panel show it.
+  - `the-index-logo-grey.png`: grey badge with red speckles. Not used in the UI yet; keep it for places where the red one clashes.
+- **Icons:** `public/favicon.ico` (16/32/48) and `public/apple-touch-icon.png` (180, logo on the nav black) are generated from the red logo. There is no square version of the mark yet, so at 16px it reads as the red badge; replace both if one arrives.
+- Show the logo as an `<img>` with `width="640" height="270"` (so the space is reserved before it loads) and size it with CSS `height`. Give it an accessible name: `alt="The Index"`, or `alt=""` when the surrounding link already has an `aria-label`, as in `app-brand`.
+- **Logo colors:** red `#800000`, lettering black `#000000`, grey `#999999`. The light-theme `--accent` and `--accent-text` are the logo red; the other theme colors are tuned for contrast. Don't redraw the logo in CSS or use these values directly; use the image and the tokens.
 
 ### Fonts
 - **Barlow Condensed** 600/700 (`--font-heading`): headings, buttons, uppercase labels. Always uppercase with `--heading-tracking` or `--label-tracking`.
@@ -219,7 +226,6 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
   - `.form-stack` is a vertical form layout.
   - `.panel-section` is a titled section inside a panel.
   - `.section-header` is a page section's heading row.
-- **`.brand-badge`** (and `--lg`): the logo as a red hexagonal badge with ink lettering, built from `--brand-red` / `--brand-ink`. `app-brand` and the login panel use it. It is a logotype, so it keeps the logo's colors instead of meeting text contrast; give it an accessible name (`app-brand` sets `aria-label`).
 - **`.solo-page` + `.solo-card`** (with `__code`, `__title` and `__text`): a full-page centered card for routes outside the app shell, such as Not found and Unauthorized. Wrap it in `<main>`, as Login does, so the page has a landmark.
 - **`.notice`** with `--success` / `--warning` / `--danger`: inline banners. Use `role="status"` for success and `role="alert"` for errors.
 - **`.toggle-chip`:** multi-select chip on a `<button aria-pressed>`, e.g. picking attendance sessions.

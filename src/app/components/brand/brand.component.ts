@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-/** The logo badge. Uses the fixed --brand-* colors, so it looks the same on the nav shell, on page backgrounds and in both themes. */
+/** The official red logo. It works on the nav shell and on page backgrounds in both themes. */
 @Component({
   selector: 'app-brand',
   standalone: true,
