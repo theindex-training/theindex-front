@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-/** "TI" mark + wordmark. Text color is inherited, so it works on the nav shell and on page backgrounds. */
+/** The logo badge. Uses the fixed --brand-* colors, so it looks the same on the nav shell, on page backgrounds and in both themes. */
 @Component({
   selector: 'app-brand',
   standalone: true,
