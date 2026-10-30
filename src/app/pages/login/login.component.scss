@@ -29,9 +29,11 @@
   max-width: 26rem;
 }
 
-.login__eyebrow {
-  display: flex;
-  margin: 0 0 var(--space-6);
+.login__logo {
+  display: block;
+  width: auto;
+  height: 5.5rem;
+  margin-bottom: var(--space-6);
 }
 
 .login__brand h1 {
@@ -125,7 +127,8 @@
     padding: var(--space-6) var(--space-5);
   }
 
-  .login__eyebrow {
+  .login__logo {
+    height: 3.5rem;
     margin-bottom: var(--space-4);
   }
 
