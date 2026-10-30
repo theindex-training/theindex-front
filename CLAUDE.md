@@ -52,7 +52,7 @@ public/                   # static assets
 ## Design system ("Chalk & Iron")
 The app is being redesigned in phases. Phase 1 added tokens, fonts and theming. Phase 2 replaced the header with the navigation shell (sidebar on desktop, tab bar + sheet on mobile). Phase 3 redesigned the Trainees list and extracted the list page pattern below. Phase 4a applied it to the other list pages, 4b covered create/edit/details/delete pages and Register attendance, and 4c covered the trainee-facing pages, auth pages and dashboard. Phase 5 was a consistency pass over the whole app. Every page now uses the design system.
 
-**Direction:** bold and athletic, fitting a CrossFit gym. Condensed uppercase headings, chalk-white (light) or near-black (dark) backgrounds, one orange accent, flat surfaces (no gradients), generous touch targets (44px minimum).
+**Direction:** bold and athletic, fitting a CrossFit gym. Condensed uppercase headings, chalk-white (light) or near-black (dark) backgrounds, one red accent taken from the logo, flat surfaces (no gradients), generous touch targets (44px minimum).
 
 ### Tokens
 All tokens are CSS custom properties defined in `src/styles.scss` (global, so they don't count toward component style budgets). Color tokens have a light and a dark value; the theme is selected by `data-theme="light|dark"` on `<html>`.
@@ -66,11 +66,11 @@ All tokens are CSS custom properties defined in `src/styles.scss` (global, so th
 | `--muted` | secondary text, labels | `#5A5954` | `#A3A19A` |
 | `--border` | decorative dividers and card outlines | `#DCD9D2` | `#2D2C29` |
 | `--border-strong` | form-control borders (≥3:1 against surface) | `#8A8880` | `#6E6C66` |
-| `--accent` | primary buttons, focus rings, active indicators (fills, not text) | `#C2410C` | `#FF7A33` |
-| `--on-accent` | text/icons on `--accent` | `#FFFFFF` | `#141210` |
-| `--accent-soft` | tinted backgrounds (selected nav, secondary buttons, badges) | `#FBE4D6` | `#3B1F10` |
-| `--accent-text` | accent-colored text and links | `#9A3412` | `#FFA36B` |
-| `--accent-border` | borders on `--accent-soft` elements | `#F3BC98` | `#6A3416` |
+| `--accent` | primary buttons, focus rings, active indicators (fills, not text) | `#800000` | `#EE4238` |
+| `--on-accent` | text/icons on `--accent` | `#FFFFFF` | `#0E0E0D` |
+| `--accent-soft` | tinted backgrounds (selected nav, secondary buttons, badges) | `#F3E3E1` | `#331412` |
+| `--accent-text` | accent-colored text and links | `#800000` | `#FF7A70` |
+| `--accent-border` | borders on `--accent-soft` elements | `#DCAAA6` | `#6B2420` |
 | `--success` / `--success-soft` / `--success-border` | paid, active, linked | `#256B3A` / `#E2F0E5` / `#A9D3B3` | `#7BD69A` / `#16301F` / `#2C5A3A` |
 | `--warning` / `--warning-soft` / `--warning-border` | caution notices | `#8A4A00` / `#FBEFD5` / `#EDCB8A` | `#F2BE5C` / `#33270F` / `#5E4718` |
 | `--danger` / `--danger-soft` / `--danger-border` | errors, unpaid, destructive actions | `#B42318` / `#FCE8E6` / `#F1B4AC` | `#FF8F84` / `#3A1714` / `#6B2A24` |
@@ -78,7 +78,8 @@ All tokens are CSS custom properties defined in `src/styles.scss` (global, so th
 | `--nav-bg` / `--nav-text` / `--nav-text-strong` | the dark "iron" navigation shell (same feel in both themes) | `#121211` / `#B5B3AC` / `#F2F1EE` | `#070707` / `#A3A19A` / `#F2F1EE` |
 | `--nav-surface` | hover/active items, tiles and the theme switch track on the nav shell | `#262622` | `#1C1C1A` |
 | `--nav-border` | dividers on the nav shell (decorative) | `#3A3934` | `#2D2C29` |
-| `--nav-accent` | accent marks on the nav shell: active marker, focus outline. `--accent` is too dark on `--nav-bg` in light mode | `#FF7A33` | `#FF7A33` |
+| `--nav-accent` | accent marks on the nav shell: active marker, focus outline. `--accent` is too dark on `--nav-bg` in light mode | `#FF4A3D` | `#FF4A3D` |
+| `--brand-red` / `--brand-ink` | the logo's red badge and ink lettering; only for `app-brand`, never for UI states | `#800000` / `#0E0E0E` | same |
 | `--scrim` | backdrop behind modal sheets/dialogs | `rgba(18,18,17,.55)` | `rgba(0,0,0,.65)` |
 | `--shadow-sm` / `--shadow-md` | card lift / popovers and menus | | |
 
@@ -218,6 +219,7 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
   - `.form-stack` is a vertical form layout.
   - `.panel-section` is a titled section inside a panel.
   - `.section-header` is a page section's heading row.
+- **`.brand-badge`** (and `--lg`): the logo as a red hexagonal badge with ink lettering, built from `--brand-red` / `--brand-ink`. `app-brand` and the login panel use it. It is a logotype, so it keeps the logo's colors instead of meeting text contrast; give it an accessible name (`app-brand` sets `aria-label`).
 - **`.solo-page` + `.solo-card`** (with `__code`, `__title` and `__text`): a full-page centered card for routes outside the app shell, such as Not found and Unauthorized. Wrap it in `<main>`, as Login does, so the page has a landmark.
 - **`.notice`** with `--success` / `--warning` / `--danger`: inline banners. Use `role="status"` for success and `role="alert"` for errors.
 - **`.toggle-chip`:** multi-select chip on a `<button aria-pressed>`, e.g. picking attendance sessions.
