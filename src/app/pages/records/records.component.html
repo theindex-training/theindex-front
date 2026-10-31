@@ -1,9 +1,9 @@
 <section class="page-stack">
-  <app-page-header title="Records" subtitle="Your personal bests and benchmark results." />
+  <app-page-header [title]="'nav.records' | transloco" [subtitle]="'records.subtitle' | transloco" />
 
   <app-empty-state
     icon="trophy"
-    title="Coming soon"
-    message="Personal records will show up here once tracking is available."
+    [title]="'records.comingSoon' | transloco"
+    [message]="'records.comingSoonMessage' | transloco"
   />
 </section>

@@ -6,17 +6,20 @@ import { GymLocation, GymLocationsService } from '../../services/gym-locations.s
 import { displayValue } from '../../utils/display.util';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-gym-details',
   standalone: true,
-  imports: [CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
   templateUrl: './gym-details.component.html'
 })
 export class GymDetailsComponent implements OnInit {
   gym: GymLocation | null = null;
   loading = true;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly gymsService: GymLocationsService,
@@ -27,7 +30,7 @@ export class GymDetailsComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.errorMessage = 'Gym ID is missing.';
+      this.errorMessage = i18nMessage('gyms.errors.missingId');
       this.loading = false;
       return;
     }
@@ -40,7 +43,7 @@ export class GymDetailsComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to load this gym.';
+          apiErrorMessage(error, 'gyms.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
       }

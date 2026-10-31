@@ -1,0 +1,48 @@
+// Same look as app-theme-switch: it sits next to it on the nav shell (--nav-* tokens).
+.language-switch {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-1);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--nav-surface);
+}
+
+.language-switch--compact {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(var(--touch-target), auto));
+}
+
+.language-switch__option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--nav-text);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: var(--label-tracking);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.language-switch__option:hover {
+  color: var(--nav-text-strong);
+}
+
+.language-switch__option.is-selected {
+  background: var(--nav-text-strong);
+  color: var(--nav-bg);
+}
+
+.language-switch__option:has(:focus-visible) {
+  outline: 2px solid var(--nav-accent);
+  outline-offset: 2px;
+}

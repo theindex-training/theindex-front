@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -52,11 +52,20 @@ import {
   SegmentedControlComponent,
   SegmentedOption
 } from '../../components/segmented-control/segmented-control.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
+import { LanguageService } from '../../i18n/language.service';
+import { LocaleFormatService } from '../../i18n/locale-format.service';
 
 @Component({
   selector: 'app-trainee-details',
   standalone: true,
   imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    EnumLabelPipe,
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
@@ -74,9 +83,9 @@ import {
 export class TraineeDetailsComponent implements OnInit {
   subscriptionFilter: SubscriptionFilter = 'ACTIVE';
   readonly subscriptionFilterOptions: SegmentedOption<SubscriptionFilter>[] = [
-    { value: 'ACTIVE', label: 'Active' },
-    { value: 'EXHAUSTED', label: 'Exhausted' },
-    { value: 'ALL', label: 'All' },
+    { value: 'ACTIVE', label: 'subscriptions.filter.active' },
+    { value: 'EXHAUSTED', label: 'subscriptions.filter.exhausted' },
+    { value: 'ALL', label: 'common.all' },
   ];
 
   trainee: TraineeProfile | null = null;
@@ -88,9 +97,11 @@ export class TraineeDetailsComponent implements OnInit {
   plansLoading = true;
   subscriptionsLoading = true;
   submitting = false;
-  errorMessage = '';
-  subscriptionErrorMessage = '';
-  trainingErrorMessage = '';
+  errorMessage: UiMessage | null = null;
+  subscriptionErrorMessage: UiMessage | null = null;
+  trainingErrorMessage: UiMessage | null = null;
+  private readonly i18n = inject(LanguageService);
+  private readonly format = inject(LocaleFormatService);
   trainingsLoading = true;
   deletingSubscriptionId: string | null = null;
   canDeleteSubscriptions = false;
@@ -125,7 +136,7 @@ export class TraineeDetailsComponent implements OnInit {
 
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.errorMessage = 'Trainee ID is missing.';
+      this.errorMessage = i18nMessage('trainees.errors.missingId');
       this.loading = false;
       return;
     }
@@ -157,7 +168,7 @@ export class TraineeDetailsComponent implements OnInit {
     };
 
     this.submitting = true;
-    this.subscriptionErrorMessage = '';
+    this.subscriptionErrorMessage = null;
 
     this.subscriptionsService.createForTrainee(this.trainee.id, payload).subscribe({
       next: () => {
@@ -167,7 +178,7 @@ export class TraineeDetailsComponent implements OnInit {
       },
       error: (error) => {
         this.subscriptionErrorMessage =
-          error?.error?.message || 'Unable to create subscription right now.';
+          apiErrorMessage(error, 'trainees.details.createSubscriptionError');
         this.submitting = false;
       },
     });
@@ -186,7 +197,8 @@ export class TraineeDetailsComponent implements OnInit {
   }
 
   formatPlanOption(plan: Plan): string {
-    return `${plan.title} · ${plan.type} · ${this.formatPrice(plan.priceCents)}`;
+    const type = this.i18n.t(`enums.planType.${plan.type}`);
+    return `${plan.title} · ${type} · ${this.format.money(plan.priceCents)}`;
   }
 
   formatPlanLabel(subscription: Subscription): string {
@@ -204,16 +216,16 @@ export class TraineeDetailsComponent implements OnInit {
     );
   }
 
-  get filteredSubscriptionsEmptyMessage(): string {
+  get filteredSubscriptionsEmptyKey(): string {
     if (this.subscriptionFilter === 'ACTIVE') {
-      return 'No active subscriptions found for this trainee.';
+      return 'trainees.details.noActiveSubscriptions';
     }
 
     if (this.subscriptionFilter === 'EXHAUSTED') {
-      return 'No exhausted subscriptions found for this trainee.';
+      return 'trainees.details.noExhaustedSubscriptions';
     }
 
-    return 'No subscriptions found for this trainee.';
+    return 'trainees.details.noSubscriptions';
   }
 
   deleteSubscription(subscription: Subscription): void {
@@ -222,7 +234,10 @@ export class TraineeDetailsComponent implements OnInit {
     }
 
     const confirmed = window.confirm(
-      `Delete ${this.formatPlanLabel(subscription)} subscription from ${this.formatDate(subscription.startsAt)}?`,
+      this.i18n.t('trainees.details.confirmDeleteSubscription', {
+        plan: this.formatPlanLabel(subscription),
+        date: this.format.date(subscription.startsAt),
+      }),
     );
 
     if (!confirmed) {
@@ -230,7 +245,7 @@ export class TraineeDetailsComponent implements OnInit {
     }
 
     this.deletingSubscriptionId = subscription.id;
-    this.subscriptionErrorMessage = '';
+    this.subscriptionErrorMessage = null;
 
     this.subscriptionsService.delete(subscription.id).subscribe({
       next: () => {
@@ -240,29 +255,11 @@ export class TraineeDetailsComponent implements OnInit {
       },
       error: (error) => {
         this.subscriptionErrorMessage =
-          error?.error?.message || 'Unable to delete subscription right now.';
+          apiErrorMessage(error, 'trainees.details.deleteSubscriptionError');
         this.deletingSubscriptionId = null;
         this.changeDetector.detectChanges();
       },
     });
-  }
-
-  formatDate(value: string | null | undefined): string {
-    if (!value) {
-      return '—';
-    }
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: '2-digit',
-      year: 'numeric',
-    }).format(new Date(value));
-  }
-
-  formatPrice(priceCents: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(priceCents / 100);
   }
 
   private loadTrainee(id: string): void {
@@ -278,7 +275,7 @@ export class TraineeDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = error?.error?.message || 'Unable to load this trainee.';
+        this.errorMessage = apiErrorMessage(error, 'trainees.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
       },
@@ -308,7 +305,7 @@ export class TraineeDetailsComponent implements OnInit {
       },
       error: (error) => {
         this.subscriptionErrorMessage =
-          error?.error?.message || 'Unable to load subscriptions right now.';
+          apiErrorMessage(error, 'trainees.details.loadSubscriptionsError');
         this.subscriptionsLoading = false;
         this.changeDetector.detectChanges();
       },
@@ -325,7 +322,7 @@ export class TraineeDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.subscriptionErrorMessage = error?.error?.message || 'Unable to load plans right now.';
+        this.subscriptionErrorMessage = apiErrorMessage(error, 'trainees.details.loadPlansError');
         this.plansLoading = false;
         this.changeDetector.detectChanges();
       },
@@ -334,7 +331,7 @@ export class TraineeDetailsComponent implements OnInit {
 
   private loadTrainings(id: string): void {
     this.trainingsLoading = true;
-    this.trainingErrorMessage = '';
+    this.trainingErrorMessage = null;
 
     this.attendanceService.listForTrainee(id).subscribe({
       next: (trainings) => {
@@ -343,7 +340,7 @@ export class TraineeDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.trainingErrorMessage = error?.error?.message || 'Unable to load trainings right now.';
+        this.trainingErrorMessage = apiErrorMessage(error, 'trainees.details.loadTrainingsError');
         this.trainingsLoading = false;
         this.changeDetector.detectChanges();
       },

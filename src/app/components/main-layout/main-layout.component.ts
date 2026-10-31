@@ -1,6 +1,7 @@
 import { Component, DestroyRef, ElementRef, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { filter, map } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { BrandComponent } from '../brand/brand.component';
@@ -15,7 +16,7 @@ const DESKTOP_QUERY = '(min-width: 1024px)';
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, BrandComponent, SidebarComponent, TabBarComponent, NavSheetComponent],
+  imports: [RouterOutlet, TranslocoPipe, BrandComponent, SidebarComponent, TabBarComponent, NavSheetComponent],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
 })

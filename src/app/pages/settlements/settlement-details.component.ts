@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -16,15 +16,21 @@ import { PageHeaderComponent } from '../../components/page-header/page-header.co
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 import { ChipComponent } from '../../components/chip/chip.component';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import { LocaleFormatService } from '../../i18n/locale-format.service';
+import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 
 @Component({
   selector: 'app-settlement-details',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, PageHeaderComponent, SkeletonListComponent, ChipComponent, AvatarComponent],
+  imports: [EnumLabelPipe, UiMessagePipe, TranslocoPipe, CommonModule, FormsModule, RouterLink, PageHeaderComponent, SkeletonListComponent, ChipComponent, AvatarComponent],
   templateUrl: './settlement-details.component.html',
   styleUrl: './settlement-details.component.scss'
 })
 export class SettlementDetailsComponent implements OnInit {
+  readonly format = inject(LocaleFormatService);
   settlement: Settlement | null = null;
   lines: SettlementLine[] = [];
   allocations: SettlementAllocation[] = [];
@@ -42,8 +48,8 @@ export class SettlementDetailsComponent implements OnInit {
   loadingEntities = true;
   finalizing = false;
   isAdmin = false;
-  errorMessage = '';
-  allocationError = '';
+  errorMessage: UiMessage | null = null;
+  allocationError: UiMessage | null = null;
 
   private settlementId = '';
 
@@ -60,7 +66,7 @@ export class SettlementDetailsComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.errorMessage = 'Settlement ID is missing.';
+      this.errorMessage = i18nMessage('settlements.errors.missingId');
       this.loading = false;
       return;
     }
@@ -74,7 +80,7 @@ export class SettlementDetailsComponent implements OnInit {
 
   loadSettlement(): void {
     this.loading = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.settlementsService.getById(this.settlementId).subscribe({
       next: response => {
@@ -84,7 +90,7 @@ export class SettlementDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: error => {
-        this.errorMessage = error?.error?.message || 'Unable to load this settlement report.';
+        this.errorMessage = apiErrorMessage(error, 'settlements.details.loadError');
         this.loading = false;
         this.changeDetector.detectChanges();
       }
@@ -93,7 +99,7 @@ export class SettlementDetailsComponent implements OnInit {
 
   loadAllocations(): void {
     this.loadingAllocations = true;
-    this.allocationError = '';
+    this.allocationError = null;
 
     this.settlementsService
       .allocations(this.settlementId, {
@@ -109,7 +115,7 @@ export class SettlementDetailsComponent implements OnInit {
           this.changeDetector.detectChanges();
         },
         error: error => {
-          this.allocationError = error?.error?.message || 'Unable to load allocation rows right now.';
+          this.allocationError = apiErrorMessage(error, 'settlements.details.loadAllocationsError');
           this.loadingAllocations = false;
           this.changeDetector.detectChanges();
         }
@@ -130,7 +136,7 @@ export class SettlementDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: error => {
-        this.errorMessage = error?.error?.message || 'Unable to finalize this settlement report.';
+        this.errorMessage = apiErrorMessage(error, 'settlements.details.finalizeError');
         this.finalizing = false;
         this.changeDetector.detectChanges();
       }
@@ -158,14 +164,11 @@ export class SettlementDetailsComponent implements OnInit {
   }
 
   formatCurrency(valueCents: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(valueCents / 100);
+    return this.format.money(valueCents);
   }
 
   formatDate(date: string): string {
-    return new Date(date).toLocaleString();
+    return this.format.dateTime(date);
   }
 
   formatOptionalDate(date: string | undefined): string {

@@ -1,11 +1,12 @@
 import { Component, Input, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { IconComponent } from '../icon/icon.component';
 
 @Component({
   selector: 'app-ui-input',
   standalone: true,
-  imports: [IconComponent],
+  imports: [TranslocoPipe, IconComponent],
   templateUrl: './ui-input.component.html',
   styleUrl: './ui-input.component.scss',
   // `id` belongs on the inner <input>; leaving it on the host would duplicate it and break <label for>.

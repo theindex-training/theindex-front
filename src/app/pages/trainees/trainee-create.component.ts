@@ -15,11 +15,14 @@ import {
 import { CreateTraineePayload, TraineesService } from '../../services/trainees.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { trimmedLength } from '../../utils/form-validators.util';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-trainee-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
   templateUrl: './trainee-create.component.html'
 })
 export class TraineeCreateComponent implements OnInit {
@@ -33,7 +36,7 @@ export class TraineeCreateComponent implements OnInit {
   gymSubscriptions: GymSubscription[] = [];
   gymSubscriptionsLoading = true;
   submitting = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -84,7 +87,7 @@ export class TraineeCreateComponent implements OnInit {
     };
 
     this.submitting = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.traineesService.create(payload).subscribe({
       next: () => {
@@ -93,7 +96,7 @@ export class TraineeCreateComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to create this trainee right now.';
+          apiErrorMessage(error, 'trainees.create.error');
         this.submitting = false;
       }
     });

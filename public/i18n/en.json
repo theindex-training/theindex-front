@@ -1,0 +1,931 @@
+{
+  "common": {
+    "appName": "The Index",
+    "language": "Language",
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "Auto"
+    },
+    "skipToContent": "Skip to content",
+    "close": "Close",
+    "search": "Search",
+    "clearSearch": "Clear search",
+    "showAll": "Show all",
+    "tryAgain": "Try again",
+    "loading": "Loading",
+    "optional": "(optional)",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "noData": "No data available.",
+    "all": "All",
+    "active": "Active",
+    "inactive": "Inactive",
+    "status": "Status",
+    "yes": "Yes",
+    "no": "No",
+    "user": "User",
+    "signedIn": "Signed in",
+    "changePassword": "Change password",
+    "logOut": "Log out",
+    "linked": "Linked",
+    "notLinked": "Not linked",
+    "noNickname": "No nickname",
+    "saving": "Saving...",
+    "saveChanges": "Save changes",
+    "deactivating": "Deactivating...",
+    "missingId": "The link is missing an ID.",
+    "dash": "—",
+    "quoted": "“{text}”"
+  },
+  "nav": {
+    "mainLabel": "Main",
+    "morePages": "More pages",
+    "manage": "Manage",
+    "more": "More",
+    "account": "Account",
+    "homeLink": "The Index, home",
+    "dashboard": "Dashboard",
+    "home": "Home",
+    "trainees": "Trainees",
+    "registerAttendance": "Register attendance",
+    "register": "Register",
+    "attendanceHistory": "Attendance history",
+    "settlements": "Settlements",
+    "settle": "Settle",
+    "cashRegister": "Cash register",
+    "plans": "Plans",
+    "gyms": "Gyms",
+    "gymSubscriptions": "Gym subscriptions",
+    "trainers": "Trainers",
+    "trainingTimes": "Training times",
+    "profile": "Profile",
+    "stats": "Stats",
+    "records": "Records"
+  },
+  "enums": {
+    "role": {
+      "ADMIN": "Admin",
+      "TRAINER": "Trainer",
+      "TRAINEE": "Trainee"
+    },
+    "accountStatus": {
+      "ACTIVE": "Active",
+      "DISABLED": "Disabled"
+    },
+    "paymentStatus": {
+      "PAID": "Paid",
+      "UNPAID": "Unpaid"
+    },
+    "planType": {
+      "PUNCH": "Punch card",
+      "TIME": "Time-based"
+    },
+    "subscriptionStatus": {
+      "ACTIVE": "Active",
+      "EXHAUSTED": "Exhausted",
+      "EXPIRED": "Expired",
+      "CANCELLED": "Cancelled"
+    },
+    "settlementStatus": {
+      "DRAFT": "Draft",
+      "FINAL": "Final"
+    },
+    "allocationReason": {
+      "PUNCH_CREDIT": "Punch credit",
+      "TIME_PRORATA": "Time pro rata",
+      "UNPAID": "Unpaid"
+    },
+    "cashTransactionType": {
+      "SUBSCRIPTION_IN": "Subscription",
+      "SETTLEMENT_OUT": "Settlement",
+      "MANUAL_IN": "Manual in",
+      "MANUAL_OUT": "Manual out"
+    },
+    "cashSourceType": {
+      "SUBSCRIPTION": "Subscription",
+      "SETTLEMENT": "Settlement",
+      "MANUAL": "Manual"
+    }
+  },
+  "trainees": {
+    "list": {
+      "subtitle": "Profiles, gym cards and app accounts for everyone who trains with you.",
+      "new": "New trainee",
+      "searchLabel": "Search trainees",
+      "searchPlaceholder": "Search name or nickname",
+      "count": "{shown} of {total, plural, one {# trainee} other {# trainees}}",
+      "loading": "Loading trainees",
+      "loadError": "Couldn't load trainees",
+      "loadErrorMessage": "Unable to load trainees right now.",
+      "emptyTitle": "No trainees yet",
+      "emptyMessage": "Add the people who train with you to track their gym cards, subscriptions and attendance.",
+      "noActive": "No active trainees",
+      "noInactive": "No inactive trainees",
+      "tryOtherFilter": "Try a different status filter.",
+      "showAll": "Show all trainees",
+      "noMatchesTitle": "No matches",
+      "noMatches": "No trainee matches “{term}”.",
+      "tableLabel": "Trainees table",
+      "detailsColumn": "Details",
+      "noGymCard": "None",
+      "appMark": "App",
+      "appMarkHidden": "account linked",
+      "accountColumn": "App account"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "fields": {
+      "trainee": "Trainee",
+      "name": "Name",
+      "nickname": "Nickname",
+      "phone": "Phone",
+      "gymCard": "Gym card",
+      "gymSubscription": "Gym subscription",
+      "noGymSubscription": "No gym subscription",
+      "appAccount": "App account",
+      "account": "Account",
+      "profileStatus": "Profile status",
+      "nameError": "Enter a name of 2–100 characters.",
+      "nameHint": "2–100 characters.",
+      "nicknameError": "Nickname must be 1–50 characters.",
+      "nicknameHint": "Up to 50 characters.",
+      "namePlaceholder": "Anton",
+      "nicknamePlaceholder": "Toni"
+    },
+    "backToList": "Back to trainees",
+    "loadingOne": "Loading trainee...",
+    "errors": {
+      "missingId": "Trainee ID is missing.",
+      "load": "Unable to load this trainee."
+    },
+    "create": {
+      "title": "Create trainee",
+      "subtitle": "Add a new trainee profile and optional account link.",
+      "error": "Unable to create this trainee right now.",
+      "submit": "Create trainee"
+    },
+    "edit": {
+      "title": "Edit trainee",
+      "subtitle": "Update trainee profile information.",
+      "error": "Unable to update this trainee right now."
+    },
+    "delete": {
+      "title": "Deactivate trainee",
+      "subtitle": "Disable access for a trainee while keeping their profile.",
+      "warning": "This trainee will no longer be active, but their profile can be reactivated later.",
+      "error": "Unable to deactivate this trainee right now.",
+      "unlinked": "Unlinked",
+      "submit": "Deactivate trainee"
+    },
+    "details": {
+      "title": "Trainee details",
+      "subtitle": "Profile, app account, subscriptions and trainings.",
+      "loading": "Loading trainee",
+      "accountInfo": "Account information",
+      "role": "Role",
+      "email": "Email",
+      "deactivate": "Deactivate trainee",
+      "edit": "Edit trainee",
+      "manageAccount": "Manage account",
+      "createAccount": "Create account",
+      "subscriptions": "Subscriptions",
+      "subscriptionsSub": "Current plans, and purchase of new ones.",
+      "subscriptionFilter": "Subscription filter",
+      "buyTitle": "Buy subscription",
+      "plan": "Plan",
+      "planError": "Select a plan to purchase.",
+      "startsAt": "Starts at",
+      "startsAtError": "Choose a start date.",
+      "paid": "Paid amount (EUR)",
+      "paidError": "Enter an amount of 0 or more, with up to two decimals.",
+      "paidHint": "Defaults to the plan price. Up to two decimals.",
+      "purchasing": "Purchasing...",
+      "trainings": "Trainings",
+      "trainingsSub": "Completed trainings for this trainee.",
+      "noTrainings": "No trainings yet.",
+      "createSubscriptionError": "Unable to create subscription right now.",
+      "deleteSubscriptionError": "Unable to delete subscription right now.",
+      "loadSubscriptionsError": "Unable to load subscriptions right now.",
+      "loadPlansError": "Unable to load plans right now.",
+      "loadTrainingsError": "Unable to load trainings right now.",
+      "noActiveSubscriptions": "No active subscriptions found for this trainee.",
+      "noExhaustedSubscriptions": "No exhausted subscriptions found for this trainee.",
+      "noSubscriptions": "No subscriptions found for this trainee.",
+      "confirmDeleteSubscription": "Delete the {plan} subscription from {date}?",
+      "buySubmit": "Buy subscription"
+    },
+    "account": {
+      "pageTitle": "Trainee account",
+      "manageTitle": "Manage trainee account",
+      "createTitle": "Create trainee account",
+      "manageSubtitle": "Update login credentials for this trainee account.",
+      "createSubtitle": "Provision login credentials for the selected trainee.",
+      "emailInvalid": "Enter a valid email address, e.g. trainee@example.com.",
+      "emailHint": "Used to log in, e.g. trainee@example.com.",
+      "updateError": "Unable to update this account right now.",
+      "createError": "Unable to provision an account for this trainee.",
+      "deactivateError": "Unable to deactivate this account."
+    }
+  },
+  "accounts": {
+    "email": "Email",
+    "emailRequired": "Email is required.",
+    "newPassword": "New password",
+    "password": "Password",
+    "passwordHint": "At least 8 characters.",
+    "passwordHintEdit": "At least 8 characters. Leave blank to keep the current password.",
+    "confirmNewPassword": "Confirm new password",
+    "confirmPassword": "Confirm password",
+    "mustMatchNew": "Must match the new password.",
+    "mustMatch": "Must match the password.",
+    "deactivate": "Deactivate account",
+    "saveChanges": "Save account changes",
+    "create": "Create account",
+    "passwordRequired": "Password is required.",
+    "passwordLength": "Password must be at least 8 characters.",
+    "repeatPassword": "Repeat the password.",
+    "passwordsMismatch": "Passwords do not match."
+  },
+  "subscriptions": {
+    "title": "Subscriptions",
+    "loading": "Loading subscriptions",
+    "empty": "No subscriptions yet.",
+    "tableLabel": "Subscriptions table",
+    "columns": {
+      "plan": "Plan",
+      "type": "Type",
+      "starts": "Starts",
+      "endsOrUsed": "Ends / used",
+      "paid": "Paid",
+      "actions": "Actions"
+    },
+    "creditsUsed": "{used} / {total, plural, one {# training} other {# trainings}}",
+    "fromPaid": "From {date} · Paid {amount}",
+    "deleteLabel": "Delete subscription {plan}",
+    "filter": {
+      "active": "Active",
+      "exhausted": "Exhausted"
+    }
+  },
+  "trainings": {
+    "title": "Trainings",
+    "loading": "Loading trainings",
+    "empty": "No trainings yet.",
+    "tableLabel": "Trainings table",
+    "columns": {
+      "trainedAt": "Trained at",
+      "trainer": "Trainer",
+      "location": "Location",
+      "payment": "Payment"
+    }
+  },
+  "traineeDashboard": {
+    "title": "My profile",
+    "subtitle": "Your subscriptions and training attendance.",
+    "loadErrorTitle": "Couldn't load your profile",
+    "subscriptions": "Subscriptions",
+    "subscriptionsSub": "Your current and past subscriptions.",
+    "subscriptionFilter": "Subscription filter",
+    "trainings": "Trainings",
+    "trainingsSub": "Your completed trainings.",
+    "noTrainings": "No trainings yet.",
+    "noActiveSubscriptions": "No active subscriptions found for your profile.",
+    "noExhaustedSubscriptions": "No exhausted subscriptions found for your profile.",
+    "noSubscriptions": "No subscriptions found for your profile.",
+    "missingProfile": "Unable to load your dashboard. Missing trainee profile identifier.",
+    "loadError": "Unable to load your dashboard right now. Please try again later."
+  },
+  "plans": {
+    "list": {
+      "subtitle": "Training plans, pricing and availability.",
+      "new": "New plan",
+      "count": "{count, plural, one {# plan} other {# plans}}",
+      "loading": "Loading plans",
+      "loadError": "Couldn't load plans",
+      "loadErrorMessage": "Unable to load plans right now.",
+      "emptyTitle": "No plans yet",
+      "emptyMessage": "Create the plans trainees can buy: punch cards or time-based passes.",
+      "noActive": "No active plans",
+      "noInactive": "No inactive plans",
+      "tryOtherFilter": "Try a different status filter.",
+      "showAll": "Show all plans",
+      "tableLabel": "Plans table",
+      "includes": "Includes",
+      "detailsColumn": "Details"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "fields": {
+      "plan": "Plan",
+      "title": "Title",
+      "type": "Type",
+      "price": "Price",
+      "titleRequired": "Title is required.",
+      "titlePlaceholder": "12 trainings",
+      "planType": "Plan type",
+      "typePunch": "Punch (credits)",
+      "typeTime": "Time (days)",
+      "credits": "Credits",
+      "wholeNumberError": "Enter a whole number of 1 or more.",
+      "creditsHint": "Trainings included. Whole number, 1 or more.",
+      "duration": "Duration (days)",
+      "durationHint": "Days the plan is valid. Whole number, 1 or more.",
+      "priceEur": "Price (EUR)",
+      "priceError": "Enter a price of 0 or more, with up to two decimals.",
+      "priceHint": "0 or more, up to two decimals, e.g. 45.50.",
+      "activePlan": "Active plan",
+      "creditsCount": "{count, plural, one {# credit} other {# credits}}",
+      "daysCount": "{count, plural, one {# day} other {# days}}"
+    },
+    "backToList": "Back to plans",
+    "loadingOne": "Loading plan...",
+    "errors": {
+      "missingId": "Plan ID is missing.",
+      "load": "Unable to load this plan."
+    },
+    "create": {
+      "title": "Create plan",
+      "subtitle": "Define the pricing and duration for a new training plan.",
+      "submit": "Create plan",
+      "error": "Unable to create this plan right now."
+    },
+    "edit": {
+      "title": "Edit plan",
+      "subtitle": "Update plan details or availability.",
+      "error": "Unable to update this plan right now."
+    },
+    "details": {
+      "title": "Plan details",
+      "subtitle": "Review plan information and manage availability.",
+      "details": "Details",
+      "deactivate": "Deactivate plan",
+      "edit": "Edit plan"
+    },
+    "delete": {
+      "title": "Deactivate plan",
+      "subtitle": "Plans are archived by marking them inactive.",
+      "warning": "Deactivating a plan hides it from new sign-ups, but existing subscriptions remain unchanged.",
+      "inactive": "Plan inactive",
+      "error": "Unable to deactivate this plan right now.",
+      "submit": "Deactivate plan"
+    }
+  },
+  "gyms": {
+    "list": {
+      "subtitle": "Gym locations where trainings take place.",
+      "new": "New gym",
+      "count": "{count, plural, one {# gym} other {# gyms}}",
+      "loading": "Loading gyms",
+      "loadError": "Couldn't load gyms",
+      "loadErrorMessage": "Unable to load gyms right now.",
+      "emptyTitle": "No gyms yet",
+      "emptyMessage": "Add the locations where you train.",
+      "noActive": "No active gyms",
+      "noInactive": "No inactive gyms",
+      "tryOtherFilter": "Try a different status filter.",
+      "showAll": "Show all gyms",
+      "tableLabel": "Gyms table",
+      "detailsColumn": "Details"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "fields": {
+      "gym": "Gym",
+      "name": "Name",
+      "address": "Address",
+      "notes": "Notes",
+      "nameError": "Enter a name of 2–120 characters.",
+      "nameHint": "2–120 characters.",
+      "addressError": "Address must be 2–250 characters.",
+      "addressHint": "2–250 characters.",
+      "namePlaceholder": "West Gym",
+      "addressPlaceholder": "Plovdiv, Bulgaria"
+    },
+    "backToList": "Back to gyms",
+    "loadingOne": "Loading gym...",
+    "errors": {
+      "missingId": "Gym ID is missing.",
+      "load": "Unable to load this gym."
+    },
+    "create": {
+      "title": "Create gym",
+      "subtitle": "Add a new gym location.",
+      "submit": "Create gym",
+      "error": "Unable to create this gym right now."
+    },
+    "edit": {
+      "title": "Edit gym",
+      "subtitle": "Update gym location details.",
+      "error": "Unable to update this gym right now."
+    },
+    "details": {
+      "edit": "Edit gym",
+      "title": "Gym details",
+      "subtitle": "Review gym location information and manage availability.",
+      "deactivate": "Deactivate gym"
+    },
+    "delete": {
+      "title": "Deactivate gym",
+      "submit": "Deactivate gym",
+      "subtitle": "Gyms are archived by marking them inactive.",
+      "warning": "Deactivating a gym hides it from new schedules, but existing references remain unchanged.",
+      "inactive": "Gym inactive",
+      "error": "Unable to deactivate this gym right now."
+    }
+  },
+  "gymSubscriptions": {
+    "list": {
+      "subtitle": "Gym cards and partner programs trainees can pay with.",
+      "new": "New gym subscription",
+      "count": "{count, plural, one {# gym subscription} other {# gym subscriptions}}",
+      "loading": "Loading gym subscriptions",
+      "loadError": "Couldn't load gym subscriptions",
+      "loadErrorMessage": "Unable to load gym subscriptions right now.",
+      "emptyTitle": "No gym subscriptions yet",
+      "emptyMessage": "Add gym cards such as Multisport or Coolfit so trainees can be linked to them.",
+      "noActive": "No active gym subscriptions",
+      "noInactive": "No inactive gym subscriptions",
+      "tryOtherFilter": "Try a different status filter.",
+      "showAll": "Show all gym subscriptions",
+      "tableLabel": "Gym subscriptions table",
+      "detailsColumn": "Details"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "fields": {
+      "gymSubscription": "Gym subscription",
+      "name": "Name",
+      "nameError": "Enter a name of 2–120 characters.",
+      "nameHint": "2–120 characters.",
+      "namePlaceholder": "Club card"
+    },
+    "backToList": "Back to gym subscriptions",
+    "loadingOne": "Loading gym subscription...",
+    "errors": {
+      "missingId": "Gym subscription ID is missing.",
+      "load": "Unable to load this gym subscription."
+    },
+    "create": {
+      "title": "Create gym subscription",
+      "subtitle": "Add a new gym subscription method.",
+      "submit": "Create gym subscription",
+      "error": "Unable to create this gym subscription right now."
+    },
+    "edit": {
+      "title": "Edit gym subscription",
+      "subtitle": "Update gym subscription details.",
+      "error": "Unable to update this gym subscription right now."
+    },
+    "details": {
+      "edit": "Edit gym subscription",
+      "title": "Gym subscription details",
+      "subtitle": "Review gym subscription information and manage availability.",
+      "deactivate": "Deactivate gym subscription"
+    },
+    "delete": {
+      "title": "Deactivate gym subscription",
+      "submit": "Deactivate gym subscription",
+      "subtitle": "Gym subscriptions are archived by marking them inactive.",
+      "warning": "Deactivating a gym subscription hides it from new trainee assignments.",
+      "inactive": "Gym subscription inactive",
+      "error": "Unable to deactivate this gym subscription right now."
+    }
+  },
+  "trainers": {
+    "list": {
+      "subtitle": "Coaches, their profiles and app accounts.",
+      "new": "New trainer",
+      "count": "{shown} of {total, plural, one {# trainer} other {# trainers}}",
+      "searchLabel": "Search trainers",
+      "searchPlaceholder": "Search name or nickname",
+      "loading": "Loading trainers",
+      "loadError": "Couldn't load trainers",
+      "loadErrorMessage": "Unable to load trainers right now.",
+      "emptyTitle": "No trainers yet",
+      "emptyMessage": "Add the coaches who run your classes.",
+      "noActive": "No active trainers",
+      "noInactive": "No inactive trainers",
+      "tryOtherFilter": "Try a different status filter.",
+      "showAll": "Show all trainers",
+      "noMatchesTitle": "No matches",
+      "noMatches": "No trainer matches “{term}”.",
+      "tableLabel": "Trainers table",
+      "detailsColumn": "Details",
+      "appMark": "App",
+      "appMarkHidden": "account linked",
+      "accountColumn": "App account"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "fields": {
+      "trainer": "Trainer",
+      "name": "Name",
+      "nickname": "Nickname",
+      "appAccount": "App account",
+      "account": "Account",
+      "profileStatus": "Profile status",
+      "nameError": "Enter a name of 2–100 characters.",
+      "nameHint": "2–100 characters.",
+      "nicknameError": "Nickname must be 1–50 characters.",
+      "nicknameHint": "Up to 50 characters.",
+      "namePlaceholder": "Velcho",
+      "nicknamePlaceholder": "V"
+    },
+    "backToList": "Back to trainers",
+    "loadingOne": "Loading trainer...",
+    "errors": {
+      "missingId": "Trainer ID is missing.",
+      "load": "Unable to load this trainer."
+    },
+    "create": {
+      "title": "Create trainer",
+      "subtitle": "Add a new trainer profile and optional account link.",
+      "submit": "Create trainer",
+      "error": "Unable to create this trainer right now."
+    },
+    "edit": {
+      "title": "Edit trainer",
+      "subtitle": "Update trainer profile information.",
+      "error": "Unable to update this trainer right now."
+    },
+    "details": {
+      "edit": "Edit trainer",
+      "title": "Trainer details",
+      "subtitle": "Review trainer information and account access.",
+      "deactivate": "Deactivate trainer",
+      "accountInfo": "Account information",
+      "email": "Email",
+      "role": "Role",
+      "manageAccount": "Manage account",
+      "createAccount": "Create account"
+    },
+    "delete": {
+      "title": "Deactivate trainer",
+      "submit": "Deactivate trainer",
+      "subtitle": "Disable access for a trainer while keeping their profile.",
+      "warning": "This trainer will no longer be active, but their profile can be reactivated later.",
+      "error": "Unable to deactivate this trainer right now."
+    },
+    "account": {
+      "pageTitle": "Trainer account",
+      "manageTitle": "Manage trainer account",
+      "createTitle": "Create trainer account",
+      "manageSubtitle": "Update login credentials for this trainer account.",
+      "createSubtitle": "Provision login credentials for the selected trainer.",
+      "emailInvalid": "Enter a valid email address, e.g. trainer@example.com.",
+      "emailHint": "Used to log in, e.g. trainer@example.com.",
+      "updateError": "Unable to update this account right now.",
+      "createError": "Unable to provision an account for this trainer.",
+      "deactivateError": "Unable to deactivate this account."
+    }
+  },
+  "trainingTimes": {
+    "list": {
+      "subtitle": "Time slots to pick from when registering attendance.",
+      "new": "New training time",
+      "loading": "Loading training times",
+      "loadError": "Couldn't load training times",
+      "loadErrorMessage": "Unable to load training times right now.",
+      "emptyTitle": "No training times yet",
+      "emptyMessage": "Add your class times so attendance can be registered against them.",
+      "tableLabel": "Training times table",
+      "timeSlot": "Time slot",
+      "starts": "Starts",
+      "ends": "Ends",
+      "detailsColumn": "Details"
+    },
+    "fields": {
+      "startTime": "Start time",
+      "endTime": "End time",
+      "startRequired": "Start time is required.",
+      "endRequired": "End time is required."
+    },
+    "backToList": "Back to training times",
+    "loadingOne": "Loading training time...",
+    "errors": {
+      "missingId": "Training time ID is missing.",
+      "load": "Unable to load this training time."
+    },
+    "create": {
+      "title": "Create training time",
+      "subtitle": "Add a new attendance training slot.",
+      "submit": "Create training time",
+      "error": "Unable to create this training time right now."
+    },
+    "edit": {
+      "title": "Edit training time",
+      "subtitle": "Update this attendance training slot.",
+      "error": "Unable to update this training time right now."
+    },
+    "details": {
+      "edit": "Edit training time",
+      "title": "Training time details",
+      "subtitle": "Review this configured training slot.",
+      "delete": "Delete training time"
+    },
+    "delete": {
+      "title": "Delete training time",
+      "submit": "Delete training time",
+      "subtitle": "This action removes the training time permanently.",
+      "warning": "Deleting cannot be undone.",
+      "deleting": "Deleting...",
+      "error": "Unable to delete this training time right now."
+    }
+  },
+  "attendance": {
+    "register": {
+      "subtitle": "Pick the session, tap everyone who trained, save.",
+      "loading": "Loading trainers, gyms and trainees",
+      "session": "Session",
+      "trainer": "Trainer",
+      "selectTrainer": "Select trainer",
+      "trainerRequired": "Trainer is required.",
+      "gym": "Gym",
+      "selectGym": "Select gym location",
+      "gymRequired": "Gym location is required.",
+      "date": "Date",
+      "dateRequired": "Training date is required.",
+      "time": "Time",
+      "notSpecified": "Not specified",
+      "whoTrained": "Who trained?",
+      "searchPlaceholder": "Search name or nickname",
+      "searchLabel": "Search trainees by name or nickname",
+      "selectShown": "Select shown",
+      "clearShown": "Clear shown",
+      "noMatches": "No trainees match this search.",
+      "traineesLabel": "Trainees",
+      "selected": "{count, plural, one {selected} other {selected}}",
+      "submit": "Register attendance",
+      "loadError": "Unable to load trainers, gyms, training times, or trainees right now.",
+      "selectAtLeastOne": "Select at least one trainee for this attendance batch.",
+      "error": "Unable to register attendance right now."
+    },
+    "backToList": "Back to attendance",
+    "sessions": {
+      "subtitle": "Training sessions and everyone who attended.",
+      "filters": "Filters",
+      "from": "From",
+      "to": "To",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "allTrainers": "All trainers",
+      "apply": "Apply",
+      "loading": "Loading attendance sessions",
+      "loadError": "Couldn't load sessions",
+      "loadErrorMessage": "Unable to load attendance sessions right now.",
+      "emptyTitle": "No sessions found",
+      "emptyMessage": "No attendance was registered for these filters. Try a wider date range.",
+      "sessionsCount": "Sessions ({count})",
+      "summaryLabel": "Selected sessions summary",
+      "sessions": "Sessions",
+      "attendance": "Attendance",
+      "paid": "Paid",
+      "unpaid": "Unpaid",
+      "finalTotal": "Final price total",
+      "selectHint": "Select one or more sessions to see who attended.",
+      "trainerLabel": "Trainer",
+      "gymLabel": "Gym",
+      "total": "Total",
+      "priceTotal": "Price total",
+      "attendees": "Attendees",
+      "trainee": "Trainee",
+      "payment": "Payment",
+      "price": "Price",
+      "actions": "Actions",
+      "deleteLabel": "Delete attendance for {name}",
+      "confirmDelete": "Delete attendance for {name} at {date} · {time}?",
+      "deleteError": "Unable to delete attendance right now.",
+      "title": "Attendance history"
+    }
+  },
+  "settlements": {
+    "list": {
+      "subtitle": "Generated settlement reports and their breakdowns.",
+      "generate": "Generate report",
+      "loading": "Loading settlements",
+      "loadError": "Couldn't load settlements",
+      "loadErrorMessage": "Unable to load settlements right now.",
+      "emptyTitle": "No settlements yet",
+      "emptyAdmin": "Generate a report to settle trainer payouts for a period.",
+      "emptyTrainer": "Reports appear here once an admin generates them.",
+      "tableLabel": "Settlements table",
+      "period": "Period",
+      "generated": "Generated",
+      "actions": "Actions",
+      "generatedOn": "Generated {date}",
+      "deleteLabel": "Delete settlement {start} to {end}",
+      "confirmDelete": "Delete settlement for {start} to {end}?",
+      "deleteError": "Unable to delete settlement right now."
+    },
+    "backToList": "Back to settlements",
+    "generate": {
+      "title": "Generate settlement report",
+      "subtitle": "Create a new settlement using period start and period end dates.",
+      "periodStart": "Period start",
+      "periodEnd": "Period end",
+      "generating": "Generating...",
+      "submit": "Generate report",
+      "missingDates": "Please provide both period start and period end.",
+      "error": "Unable to generate settlement report right now."
+    },
+    "details": {
+      "title": "Settlement report",
+      "subtitle": "Settlement totals and allocation rows for this report.",
+      "loading": "Loading settlement",
+      "generatedAt": "Generated at",
+      "finalizing": "Finalizing...",
+      "finalize": "Finalize settlement",
+      "trainerTotals": "Trainer totals",
+      "noTotals": "No trainer totals found for this settlement.",
+      "trainerTotalsTable": "Trainer totals table",
+      "trainer": "Trainer",
+      "total": "Total",
+      "trainings": "Trainings",
+      "unpaid": "Unpaid",
+      "punch": "Punch",
+      "time": "Time",
+      "trainingsCount": "{count, plural, one {# training} other {# trainings}}",
+      "unpaidCount": "{count} unpaid",
+      "punchTime": "Punch {punch} · Time {time}",
+      "allocations": "Allocations",
+      "allTrainers": "All trainers",
+      "showing": "Showing {shown} of {total, plural, one {# row} other {# rows}}",
+      "loadingAllocations": "Loading allocations",
+      "noAllocations": "No allocations to display.",
+      "allocationsTable": "Allocations table",
+      "trainedAt": "Trained at",
+      "trainee": "Trainee",
+      "subscription": "Subscription",
+      "gym": "Gym",
+      "value": "Value",
+      "loadError": "Unable to load this settlement report.",
+      "loadAllocationsError": "Unable to load allocation rows right now.",
+      "finalizeError": "Unable to finalize this settlement report."
+    },
+    "errors": {
+      "missingId": "Settlement ID is missing."
+    }
+  },
+  "cashRegister": {
+    "subtitle": "Available money and every transaction that changed it.",
+    "loading": "Loading cash register",
+    "loadError": "Couldn't load the cash register",
+    "loadErrorMessage": "Unable to load cash register right now.",
+    "balance": "Current balance",
+    "manualTitle": "Add manual transaction",
+    "direction": "Direction",
+    "directionIn": "IN (money in)",
+    "directionOut": "OUT (money out)",
+    "amount": "Amount (EUR)",
+    "amountError": "Enter an amount above 0, with up to two decimals.",
+    "amountHint": "Above 0, up to two decimals, e.g. 20.50.",
+    "notes": "Notes",
+    "saving": "Saving…",
+    "add": "Add transaction",
+    "created": "Manual transaction created successfully.",
+    "createError": "Unable to create manual transaction right now.",
+    "transactions": "Transactions",
+    "emptyTitle": "No transactions yet",
+    "emptyMessage": "Subscription payments, settlements and manual entries will show up here.",
+    "tableLabel": "Transactions table",
+    "date": "Date",
+    "type": "Type",
+    "details": "Details",
+    "amountColumn": "Amount",
+    "balanceAfter": "Balance after",
+    "balanceShort": "Balance {amount}",
+    "boughtByPrefix": "Bought by",
+    "boughtBy": "Bought by {name}",
+    "planPart": "Plan: {plan}",
+    "typePart": "Type: {type}",
+    "settlementPeriod": "Settlement period: {start} → {end}",
+    "settlementTransaction": "Settlement transaction",
+    "subscriptionPurchase": "Subscription purchase",
+    "unknownTrainee": "Unknown trainee"
+  },
+  "home": {
+    "subtitle": "Welcome back! Jump straight to what you need.",
+    "shortcuts": "Shortcuts",
+    "registerDesc": "Open the attendance register and log a new training session.",
+    "trainings": "List of trainings",
+    "trainingsDesc": "Review training sessions and who attended.",
+    "settlements": "Settlement reports",
+    "settlementsDesc": "Open settlement reports and inspect payout details.",
+    "reports": {
+      "title": "Attendance reports",
+      "subtitle": "Monitor inactive trainees and trainees with no active subscription.",
+      "inactiveTitle": "Inactive trainees",
+      "inactiveFor": "Inactive for",
+      "lastDays": "Last {count, plural, one {day} other {# days}}",
+      "loadingInactive": "Loading inactive trainees report",
+      "noInactive": "No inactive trainees found.",
+      "activeSubscription": "Active subscription",
+      "withoutTitle": "Trainees without active subscription",
+      "loadingWithout": "Loading trainees without active subscription report",
+      "noWithout": "No trainees without active subscription found.",
+      "lastActiveSubscription": "Last active subscription",
+      "reportLabel": "{name} report",
+      "trainee": "Trainee",
+      "lastTraining": "Last training",
+      "lastTrainingOn": "Last training: {date}",
+      "unknown": "Unknown",
+      "plan": "Plan: {value}",
+      "type": "Type: {value}",
+      "start": "Start: {value}",
+      "end": "End: {value}",
+      "remainingTrainings": "Remaining trainings: {value}",
+      "remainingDays": "Remaining days: {value}",
+      "inactiveError": "Unable to load inactive trainees report right now.",
+      "withoutError": "Unable to load trainees without active subscription report right now."
+    }
+  },
+  "auth": {
+    "changePassword": {
+      "title": "Change password",
+      "subtitle": "Update your password to keep your account secure.",
+      "loading": "Loading account security settings...",
+      "current": "Current password",
+      "new": "New password",
+      "newHint": "At least 8 characters.",
+      "confirm": "Confirm new password",
+      "confirmHint": "Must match the new password.",
+      "phone": "Phone number",
+      "phoneError": "Phone number is required for your first password change.",
+      "phoneHint": "Required for your first password change.",
+      "saving": "Saving...",
+      "save": "Save password",
+      "noAccount": "Unable to identify your account. Please sign in again.",
+      "success": "Password updated successfully.",
+      "error": "Unable to update your password right now.",
+      "currentRequired": "Current password is required.",
+      "currentLength": "Current password must be at least 8 characters.",
+      "newRequired": "New password is required.",
+      "newLength": "New password must be at least 8 characters.",
+      "repeat": "Repeat the new password.",
+      "mismatch": "Passwords do not match."
+    },
+    "login": {
+      "welcome": "Welcome back",
+      "copy": "Sign in to access TheIndex.",
+      "highlightTrainers": "Trainers to manage trainings",
+      "highlightTrainees": "Trainee to track their personal progress",
+      "title": "Sign in",
+      "intro": "Use your The Index account credentials to continue.",
+      "email": "Email",
+      "emailPlaceholder": "you@company.com",
+      "emailRequired": "Email is required.",
+      "password": "Password",
+      "passwordRequired": "Password is required.",
+      "passwordLength": "Password must be at least 3 characters.",
+      "error": "Unable to sign in with those credentials.",
+      "submit": "Sign in",
+      "footer": "Need access? Contact admin"
+    }
+  },
+  "stats": {
+    "subtitle": "Insights based on your training attendance.",
+    "loading": "Loading stats",
+    "loadError": "Couldn't load your stats",
+    "loadErrorMessage": "Unable to load your training stats right now. Please try again later.",
+    "partners": "Top training partners",
+    "partnersSub": "People you have trained with most often.",
+    "weekdays": "Top weekdays",
+    "weekdaysSub": "The weekdays you train on most often.",
+    "timeSlots": "Top timeslots",
+    "timeSlotsSub": "Hours of day with the most training sessions.",
+    "trainers": "Top trainers",
+    "trainersSub": "Trainers you have the most sessions with.",
+    "gyms": "Top gyms",
+    "gymsSub": "Gyms where you train most often.",
+    "togetherCount": "{count, plural, one {# together} other {# together}}",
+    "trainingsCount": "{count, plural, one {# training} other {# trainings}}"
+  },
+  "records": {
+    "subtitle": "Your personal bests and benchmark results.",
+    "comingSoon": "Coming soon",
+    "comingSoonMessage": "Personal records will show up here once tracking is available."
+  },
+  "system": {
+    "notFound": {
+      "title": "Page not found",
+      "text": "The page you're looking for doesn't exist or has moved.",
+      "back": "Back to the app"
+    },
+    "unauthorized": {
+      "title": "Access restricted",
+      "text": "You do not have permission to access the administrative areas yet."
+    }
+  }
+}

@@ -1,76 +1,94 @@
 <section class="page-stack">
   <app-page-header
-    title="Trainees"
-    subtitle="Profiles, gym cards and app accounts for everyone who trains with you."
-    [action]="{ label: 'New trainee', link: '/trainees/new' }"
+    [title]="'nav.trainees' | transloco"
+    [subtitle]="'trainees.list.subtitle' | transloco"
+    [action]="{ label: 'trainees.list.new' | transloco, link: '/trainees/new' }"
   />
 
   <div class="list-toolbar">
     <app-search-field
       class="list-toolbar__search"
-      label="Search trainees"
-      placeholder="Search name or nickname"
+      [label]="'trainees.list.searchLabel' | transloco"
+      [placeholder]="'trainees.list.searchPlaceholder' | transloco"
       [value]="searchTerm"
       (valueChange)="searchTerm = $event; applySearch()"
     />
     <app-segmented-control
-      label="Status"
+      [label]="'common.status' | transloco"
       [options]="statusOptions"
       [value]="activeFilter"
       (valueChange)="activeFilter = $event; loadTrainees()"
     />
     @if (!loading && !errorMessage && trainees.length) {
       <p class="list-toolbar__count" aria-live="polite">
-        {{ filteredTrainees.length }} of {{ trainees.length }} trainees
+        {{ 'trainees.list.count' | transloco: { shown: filteredTrainees.length, total: trainees.length } }}
       </p>
     }
   </div>
 
   @if (loading) {
-    <app-skeleton-list label="Loading trainees" [rows]="6" />
+    <app-skeleton-list [label]="'trainees.list.loading' | transloco" [rows]="6" />
   } @else if (errorMessage) {
-    <app-empty-state tone="danger" title="Couldn't load trainees" [message]="errorMessage">
-      <button class="btn btn--secondary" type="button" (click)="loadTrainees()">Try again</button>
+    <app-empty-state
+      tone="danger"
+      [title]="'trainees.list.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="loadTrainees()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
     </app-empty-state>
   } @else if (!trainees.length) {
     @if (activeFilter === 'all') {
       <app-empty-state
         icon="users"
-        title="No trainees yet"
-        message="Add the people who train with you to track their gym cards, subscriptions and attendance."
+        [title]="'trainees.list.emptyTitle' | transloco"
+        [message]="'trainees.list.emptyMessage' | transloco"
       >
-        <a class="btn btn--primary" routerLink="/trainees/new">New trainee</a>
+        <a class="btn btn--primary" routerLink="/trainees/new">{{ 'trainees.list.new' | transloco }}</a>
       </app-empty-state>
     } @else {
       <app-empty-state
         icon="users"
-        [title]="activeFilter === 'active' ? 'No active trainees' : 'No inactive trainees'"
-        message="Try a different status filter."
+        [title]="
+          (activeFilter === 'active' ? 'trainees.list.noActive' : 'trainees.list.noInactive') | transloco
+        "
+        [message]="'trainees.list.tryOtherFilter' | transloco"
       >
         <button class="btn btn--secondary" type="button" (click)="activeFilter = 'all'; loadTrainees()">
-          Show all trainees
+          {{ 'trainees.list.showAll' | transloco }}
         </button>
       </app-empty-state>
     }
   } @else if (!filteredTrainees.length) {
-    <app-empty-state title="No matches" [message]="'No trainee matches “' + searchTerm.trim() + '”.'">
+    <app-empty-state
+      [title]="'trainees.list.noMatchesTitle' | transloco"
+      [message]="'trainees.list.noMatches' | transloco: { term: searchTerm.trim() }"
+    >
       <button class="btn btn--secondary" type="button" (click)="searchTerm = ''; applySearch()">
-        Clear search
+        {{ 'common.clearSearch' | transloco }}
       </button>
     </app-empty-state>
   } @else {
     <!-- Desktop / tablet (≥ 768px): table -->
-    <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Trainees table">
+    <div
+      class="data-table-wrap responsive-table"
+      tabindex="0"
+      role="region"
+      [attr.aria-label]="'trainees.list.tableLabel' | transloco"
+    >
       <table class="data-table">
-        <caption class="visually-hidden">Trainees</caption>
+        <caption class="visually-hidden">{{ 'nav.trainees' | transloco }}</caption>
         <thead>
           <tr>
-            <th scope="col">Trainee</th>
-            <th scope="col">Phone</th>
-            <th scope="col">Gym card</th>
-            <th scope="col">App account</th>
-            <th scope="col">Status</th>
-            <th scope="col" class="cell-fit"><span class="visually-hidden">Details</span></th>
+            <th scope="col">{{ 'trainees.fields.trainee' | transloco }}</th>
+            <th scope="col">{{ 'trainees.fields.phone' | transloco }}</th>
+            <th scope="col">{{ 'trainees.fields.gymCard' | transloco }}</th>
+            <th scope="col">{{ 'trainees.list.accountColumn' | transloco }}</th>
+            <th scope="col">{{ 'common.status' | transloco }}</th>
+            <th scope="col" class="cell-fit">
+              <span class="visually-hidden">{{ 'trainees.list.detailsColumn' | transloco }}</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -90,19 +108,19 @@
                 @if (gymCardName(trainee); as gymCard) {
                   <app-chip tone="accent">{{ gymCard }}</app-chip>
                 } @else {
-                  <span class="text-muted">None</span>
+                  <span class="text-muted">{{ 'trainees.list.noGymCard' | transloco }}</span>
                 }
               </td>
               <td>
                 @if (hasLinkedAccount(trainee)) {
-                  <span class="linked-mark">Linked</span>
+                  <span class="linked-mark">{{ 'common.linked' | transloco }}</span>
                 } @else {
-                  <span class="text-muted">Not linked</span>
+                  <span class="text-muted">{{ 'common.notLinked' | transloco }}</span>
                 }
               </td>
               <td>
                 <app-status-dot [tone]="trainee.isActive ? 'success' : 'neutral'">
-                  {{ trainee.isActive ? 'Active' : 'Inactive' }}
+                  {{ (trainee.isActive ? 'trainees.status.active' : 'trainees.status.inactive') | transloco }}
                 </app-status-dot>
               </td>
               <td class="cell-fit">
@@ -118,20 +136,21 @@
     </div>
 
     <!-- Mobile (< 768px): tappable rows -->
-    <ul class="list-card responsive-list" aria-label="Trainees">
+    <ul class="list-card responsive-list" [attr.aria-label]="'nav.trainees' | transloco">
       @for (trainee of filteredTrainees; track trainee.id) {
         <li>
           <app-list-row
             [link]="['/trainees', trainee.id]"
             [title]="trainee.name"
-            [titleSuffix]="trainee.nickname ? '“' + trainee.nickname + '”' : ''"
+            [titleSuffix]="quotedNickname(trainee.nickname)"
             [avatarName]="trainee.name"
             [dimmed]="!trainee.isActive"
           >
             <span listRowMeta class="num">{{ formatPhone(trainee) }}</span>
             @if (hasLinkedAccount(trainee)) {
               <span listRowMeta class="linked-mark">
-                <app-icon name="check" />App<span class="visually-hidden"> account linked</span>
+                <app-icon name="check" />{{ 'trainees.list.appMark' | transloco
+                }}<span class="visually-hidden"> {{ 'trainees.list.appMarkHidden' | transloco }}</span>
               </span>
             }
             @if (trailingChip(trainee); as chip) {

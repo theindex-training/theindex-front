@@ -16,13 +16,16 @@ import {
 import { AuthService } from '../../services/auth.service';
 import { Plan, PlansService } from '../../services/plans.service';
 import { Subscription, SubscriptionsService } from '../../services/subscriptions.service';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 type SubscriptionFilter = 'ACTIVE' | 'EXHAUSTED' | 'ALL';
 
 @Component({
   selector: 'app-trainee-dashboard',
   standalone: true,
-  imports: [
+  imports: [UiMessagePipe, TranslocoPipe, 
     CommonModule,
     EmptyStateComponent,
     PageHeaderComponent,
@@ -35,21 +38,21 @@ type SubscriptionFilter = 'ACTIVE' | 'EXHAUSTED' | 'ALL';
 export class TraineeDashboardComponent implements OnInit {
   subscriptionFilter: SubscriptionFilter = 'ACTIVE';
   readonly subscriptionFilterOptions: SegmentedOption<SubscriptionFilter>[] = [
-    { value: 'ACTIVE', label: 'Active' },
-    { value: 'EXHAUSTED', label: 'Exhausted' },
-    { value: 'ALL', label: 'All' },
+    { value: 'ACTIVE', label: 'subscriptions.filter.active' },
+    { value: 'EXHAUSTED', label: 'subscriptions.filter.exhausted' },
+    { value: 'ALL', label: 'common.all' },
   ];
 
   loading = true;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   subscriptions: Subscription[] = [];
   subscriptionsLoading = true;
-  subscriptionErrorMessage = '';
+  subscriptionErrorMessage: UiMessage | null = null;
 
   trainings: AttendanceTraineeTrainingItem[] = [];
   trainingsLoading = true;
-  trainingErrorMessage = '';
+  trainingErrorMessage: UiMessage | null = null;
 
   plans: Plan[] = [];
 
@@ -75,23 +78,23 @@ export class TraineeDashboardComponent implements OnInit {
     );
   }
 
-  get filteredSubscriptionsEmptyMessage(): string {
+  get filteredSubscriptionsEmptyKey(): string {
     if (this.subscriptionFilter === 'ACTIVE') {
-      return 'No active subscriptions found for your profile.';
+      return 'traineeDashboard.noActiveSubscriptions';
     }
 
     if (this.subscriptionFilter === 'EXHAUSTED') {
-      return 'No exhausted subscriptions found for your profile.';
+      return 'traineeDashboard.noExhaustedSubscriptions';
     }
 
-    return 'No subscriptions found for your profile.';
+    return 'traineeDashboard.noSubscriptions';
   }
 
   private loadDashboardData(): void {
     const traineeId = this.authService.getTraineeProfileId();
 
     if (!traineeId) {
-      this.errorMessage = 'Unable to load your dashboard. Missing trainee profile identifier.';
+      this.errorMessage = i18nMessage('traineeDashboard.missingProfile');
       this.loading = false;
       this.subscriptionsLoading = false;
       this.trainingsLoading = false;
@@ -100,7 +103,7 @@ export class TraineeDashboardComponent implements OnInit {
     }
 
     this.loading = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     forkJoin({
       trainings: this.attendanceService.listForTrainee(traineeId),
@@ -117,8 +120,7 @@ export class TraineeDashboardComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        const message =
-          error?.error?.message || 'Unable to load your dashboard right now. Please try again later.';
+        const message = apiErrorMessage(error, 'traineeDashboard.loadError');
         this.errorMessage = message;
         this.subscriptionErrorMessage = message;
         this.trainingErrorMessage = message;

@@ -1,34 +1,34 @@
 <section class="page-stack">
   <app-page-header
-    [title]="isEditMode ? 'Manage trainee account' : 'Create trainee account'"
-    [subtitle]="isEditMode ? 'Update login credentials for this trainee account.' : 'Provision login credentials for the selected trainee.'"
-    [back]="{ label: 'Back to trainees', link: '/trainees' }"
+    [title]="isEditMode ? ('trainees.account.manageTitle' | transloco) : ('trainees.account.createTitle' | transloco)"
+    [subtitle]="isEditMode ? ('trainees.account.manageSubtitle' | transloco) : ('trainees.account.createSubtitle' | transloco)"
+    [back]="{ label: ('trainees.backToList' | transloco), link: '/trainees' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading trainee...</p>
+    <p class="notice" role="status">{{ 'trainees.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !trainee) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (trainee) {
     <div class="panel">
       <dl class="detail-list">
         <div>
-          <dt>Trainee</dt>
+          <dt>{{ 'trainees.fields.trainee' | transloco }}</dt>
           <dd>{{ trainee.name }}</dd>
         </div>
         <div>
-          <dt>Nickname</dt>
+          <dt>{{ 'trainees.fields.nickname' | transloco }}</dt>
           <dd>{{ formatNickname() }}</dd>
         </div>
         <div>
-          <dt>Phone</dt>
+          <dt>{{ 'trainees.fields.phone' | transloco }}</dt>
           <dd>{{ formatPhone() }}</dd>
         </div>
         <div>
-          <dt>Profile status</dt>
+          <dt>{{ 'trainees.fields.profileStatus' | transloco }}</dt>
           <dd>
             <app-status-dot [tone]="trainee.isActive ? 'success' : 'neutral'">
-              {{ trainee.isActive ? 'Active' : 'Inactive' }}
+              {{ trainee.isActive ? ('trainees.status.active' | transloco) : ('trainees.status.inactive' | transloco) }}
             </app-status-dot>
           </dd>
         </div>
@@ -38,7 +38,7 @@
         <div class="form-grid">
           <div class="form-row">
             <div class="form-field">
-              <label class="form-field__label" for="trainee-account-email">Email</label>
+              <label class="form-field__label" for="trainee-account-email">{{ 'accounts.email' | transloco }}</label>
               <input
                 id="trainee-account-email"
                 type="email"
@@ -50,14 +50,14 @@
               @if (form.controls.email.touched && form.controls.email.invalid) {
                 <span class="form-field__error" id="trainee-account-email-help">
                   @if (form.controls.email.hasError('required')) {
-                    Email is required.
+                    {{ 'accounts.emailRequired' | transloco }}
                   } @else {
-                    Enter a valid email address, e.g. trainee&#64;example.com.
+                    {{ 'trainees.account.emailInvalid' | transloco }}
                   }
                 </span>
               } @else {
                 <span class="form-field__hint" id="trainee-account-email-help">
-                  Used to log in, e.g. trainee&#64;example.com.
+                  {{ 'trainees.account.emailHint' | transloco }}
                 </span>
               }
             </div>
@@ -67,9 +67,9 @@
             <div class="form-field">
               <label class="form-field__label" for="trainee-account-password">
                 @if (isEditMode) {
-                  New password <span class="form-field__optional">(optional)</span>
+                  {{ 'accounts.newPassword' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span>
                 } @else {
-                  Password
+                  {{ 'accounts.password' | transloco }}
                 }
               </label>
               <div class="password-field">
@@ -84,25 +84,25 @@
                 <button
                   type="button"
                   class="password-toggle"
-                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-                  [title]="showPassword ? 'Hide password' : 'Show password'"
+                  [attr.aria-label]="(showPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
+                  [title]="(showPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
                   (click)="togglePasswordVisibility()"
                 >
                   <app-icon [name]="showPassword ? 'eye-off' : 'eye'" />
                 </button>
               </div>
               @if (passwordError) {
-                <span class="form-field__error" id="trainee-account-password-help">{{ passwordError }}</span>
+                <span class="form-field__error" id="trainee-account-password-help">{{ passwordError | transloco }}</span>
               } @else {
                 <span class="form-field__hint" id="trainee-account-password-help">
-                  At least 8 characters.{{ isEditMode ? ' Leave blank to keep the current password.' : '' }}
+                  {{ (isEditMode ? 'accounts.passwordHintEdit' : 'accounts.passwordHint') | transloco }}
                 </span>
               }
             </div>
 
             <div class="form-field">
               <label class="form-field__label" for="trainee-account-confirm-password">
-                {{ isEditMode ? 'Confirm new password' : 'Confirm password' }}
+                {{ isEditMode ? ('accounts.confirmNewPassword' | transloco) : ('accounts.confirmPassword' | transloco) }}
               </label>
               <div class="password-field">
                 <input
@@ -116,18 +116,18 @@
                 <button
                   type="button"
                   class="password-toggle"
-                  [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
-                  [title]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                  [attr.aria-label]="(showConfirmPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
+                  [title]="(showConfirmPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
                   (click)="toggleConfirmPasswordVisibility()"
                 >
                   <app-icon [name]="showConfirmPassword ? 'eye-off' : 'eye'" />
                 </button>
               </div>
               @if (confirmPasswordError) {
-                <span class="form-field__error" id="trainee-account-confirm-password-help">{{ confirmPasswordError }}</span>
+                <span class="form-field__error" id="trainee-account-confirm-password-help">{{ confirmPasswordError | transloco }}</span>
               } @else {
                 <span class="form-field__hint" id="trainee-account-confirm-password-help">
-                  Must match the {{ isEditMode ? 'new password' : 'password' }}.
+                  {{ (isEditMode ? 'accounts.mustMatchNew' : 'accounts.mustMatch') | transloco }}
                 </span>
               }
             </div>
@@ -135,7 +135,7 @@
         </div>
 
         @if (errorMessage) {
-          <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+          <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
         }
 
         <div class="form-actions">
@@ -146,11 +146,11 @@
               [disabled]="deactivating"
               (click)="deactivateAccount()"
             >
-              {{ deactivating ? 'Deactivating...' : 'Deactivate account' }}
+              {{ deactivating ? ('common.deactivating' | transloco) : ('accounts.deactivate' | transloco) }}
             </button>
           }
           <button class="btn btn--primary" type="submit" [disabled]="submitting">
-            {{ submitting ? 'Saving...' : isEditMode ? 'Save account changes' : 'Create account' }}
+            {{ submitting ? ('common.saving' | transloco) : isEditMode ? ('accounts.saveChanges' | transloco) : ('accounts.create' | transloco) }}
           </button>
         </div>
       </form>

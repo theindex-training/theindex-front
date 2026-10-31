@@ -1,0 +1,17 @@
+<fieldset class="language-switch" [class.language-switch--compact]="compact">
+  <legend class="visually-hidden">{{ 'common.language' | transloco }}</legend>
+  @for (option of options; track option.value) {
+    <label class="language-switch__option" [class.is-selected]="language.lang() === option.value">
+      <input
+        class="visually-hidden"
+        type="radio"
+        [name]="name"
+        [value]="option.value"
+        [checked]="language.lang() === option.value"
+        (change)="language.setLanguage(option.value)"
+      />
+      <span aria-hidden="true">{{ option.short }}</span>
+      <span class="visually-hidden" [attr.lang]="option.value">{{ option.name }}</span>
+    </label>
+  }
+</fieldset>

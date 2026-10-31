@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { TraineeTrainingInsights, TraineesService } from '../../services/trainees.service';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -7,11 +7,17 @@ import {
   RankedListComponent
 } from '../../components/ranked-list/ranked-list.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
+import { LocaleFormatService } from '../../i18n/locale-format.service';
 
 @Component({
   selector: 'app-stats',
   standalone: true,
   imports: [
+    UiMessagePipe, 
+    TranslocoPipe, 
     EmptyStateComponent,
     PageHeaderComponent,
     RankedListComponent,
@@ -21,8 +27,9 @@ import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-l
   styleUrl: './stats.component.scss'
 })
 export class StatsComponent implements OnInit {
+  readonly format = inject(LocaleFormatService);
   loading = true;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
   insights: TraineeTrainingInsights | null = null;
 
   constructor(
@@ -43,7 +50,8 @@ export class StatsComponent implements OnInit {
 
   get weekdays(): RankedItem[] {
     return (this.insights?.topWeekdays ?? []).map(item => ({
-      label: item.weekday,
+      // The API sends an English day name plus the ISO number (1 = Monday); localize from the number.
+      label: item.weekdayNumber ? this.format.weekday(item.weekdayNumber) : item.weekday,
       value: item.trainingsCount
     }));
   }
@@ -71,7 +79,7 @@ export class StatsComponent implements OnInit {
 
   private loadInsights(): void {
     this.loading = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.traineesService.getMyTrainingInsights().subscribe({
       next: insights => {
@@ -81,7 +89,7 @@ export class StatsComponent implements OnInit {
       },
       error: error => {
         this.errorMessage =
-          error?.error?.message || 'Unable to load your training stats right now. Please try again later.';
+          apiErrorMessage(error, 'stats.loadErrorMessage');
         this.loading = false;
         this.changeDetector.detectChanges();
       }

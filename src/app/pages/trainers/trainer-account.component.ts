@@ -22,6 +22,9 @@ import { displayValue } from '../../utils/display.util';
 import { IconComponent } from '../../components/icon/icon.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 const accountPasswordValidator: ValidatorFn = (
   control: AbstractControl
@@ -43,7 +46,7 @@ const accountPasswordValidator: ValidatorFn = (
 @Component({
   selector: 'app-trainer-account',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent, IconComponent, StatusDotComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent, IconComponent, StatusDotComponent],
   templateUrl: './trainer-account.component.html'
 })
 export class TrainerAccountComponent implements OnInit {
@@ -58,7 +61,7 @@ export class TrainerAccountComponent implements OnInit {
   loading = true;
   submitting = false;
   deactivating = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
   showPassword = false;
   showConfirmPassword = false;
 
@@ -87,7 +90,7 @@ export class TrainerAccountComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.errorMessage = 'Trainer ID is missing.';
+      this.errorMessage = i18nMessage('trainers.errors.missingId');
       this.loading = false;
       return;
     }
@@ -105,7 +108,7 @@ export class TrainerAccountComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to load this trainer.';
+          apiErrorMessage(error, 'trainers.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
       }
@@ -123,7 +126,7 @@ export class TrainerAccountComponent implements OnInit {
 
     const raw = this.form.getRawValue();
     this.submitting = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     if (this.account) {
       const payload: UpdateAccountPayload = {
@@ -142,8 +145,7 @@ export class TrainerAccountComponent implements OnInit {
         },
         error: (error) => {
           this.errorMessage =
-            error?.error?.message ||
-            'Unable to update this account right now.';
+            apiErrorMessage(error, 'trainers.account.updateError');
           this.submitting = false;
           this.changeDetector.detectChanges();
         }
@@ -168,8 +170,7 @@ export class TrainerAccountComponent implements OnInit {
         },
         error: (error) => {
           this.errorMessage =
-            error?.error?.message ||
-            'Unable to provision an account for this trainer.';
+            apiErrorMessage(error, 'trainers.account.createError');
           this.submitting = false;
           this.changeDetector.detectChanges();
         }
@@ -182,7 +183,7 @@ export class TrainerAccountComponent implements OnInit {
     }
 
     this.deactivating = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.provisioningService.deactivate(this.account.id).subscribe({
       next: () => {
@@ -191,33 +192,35 @@ export class TrainerAccountComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to deactivate this account.';
+          apiErrorMessage(error, 'trainers.account.deactivateError');
         this.deactivating = false;
         this.changeDetector.detectChanges();
       }
     });
   }
 
+  /** Translation key of the password error, or '' when there is none. */
   get passwordError(): string {
     const control = this.form.controls.password;
     if (!control.touched) {
       return '';
     }
     if (control.hasError('required')) {
-      return 'Password is required.';
+      return 'accounts.passwordRequired';
     }
-    return this.form.hasError('passwordLength') ? 'Password must be at least 8 characters.' : '';
+    return this.form.hasError('passwordLength') ? 'accounts.passwordLength' : '';
   }
 
+  /** Translation key of the confirmation error, or '' when there is none. */
   get confirmPasswordError(): string {
     const control = this.form.controls.confirmPassword;
     if (!control.touched) {
       return '';
     }
     if (control.hasError('required')) {
-      return 'Repeat the password.';
+      return 'accounts.repeatPassword';
     }
-    return this.form.hasError('passwordsMismatch') ? 'Passwords do not match.' : '';
+    return this.form.hasError('passwordsMismatch') ? 'accounts.passwordsMismatch' : '';
   }
 
   formatNickname(): string {

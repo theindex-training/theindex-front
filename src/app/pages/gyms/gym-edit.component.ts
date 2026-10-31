@@ -15,11 +15,14 @@ import {
 } from '../../services/gym-locations.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { trimmedLength } from '../../utils/form-validators.util';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-gym-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
   templateUrl: './gym-edit.component.html'
 })
 export class GymEditComponent implements OnInit {
@@ -31,7 +34,7 @@ export class GymEditComponent implements OnInit {
   gym: GymLocation | null = null;
   loading = true;
   submitting = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -52,7 +55,7 @@ export class GymEditComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.errorMessage = 'Gym ID is missing.';
+      this.errorMessage = i18nMessage('gyms.errors.missingId');
       this.loading = false;
       return;
     }
@@ -68,7 +71,7 @@ export class GymEditComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = error?.error?.message || 'Unable to load this gym.';
+        this.errorMessage = apiErrorMessage(error, 'gyms.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
       },
@@ -91,7 +94,7 @@ export class GymEditComponent implements OnInit {
     };
 
     this.submitting = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.gymsService.update(this.gym.id, payload).subscribe({
       next: () => {
@@ -99,7 +102,7 @@ export class GymEditComponent implements OnInit {
         this.router.navigate(['/gyms']);
       },
       error: (error) => {
-        this.errorMessage = error?.error?.message || 'Unable to update this gym right now.';
+        this.errorMessage = apiErrorMessage(error, 'gyms.edit.error');
         this.submitting = false;
       },
     });

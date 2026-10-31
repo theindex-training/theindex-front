@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import {
@@ -14,12 +14,18 @@ import { ListRowComponent } from '../../components/list-row/list-row.component';
 import { IconComponent } from '../../components/icon/icon.component';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
+import { LanguageService } from '../../i18n/language.service';
 
 
 @Component({
   selector: 'app-trainers',
   standalone: true,
   imports: [
+    UiMessagePipe, 
+    TranslocoPipe, 
     RouterLink,
     PageHeaderComponent,
     SegmentedControlComponent,
@@ -35,17 +41,18 @@ import { TrainerProfile, TrainersService } from '../../services/trainers.service
   templateUrl: './trainers.component.html'
 })
 export class TrainersComponent implements OnInit {
+  private readonly i18n = inject(LanguageService);
   trainers: TrainerProfile[] = [];
   filteredTrainers: TrainerProfile[] = [];
   activeFilter: 'all' | 'active' | 'inactive' = 'all';
   readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
-    { value: 'all', label: 'All' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' }
+    { value: 'all', label: 'common.all' },
+    { value: 'active', label: 'common.active' },
+    { value: 'inactive', label: 'common.inactive' }
   ];
   searchTerm = '';
   loading = true;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly trainersService: TrainersService,
@@ -58,7 +65,7 @@ export class TrainersComponent implements OnInit {
 
   loadTrainers(): void {
     this.loading = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     const active =
       this.activeFilter === 'all' ? undefined : this.activeFilter === 'active' ? true : false;
@@ -71,7 +78,7 @@ export class TrainersComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = error?.error?.message || 'Unable to load trainers right now.';
+        this.errorMessage = apiErrorMessage(error, 'trainers.list.loadErrorMessage');
         this.loading = false;
         this.changeDetector.detectChanges();
       },
@@ -93,9 +100,14 @@ export class TrainersComponent implements OnInit {
     });
   }
 
+  /** Nickname in the language's quotes (“Gosho” / „Гошо“) for the title suffix. */
+  quotedNickname(value: string | null): string {
+    return value ? this.i18n.t('common.quoted', { text: value }) : '';
+  }
+
   nicknameLabel(trainer: TrainerProfile): string {
     const nickname = trainer.nickname?.trim();
-    return nickname ? `“${nickname}”` : 'No nickname';
+    return nickname ? this.i18n.t('common.quoted', { text: nickname }) : this.i18n.t('common.noNickname');
   }
 
   hasLinkedAccount(trainer: TrainerProfile): boolean {
