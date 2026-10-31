@@ -1,0 +1,295 @@
+{
+  "common": {
+    "appName": "The Index",
+    "language": "Език",
+    "theme": {
+      "label": "Тема",
+      "light": "Светла",
+      "dark": "Тъмна",
+      "system": "Авто"
+    },
+    "skipToContent": "Към съдържанието",
+    "close": "Затвори",
+    "search": "Търсене",
+    "clearSearch": "Изчисти търсенето",
+    "showAll": "Покажи всички",
+    "tryAgain": "Опитай отново",
+    "loading": "Зареждане",
+    "optional": "(по избор)",
+    "showPassword": "Покажи паролата",
+    "hidePassword": "Скрий паролата",
+    "noData": "Няма данни.",
+    "all": "Всички",
+    "active": "Активни",
+    "inactive": "Неактивни",
+    "status": "Статус",
+    "yes": "Да",
+    "no": "Не",
+    "user": "Потребител",
+    "signedIn": "Вписан профил",
+    "changePassword": "Смяна на парола",
+    "logOut": "Изход",
+    "linked": "Свързан",
+    "notLinked": "Няма акаунт",
+    "noNickname": "Без прякор",
+    "saving": "Запазване...",
+    "saveChanges": "Запази промените",
+    "deactivating": "Деактивиране...",
+    "missingId": "В адреса липсва идентификатор.",
+    "dash": "—"
+  },
+  "nav": {
+    "mainLabel": "Основна навигация",
+    "morePages": "Още страници",
+    "manage": "Управление",
+    "more": "Още",
+    "account": "Акаунт",
+    "homeLink": "The Index, начало",
+    "dashboard": "Табло",
+    "home": "Начало",
+    "trainees": "Трениращи",
+    "registerAttendance": "Отбележи присъствие",
+    "register": "Отбележи",
+    "attendanceHistory": "История на присъствията",
+    "settlements": "Разчети",
+    "settle": "Разчети",
+    "cashRegister": "Каса",
+    "plans": "Планове",
+    "gyms": "Зали",
+    "gymSubscriptions": "Спортни карти",
+    "trainers": "Треньори",
+    "trainingTimes": "Часове за тренировки",
+    "profile": "Профил",
+    "stats": "Статистика",
+    "records": "Рекорди"
+  },
+  "enums": {
+    "role": {
+      "ADMIN": "Администратор",
+      "TRAINER": "Треньор",
+      "TRAINEE": "Трениращ"
+    },
+    "accountStatus": {
+      "ACTIVE": "Активен",
+      "DISABLED": "Деактивиран"
+    },
+    "paymentStatus": {
+      "PAID": "Платено",
+      "UNPAID": "Неплатено"
+    },
+    "planType": {
+      "PUNCH": "По посещения",
+      "TIME": "За период"
+    },
+    "subscriptionStatus": {
+      "ACTIVE": "Активен",
+      "EXHAUSTED": "Изчерпан",
+      "EXPIRED": "Изтекъл",
+      "CANCELLED": "Анулиран"
+    },
+    "settlementStatus": {
+      "DRAFT": "Чернова",
+      "FINAL": "Окончателен"
+    },
+    "allocationReason": {
+      "PUNCH_CREDIT": "Посещение от карта",
+      "TIME_PRORATA": "Пропорционално за период",
+      "UNPAID": "Неплатено"
+    },
+    "cashTransactionType": {
+      "SUBSCRIPTION_IN": "Плащане на абонамент",
+      "SETTLEMENT_OUT": "Изплащане по разчет",
+      "MANUAL_IN": "Ръчно внасяне",
+      "MANUAL_OUT": "Ръчно теглене"
+    },
+    "cashSourceType": {
+      "SUBSCRIPTION": "Абонамент",
+      "SETTLEMENT": "Разчет",
+      "MANUAL": "Ръчно"
+    }
+  },
+  "trainees": {
+    "list": {
+      "subtitle": "Профили, спортни карти и акаунти на всички, които тренират при вас.",
+      "new": "Нов трениращ",
+      "searchLabel": "Търсене на трениращи",
+      "searchPlaceholder": "Търсене по име или прякор",
+      "count": "{shown} от {total, plural, one {# трениращ} other {# трениращи}}",
+      "loading": "Зареждане на трениращите",
+      "loadError": "Трениращите не можаха да се заредят",
+      "loadErrorMessage": "В момента трениращите не могат да се заредят.",
+      "emptyTitle": "Все още няма трениращи",
+      "emptyMessage": "Добавете хората, които тренират при вас, за да следите спортните им карти, абонаментите и присъствията.",
+      "noActive": "Няма активни трениращи",
+      "noInactive": "Няма неактивни трениращи",
+      "tryOtherFilter": "Опитайте с друг филтър по статус.",
+      "showAll": "Покажи всички трениращи",
+      "noMatchesTitle": "Няма съвпадения",
+      "noMatches": "Няма трениращ, който да отговаря на „{term}“.",
+      "tableLabel": "Таблица с трениращи",
+      "detailsColumn": "Подробности",
+      "noGymCard": "Няма",
+      "appMark": "Акаунт",
+      "appMarkHidden": "в приложението е свързан"
+    },
+    "status": {
+      "active": "Активен",
+      "inactive": "Неактивен"
+    },
+    "fields": {
+      "trainee": "Трениращ",
+      "name": "Име",
+      "nickname": "Прякор",
+      "phone": "Телефон",
+      "gymCard": "Спортна карта",
+      "gymSubscription": "Спортна карта",
+      "noGymSubscription": "Без спортна карта",
+      "appAccount": "Акаунт в приложението",
+      "account": "Акаунт",
+      "profileStatus": "Статус на профила",
+      "nameError": "Въведете име от 2 до 100 символа.",
+      "nameHint": "От 2 до 100 символа.",
+      "nicknameError": "Прякорът трябва да е от 1 до 50 символа.",
+      "nicknameHint": "До 50 символа.",
+      "namePlaceholder": "Антон",
+      "nicknamePlaceholder": "Тони"
+    },
+    "backToList": "Към трениращите",
+    "loadingOne": "Зареждане на трениращия...",
+    "errors": {
+      "missingId": "Липсва идентификатор на трениращия.",
+      "load": "Трениращият не може да се зареди."
+    },
+    "create": {
+      "title": "Нов трениращ",
+      "subtitle": "Добавете профил на трениращ и по желание го свържете с акаунт.",
+      "error": "В момента трениращият не може да бъде създаден.",
+      "submit": "Създай трениращ"
+    },
+    "edit": {
+      "title": "Редакция на трениращ",
+      "subtitle": "Променете данните в профила на трениращия.",
+      "error": "В момента промените не могат да бъдат запазени."
+    },
+    "delete": {
+      "title": "Деактивиране на трениращ",
+      "subtitle": "Спира достъпа на трениращия, като профилът му се запазва.",
+      "warning": "Трениращият вече няма да е активен, но профилът му може да бъде активиран отново по-късно.",
+      "error": "В момента трениращият не може да бъде деактивиран.",
+      "unlinked": "Няма акаунт",
+      "submit": "Деактивирай трениращия"
+    },
+    "details": {
+      "title": "Трениращ",
+      "subtitle": "Профил, акаунт, абонаменти и тренировки.",
+      "loading": "Зареждане на трениращия",
+      "accountInfo": "Данни за акаунта",
+      "role": "Роля",
+      "email": "Имейл",
+      "deactivate": "Деактивирай",
+      "edit": "Редактирай",
+      "manageAccount": "Управление на акаунта",
+      "createAccount": "Създай акаунт",
+      "subscriptions": "Абонаменти",
+      "subscriptionsSub": "Текущи планове и покупка на нови.",
+      "subscriptionFilter": "Филтър за абонаменти",
+      "buyTitle": "Покупка на абонамент",
+      "plan": "План",
+      "planError": "Изберете план.",
+      "startsAt": "Начална дата",
+      "startsAtError": "Изберете начална дата.",
+      "paid": "Платена сума (EUR)",
+      "paidError": "Въведете сума от 0 нагоре, с до два знака след десетичната запетая.",
+      "paidHint": "По подразбиране е цената на плана. До два знака след запетаята.",
+      "purchasing": "Покупка...",
+      "trainings": "Тренировки",
+      "trainingsSub": "Проведени тренировки на трениращия.",
+      "noTrainings": "Все още няма тренировки.",
+      "createSubscriptionError": "В момента абонаментът не може да бъде създаден.",
+      "deleteSubscriptionError": "В момента абонаментът не може да бъде изтрит.",
+      "loadSubscriptionsError": "В момента абонаментите не могат да се заредят.",
+      "loadPlansError": "В момента плановете не могат да се заредят.",
+      "loadTrainingsError": "В момента тренировките не могат да се заредят.",
+      "noActiveSubscriptions": "Трениращият няма активни абонаменти.",
+      "noExhaustedSubscriptions": "Трениращият няма изчерпани абонаменти.",
+      "noSubscriptions": "Трениращият няма абонаменти.",
+      "confirmDeleteSubscription": "Да се изтрие ли абонаментът „{plan}“ от {date}?"
+    },
+    "account": {
+      "pageTitle": "Акаунт на трениращ",
+      "manageTitle": "Акаунт на трениращ",
+      "createTitle": "Нов акаунт за трениращ",
+      "manageSubtitle": "Променете данните за вход в акаунта на трениращия.",
+      "createSubtitle": "Създайте данни за вход за избрания трениращ.",
+      "emailInvalid": "Въведете валиден имейл адрес, например trainee@example.com.",
+      "emailHint": "Използва се за вход, например trainee@example.com.",
+      "updateError": "В момента акаунтът не може да бъде променен.",
+      "createError": "Не може да бъде създаден акаунт за този трениращ.",
+      "deactivateError": "Акаунтът не може да бъде деактивиран."
+    }
+  },
+  "accounts": {
+    "email": "Имейл",
+    "emailRequired": "Въведете имейл.",
+    "newPassword": "Нова парола",
+    "password": "Парола",
+    "passwordHint": "Поне 8 символа.",
+    "passwordHintEdit": "Поне 8 символа. Оставете празно, за да запазите текущата парола.",
+    "confirmNewPassword": "Повторете новата парола",
+    "confirmPassword": "Повторете паролата",
+    "mustMatchNew": "Трябва да съвпада с новата парола.",
+    "mustMatch": "Трябва да съвпада с паролата.",
+    "deactivate": "Деактивирай акаунта",
+    "saveChanges": "Запази акаунта",
+    "create": "Създай акаунт",
+    "passwordRequired": "Въведете парола.",
+    "passwordLength": "Паролата трябва да е поне 8 символа.",
+    "repeatPassword": "Повторете паролата.",
+    "passwordsMismatch": "Паролите не съвпадат."
+  },
+  "subscriptions": {
+    "title": "Абонаменти",
+    "loading": "Зареждане на абонаментите",
+    "empty": "Все още няма абонаменти.",
+    "tableLabel": "Таблица с абонаменти",
+    "columns": {
+      "plan": "План",
+      "type": "Вид",
+      "starts": "Начало",
+      "endsOrUsed": "Край / използвани",
+      "paid": "Платено",
+      "actions": "Действия"
+    },
+    "creditsUsed": "{used} / {total, plural, one {# тренировка} other {# тренировки}}",
+    "fromPaid": "От {date} · Платено {amount}",
+    "deleteLabel": "Изтрий абонамента „{plan}“"
+  },
+  "trainings": {
+    "title": "Тренировки",
+    "loading": "Зареждане на тренировките",
+    "empty": "Все още няма тренировки.",
+    "tableLabel": "Таблица с тренировки",
+    "columns": {
+      "trainedAt": "Дата и час",
+      "trainer": "Треньор",
+      "location": "Зала",
+      "payment": "Плащане"
+    }
+  },
+  "traineeDashboard": {
+    "title": "Моят профил",
+    "subtitle": "Вашите абонаменти и тренировки.",
+    "loadErrorTitle": "Профилът ви не можа да се зареди",
+    "subscriptions": "Абонаменти",
+    "subscriptionsSub": "Текущите и предишните ви абонаменти.",
+    "subscriptionFilter": "Филтър за абонаменти",
+    "trainings": "Тренировки",
+    "trainingsSub": "Проведените ви тренировки.",
+    "noTrainings": "Все още нямате тренировки.",
+    "noActiveSubscriptions": "Нямате активни абонаменти.",
+    "noExhaustedSubscriptions": "Нямате изчерпани абонаменти.",
+    "noSubscriptions": "Нямате абонаменти.",
+    "missingProfile": "Профилът ви не може да се зареди: акаунтът ви не е свързан с профил на трениращ.",
+    "loadError": "В момента профилът ви не може да се зареди. Опитайте отново по-късно."
+  }
+}

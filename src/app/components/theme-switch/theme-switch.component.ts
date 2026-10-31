@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { ThemeMode, ThemeService } from '../../services/theme.service';
 
 let nextId = 0;
@@ -7,6 +8,7 @@ let nextId = 0;
 @Component({
   selector: 'app-theme-switch',
   standalone: true,
+  imports: [TranslocoPipe],
   templateUrl: './theme-switch.component.html',
   styleUrl: './theme-switch.component.scss'
 })
@@ -16,8 +18,8 @@ export class ThemeSwitchComponent {
   readonly name = `theme-switch-${nextId++}`;
 
   readonly options: { value: ThemeMode; label: string }[] = [
-    { value: 'light', label: 'Light' },
-    { value: 'dark', label: 'Dark' },
-    { value: 'system', label: 'Auto' }
+    { value: 'light', label: 'common.theme.light' },
+    { value: 'dark', label: 'common.theme.dark' },
+    { value: 'system', label: 'common.theme.system' }
   ];
 }

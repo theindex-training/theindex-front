@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="bg">
 <head>
   <meta charset="utf-8">
   <title>The Index</title>
@@ -20,6 +20,14 @@
       }
       document.documentElement.setAttribute('data-theme', theme);
       document.documentElement.style.colorScheme = theme;
+    })();
+    // Same for the language (Bulgarian unless the user picked English). Mirrors LanguageService.
+    (function () {
+      var lang = null;
+      try {
+        lang = localStorage.getItem('lang');
+      } catch (e) {}
+      document.documentElement.lang = lang === 'en' ? 'en' : 'bg';
     })();
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">

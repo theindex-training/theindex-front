@@ -19,11 +19,14 @@ import {
 } from '../../services/trainees.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { trimmedLength } from '../../utils/form-validators.util';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-trainee-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
   templateUrl: './trainee-edit.component.html'
 })
 export class TraineeEditComponent implements OnInit {
@@ -38,7 +41,7 @@ export class TraineeEditComponent implements OnInit {
   gymSubscriptions: GymSubscription[] = [];
   loading = true;
   submitting = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -62,7 +65,7 @@ export class TraineeEditComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.errorMessage = 'Trainee ID is missing.';
+      this.errorMessage = i18nMessage('trainees.errors.missingId');
       this.loading = false;
       return;
     }
@@ -92,7 +95,7 @@ export class TraineeEditComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to load this trainee.';
+          apiErrorMessage(error, 'trainees.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
       }
@@ -117,7 +120,7 @@ export class TraineeEditComponent implements OnInit {
     };
 
     this.submitting = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.traineesService.update(this.trainee.id, payload).subscribe({
       next: () => {
@@ -126,7 +129,7 @@ export class TraineeEditComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to update this trainee right now.';
+          apiErrorMessage(error, 'trainees.edit.error');
         this.submitting = false;
       }
     });

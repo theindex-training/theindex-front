@@ -1,5 +1,6 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
 import { ChipComponent, ChipTone } from '../../components/chip/chip.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
@@ -14,6 +15,9 @@ import {
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import { GymSubscription, GymSubscriptionsService } from '../../services/gym-subscriptions.service';
+import { LanguageService } from '../../i18n/language.service';
+import { UiMessage, apiErrorMessage } from '../../i18n/ui-message';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
 
 import { displayValue } from '../../utils/display.util';
@@ -23,6 +27,8 @@ import { displayValue } from '../../utils/display.util';
   standalone: true,
   imports: [
     RouterLink,
+    TranslocoPipe,
+    UiMessagePipe,
     AvatarComponent,
     ChipComponent,
     EmptyStateComponent,
@@ -42,13 +48,14 @@ export class TraineesComponent implements OnInit {
   gymSubscriptions: GymSubscription[] = [];
   activeFilter: 'all' | 'active' | 'inactive' = 'all';
   readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
-    { value: 'all', label: 'All' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
+    { value: 'all', label: 'common.all' },
+    { value: 'active', label: 'common.active' },
+    { value: 'inactive', label: 'common.inactive' },
   ];
   searchTerm = '';
   loading = true;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
+  private readonly i18n = inject(LanguageService);
 
   constructor(
     private readonly traineesService: TraineesService,
@@ -76,7 +83,7 @@ export class TraineesComponent implements OnInit {
 
   loadTrainees(): void {
     this.loading = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     const active =
       this.activeFilter === 'all' ? undefined : this.activeFilter === 'active' ? true : false;
@@ -89,7 +96,7 @@ export class TraineesComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = error?.error?.message || 'Unable to load trainees right now.';
+        this.errorMessage = apiErrorMessage(error, 'trainees.list.loadErrorMessage');
         this.loading = false;
         this.changeDetector.detectChanges();
       },
@@ -113,7 +120,7 @@ export class TraineesComponent implements OnInit {
 
   nicknameLabel(trainee: TraineeProfile): string {
     const nickname = trainee.nickname?.trim();
-    return nickname ? `“${nickname}”` : 'No nickname';
+    return nickname ? `“${nickname}”` : this.i18n.t('common.noNickname');
   }
 
   formatPhone(trainee: TraineeProfile): string {
@@ -139,7 +146,7 @@ export class TraineesComponent implements OnInit {
   /** Mobile rows show one chip: "Inactive" for inactive trainees, otherwise their gym card. */
   trailingChip(trainee: TraineeProfile): { label: string; tone: ChipTone } | null {
     if (!trainee.isActive) {
-      return { label: 'Inactive', tone: 'neutral' };
+      return { label: this.i18n.t('trainees.status.inactive'), tone: 'neutral' };
     }
 
     const gymCard = this.gymCardName(trainee);

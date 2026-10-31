@@ -7,7 +7,7 @@
   </div>
 
   @if (!items.length) {
-    <p class="notice" role="status">{{ emptyMessage }}</p>
+    <p class="notice" role="status">{{ emptyMessage || ('common.noData' | transloco) }}</p>
   } @else {
     <ol class="ranked__list">
       @for (item of items; track $index) {
@@ -16,7 +16,7 @@
           <span class="ranked__body">
             <span class="ranked__row">
               <span class="ranked__label">{{ item.label }}</span>
-              <span class="ranked__value num">{{ item.value }}{{ unit ? ' ' + unit : '' }}</span>
+              <span class="ranked__value num">{{ countKey ? (countKey | transloco: { count: item.value }) : item.value }}</span>
             </span>
             <span class="ranked__track" aria-hidden="true">
               <span class="ranked__bar" [style.width.%]="barWidth(item.value)"></span>

@@ -1,20 +1,20 @@
 <section class="page-stack">
   <app-page-header
-    title="Edit trainee"
-    subtitle="Update trainee profile information."
-    [back]="{ label: 'Back to trainees', link: '/trainees' }"
+    [title]="'trainees.edit.title' | transloco"
+    [subtitle]="'trainees.edit.subtitle' | transloco"
+    [back]="{ label: ('trainees.backToList' | transloco), link: '/trainees' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading trainee...</p>
+    <p class="notice" role="status">{{ 'trainees.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !trainee) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (trainee) {
     <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <div class="form-grid">
         <div class="form-row">
           <div class="form-field">
-            <label class="form-field__label" for="trainee-name">Name</label>
+            <label class="form-field__label" for="trainee-name">{{ 'trainees.fields.name' | transloco }}</label>
             <input
               id="trainee-name"
               type="text"
@@ -23,15 +23,15 @@
               [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
             />
             @if (form.controls.name.touched && form.controls.name.invalid) {
-              <span class="form-field__error" id="trainee-name-help">Enter a name of 2–100 characters.</span>
+              <span class="form-field__error" id="trainee-name-help">{{ 'trainees.fields.nameError' | transloco }}</span>
             } @else {
-              <span class="form-field__hint" id="trainee-name-help">2–100 characters.</span>
+              <span class="form-field__hint" id="trainee-name-help">{{ 'trainees.fields.nameHint' | transloco }}</span>
             }
           </div>
 
           <div class="form-field">
             <label class="form-field__label" for="trainee-nickname">
-              Nickname <span class="form-field__optional">(optional)</span>
+              {{ 'trainees.fields.nickname' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span>
             </label>
             <input
               id="trainee-nickname"
@@ -41,9 +41,9 @@
               [attr.aria-invalid]="form.controls.nickname.touched && form.controls.nickname.invalid"
             />
             @if (form.controls.nickname.touched && form.controls.nickname.invalid) {
-              <span class="form-field__error" id="trainee-nickname-help">Nickname must be 1–50 characters.</span>
+              <span class="form-field__error" id="trainee-nickname-help">{{ 'trainees.fields.nicknameError' | transloco }}</span>
             } @else {
-              <span class="form-field__hint" id="trainee-nickname-help">Up to 50 characters.</span>
+              <span class="form-field__hint" id="trainee-nickname-help">{{ 'trainees.fields.nicknameHint' | transloco }}</span>
             }
           </div>
         </div>
@@ -51,17 +51,17 @@
         <div class="form-row">
           <div class="form-field">
             <label class="form-field__label" for="trainee-phone">
-              Phone <span class="form-field__optional">(optional)</span>
+              {{ 'trainees.fields.phone' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span>
             </label>
             <input id="trainee-phone" type="tel" formControlName="phone" />
           </div>
 
           <div class="form-field">
             <label class="form-field__label" for="trainee-gym-subscription">
-              Gym subscription <span class="form-field__optional">(optional)</span>
+              {{ 'trainees.fields.gymSubscription' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span>
             </label>
             <select id="trainee-gym-subscription" formControlName="gymSubscriptionId">
-              <option [ngValue]="null">No gym subscription</option>
+              <option [ngValue]="null">{{ 'trainees.fields.noGymSubscription' | transloco }}</option>
               @for (gymSubscription of gymSubscriptions; track gymSubscription.id) {
                 <option [value]="gymSubscription.id">{{ gymSubscription.name }}</option>
               }
@@ -71,12 +71,12 @@
       </div>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
       }
 
       <div class="form-actions">
         <button class="btn btn--primary" type="submit" [disabled]="submitting">
-          {{ submitting ? 'Saving...' : 'Save changes' }}
+          {{ submitting ? ('common.saving' | transloco) : ('common.saveChanges' | transloco) }}
         </button>
       </div>
     </form>

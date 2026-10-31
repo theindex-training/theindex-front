@@ -2,8 +2,8 @@
   <div class="user__identity">
     <span class="user__avatar" aria-hidden="true">{{ initials }}</span>
     <span class="user__text">
-      <span class="user__email" [title]="email">{{ email }}</span>
-      <span class="user__role">{{ roleLabel }}</span>
+      <span class="user__email" [title]="email ?? ('common.user' | transloco)">{{ email ?? ('common.user' | transloco) }}</span>
+      <span class="user__role">{{ role ? (role | enumLabel: 'role') : ('common.signedIn' | transloco) }}</span>
     </span>
   </div>
 
@@ -12,7 +12,7 @@
       @if (layout === 'list') {
         <app-icon name="key" />
       }
-      Change password
+      {{ 'common.changePassword' | transloco }}
     </a>
     @if (layout === 'inline') {
       <span class="user__separator" aria-hidden="true">·</span>
@@ -21,7 +21,7 @@
       @if (layout === 'list') {
         <app-icon name="log-out" />
       }
-      Log out
+      {{ 'common.logOut' | transloco }}
     </button>
   </div>
 </div>

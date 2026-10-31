@@ -1,10 +1,11 @@
 import { IconName } from '../icon/icon.component';
 
 export interface NavItem {
+  /** Translation key, e.g. 'nav.trainees'. */
   label: string;
   route: string;
   icon: IconName;
-  /** Shorter label for the mobile tab bar. */
+  /** Translation key of a shorter label for the mobile tab bar. */
   tabLabel?: string;
   /** Highlighted as the primary action in the mobile tab bar. */
   primary?: boolean;
@@ -24,33 +25,33 @@ export interface Navigation {
   /** Items that don't fit the tab bar; shown in the mobile sheet. */
   moreMain: NavItem[];
   moreManage: NavItem[];
-  /** Label of the tab that opens the sheet. */
-  sheetLabel: 'More' | 'Account';
+  /** Translation key of the tab that opens the sheet: 'nav.more' (staff) or 'nav.account' (trainees). */
+  sheetLabel: 'nav.more' | 'nav.account';
 }
 
 const STAFF_MAIN: NavItem[] = [
-  { label: 'Dashboard', tabLabel: 'Home', route: '/home', icon: 'home' },
-  { label: 'Trainees', route: '/trainees', icon: 'users' },
-  { label: 'Register attendance', tabLabel: 'Register', route: '/attendance/new', icon: 'check', primary: true },
-  { label: 'Attendance history', route: '/attendance', icon: 'history', exact: true },
-  { label: 'Settlements', tabLabel: 'Settle', route: '/settlements', icon: 'wallet' },
-  { label: 'Cash register', route: '/cash-register', icon: 'banknote', roles: ['ADMIN'] }
+  { label: 'nav.dashboard', tabLabel: 'nav.home', route: '/home', icon: 'home' },
+  { label: 'nav.trainees', route: '/trainees', icon: 'users' },
+  { label: 'nav.registerAttendance', tabLabel: 'nav.register', route: '/attendance/new', icon: 'check', primary: true },
+  { label: 'nav.attendanceHistory', route: '/attendance', icon: 'history', exact: true },
+  { label: 'nav.settlements', tabLabel: 'nav.settle', route: '/settlements', icon: 'wallet' },
+  { label: 'nav.cashRegister', route: '/cash-register', icon: 'banknote', roles: ['ADMIN'] }
 ];
 
 const STAFF_MANAGE: NavItem[] = [
-  { label: 'Plans', route: '/plans', icon: 'clipboard' },
-  { label: 'Gyms', route: '/gyms', icon: 'dumbbell' },
-  { label: 'Gym subscriptions', route: '/gym-subscriptions', icon: 'ticket' },
-  { label: 'Trainers', route: '/trainers', icon: 'trainer', roles: ['ADMIN'] },
-  { label: 'Training times', route: '/training-times', icon: 'clock' }
+  { label: 'nav.plans', route: '/plans', icon: 'clipboard' },
+  { label: 'nav.gyms', route: '/gyms', icon: 'dumbbell' },
+  { label: 'nav.gymSubscriptions', route: '/gym-subscriptions', icon: 'ticket' },
+  { label: 'nav.trainers', route: '/trainers', icon: 'trainer', roles: ['ADMIN'] },
+  { label: 'nav.trainingTimes', route: '/training-times', icon: 'clock' }
 ];
 
 const STAFF_TAB_ROUTES = ['/home', '/trainees', '/attendance/new', '/settlements'];
 
 const TRAINEE_MAIN: NavItem[] = [
-  { label: 'Profile', route: '/my-profile', icon: 'user' },
-  { label: 'Stats', route: '/stats', icon: 'chart' },
-  { label: 'Records', route: '/records', icon: 'trophy' }
+  { label: 'nav.profile', route: '/my-profile', icon: 'user' },
+  { label: 'nav.stats', route: '/stats', icon: 'chart' },
+  { label: 'nav.records', route: '/records', icon: 'trophy' }
 ];
 
 function visibleTo(items: NavItem[], role: string | null): NavItem[] {
@@ -67,7 +68,7 @@ export function buildNavigation(role: string | null): Navigation {
       tabs: TRAINEE_MAIN,
       moreMain: [],
       moreManage: [],
-      sheetLabel: 'Account'
+      sheetLabel: 'nav.account'
     };
   }
 
@@ -81,7 +82,7 @@ export function buildNavigation(role: string | null): Navigation {
     tabs: main.filter(isTab),
     moreMain: main.filter(item => !isTab(item)),
     moreManage: manage,
-    sheetLabel: 'More'
+    sheetLabel: 'nav.more'
   };
 }
 

@@ -1,6 +1,10 @@
+import en from '../../../../public/i18n/en.json';
 import { buildNavigation, isUrlInItems } from './navigation';
 
-const labels = (items: { label: string }[]) => items.map(item => item.label);
+// Nav labels are translation keys; resolve them to the English text to keep the expectations readable.
+const english = (key: string): string =>
+  key.split('.').reduce<unknown>((node, part) => (node as Record<string, unknown>)?.[part], en) as string;
+const labels = (items: { label: string }[]) => items.map(item => english(item.label));
 
 describe('buildNavigation', () => {
   it('gives admins every item, with Register as the primary tab', () => {
@@ -15,10 +19,10 @@ describe('buildNavigation', () => {
       'Cash register'
     ]);
     expect(labels(nav.manage)).toEqual(['Plans', 'Gyms', 'Gym subscriptions', 'Trainers', 'Training times']);
-    expect(nav.tabs.map(tab => tab.tabLabel ?? tab.label)).toEqual(['Home', 'Trainees', 'Register', 'Settle']);
+    expect(nav.tabs.map(tab => english(tab.tabLabel ?? tab.label))).toEqual(['Home', 'Trainees', 'Register', 'Settle']);
     expect(nav.tabs.filter(tab => tab.primary).map(tab => tab.route)).toEqual(['/attendance/new']);
     expect(labels(nav.moreMain)).toEqual(['Attendance history', 'Cash register']);
-    expect(nav.sheetLabel).toBe('More');
+    expect(english(nav.sheetLabel)).toBe('More');
   });
 
   it('hides ADMIN-only items (Cash register, Trainers) from trainers', () => {
@@ -37,7 +41,7 @@ describe('buildNavigation', () => {
     expect(labels(nav.tabs)).toEqual(['Profile', 'Stats', 'Records']);
     expect(nav.manage).toEqual([]);
     expect(nav.moreMain).toEqual([]);
-    expect(nav.sheetLabel).toBe('Account');
+    expect(english(nav.sheetLabel)).toBe('Account');
   });
 
   it('shows only unrestricted items when the role is unknown', () => {
