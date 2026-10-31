@@ -1,69 +1,69 @@
 <section class="page-stack">
   <app-page-header
-    title="Trainers"
-    subtitle="Coaches, their profiles and app accounts."
-    [action]="{ label: 'New trainer', link: '/trainers/new' }"
+    [title]="'nav.trainers' | transloco"
+    [subtitle]="'trainers.list.subtitle' | transloco"
+    [action]="{ label: ('trainers.list.new' | transloco), link: '/trainers/new' }"
   />
 
   <div class="list-toolbar">
     <app-search-field
       class="list-toolbar__search"
-      label="Search trainers"
-      placeholder="Search name or nickname"
+      [label]="'trainers.list.searchLabel' | transloco"
+      [placeholder]="'trainers.list.searchPlaceholder' | transloco"
       [value]="searchTerm"
       (valueChange)="searchTerm = $event; applySearch()"
     />
     <app-segmented-control
-      label="Status"
+      [label]="'common.status' | transloco"
       [options]="statusOptions"
       [value]="activeFilter"
       (valueChange)="activeFilter = $event; loadTrainers()"
     />
     @if (!loading && !errorMessage && trainers.length) {
       <p class="list-toolbar__count" aria-live="polite">
-        {{ filteredTrainers.length }} of {{ trainers.length }} trainers
+        {{ 'trainers.list.count' | transloco: { shown: filteredTrainers.length, total: trainers.length } }}
       </p>
     }
   </div>
 
   @if (loading) {
-    <app-skeleton-list label="Loading trainers" [rows]="3" />
+    <app-skeleton-list [label]="'trainers.list.loading' | transloco" [rows]="3" />
   } @else if (errorMessage) {
-    <app-empty-state tone="danger" title="Couldn't load trainers" [message]="errorMessage">
-      <button class="btn btn--secondary" type="button" (click)="loadTrainers()">Try again</button>
+    <app-empty-state tone="danger" [title]="'trainers.list.loadError' | transloco" [message]="errorMessage | uiMessage">
+      <button class="btn btn--secondary" type="button" (click)="loadTrainers()">{{ 'common.tryAgain' | transloco }}</button>
     </app-empty-state>
   } @else if (!trainers.length) {
     @if (activeFilter === 'all') {
-      <app-empty-state icon="trainer" title="No trainers yet" message="Add the coaches who run your classes.">
-        <a class="btn btn--primary" routerLink="/trainers/new">New trainer</a>
+      <app-empty-state icon="trainer" [title]="'trainers.list.emptyTitle' | transloco" [message]="'trainers.list.emptyMessage' | transloco">
+        <a class="btn btn--primary" routerLink="/trainers/new">{{ 'trainers.list.new' | transloco }}</a>
       </app-empty-state>
     } @else {
       <app-empty-state
         icon="trainer"
-        [title]="activeFilter === 'active' ? 'No active trainers' : 'No inactive trainers'"
-        message="Try a different status filter."
+        [title]="activeFilter === 'active' ? ('trainers.list.noActive' | transloco) : ('trainers.list.noInactive' | transloco)"
+        [message]="'trainers.list.tryOtherFilter' | transloco"
       >
         <button class="btn btn--secondary" type="button" (click)="activeFilter = 'all'; loadTrainers()">
-          Show all trainers
+          {{ 'trainers.list.showAll' | transloco }}
         </button>
       </app-empty-state>
     }
   } @else if (!filteredTrainers.length) {
-    <app-empty-state title="No matches" [message]="'No trainer matches “' + searchTerm.trim() + '”.'">
+    <app-empty-state [title]="'trainers.list.noMatchesTitle' | transloco" [message]="'trainers.list.noMatches' | transloco: { term: searchTerm.trim() }">
       <button class="btn btn--secondary" type="button" (click)="searchTerm = ''; applySearch()">
-        Clear search
+        {{ 'common.clearSearch' | transloco }}
       </button>
     </app-empty-state>
   } @else {
-    <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Trainers table">
+    <div class="data-table-wrap responsive-table" tabindex="0" role="region" [attr.aria-label]="'trainers.list.tableLabel' | transloco">
       <table class="data-table">
-        <caption class="visually-hidden">Trainers</caption>
+        <caption class="visually-hidden">{{ 'nav.trainers' | transloco }}</caption>
         <thead>
           <tr>
-            <th scope="col">Trainer</th>
-            <th scope="col">App account</th>
-            <th scope="col">Status</th>
-            <th scope="col" class="cell-fit"><span class="visually-hidden">Details</span></th>
+            <th scope="col">{{ 'trainers.fields.trainer' | transloco }}</th>
+            <th scope="col">{{ 'trainers.fields.appAccount' | transloco }}</th>
+            <th scope="col">{{ 'common.status' | transloco }}</th>
+            <th scope="col" class="cell-fit"><span class="visually-hidden">{{ 'trainers.list.detailsColumn' | transloco }}</span></th>
           </tr>
         </thead>
         <tbody>
@@ -80,14 +80,14 @@
               </td>
               <td>
                 @if (hasLinkedAccount(trainer)) {
-                  <span class="linked-mark">Linked</span>
+                  <span class="linked-mark">{{ 'common.linked' | transloco }}</span>
                 } @else {
-                  <span class="text-muted">Not linked</span>
+                  <span class="text-muted">{{ 'common.notLinked' | transloco }}</span>
                 }
               </td>
               <td>
                 <app-status-dot [tone]="trainer.isActive ? 'success' : 'neutral'">
-                  {{ trainer.isActive ? 'Active' : 'Inactive' }}
+                  {{ trainer.isActive ? ('trainers.status.active' | transloco) : ('trainers.status.inactive' | transloco) }}
                 </app-status-dot>
               </td>
               <td class="cell-fit">
@@ -101,7 +101,7 @@
       </table>
     </div>
 
-    <ul class="list-card responsive-list" aria-label="Trainers">
+    <ul class="list-card responsive-list" [attr.aria-label]="'nav.trainers' | transloco">
       @for (trainer of filteredTrainers; track trainer.id) {
         <li>
           <app-list-row
@@ -113,11 +113,11 @@
           >
             @if (hasLinkedAccount(trainer)) {
               <span listRowMeta class="linked-mark">
-                <app-icon name="check" />App<span class="visually-hidden"> account linked</span>
+                <app-icon name="check" />{{ 'trainers.list.appMark' | transloco }}<span class="visually-hidden"> {{ 'trainers.list.appMarkHidden' | transloco }}</span>
               </span>
             }
             @if (!trainer.isActive) {
-              <app-chip listRowTrailing>Inactive</app-chip>
+              <app-chip listRowTrailing>{{ 'trainers.status.inactive' | transloco }}</app-chip>
             }
           </app-list-row>
         </li>

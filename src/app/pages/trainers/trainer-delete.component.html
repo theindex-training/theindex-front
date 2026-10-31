@@ -1,42 +1,42 @@
 <section class="page-stack page-narrow">
   <app-page-header
-    title="Deactivate trainer"
-    subtitle="Disable access for a trainer while keeping their profile."
-    [back]="{ label: 'Back to trainers', link: '/trainers' }"
+    [title]="'trainers.delete.title' | transloco"
+    [subtitle]="'trainers.delete.subtitle' | transloco"
+    [back]="{ label: ('trainers.backToList' | transloco), link: '/trainers' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading trainer...</p>
+    <p class="notice" role="status">{{ 'trainers.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !trainer) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (trainer) {
     <div class="panel">
       <dl class="detail-list">
         <div>
-          <dt>Name</dt>
+          <dt>{{ 'trainers.fields.name' | transloco }}</dt>
           <dd>{{ trainer.name }}</dd>
         </div>
         <div>
-          <dt>Nickname</dt>
+          <dt>{{ 'trainers.fields.nickname' | transloco }}</dt>
           <dd>{{ formatNickname() }}</dd>
         </div>
         <div>
-          <dt>Account</dt>
+          <dt>{{ 'trainers.fields.account' | transloco }}</dt>
           <dd>{{ formatAccount() }}</dd>
         </div>
       </dl>
 
       <p class="notice notice--warning">
-        This trainer will no longer be active, but their profile can be reactivated later.
+        {{ 'trainers.delete.warning' | transloco }}
       </p>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
       }
 
       <div class="form-actions">
         <button class="btn btn--danger-solid" type="button" (click)="confirmDeactivate()" [disabled]="submitting">
-          {{ submitting ? 'Deactivating...' : 'Deactivate trainer' }}
+          {{ submitting ? ('common.deactivating' | transloco) : ('trainers.delete.submit' | transloco) }}
         </button>
       </div>
     </div>

@@ -493,5 +493,94 @@
       "inactive": "Gym subscription inactive",
       "error": "Unable to deactivate this gym subscription right now."
     }
+  },
+  "trainers": {
+    "list": {
+      "subtitle": "Coaches, their profiles and app accounts.",
+      "new": "New trainer",
+      "count": "{shown} of {total, plural, one {# trainer} other {# trainers}}",
+      "searchLabel": "Search trainers",
+      "searchPlaceholder": "Search name or nickname",
+      "loading": "Loading trainers",
+      "loadError": "Couldn't load trainers",
+      "loadErrorMessage": "Unable to load trainers right now.",
+      "emptyTitle": "No trainers yet",
+      "emptyMessage": "Add the coaches who run your classes.",
+      "noActive": "No active trainers",
+      "noInactive": "No inactive trainers",
+      "tryOtherFilter": "Try a different status filter.",
+      "showAll": "Show all trainers",
+      "noMatchesTitle": "No matches",
+      "noMatches": "No trainer matches “{term}”.",
+      "tableLabel": "Trainers table",
+      "detailsColumn": "Details",
+      "appMark": "App",
+      "appMarkHidden": "account linked"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "fields": {
+      "trainer": "Trainer",
+      "name": "Name",
+      "nickname": "Nickname",
+      "appAccount": "App account",
+      "account": "Account",
+      "profileStatus": "Profile status",
+      "nameError": "Enter a name of 2–100 characters.",
+      "nameHint": "2–100 characters.",
+      "nicknameError": "Nickname must be 1–50 characters.",
+      "nicknameHint": "Up to 50 characters.",
+      "namePlaceholder": "Velcho",
+      "nicknamePlaceholder": "V"
+    },
+    "backToList": "Back to trainers",
+    "loadingOne": "Loading trainer...",
+    "errors": {
+      "missingId": "Trainer ID is missing.",
+      "load": "Unable to load this trainer."
+    },
+    "create": {
+      "title": "Create trainer",
+      "subtitle": "Add a new trainer profile and optional account link.",
+      "submit": "Create trainer",
+      "error": "Unable to create this trainer right now."
+    },
+    "edit": {
+      "title": "Edit trainer",
+      "subtitle": "Update trainer profile information.",
+      "error": "Unable to update this trainer right now."
+    },
+    "details": {
+      "edit": "Edit trainer",
+      "title": "Trainer details",
+      "subtitle": "Review trainer information and account access.",
+      "deactivate": "Deactivate trainer",
+      "accountInfo": "Account information",
+      "email": "Email",
+      "role": "Role",
+      "manageAccount": "Manage account",
+      "createAccount": "Create account"
+    },
+    "delete": {
+      "title": "Deactivate trainer",
+      "submit": "Deactivate trainer",
+      "subtitle": "Disable access for a trainer while keeping their profile.",
+      "warning": "This trainer will no longer be active, but their profile can be reactivated later.",
+      "error": "Unable to deactivate this trainer right now."
+    },
+    "account": {
+      "pageTitle": "Trainer account",
+      "manageTitle": "Manage trainer account",
+      "createTitle": "Create trainer account",
+      "manageSubtitle": "Update login credentials for this trainer account.",
+      "createSubtitle": "Provision login credentials for the selected trainer.",
+      "emailInvalid": "Enter a valid email address, e.g. trainer@example.com.",
+      "emailHint": "Used to log in, e.g. trainer@example.com.",
+      "updateError": "Unable to update this account right now.",
+      "createError": "Unable to provision an account for this trainer.",
+      "deactivateError": "Unable to deactivate this account."
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
 
@@ -8,6 +8,7 @@ import { PageHeaderComponent } from '../../components/page-header/page-header.co
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import { LanguageService } from '../../i18n/language.service';
 
 @Component({
   selector: 'app-trainee-delete',
@@ -16,6 +17,7 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
   templateUrl: './trainee-delete.component.html'
 })
 export class TraineeDeleteComponent implements OnInit {
+  private readonly i18n = inject(LanguageService);
   trainee: TraineeProfile | null = null;
   loading = true;
   submitting = false;
@@ -81,6 +83,6 @@ export class TraineeDeleteComponent implements OnInit {
   }
 
   formatAccount(): string {
-    return this.trainee?.accountId ? 'Linked' : 'Unlinked';
+    return this.i18n.t(this.trainee?.accountId ? 'common.linked' : 'common.notLinked');
   }
 }

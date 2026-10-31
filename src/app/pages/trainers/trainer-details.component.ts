@@ -10,18 +10,22 @@ import { TrainerProfile, TrainersService } from '../../services/trainers.service
 import { displayValue } from '../../utils/display.util';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 
 @Component({
   selector: 'app-trainer-details',
   standalone: true,
-  imports: [CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  imports: [EnumLabelPipe, UiMessagePipe, TranslocoPipe, CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
   templateUrl: './trainer-details.component.html'
 })
 export class TrainerDetailsComponent implements OnInit {
   trainer: TrainerProfile | null = null;
   account: ProvisionedAccount | null = null;
   loading = true;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly trainersService: TrainersService,
@@ -33,7 +37,7 @@ export class TrainerDetailsComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.errorMessage = 'Trainer ID is missing.';
+      this.errorMessage = i18nMessage('trainers.errors.missingId');
       this.loading = false;
       return;
     }
@@ -51,7 +55,7 @@ export class TrainerDetailsComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to load this trainer.';
+          apiErrorMessage(error, 'trainers.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
       }
