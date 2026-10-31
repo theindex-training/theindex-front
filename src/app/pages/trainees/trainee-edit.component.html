@@ -1,62 +1,81 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Edit trainee</h1>
-      <p>Update trainee profile information.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/trainees">Back to trainees</a>
-  </header>
+<section class="page-stack">
+  <app-page-header
+    title="Edit trainee"
+    subtitle="Update trainee profile information."
+    [back]="{ label: 'Back to trainees', link: '/trainees' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading trainee...</div>
+    <p class="notice" role="status">Loading trainee...</p>
   } @else if (errorMessage && !trainee) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (trainee) {
-    <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
+    <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <div class="form-grid">
-        <label class="field">
-          <span>Name</span>
-          <input type="text" formControlName="name" />
-          @if (form.controls.name.touched && form.controls.name.invalid) {
-            <small class="error">Name is required and must be at least 2 characters.</small>
-          }
-        </label>
-
-        <label class="field">
-          <span>Nickname</span>
-          <input type="text" formControlName="nickname" />
-          @if (form.controls.nickname.touched && form.controls.nickname.invalid) {
-            <small class="error">Nickname must be at least 1 character.</small>
-          }
-        </label>
-
-        <label class="field">
-          <span>Phone</span>
-          <input type="text" formControlName="phone" />
-          @if (form.controls.phone.touched && form.controls.phone.invalid) {
-            <small class="error">Phone must be at least 1 character.</small>
-          }
-        </label>
-
-
-        <label class="field">
-          <span>Gym subscription</span>
-          <select formControlName="gymSubscriptionId">
-            <option [ngValue]="null">No gym subscription</option>
-            @for (gymSubscription of gymSubscriptions; track gymSubscription.id) {
-              <option [value]="gymSubscription.id">{{ gymSubscription.name }}</option>
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="trainee-name">Name</label>
+            <input
+              id="trainee-name"
+              type="text"
+              formControlName="name"
+              aria-describedby="trainee-name-help"
+              [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+            />
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+              <span class="form-field__error" id="trainee-name-help">Enter a name of 2–100 characters.</span>
+            } @else {
+              <span class="form-field__hint" id="trainee-name-help">2–100 characters.</span>
             }
-          </select>
-        </label>
+          </div>
 
+          <div class="form-field">
+            <label class="form-field__label" for="trainee-nickname">
+              Nickname <span class="form-field__optional">(optional)</span>
+            </label>
+            <input
+              id="trainee-nickname"
+              type="text"
+              formControlName="nickname"
+              aria-describedby="trainee-nickname-help"
+              [attr.aria-invalid]="form.controls.nickname.touched && form.controls.nickname.invalid"
+            />
+            @if (form.controls.nickname.touched && form.controls.nickname.invalid) {
+              <span class="form-field__error" id="trainee-nickname-help">Nickname must be 1–50 characters.</span>
+            } @else {
+              <span class="form-field__hint" id="trainee-nickname-help">Up to 50 characters.</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="trainee-phone">
+              Phone <span class="form-field__optional">(optional)</span>
+            </label>
+            <input id="trainee-phone" type="tel" formControlName="phone" />
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label" for="trainee-gym-subscription">
+              Gym subscription <span class="form-field__optional">(optional)</span>
+            </label>
+            <select id="trainee-gym-subscription" formControlName="gymSubscriptionId">
+              <option [ngValue]="null">No gym subscription</option>
+              @for (gymSubscription of gymSubscriptions; track gymSubscription.id) {
+                <option [value]="gymSubscription.id">{{ gymSubscription.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
       </div>
 
       @if (errorMessage) {
-        <div class="state error">{{ errorMessage }}</div>
+        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
       }
 
       <div class="form-actions">
-        <button class="button button-primary" type="submit" [disabled]="submitting">
+        <button class="btn btn--primary" type="submit" [disabled]="submitting">
           {{ submitting ? 'Saving...' : 'Save changes' }}
         </button>
       </div>

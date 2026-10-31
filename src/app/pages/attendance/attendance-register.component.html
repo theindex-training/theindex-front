@@ -1,19 +1,18 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Register attendance</h1>
-      <p>Capture a completed training session and mark all trainees who attended.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/attendance">Back to attendance</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Register attendance"
+    subtitle="Pick the session, tap everyone who trained, save."
+    [back]="{ label: 'Back to attendance', link: '/attendance' }"
+  />
 
   @if (loading) {
-    <div class="card state">Loading trainers, gyms, and trainees...</div>
+    <app-skeleton-list label="Loading trainers, gyms and trainees" [rows]="5" />
   } @else {
-    <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
-      <div class="form-grid">
-        <label class="field">
-          <span>Trainer</span>
+    <form class="register" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <fieldset class="panel session">
+        <legend class="visually-hidden">Session</legend>
+        <label class="form-field session__pick">
+          <span class="form-field__label">Trainer</span>
           <select formControlName="trainerId">
             <option value="" disabled>Select trainer</option>
             @for (trainer of trainers; track trainer.id) {
@@ -23,12 +22,12 @@
             }
           </select>
           @if (form.controls.trainerId.touched && form.controls.trainerId.invalid) {
-            <small class="error">Trainer is required.</small>
+            <span class="form-field__error">Trainer is required.</span>
           }
         </label>
 
-        <label class="field">
-          <span>Gym location</span>
+        <label class="form-field session__pick">
+          <span class="form-field__label">Gym</span>
           <select formControlName="locationId">
             <option value="" disabled>Select gym location</option>
             @for (gym of gymLocations; track gym.id) {
@@ -36,20 +35,20 @@
             }
           </select>
           @if (form.controls.locationId.touched && form.controls.locationId.invalid) {
-            <small class="error">Gym location is required.</small>
+            <span class="form-field__error">Gym location is required.</span>
           }
         </label>
 
-        <label class="field">
-          <span>Training date *</span>
+        <label class="form-field">
+          <span class="form-field__label">Date</span>
           <input type="date" formControlName="trainedDate" />
           @if (form.controls.trainedDate.touched && form.controls.trainedDate.invalid) {
-            <small class="error">Training date is required.</small>
+            <span class="form-field__error">Training date is required.</span>
           }
         </label>
 
-        <label class="field">
-          <span>Training time (optional)</span>
+        <label class="form-field">
+          <span class="form-field__label">Time <span class="form-field__optional">(optional)</span></span>
           <select formControlName="trainedTime">
             <option value="">Not specified</option>
             @for (trainingTime of trainingTimes; track trainingTime.id) {
@@ -59,61 +58,65 @@
             }
           </select>
         </label>
-      </div>
+      </fieldset>
 
-      <section class="trainee-section">
-        <div class="trainee-toolbar">
-          <label class="field search-field">
-            <span>Search trainees (name or nickname)</span>
+      <fieldset class="who">
+        <legend class="who__title">Who trained?</legend>
+
+        <div class="who__tools">
+          <div class="who__search">
+            <app-icon class="who__search-icon" name="search" />
             <input
-              type="text"
+              type="search"
               formControlName="traineeSearch"
-              placeholder="Type trainee name or nickname"
+              placeholder="Search name or nickname"
+              aria-label="Search trainees by name or nickname"
+              autocomplete="off"
             />
-          </label>
-
-          <div class="selection-actions">
-            <button class="button button-ghost" type="button" (click)="selectFiltered()">
-              Select filtered
-            </button>
-            <button class="button button-ghost" type="button" (click)="clearFiltered()">
-              Clear filtered
-            </button>
+          </div>
+          <div class="who__bulk">
+            <button class="btn btn--ghost" type="button" (click)="selectFiltered()">Select shown</button>
+            <button class="btn btn--ghost" type="button" (click)="clearFiltered()">Clear shown</button>
           </div>
         </div>
 
-        <p class="selection-hint">
-          Selected trainees: <strong>{{ selectedTraineeIds.size }}</strong>
-        </p>
-
-        <div class="trainee-list">
-          @if (filteredTrainees.length === 0) {
-            <p class="state">No trainees match this search.</p>
-          } @else {
+        @if (filteredTrainees.length === 0) {
+          <p class="notice" role="status">No trainees match this search.</p>
+        } @else {
+          <ul class="list-card" aria-label="Trainees">
             @for (trainee of filteredTrainees; track trainee.id) {
-              <label class="trainee-item">
-                <input
-                  type="checkbox"
-                  [checked]="isSelected(trainee.id)"
-                  (change)="toggleTraineeSelection(trainee.id, $any($event.target).checked)"
-                />
-                <span class="trainee-name">{{ trainee.name }}</span>
-                <span class="trainee-nickname">{{ trainee.nickname || '—' }}</span>
-              </label>
+              <li>
+                <label class="trainee" [class.is-selected]="isSelected(trainee.id)">
+                  <app-avatar [name]="trainee.name" />
+                  <span class="trainee__text">
+                    <span class="trainee__name">{{ trainee.name }}</span>
+                    <span class="trainee__nickname">{{ trainee.nickname || '—' }}</span>
+                  </span>
+                  <input
+                    class="trainee__check"
+                    type="checkbox"
+                    [checked]="isSelected(trainee.id)"
+                    (change)="toggleTraineeSelection(trainee.id, $any($event.target).checked)"
+                  />
+                </label>
+              </li>
             }
-          }
+          </ul>
+        }
+      </fieldset>
+
+      <div class="save-bar">
+        @if (errorMessage) {
+          <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+        }
+        <div class="save-bar__inner">
+          <p class="save-bar__count" aria-live="polite">
+            <strong class="num">{{ selectedTraineeIds.size }}</strong> selected
+          </p>
+          <button class="btn btn--primary save-bar__submit" type="submit" [disabled]="submitting">
+            {{ submitting ? 'Saving...' : 'Register attendance' }}
+          </button>
         </div>
-      </section>
-
-      @if (errorMessage) {
-        <div class="state error">{{ errorMessage }}</div>
-      }
-
-
-      <div class="form-actions">
-        <button class="button button-primary" type="submit" [disabled]="submitting">
-          {{ submitting ? 'Saving...' : 'Register attendance' }}
-        </button>
       </div>
     </form>
   }

@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { BrandComponent } from '../../components/brand/brand.component';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-unauthorized',
   standalone: true,
-  templateUrl: './unauthorized.component.html',
-  styleUrl: './unauthorized.component.scss'
+  imports: [BrandComponent],
+  templateUrl: './unauthorized.component.html'
 })
 export class UnauthorizedComponent {
   constructor(

@@ -1,68 +1,110 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Create plan</h1>
-      <p>Define the pricing and duration for a new training plan.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/plans">Back to plans</a>
-  </header>
+<section class="page-stack">
+  <app-page-header
+    title="Create plan"
+    subtitle="Define the pricing and duration for a new training plan."
+    [back]="{ label: 'Back to plans', link: '/plans' }"
+  />
 
-  <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
+  <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
     <div class="form-grid">
-      <label class="field">
-        <span>Plan type</span>
-        <select formControlName="type">
-          <option value="PUNCH">Punch (credits)</option>
-          <option value="TIME">Time (days)</option>
-        </select>
-      </label>
-
-      <label class="field">
-        <span>Title</span>
-        <input type="text" formControlName="title" placeholder="12 trainings" />
-        @if (form.controls.title.touched && form.controls.title.invalid) {
-          <small class="error">Title is required.</small>
-        }
-      </label>
-
-      <label class="field">
-        <span>Price (EUR)</span>
-        <input type="number" formControlName="price" min="0" step="0.01" />
-        @if (form.controls.price.touched && form.controls.price.invalid) {
-          <small class="error">Enter a valid price (up to two decimals).</small>
-        }
-      </label>
-
-      @if (form.controls.type.value === 'PUNCH') {
-        <label class="field">
-          <span>Credits</span>
-          <input type="number" formControlName="credits" min="1" step="1" />
-          @if (form.controls.credits.touched && form.controls.credits.invalid) {
-            <small class="error">Credits must be at least 1.</small>
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-field__label" for="plan-title">Title</label>
+          <input
+            id="plan-title"
+            type="text"
+            formControlName="title"
+            placeholder="12 trainings"
+            aria-describedby="plan-title-help"
+            [attr.aria-invalid]="form.controls.title.touched && form.controls.title.invalid"
+          />
+          @if (form.controls.title.touched && form.controls.title.invalid) {
+            <span class="form-field__error" id="plan-title-help">Title is required.</span>
           }
-        </label>
-      } @else {
-        <label class="field">
-          <span>Duration (days)</span>
-          <input type="number" formControlName="durationDays" min="1" step="1" />
-          @if (form.controls.durationDays.touched && form.controls.durationDays.invalid) {
-            <small class="error">Duration must be at least 1 day.</small>
-          }
-        </label>
-      }
+        </div>
+      </div>
 
-      <label class="field checkbox">
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-field__label" for="plan-type">Plan type</label>
+          <select id="plan-type" formControlName="type">
+            <option value="PUNCH">Punch (credits)</option>
+            <option value="TIME">Time (days)</option>
+          </select>
+        </div>
+
+        @if (form.controls.type.value === 'PUNCH') {
+          <div class="form-field">
+            <label class="form-field__label" for="plan-credits">Credits</label>
+            <input
+              id="plan-credits"
+              type="number"
+              inputmode="numeric"
+              formControlName="credits"
+              min="1"
+              step="1"
+              aria-describedby="plan-credits-help"
+              [attr.aria-invalid]="form.controls.credits.touched && form.controls.credits.invalid"
+            />
+            @if (form.controls.credits.touched && form.controls.credits.invalid) {
+              <span class="form-field__error" id="plan-credits-help">Enter a whole number of 1 or more.</span>
+            } @else {
+              <span class="form-field__hint" id="plan-credits-help">Trainings included. Whole number, 1 or more.</span>
+            }
+          </div>
+        } @else {
+          <div class="form-field">
+            <label class="form-field__label" for="plan-duration">Duration (days)</label>
+            <input
+              id="plan-duration"
+              type="number"
+              inputmode="numeric"
+              formControlName="durationDays"
+              min="1"
+              step="1"
+              aria-describedby="plan-duration-help"
+              [attr.aria-invalid]="form.controls.durationDays.touched && form.controls.durationDays.invalid"
+            />
+            @if (form.controls.durationDays.touched && form.controls.durationDays.invalid) {
+              <span class="form-field__error" id="plan-duration-help">Enter a whole number of 1 or more.</span>
+            } @else {
+              <span class="form-field__hint" id="plan-duration-help">Days the plan is valid. Whole number, 1 or more.</span>
+            }
+          </div>
+        }
+
+        <div class="form-field">
+          <label class="form-field__label" for="plan-price">Price (EUR)</label>
+          <input
+            id="plan-price"
+            type="number"
+            inputmode="decimal"
+            formControlName="price"
+            min="0"
+            step="0.01"
+            aria-describedby="plan-price-help"
+            [attr.aria-invalid]="form.controls.price.touched && form.controls.price.invalid"
+          />
+          @if (form.controls.price.touched && form.controls.price.invalid) {
+            <span class="form-field__error" id="plan-price-help">Enter a price of 0 or more, with up to two decimals.</span>
+          } @else {
+            <span class="form-field__hint" id="plan-price-help">0 or more, up to two decimals, e.g. 45.50.</span>
+          }
+        </div>
+      </div>
+
+      <label class="form-field form-field--check">
         <input type="checkbox" formControlName="isActive" />
         <span>Active plan</span>
       </label>
     </div>
 
     @if (errorMessage) {
-      <div class="state error">{{ errorMessage }}</div>
+      <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
     }
 
     <div class="form-actions">
-      <button class="button button-primary" type="submit" [disabled]="submitting">
+      <button class="btn btn--primary" type="submit" [disabled]="submitting">
         {{ submitting ? 'Saving...' : 'Create plan' }}
       </button>
     </div>

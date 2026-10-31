@@ -1,7 +1,18 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AvatarComponent } from '../../components/avatar/avatar.component';
+import { ChipComponent, ChipTone } from '../../components/chip/chip.component';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { IconComponent } from '../../components/icon/icon.component';
+import { ListRowComponent } from '../../components/list-row/list-row.component';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { SearchFieldComponent } from '../../components/search-field/search-field.component';
+import {
+  SegmentedControlComponent,
+  SegmentedOption
+} from '../../components/segmented-control/segmented-control.component';
+import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
+import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import { GymSubscription, GymSubscriptionsService } from '../../services/gym-subscriptions.service';
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
 
@@ -10,15 +21,31 @@ import { displayValue } from '../../utils/display.util';
 @Component({
   selector: 'app-trainees',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [
+    RouterLink,
+    AvatarComponent,
+    ChipComponent,
+    EmptyStateComponent,
+    IconComponent,
+    ListRowComponent,
+    PageHeaderComponent,
+    SearchFieldComponent,
+    SegmentedControlComponent,
+    SkeletonListComponent,
+    StatusDotComponent,
+  ],
   templateUrl: './trainees.component.html',
-  styleUrl: './trainees.component.scss',
 })
 export class TraineesComponent implements OnInit {
   trainees: TraineeProfile[] = [];
   filteredTrainees: TraineeProfile[] = [];
   gymSubscriptions: GymSubscription[] = [];
   activeFilter: 'all' | 'active' | 'inactive' = 'all';
+  readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
+    { value: 'all', label: 'All' },
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' },
+  ];
   searchTerm = '';
   loading = true;
   errorMessage = '';
@@ -84,8 +111,9 @@ export class TraineesComponent implements OnInit {
     });
   }
 
-  formatNickname(trainee: TraineeProfile): string {
-    return displayValue(trainee.nickname);
+  nicknameLabel(trainee: TraineeProfile): string {
+    const nickname = trainee.nickname?.trim();
+    return nickname ? `“${nickname}”` : 'No nickname';
   }
 
   formatPhone(trainee: TraineeProfile): string {
@@ -96,15 +124,25 @@ export class TraineesComponent implements OnInit {
     return Boolean(trainee.accountId);
   }
 
-  formatGymSubscription(trainee: TraineeProfile): string {
+  gymCardName(trainee: TraineeProfile): string | null {
     if (!trainee.gymSubscriptionId) {
-      return '—';
+      return null;
     }
 
     return (
       this.gymSubscriptions.find(
         (gymSubscription) => gymSubscription.id === trainee.gymSubscriptionId,
-      )?.name || '—'
+      )?.name || null
     );
+  }
+
+  /** Mobile rows show one chip: "Inactive" for inactive trainees, otherwise their gym card. */
+  trailingChip(trainee: TraineeProfile): { label: string; tone: ChipTone } | null {
+    if (!trainee.isActive) {
+      return { label: 'Inactive', tone: 'neutral' };
+    }
+
+    const gymCard = this.gymCardName(trainee);
+    return gymCard ? { label: gymCard, tone: 'accent' } : null;
   }
 }

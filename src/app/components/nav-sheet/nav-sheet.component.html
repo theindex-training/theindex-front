@@ -1,0 +1,63 @@
+<dialog
+  #dialog
+  class="sheet"
+  aria-labelledby="nav-sheet-title"
+  (close)="handleClose()"
+  (click)="handleDialogClick($event)"
+>
+  <div class="sheet__panel">
+    <div class="sheet__handle" aria-hidden="true"></div>
+    <div class="sheet__header">
+      <h2 class="sheet__title" id="nav-sheet-title">{{ title }}</h2>
+      <button class="sheet__close" type="button" aria-label="Close" (click)="close()">
+        <app-icon name="close" />
+      </button>
+    </div>
+
+    @if (mainItems.length || manageItems.length) {
+      <nav class="sheet__section" aria-label="More pages">
+        @if (mainItems.length) {
+          <ul class="tiles">
+            @for (item of mainItems; track item.route) {
+              <li><ng-container *ngTemplateOutlet="tile; context: { $implicit: item }" /></li>
+            }
+          </ul>
+        }
+        @if (manageItems.length) {
+          <h3 class="sheet__label" id="nav-sheet-manage">Manage</h3>
+          <ul class="tiles" aria-labelledby="nav-sheet-manage">
+            @for (item of manageItems; track item.route) {
+              <li><ng-container *ngTemplateOutlet="tile; context: { $implicit: item }" /></li>
+            }
+          </ul>
+        }
+      </nav>
+    }
+
+    <section class="sheet__section" aria-labelledby="nav-sheet-theme">
+      <h3 class="sheet__label" id="nav-sheet-theme">Theme</h3>
+      <app-theme-switch />
+    </section>
+
+    <section class="sheet__section" aria-labelledby="nav-sheet-account">
+      <h3 class="sheet__label" id="nav-sheet-account">
+        {{ title === 'Account' ? 'Signed in' : 'Account' }}
+      </h3>
+      <app-user-block layout="list" />
+    </section>
+  </div>
+</dialog>
+
+<ng-template #tile let-item>
+  <a
+    class="tile"
+    [routerLink]="item.route"
+    routerLinkActive="is-active"
+    ariaCurrentWhenActive="page"
+    [routerLinkActiveOptions]="{ exact: !!item.exact }"
+    (click)="close()"
+  >
+    <app-icon [name]="item.icon" />
+    <span>{{ item.label }}</span>
+  </a>
+</ng-template>

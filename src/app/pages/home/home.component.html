@@ -1,38 +1,44 @@
-<section class="dashboard">
-  <header>
-    <h1>Dashboard</h1>
-    <p>Welcome back! Use these shortcuts to jump to important features.</p>
-  </header>
+<section class="page-stack">
+  <app-page-header title="Dashboard" subtitle="Welcome back! Jump straight to what you need." />
 
-  <div class="card-grid">
-    <article class="card">
-      <h2><a routerLink="/attendance/new">Register attendance</a></h2>
-      <p>Open the attendance register and log a new training session.</p>
-    </article>
-
-    <article class="card">
-      <h2><a routerLink="/attendance">List of trainings</a></h2>
-      <p>Review training times and keep your schedule up to date.</p>
-    </article>
-
-    <article class="card">
-      <h2><a routerLink="/settlements">Settlement reports</a></h2>
-      <p>Open settlement reports and inspect payout details.</p>
-    </article>
-  </div>
+  <nav class="actions" aria-label="Shortcuts">
+    <a class="action action--primary" routerLink="/attendance/new">
+      <span class="action__icon"><app-icon name="check" /></span>
+      <span class="action__text">
+        <span class="action__title">Register attendance</span>
+        <span class="action__desc">Open the attendance register and log a new training session.</span>
+      </span>
+    </a>
+    <a class="action" routerLink="/attendance">
+      <span class="action__icon"><app-icon name="history" /></span>
+      <span class="action__text">
+        <span class="action__title">List of trainings</span>
+        <span class="action__desc">Review training sessions and who attended.</span>
+      </span>
+    </a>
+    <a class="action" routerLink="/settlements">
+      <span class="action__icon"><app-icon name="wallet" /></span>
+      <span class="action__text">
+        <span class="action__title">Settlement reports</span>
+        <span class="action__desc">Open settlement reports and inspect payout details.</span>
+      </span>
+    </a>
+  </nav>
 
   @if (canViewAttendanceReports) {
-    <section class="reports-section">
-      <header>
-        <h2>Attendance reports</h2>
-        <p>Monitor inactive trainees and trainees with no active subscription.</p>
-      </header>
+    <section class="page-stack" aria-labelledby="reports-title">
+      <div>
+        <h2 class="reports-title" id="reports-title">Attendance reports</h2>
+        <p class="text-muted section-header__sub">
+          Monitor inactive trainees and trainees with no active subscription.
+        </p>
+      </div>
 
-      <article class="report-card">
-        <div class="report-title-row">
-          <h3>Inactive trainees</h3>
-          <label class="report-filter">
-            <span>Inactive for</span>
+      <section class="page-stack report" aria-labelledby="inactive-title">
+        <div class="section-header">
+          <h3 class="panel__title" id="inactive-title">Inactive trainees</h3>
+          <label class="form-field report__filter">
+            <span class="form-field__label">Inactive for</span>
             <select [(ngModel)]="selectedInactiveSkipDays" (ngModelChange)="onInactiveSkipDaysChange()">
               @for (option of inactiveSkipDaysOptions; track option.value) {
                 <option [ngValue]="option.value">{{ option.label }}</option>
@@ -41,72 +47,77 @@
           </label>
         </div>
         @if (loadingInactiveReport) {
-          <div class="state">Loading inactive trainees report...</div>
+          <app-skeleton-list label="Loading inactive trainees report" [rows]="3" />
         } @else if (inactiveReportErrorMessage) {
-          <div class="state error">{{ inactiveReportErrorMessage }}</div>
+          <p class="notice notice--danger" role="alert">{{ inactiveReportErrorMessage }}</p>
         } @else if (!inactiveTrainees.length) {
-          <div class="state">No inactive trainees found.</div>
+          <p class="notice" role="status">No inactive trainees found.</p>
         } @else {
-          <div class="table">
-            <div class="table-row table-header report-grid">
-              <span>Trainee</span>
-              <span>Last training date</span>
-              <span>Active subscription</span>
-            </div>
-
-            @for (item of inactiveTrainees; track $index) {
-              <div class="table-row report-grid">
-                <span>
-                  @if (item.traineeId) {
-                    <a class="link-inherit" [routerLink]="['/trainees', item.traineeId]">
-                      {{ traineeDisplayName(item) }}
-                    </a>
-                  } @else {
-                    {{ traineeDisplayName(item) }}
-                  }
-                </span>
-                <span>{{ formatDateOrFallback(item.lastTrainingDate) }}</span>
-                <span>{{ formatSubscriptionSummary(item.activeSubscription) }}</span>
-              </div>
-            }
-          </div>
+          <ng-container
+            *ngTemplateOutlet="report; context: { $implicit: inactiveTrainees, subscriptionLabel: 'Active subscription', key: 'activeSubscription' }"
+          />
         }
-      </article>
+      </section>
 
-      <article class="report-card">
-        <h3>Trainees without active subscription</h3>
+      <section class="page-stack report" aria-labelledby="without-subscription-title">
+        <h3 class="panel__title" id="without-subscription-title">Trainees without active subscription</h3>
         @if (loadingWithoutActiveSubscriptionReport) {
-          <div class="state">Loading trainees without active subscription report...</div>
+          <app-skeleton-list label="Loading trainees without active subscription report" [rows]="3" />
         } @else if (withoutActiveSubscriptionReportErrorMessage) {
-          <div class="state error">{{ withoutActiveSubscriptionReportErrorMessage }}</div>
+          <p class="notice notice--danger" role="alert">{{ withoutActiveSubscriptionReportErrorMessage }}</p>
         } @else if (!traineesWithoutActiveSubscription.length) {
-          <div class="state">No trainees without active subscription found.</div>
+          <p class="notice" role="status">No trainees without active subscription found.</p>
         } @else {
-          <div class="table">
-            <div class="table-row table-header report-grid">
-              <span>Trainee</span>
-              <span>Last training date</span>
-              <span>Last active subscription</span>
-            </div>
-
-            @for (item of traineesWithoutActiveSubscription; track $index) {
-              <div class="table-row report-grid">
-                <span>
-                  @if (item.traineeId) {
-                    <a class="link-inherit" [routerLink]="['/trainees', item.traineeId]">
-                      {{ traineeDisplayName(item) }}
-                    </a>
-                  } @else {
-                    {{ traineeDisplayName(item) }}
-                  }
-                </span>
-                <span>{{ formatDateOrFallback(item.lastTrainingDate) }}</span>
-                <span>{{ formatSubscriptionSummary(item.lastActiveSubscription) }}</span>
-              </div>
-            }
-          </div>
+          <ng-container
+            *ngTemplateOutlet="report; context: { $implicit: traineesWithoutActiveSubscription, subscriptionLabel: 'Last active subscription', key: 'lastActiveSubscription' }"
+          />
         }
-      </article>
+      </section>
     </section>
   }
 </section>
+
+<ng-template #report let-items let-subscriptionLabel="subscriptionLabel" let-key="key">
+  <div class="data-table-wrap responsive-table" tabindex="0" role="region" [attr.aria-label]="subscriptionLabel + ' report'">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Trainee</th>
+          <th scope="col">Last training</th>
+          <th scope="col">{{ subscriptionLabel }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items; track $index) {
+          <tr>
+            <td>
+              @if (item.traineeId) {
+                <a class="cell-link" [routerLink]="['/trainees', item.traineeId]">{{ traineeDisplayName(item) }}</a>
+              } @else {
+                <strong>{{ traineeDisplayName(item) }}</strong>
+              }
+            </td>
+            <td class="num">{{ formatDateOrFallback(item.lastTrainingDate) }}</td>
+            <td class="summary">{{ formatSubscriptionSummary(item[key]) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="list-card responsive-list" [attr.aria-label]="subscriptionLabel + ' report'">
+    @for (item of items; track $index) {
+      <li class="record">
+        <div class="record__main">
+          @if (item.traineeId) {
+            <a class="record__title" [routerLink]="['/trainees', item.traineeId]">{{ traineeDisplayName(item) }}</a>
+          } @else {
+            <span class="record__title">{{ traineeDisplayName(item) }}</span>
+          }
+          <span class="record__meta num">Last training: {{ formatDateOrFallback(item.lastTrainingDate) }}</span>
+          <span class="record__meta">{{ formatSubscriptionSummary(item[key]) }}</span>
+        </div>
+      </li>
+    }
+  </ul>
+</ng-template>

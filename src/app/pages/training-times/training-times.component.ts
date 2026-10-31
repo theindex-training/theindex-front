@@ -1,15 +1,25 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { ListRowComponent } from '../../components/list-row/list-row.component';
+import { IconComponent } from '../../components/icon/icon.component';
 import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
 import { formatTimeWithoutSeconds } from '../../utils/time-display';
 
 @Component({
   selector: 'app-training-times',
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './training-times.component.html',
-  styleUrl: './training-times.component.scss'
+  imports: [
+    RouterLink,
+    PageHeaderComponent,
+    SkeletonListComponent,
+    EmptyStateComponent,
+    ListRowComponent,
+    IconComponent
+  ],
+  templateUrl: './training-times.component.html'
 })
 export class TrainingTimesComponent implements OnInit {
   trainingTimes: TrainingTime[] = [];

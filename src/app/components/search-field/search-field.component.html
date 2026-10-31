@@ -1,0 +1,19 @@
+<div class="search">
+  <label class="visually-hidden" [attr.for]="id">{{ label }}</label>
+  <app-icon class="search__icon" name="search" />
+  <input
+    #input
+    class="search__input"
+    type="search"
+    autocomplete="off"
+    [id]="id"
+    [value]="value"
+    [placeholder]="placeholder"
+    (input)="handleInput($event)"
+  />
+  @if (value) {
+    <button class="search__clear" type="button" aria-label="Clear search" (click)="clear(input)">
+      <app-icon name="close" />
+    </button>
+  }
+</div>

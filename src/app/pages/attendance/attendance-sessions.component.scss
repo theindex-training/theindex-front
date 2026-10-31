@@ -1,208 +1,81 @@
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.page-header h1 {
-  margin: 0;
-}
-
-.page-header p {
-  margin: 0.35rem 0 0;
-  color: var(--color-muted);
-}
-
 .filters {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
   align-items: end;
 }
 
-.field {
+.filters__trainer,
+.filters__apply {
+  grid-column: 1 / -1;
+}
+
+.session-picker {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  font-weight: 600;
-  color: var(--color-muted);
+  gap: var(--space-3);
 }
 
-.field input,
-.field select {
-  padding: 0.55rem 0.7rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
-  font-size: 0.95rem;
-}
-
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tab {
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  background: #fff;
-  color: #344054;
-  padding: 0.45rem 0.85rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-}
-
-.tab.active {
-  background: #eff8ff;
-  border-color: #84caff;
-  color: #175cd3;
-}
-
-.selection-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: var(--color-surface);
-  color: var(--color-muted);
-}
-
-.selection-summary strong {
-  color: #101828;
-}
-
-.card {
-  background: var(--color-surface);
-  border-radius: 1rem;
-  border: 1px solid var(--color-border);
-  padding: 1rem;
-}
-
-.session-header h2 {
+.session-picker h2 {
   margin: 0;
-  font-size: 1.15rem;
 }
 
-.session-header p {
-  margin: 0.4rem 0 0;
-  color: var(--color-muted);
-}
-
-.attendees {
-  margin-top: 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
-  overflow: hidden;
-}
-
-.attendees-header,
-.attendee-row {
-  display: grid;
-  grid-template-columns: 1.2fr 0.9fr 0.7fr 0.8fr;
-  gap: 0.5rem;
-  padding: 0.6rem 0.75rem;
-}
-
-.attendees-header.with-actions,
-.attendee-row.with-actions {
-  grid-template-columns: 1.2fr 0.9fr 0.7fr 0.8fr auto;
-}
-
-.attendees-header {
-  background: #f8fafc;
-  font-weight: 700;
-  color: #475467;
-}
-
-.attendee-row {
-  border-top: 1px solid var(--color-border);
-}
-
-
-.attendee-row a {
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.attendee-row a:hover {
-  color: var(--color-primary);
-}
-.status {
-  display: inline-flex;
-  border: 1px solid #b7d7fe;
-  color: #1849a9;
-  border-radius: 999px;
-  padding: 0.1rem 0.5rem;
-  font-weight: 700;
-  font-size: 0.8rem;
-}
-
-.status.unpaid {
-  border-color: #fda29b;
-  color: #b42318;
-}
-
-.state {
-  border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
-  padding: 0.8rem 1rem;
-  background: var(--color-surface);
-}
-
-.state.error {
-  border-color: #fda29b;
-  background: #fef3f2;
-  color: #b42318;
-}
-
-.button {
-  border-radius: 999px;
-  padding: 0.5rem 1.1rem;
-  border: 1px solid transparent;
-  cursor: pointer;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.button-primary {
-  background: var(--color-primary);
-  color: #fff;
-}
-
-.button-secondary {
-  border-color: var(--color-border);
-  background: #fff;
-  color: #344054;
-}
-
-.action-cell {
+.session-picker__chips {
   display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
-.button-danger {
-  border-color: #fda29b;
-  color: #b42318;
-  background: #fff5f4;
+.stats {
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
 }
 
-.button-danger:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+.stats dd {
+  margin: 0;
 }
 
-.button-small {
-  padding: 0.35rem 0.7rem;
-  font-size: 0.8rem;
+.session__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.session__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  color: var(--muted);
+}
+
+.session__meta strong {
+  color: var(--text);
+}
+
+// The session card is already a card: the table sits flush inside it.
+.session__table {
+  overflow-x: auto;
+  position: relative;
+  margin: 0 calc(-1 * var(--space-6));
+  border-top: 1px solid var(--border);
+}
+
+.session .list-card {
+  margin: 0 calc(-1 * var(--space-5)) calc(-1 * var(--space-5));
+  border-width: 1px 0 0;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+@media (min-width: 1024px) {
+  .filters {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  }
+
+  .filters__trainer {
+    grid-column: 1 / 3;
+  }
+
+  .filters__apply {
+    grid-column: auto;
+  }
 }

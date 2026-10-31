@@ -1,11 +1,15 @@
 import { Component, Input, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   selector: 'app-ui-input',
   standalone: true,
+  imports: [IconComponent],
   templateUrl: './ui-input.component.html',
   styleUrl: './ui-input.component.scss',
+  // `id` belongs on the inner <input>; leaving it on the host would duplicate it and break <label for>.
+  host: { '[attr.id]': 'null' },
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -20,6 +24,8 @@ export class UiInputComponent implements ControlValueAccessor {
   @Input() type: 'text' | 'email' | 'password' = 'text';
   @Input() placeholder = '';
   @Input() autocomplete = '';
+  @Input() describedBy: string | null = null;
+  @Input() invalid = false;
 
   value = '';
   isDisabled = false;

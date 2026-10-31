@@ -1,34 +1,57 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Create gym</h1>
-      <p>Add a new gym location.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/gyms">Back to gyms</a>
-  </header>
+<section class="page-stack">
+  <app-page-header
+    title="Create gym"
+    subtitle="Add a new gym location."
+    [back]="{ label: 'Back to gyms', link: '/gyms' }"
+  />
 
-  <form class="card" [formGroup]="form" (ngSubmit)="handleSubmit()">
+  <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
     <div class="form-grid">
-      <label class="field">
-        <span>Name</span>
-        <input type="text" formControlName="name" placeholder="West Gym" />
-        @if (form.controls.name.touched && form.controls.name.invalid) {
-          <small class="error">Name is required and must be at least 2 characters.</small>
-        }
-      </label>
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-field__label" for="gym-name">Name</label>
+          <input
+            id="gym-name"
+            type="text"
+            formControlName="name"
+            placeholder="West Gym"
+            aria-describedby="gym-name-help"
+            [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+          />
+          @if (form.controls.name.touched && form.controls.name.invalid) {
+            <span class="form-field__error" id="gym-name-help">Enter a name of 2–120 characters.</span>
+          } @else {
+            <span class="form-field__hint" id="gym-name-help">2–120 characters.</span>
+          }
+        </div>
 
-      <label class="field">
-        <span>Address</span>
-        <input type="text" formControlName="address" placeholder="Plovdiv, Bulgaria" />
-      </label>
+        <div class="form-field">
+          <label class="form-field__label" for="gym-address">
+            Address <span class="form-field__optional">(optional)</span>
+          </label>
+          <input
+            id="gym-address"
+            type="text"
+            formControlName="address"
+            placeholder="Plovdiv, Bulgaria"
+            aria-describedby="gym-address-help"
+            [attr.aria-invalid]="form.controls.address.touched && form.controls.address.invalid"
+          />
+          @if (form.controls.address.touched && form.controls.address.invalid) {
+            <span class="form-field__error" id="gym-address-help">Address must be 2–250 characters.</span>
+          } @else {
+            <span class="form-field__hint" id="gym-address-help">2–250 characters.</span>
+          }
+        </div>
+      </div>
     </div>
 
     @if (errorMessage) {
-      <div class="state error">{{ errorMessage }}</div>
+      <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
     }
 
     <div class="form-actions">
-      <button class="button button-primary" type="submit" [disabled]="submitting">
+      <button class="btn btn--primary" type="submit" [disabled]="submitting">
         {{ submitting ? 'Saving...' : 'Create gym' }}
       </button>
     </div>

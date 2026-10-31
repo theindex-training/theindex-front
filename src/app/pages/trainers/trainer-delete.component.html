@@ -1,43 +1,41 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Deactivate trainer</h1>
-      <p>Disable access for a trainer while keeping their profile.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/trainers">Back to trainers</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Deactivate trainer"
+    subtitle="Disable access for a trainer while keeping their profile."
+    [back]="{ label: 'Back to trainers', link: '/trainers' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading trainer...</div>
+    <p class="notice" role="status">Loading trainer...</p>
   } @else if (errorMessage && !trainer) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (trainer) {
-    <div class="card">
-      <div class="details">
+    <div class="panel">
+      <dl class="detail-list">
         <div>
-          <span class="label">Name</span>
-          <strong>{{ trainer.name }}</strong>
+          <dt>Name</dt>
+          <dd>{{ trainer.name }}</dd>
         </div>
         <div>
-          <span class="label">Nickname</span>
-          <strong>{{ formatNickname() }}</strong>
+          <dt>Nickname</dt>
+          <dd>{{ formatNickname() }}</dd>
         </div>
         <div>
-          <span class="label">Account</span>
-          <strong>{{ formatAccount() }}</strong>
+          <dt>Account</dt>
+          <dd>{{ formatAccount() }}</dd>
         </div>
-      </div>
+      </dl>
 
-      <div class="warning">
+      <p class="notice notice--warning">
         This trainer will no longer be active, but their profile can be reactivated later.
-      </div>
+      </p>
 
       @if (errorMessage) {
-        <div class="state error">{{ errorMessage }}</div>
+        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
       }
 
       <div class="form-actions">
-        <button class="button button-danger" type="button" (click)="confirmDeactivate()" [disabled]="submitting">
+        <button class="btn btn--danger-solid" type="button" (click)="confirmDeactivate()" [disabled]="submitting">
           {{ submitting ? 'Deactivating...' : 'Deactivate trainer' }}
         </button>
       </div>

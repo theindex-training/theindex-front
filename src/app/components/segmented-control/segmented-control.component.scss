@@ -1,0 +1,54 @@
+:host {
+  display: inline-flex;
+}
+
+.segmented {
+  display: inline-grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  gap: var(--space-1);
+  width: 100%;
+  margin: 0;
+  padding: var(--space-1);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+}
+
+.segmented__option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-md);
+  color: var(--muted);
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.segmented__option:hover {
+  color: var(--text);
+}
+
+.segmented__option.is-selected {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow:
+    inset 0 0 0 1px var(--border),
+    var(--shadow-sm);
+}
+
+.segmented__option:has(:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

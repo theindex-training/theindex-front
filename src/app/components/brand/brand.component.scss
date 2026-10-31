@@ -1,0 +1,17 @@
+:host {
+  display: flex;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
+.brand__logo {
+  display: block;
+  width: auto;
+  height: 3rem;
+}

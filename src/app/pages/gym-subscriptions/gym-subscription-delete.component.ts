@@ -1,17 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   GymSubscription,
   GymSubscriptionsService
 } from '../../services/gym-subscriptions.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 
 @Component({
   selector: 'app-gym-subscription-delete',
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './gym-subscription-delete.component.html',
-  styleUrl: './gym-subscription-delete.component.scss'
+  imports: [CommonModule, PageHeaderComponent, StatusDotComponent],
+  templateUrl: './gym-subscription-delete.component.html'
 })
 export class GymSubscriptionDeleteComponent implements OnInit {
   gymSubscription: GymSubscription | null = null;

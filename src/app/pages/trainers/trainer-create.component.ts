@@ -1,34 +1,22 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import {
-  AbstractControl,
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn,
   Validators
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { CreateTrainerPayload, TrainersService } from '../../services/trainers.service';
-
-const optionalMinLength = (minLength: number): ValidatorFn => {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const value = control.value as string | null;
-    if (!value) {
-      return null;
-    }
-    return value.trim().length >= minLength ? null : { minlength: true };
-  };
-};
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { trimmedLength } from '../../utils/form-validators.util';
 
 @Component({
   selector: 'app-trainer-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './trainer-create.component.html',
-  styleUrl: './trainer-create.component.scss'
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  templateUrl: './trainer-create.component.html'
 })
 export class TrainerCreateComponent {
   readonly form: FormGroup<{
@@ -47,9 +35,9 @@ export class TrainerCreateComponent {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        Validators.minLength(2)
+        trimmedLength(2, 100)
       ]),
-      nickname: this.formBuilder.control<string | null>(null, [optionalMinLength(1)])
+      nickname: this.formBuilder.control<string | null>(null, [trimmedLength(1, 50)])
     });
   }
 

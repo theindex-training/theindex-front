@@ -1,38 +1,38 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Gym details</h1>
-      <p>Review gym location information and manage availability.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/gyms">Back to gyms</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Gym details"
+    subtitle="Review gym location information and manage availability."
+    [back]="{ label: 'Back to gyms', link: '/gyms' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading gym...</div>
+    <p class="notice" role="status">Loading gym...</p>
   } @else if (errorMessage && !gym) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (gym) {
-    <div class="card">
-      <div class="details">
+    <div class="panel">
+      <dl class="detail-list">
         <div>
-          <span class="label">Name</span>
-          <strong>{{ gym.name }}</strong>
+          <dt>Name</dt>
+          <dd>{{ gym.name }}</dd>
         </div>
         <div>
-          <span class="label">Address</span>
-          <strong>{{ formatAddress() }}</strong>
+          <dt>Address</dt>
+          <dd>{{ formatAddress() }}</dd>
         </div>
         <div>
-          <span class="label">Status</span>
-          <strong>{{ gym.isActive ? 'Active' : 'Inactive' }}</strong>
+          <dt>Status</dt>
+          <dd>
+            <app-status-dot [tone]="gym.isActive ? 'success' : 'neutral'">
+              {{ gym.isActive ? 'Active' : 'Inactive' }}
+            </app-status-dot>
+          </dd>
         </div>
-      </div>
+      </dl>
 
-      <div class="details-actions">
-        <a class="button button-secondary" [routerLink]="['/gyms', gym.id, 'edit']"> Edit gym </a>
-        <a class="button button-ghost" [routerLink]="['/gyms', gym.id, 'delete']">
-          Deactivate gym
-        </a>
+      <div class="form-actions">
+        <a class="btn btn--ghost" [routerLink]="['/gyms', gym.id, 'delete']">Deactivate gym</a>
+        <a class="btn btn--primary" [routerLink]="['/gyms', gym.id, 'edit']">Edit gym</a>
       </div>
     </div>
   }

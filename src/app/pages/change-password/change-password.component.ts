@@ -6,6 +6,7 @@ import { UiButtonComponent } from '../../components/ui-button/ui-button.componen
 import { UiInputComponent } from '../../components/ui-input/ui-input.component';
 import { AccountSecurityService } from '../../services/account-security.service';
 import { AuthService } from '../../services/auth.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 const passwordMatchValidator: ValidatorFn = control => {
   const newPassword = (control.get('newPassword')?.value as string | null) ?? '';
@@ -21,7 +22,7 @@ const passwordMatchValidator: ValidatorFn = control => {
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, UiInputComponent, UiButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, UiInputComponent, UiButtonComponent, PageHeaderComponent],
   templateUrl: './change-password.component.html',
   styleUrl: './change-password.component.scss'
 })
@@ -138,8 +139,37 @@ export class ChangePasswordComponent implements OnInit {
       });
   }
 
-  get passwordMismatchError(): boolean {
-    return Boolean(this.form.errors?.['passwordMismatch'] && this.form.controls.confirmPassword.touched);
+  get currentPasswordError(): string {
+    const control = this.form.controls.currentPassword;
+    if (!control.touched) {
+      return '';
+    }
+    if (control.hasError('required')) {
+      return 'Current password is required.';
+    }
+    return control.hasError('minlength') ? 'Current password must be at least 8 characters.' : '';
+  }
+
+  get newPasswordError(): string {
+    const control = this.form.controls.newPassword;
+    if (!control.touched) {
+      return '';
+    }
+    if (control.hasError('required')) {
+      return 'New password is required.';
+    }
+    return control.hasError('minlength') ? 'New password must be at least 8 characters.' : '';
+  }
+
+  get confirmPasswordError(): string {
+    const control = this.form.controls.confirmPassword;
+    if (!control.touched) {
+      return '';
+    }
+    if (control.hasError('required')) {
+      return 'Repeat the new password.';
+    }
+    return this.form.hasError('passwordMismatch') ? 'Passwords do not match.' : '';
   }
 
   private updatePhoneValidators(): void {

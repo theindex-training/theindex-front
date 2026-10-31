@@ -44,6 +44,14 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
 };
 
 import { displayValue } from '../../utils/display.util';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
+import { AvatarComponent } from '../../components/avatar/avatar.component';
+import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
+import {
+  SegmentedControlComponent,
+  SegmentedOption
+} from '../../components/segmented-control/segmented-control.component';
 
 @Component({
   selector: 'app-trainee-details',
@@ -54,12 +62,22 @@ import { displayValue } from '../../utils/display.util';
     RouterLink,
     TraineeSubscriptionsTableComponent,
     TraineeTrainingsTableComponent,
+    PageHeaderComponent,
+    SkeletonListComponent,
+    AvatarComponent,
+    StatusDotComponent,
+    SegmentedControlComponent,
   ],
   templateUrl: './trainee-details.component.html',
   styleUrl: './trainee-details.component.scss',
 })
 export class TraineeDetailsComponent implements OnInit {
   subscriptionFilter: SubscriptionFilter = 'ACTIVE';
+  readonly subscriptionFilterOptions: SegmentedOption<SubscriptionFilter>[] = [
+    { value: 'ACTIVE', label: 'Active' },
+    { value: 'EXHAUSTED', label: 'Exhausted' },
+    { value: 'ALL', label: 'All' },
+  ];
 
   trainee: TraineeProfile | null = null;
   account: ProvisionedAccount | null = null;

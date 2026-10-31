@@ -1,48 +1,46 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Plan details</h1>
-      <p>Review plan information and manage availability.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/plans">Back to plans</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Plan details"
+    subtitle="Review plan information and manage availability."
+    [back]="{ label: 'Back to plans', link: '/plans' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading plan...</div>
+    <p class="notice" role="status">Loading plan...</p>
   } @else if (errorMessage && !plan) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (plan) {
-    <div class="card">
-      <div class="details">
+    <div class="panel">
+      <dl class="detail-list">
         <div>
-          <span class="label">Title</span>
-          <strong>{{ plan.title }}</strong>
+          <dt>Title</dt>
+          <dd>{{ plan.title }}</dd>
         </div>
         <div>
-          <span class="label">Type</span>
-          <strong>{{ plan.type }}</strong>
+          <dt>Type</dt>
+          <dd>{{ plan.type }}</dd>
         </div>
         <div>
-          <span class="label">Price</span>
-          <strong>{{ formatPrice(plan.priceCents) }}</strong>
+          <dt>Price</dt>
+          <dd>{{ formatPrice(plan.priceCents) }}</dd>
         </div>
         <div>
-          <span class="label">Details</span>
-          <strong>{{ formatPlanDetails(plan) }}</strong>
+          <dt>Details</dt>
+          <dd>{{ formatPlanDetails(plan) }}</dd>
         </div>
         <div>
-          <span class="label">Status</span>
-          <strong>{{ plan.isActive ? 'Active' : 'Inactive' }}</strong>
+          <dt>Status</dt>
+          <dd>
+            <app-status-dot [tone]="plan.isActive ? 'success' : 'neutral'">
+              {{ plan.isActive ? 'Active' : 'Inactive' }}
+            </app-status-dot>
+          </dd>
         </div>
-      </div>
+      </dl>
 
-      <div class="details-actions">
-        <a class="button button-secondary" [routerLink]="['/plans', plan.id, 'edit']">
-          Edit plan
-        </a>
-        <a class="button button-ghost" [routerLink]="['/plans', plan.id, 'delete']">
-          Deactivate plan
-        </a>
+      <div class="form-actions">
+        <a class="btn btn--ghost" [routerLink]="['/plans', plan.id, 'delete']">Deactivate plan</a>
+        <a class="btn btn--primary" [routerLink]="['/plans', plan.id, 'edit']">Edit plan</a>
       </div>
     </div>
   }

@@ -1,0 +1,8 @@
+<div class="empty" [class.empty--danger]="tone === 'danger'" [attr.role]="tone === 'danger' ? 'alert' : null">
+  <span class="empty__icon"><app-icon [name]="tone === 'danger' ? 'alert' : icon" /></span>
+  <h2 class="empty__title">{{ title }}</h2>
+  @if (message) {
+    <p class="empty__message">{{ message }}</p>
+  }
+  <div class="empty__actions"><ng-content /></div>
+</div>

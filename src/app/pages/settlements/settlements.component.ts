@@ -1,15 +1,27 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { ChipComponent } from '../../components/chip/chip.component';
+import { ListRowComponent } from '../../components/list-row/list-row.component';
+import { IconComponent } from '../../components/icon/icon.component';
 import { AuthService } from '../../services/auth.service';
 import { Settlement, SettlementsService } from '../../services/settlements.service';
 
 @Component({
   selector: 'app-settlements',
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './settlements.component.html',
-  styleUrl: './settlements.component.scss'
+  imports: [
+    RouterLink,
+    PageHeaderComponent,
+    SkeletonListComponent,
+    EmptyStateComponent,
+    ChipComponent,
+    ListRowComponent,
+    IconComponent
+  ],
+  templateUrl: './settlements.component.html'
 })
 export class SettlementsComponent implements OnInit {
   settlements: Settlement[] = [];

@@ -1,111 +1,69 @@
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Component, DestroyRef, ElementRef, ViewChild, inject } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter, map } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { BrandComponent } from '../brand/brand.component';
+import { NavSheetComponent } from '../nav-sheet/nav-sheet.component';
+import { buildNavigation, isUrlInItems } from '../navigation/navigation';
+import { SidebarComponent } from '../sidebar/sidebar.component';
+import { TabBarComponent } from '../tab-bar/tab-bar.component';
 
-interface NavItem {
-  label: string;
-  route?: string;
-  children?: NavItem[];
-  roles?: string[];
-}
+/** Breakpoint where the sidebar replaces the top bar + tab bar. Keep in sync with main-layout.component.scss. */
+const DESKTOP_QUERY = '(min-width: 1024px)';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [RouterOutlet, BrandComponent, SidebarComponent, TabBarComponent, NavSheetComponent],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
 })
 export class MainLayoutComponent {
-  isMenuOpen = false;
-  openSubmenuLabel: string | null = null;
-  isUserMenuOpen = false;
-  readonly userEmail: string;
-  readonly isTrainee: boolean;
+  private readonly router = inject(Router);
 
-  readonly navItems: NavItem[] = [
-    { label: 'Dashboard', route: '/home' },
-    {
-      label: 'Manage',
-      children: [
-        { label: 'Plans', route: '/plans' },
-        { label: 'Gyms', route: '/gyms' },
-        { label: 'Gym subscriptions', route: '/gym-subscriptions' },
-        { label: 'Trainers', route: '/trainers', roles: ['ADMIN'] },
-        { label: 'Training times', route: '/training-times' }
-      ]
-    },
-    { label: 'Trainees', route: '/trainees' },
-    {
-      label: 'Attendance',
-      children: [
-        { label: 'Register', route: '/attendance/new' },
-        { label: 'List attendance', route: '/attendance' }
-      ]
-    },
-    { label: 'Settlements', route: '/settlements' },
-    { label: 'Cash register', route: '/cash-register', roles: ['ADMIN'] }
-  ];
+  readonly navigation = buildNavigation(inject(AuthService).getUserRole());
+  readonly sheetItems = [...this.navigation.moreMain, ...this.navigation.moreManage];
+  isSheetOpen = false;
 
-  readonly traineeNavItems: NavItem[] = [
-    { label: 'Profile', route: '/my-profile' },
-    { label: 'Stats', route: '/stats' },
-    { label: 'Records', route: '/records' }
-  ];
+  private readonly url = toSignal(
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      map(() => this.router.url)
+    ),
+    { initialValue: this.router.url }
+  );
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly router: Router
-  ) {
-    this.userEmail = this.authService.getUserEmail() ?? 'User';
-    this.isTrainee = this.authService.getUserRole() === 'TRAINEE';
+  @ViewChild(NavSheetComponent) private readonly sheet?: NavSheetComponent;
+  @ViewChild('main') private readonly main?: ElementRef<HTMLElement>;
+
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntilDestroyed(destroyRef)
+      )
+      .subscribe(() => this.sheet?.close());
+
+    // The sheet is mobile-only; close it if the window grows into the desktop layout.
+    const desktop = window.matchMedia?.(DESKTOP_QUERY);
+    const closeOnDesktop = (event: MediaQueryListEvent) => event.matches && this.sheet?.close();
+    desktop?.addEventListener('change', closeOnDesktop);
+    destroyRef.onDestroy(() => desktop?.removeEventListener('change', closeOnDesktop));
   }
 
-  toggleMenu(): void {
-    this.isMenuOpen = !this.isMenuOpen;
+  /** Highlights the More/Account tab when the current page is one of the sheet's items. */
+  isSheetPageActive(): boolean {
+    return isUrlInItems(this.url(), this.sheetItems);
   }
 
-  toggleSubmenu(item: NavItem): void {
-    this.openSubmenuLabel = this.openSubmenuLabel === item.label ? null : item.label;
+  openSheet(trigger: HTMLElement): void {
+    this.sheet?.open(trigger);
   }
 
-  isSubmenuOpen(item: NavItem): boolean {
-    return this.openSubmenuLabel === item.label;
-  }
-
-  closeMenu(): void {
-    this.isMenuOpen = false;
-    this.openSubmenuLabel = null;
-    this.isUserMenuOpen = false;
-  }
-
-  toggleUserMenu(): void {
-    this.isUserMenuOpen = !this.isUserMenuOpen;
-  }
-
-  isParentActive(item: NavItem): boolean {
-    return !!item.children?.some(
-      child => this.canViewNavItem(child) && child.route && this.router.url.startsWith(child.route)
-    );
-  }
-
-  get visibleNavItems(): NavItem[] {
-    return this.isTrainee ? this.traineeNavItems : this.navItems;
-  }
-
-  canViewNavItem(item: NavItem): boolean {
-    if (!item.roles?.length) {
-      return true;
-    }
-
-    const userRole = this.authService.getUserRole();
-    return !!userRole && item.roles.includes(userRole);
-  }
-
-  handleLogout(): void {
-    this.isUserMenuOpen = false;
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  skipToContent(): void {
+    this.main?.nativeElement.focus();
   }
 }

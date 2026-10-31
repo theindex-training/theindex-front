@@ -1,16 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import {
-  AbstractControl,
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn,
   Validators
 } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   GymSubscription,
   GymSubscriptionsService
@@ -20,23 +17,14 @@ import {
   TraineesService,
   UpdateTraineePayload
 } from '../../services/trainees.service';
-
-const optionalMinLength = (minLength: number): ValidatorFn => {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const value = control.value as string | null;
-    if (!value) {
-      return null;
-    }
-    return value.trim().length >= minLength ? null : { minlength: true };
-  };
-};
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { trimmedLength } from '../../utils/form-validators.util';
 
 @Component({
   selector: 'app-trainee-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './trainee-edit.component.html',
-  styleUrl: './trainee-edit.component.scss'
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  templateUrl: './trainee-edit.component.html'
 })
 export class TraineeEditComponent implements OnInit {
   readonly form: FormGroup<{
@@ -63,10 +51,10 @@ export class TraineeEditComponent implements OnInit {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        Validators.minLength(2)
+        trimmedLength(2, 100)
       ]),
-      nickname: this.formBuilder.control<string | null>(null, [optionalMinLength(1)]),
-      phone: this.formBuilder.control<string | null>(null, [optionalMinLength(1)]),
+      nickname: this.formBuilder.control<string | null>(null, [trimmedLength(1, 50)]),
+      phone: this.formBuilder.control<string | null>(null),
       gymSubscriptionId: this.formBuilder.control<string | null>(null)
     });
   }

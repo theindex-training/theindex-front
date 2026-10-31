@@ -9,13 +9,14 @@ import {
   ValidatorFn,
   Validators
 } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   Plan,
   PlanType,
   PlansService,
   UpdatePlanPayload
 } from '../../services/plans.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 const integerValidator: ValidatorFn = (control: AbstractControl) => {
   const value = control.value;
@@ -44,9 +45,8 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
 @Component({
   selector: 'app-plan-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './plan-edit.component.html',
-  styleUrl: './plan-edit.component.scss'
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  templateUrl: './plan-edit.component.html'
 })
 export class PlanEditComponent implements OnInit {
   readonly form: FormGroup<{

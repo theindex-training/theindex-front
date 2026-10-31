@@ -1,0 +1,15 @@
+<div role="status" aria-live="polite">
+  <span class="visually-hidden">{{ label }}</span>
+  <ul class="list-card" aria-hidden="true">
+    @for (index of rowIndexes; track index) {
+      <li class="skeleton-row">
+        <span class="skeleton skeleton-row__avatar"></span>
+        <span class="skeleton-row__lines">
+          <span class="skeleton" [style.width.%]="45 + ((index * 17) % 30)"></span>
+          <span class="skeleton skeleton-row__line-short"></span>
+        </span>
+        <span class="skeleton skeleton-row__chip"></span>
+      </li>
+    }
+  </ul>
+</div>

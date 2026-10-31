@@ -8,6 +8,8 @@
       [type]="inputType"
       [placeholder]="placeholder"
       [autocomplete]="autocomplete"
+      [attr.aria-describedby]="describedBy"
+      [attr.aria-invalid]="invalid"
       [value]="value"
       [disabled]="isDisabled"
       (input)="handleInput($event)"
@@ -18,12 +20,11 @@
       <button
         class="ui-input__toggle"
         type="button"
-        tabindex="-1"
         [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
         [title]="showPassword ? 'Hide password' : 'Show password'"
         (click)="togglePasswordVisibility()"
       >
-        {{ showPassword ? '🙈' : '👁️' }}
+        <app-icon [name]="showPassword ? 'eye-off' : 'eye'" />
       </button>
     }
   </div>

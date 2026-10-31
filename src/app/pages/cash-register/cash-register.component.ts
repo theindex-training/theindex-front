@@ -1,7 +1,17 @@
-import { CommonModule } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { ChipComponent } from '../../components/chip/chip.component';
 import {
   CashRegisterService,
   CashRegisterTransaction,
@@ -26,7 +36,15 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
 @Component({
   selector: 'app-cash-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [
+    NgTemplateOutlet,
+    ReactiveFormsModule,
+    RouterLink,
+    PageHeaderComponent,
+    SkeletonListComponent,
+    EmptyStateComponent,
+    ChipComponent
+  ],
   templateUrl: './cash-register.component.html',
   styleUrl: './cash-register.component.scss'
 })

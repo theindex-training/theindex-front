@@ -9,8 +9,9 @@ import {
   ValidatorFn,
   Validators
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { CreatePlanPayload, PlanType, PlansService } from '../../services/plans.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 const integerValidator: ValidatorFn = (control: AbstractControl) => {
   const value = control.value;
@@ -39,9 +40,8 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
 @Component({
   selector: 'app-plan-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './plan-create.component.html',
-  styleUrl: './plan-create.component.scss'
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  templateUrl: './plan-create.component.html'
 })
 export class PlanCreateComponent implements OnInit {
   readonly form: FormGroup<{

@@ -1,31 +1,21 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>My profile</h1>
-      <p>Review your subscriptions and training attendance.</p>
-    </div>
-  </header>
+<section class="page-stack">
+  <app-page-header title="My profile" subtitle="Your subscriptions and training attendance." />
 
   @if (errorMessage && loading) {
-    <div class="state error">{{ errorMessage }}</div>
+    <app-empty-state tone="danger" title="Couldn't load your profile" [message]="errorMessage" />
   } @else {
-    <div class="card">
-      <div class="card-header">
+    <section class="page-stack" aria-labelledby="my-subscriptions-title">
+      <div class="section-header">
         <div>
-          <h2>Subscriptions</h2>
-          <p>Track your current and past subscriptions.</p>
+          <h2 class="panel__title" id="my-subscriptions-title">Subscriptions</h2>
+          <p class="text-muted section-header__sub">Your current and past subscriptions.</p>
         </div>
-        <label class="filter">
-          <span>Filter</span>
-          <select
-            [value]="subscriptionFilter"
-            (change)="subscriptionFilter = $any($event.target).value"
-          >
-            <option value="ACTIVE">Active</option>
-            <option value="EXHAUSTED">Exhausted</option>
-            <option value="ALL">All</option>
-          </select>
-        </label>
+        <app-segmented-control
+          label="Subscription filter"
+          [options]="subscriptionFilterOptions"
+          [value]="subscriptionFilter"
+          (valueChange)="subscriptionFilter = $event"
+        />
       </div>
 
       <app-trainee-subscriptions-table
@@ -36,13 +26,13 @@
         [emptyMessage]="filteredSubscriptionsEmptyMessage"
         [showActionsColumn]="false"
       ></app-trainee-subscriptions-table>
-    </div>
+    </section>
 
-    <div class="card">
-      <div class="card-header">
+    <section class="page-stack" aria-labelledby="my-trainings-title">
+      <div class="section-header">
         <div>
-          <h2>Trainings</h2>
-          <p>Review your completed trainings.</p>
+          <h2 class="panel__title" id="my-trainings-title">Trainings</h2>
+          <p class="text-muted section-header__sub">Your completed trainings.</p>
         </div>
       </div>
 
@@ -52,7 +42,6 @@
         [errorMessage]="trainingErrorMessage"
         [emptyMessage]="'No trainings yet.'"
       ></app-trainee-trainings-table>
-    </div>
-
+    </section>
   }
 </section>

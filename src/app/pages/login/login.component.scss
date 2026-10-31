@@ -1,14 +1,15 @@
 :host {
   display: block;
   min-height: 100vh;
-  background: var(--color-background);
-  color: var(--color-text);
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
 }
 
 .login {
   display: grid;
   min-height: 100vh;
+  min-height: 100dvh;
   grid-template-columns: 1fr;
 }
 
@@ -16,155 +17,135 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem 1.5rem;
+  padding: var(--space-10) var(--space-6);
 }
 
 .login__panel--brand {
-  background: linear-gradient(135deg, var(--color-brand-start) 0%, var(--color-brand-end) 100%);
-  color: #f8fafc;
-}
-
-.login__panel--form {
-  background: var(--color-background);
+  background: var(--nav-bg);
+  color: var(--nav-text);
 }
 
 .login__brand {
-  max-width: 420px;
+  max-width: 26rem;
 }
 
-.login__eyebrow {
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-weight: 600;
-  color: rgba(248, 250, 252, 0.78);
-  margin-bottom: 1rem;
+.login__logo {
+  display: block;
+  width: auto;
+  height: 5.5rem;
+  margin-bottom: var(--space-6);
 }
 
 .login__brand h1 {
-  font-size: 2.4rem;
-  margin-bottom: 1rem;
+  margin: 0 0 var(--space-4);
+  color: var(--nav-text-strong);
 }
 
 .login__copy {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-  color: rgba(248, 250, 252, 0.9);
+  margin: 0 0 var(--space-6);
+  font-size: var(--text-lg);
 }
 
 .login__highlights {
-  list-style: none;
-  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .login__highlights li {
-  margin-bottom: 0.75rem;
-  padding-left: 1.5rem;
-  position: relative;
-  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
+// Small accent square as the bullet (decorative, so the --nav-accent contrast rule for marks applies).
 .login__highlights li::before {
-  content: '•';
-  position: absolute;
-  left: 0;
-  color: var(--color-accent);
-  font-size: 1.5rem;
-  line-height: 1;
+  content: '';
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 2px;
+  background: var(--nav-accent);
 }
 
 .login__card {
-  background: var(--color-surface);
-  border-radius: 1.25rem;
-  padding: 2.5rem;
-  width: min(420px, 100%);
-  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.12);
+  width: min(26rem, 100%);
+  padding: var(--space-10);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
 }
 
 .login__header h2 {
-  margin: 0 0 0.5rem;
-  font-size: 1.75rem;
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-2xl);
 }
 
 .login__header p {
-  margin: 0 0 2rem;
-  color: var(--color-muted);
+  margin: 0 0 var(--space-8);
+  color: var(--muted);
 }
 
 .login__form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--space-5);
 }
 
+// Errors sit right under their input.
 .login__error {
-  margin: -0.75rem 0 0;
-  color: #dc2626;
-  font-size: 0.85rem;
-}
-
-.login__error--auth {
-  margin: 0;
-}
-
-.login__options {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.9rem;
-  gap: 1rem;
-}
-
-.login__link {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.login__link:hover {
-  text-decoration: underline;
+  margin: calc(-1 * var(--space-3)) 0 0;
 }
 
 .login__footer {
-  margin-top: 2rem;
+  margin: var(--space-8) 0 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
   text-align: center;
-  font-size: 0.9rem;
-  color: var(--color-muted);
 }
 
-.login__footer a {
-  color: var(--color-primary);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.login__footer a:hover {
-  text-decoration: underline;
-}
-
-@media (min-width: 960px) {
+@media (min-width: 1024px) {
   .login {
     grid-template-columns: 1.1fr 1fr;
   }
 
   .login__panel {
-    padding: 3rem;
+    padding: var(--space-12);
   }
 }
 
-@media (max-width: 600px) {
+// Phones: a compact brand header so the form is visible without scrolling.
+@media (max-width: 767.98px) {
   .login__panel {
-    padding: 2rem 1.25rem;
+    padding: var(--space-8) var(--space-5);
+  }
+
+  .login__panel--brand {
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .login__logo {
+    height: 3.5rem;
+    margin-bottom: var(--space-4);
+  }
+
+  .login__brand h1 {
+    margin-bottom: var(--space-1);
+    font-size: var(--text-3xl);
+  }
+
+  .login__copy {
+    margin-bottom: 0;
+  }
+
+  .login__highlights {
+    display: none;
   }
 
   .login__card {
-    padding: 2rem 1.5rem;
-  }
-
-  .login__options {
-    flex-direction: column;
-    align-items: flex-start;
+    padding: var(--space-8) var(--space-6);
   }
 }

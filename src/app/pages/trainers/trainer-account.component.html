@@ -1,108 +1,143 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>{{ isEditMode ? 'Manage trainer account' : 'Create trainer account' }}</h1>
-      <p>
-        {{
-          isEditMode
-            ? 'Update login credentials for this trainer account.'
-            : 'Provision login credentials for the selected trainer.'
-        }}
-      </p>
-    </div>
-    <a class="button button-ghost" routerLink="/trainers">Back to trainers</a>
-  </header>
+<section class="page-stack">
+  <app-page-header
+    [title]="isEditMode ? 'Manage trainer account' : 'Create trainer account'"
+    [subtitle]="isEditMode ? 'Update login credentials for this trainer account.' : 'Provision login credentials for the selected trainer.'"
+    [back]="{ label: 'Back to trainers', link: '/trainers' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading trainer...</div>
+    <p class="notice" role="status">Loading trainer...</p>
   } @else if (errorMessage && !trainer) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (trainer) {
-    <div class="card">
-      <div class="details">
+    <div class="panel">
+      <dl class="detail-list">
         <div>
-          <span class="label">Trainer</span>
-          <strong>{{ trainer.name }}</strong>
+          <dt>Trainer</dt>
+          <dd>{{ trainer.name }}</dd>
         </div>
         <div>
-          <span class="label">Nickname</span>
-          <strong>{{ formatNickname() }}</strong>
+          <dt>Nickname</dt>
+          <dd>{{ formatNickname() }}</dd>
         </div>
         <div>
-          <span class="label">Profile status</span>
-          <strong>{{ trainer.isActive ? 'Active' : 'Inactive' }}</strong>
+          <dt>Profile status</dt>
+          <dd>
+            <app-status-dot [tone]="trainer.isActive ? 'success' : 'neutral'">
+              {{ trainer.isActive ? 'Active' : 'Inactive' }}
+            </app-status-dot>
+          </dd>
         </div>
-      </div>
+      </dl>
 
-      <form class="form" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <form class="form-stack panel-section" [formGroup]="form" (ngSubmit)="handleSubmit()">
         <div class="form-grid">
-          <label class="field">
-            <span>Email</span>
-            <input type="email" formControlName="email" placeholder="trainer@example.com" />
-            @if (form.controls.email.touched && form.controls.email.invalid) {
-              <small class="error">Enter a valid email address.</small>
-            }
-          </label>
-
-          <label class="field">
-            <span>{{ isEditMode ? 'New password (optional)' : 'Password' }}</span>
-            <div class="password-field">
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-field__label" for="trainer-account-email">Email</label>
               <input
-                [type]="showPassword ? 'text' : 'password'"
-                formControlName="password"
-                [placeholder]="
-                  isEditMode ? 'Leave blank to keep current password' : 'Minimum 8 characters'
-                "
+                id="trainer-account-email"
+                type="email"
+                autocomplete="off"
+                formControlName="email"
+                aria-describedby="trainer-account-email-help"
+                [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
               />
-              <button
-                type="button"
-                class="password-toggle"
-                tabindex="-1"
-                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-                [title]="showPassword ? 'Hide password' : 'Show password'"
-                (click)="togglePasswordVisibility()"
-              >
-                {{ showPassword ? '🙈' : '👁️' }}
-              </button>
+              @if (form.controls.email.touched && form.controls.email.invalid) {
+                <span class="form-field__error" id="trainer-account-email-help">
+                  @if (form.controls.email.hasError('required')) {
+                    Email is required.
+                  } @else {
+                    Enter a valid email address, e.g. trainer&#64;example.com.
+                  }
+                </span>
+              } @else {
+                <span class="form-field__hint" id="trainer-account-email-help">
+                  Used to log in, e.g. trainer&#64;example.com.
+                </span>
+              }
             </div>
-          </label>
+          </div>
 
-          <label class="field">
-            <span>{{ isEditMode ? 'Confirm new password' : 'Confirm password' }}</span>
-            <div class="password-field">
-              <input
-                [type]="showConfirmPassword ? 'text' : 'password'"
-                formControlName="confirmPassword"
-                [placeholder]="isEditMode ? 'Repeat new password if changed' : 'Repeat password'"
-              />
-              <button
-                type="button"
-                class="password-toggle"
-                tabindex="-1"
-                [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
-                [title]="showConfirmPassword ? 'Hide password' : 'Show password'"
-                (click)="toggleConfirmPasswordVisibility()"
-              >
-                {{ showConfirmPassword ? '🙈' : '👁️' }}
-              </button>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-field__label" for="trainer-account-password">
+                @if (isEditMode) {
+                  New password <span class="form-field__optional">(optional)</span>
+                } @else {
+                  Password
+                }
+              </label>
+              <div class="password-field">
+                <input
+                  id="trainer-account-password"
+                  [type]="showPassword ? 'text' : 'password'"
+                  autocomplete="new-password"
+                  formControlName="password"
+                  aria-describedby="trainer-account-password-help"
+                  [attr.aria-invalid]="!!passwordError"
+                />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                  [title]="showPassword ? 'Hide password' : 'Show password'"
+                  (click)="togglePasswordVisibility()"
+                >
+                  <app-icon [name]="showPassword ? 'eye-off' : 'eye'" />
+                </button>
+              </div>
+              @if (passwordError) {
+                <span class="form-field__error" id="trainer-account-password-help">{{ passwordError }}</span>
+              } @else {
+                <span class="form-field__hint" id="trainer-account-password-help">
+                  At least 8 characters.{{ isEditMode ? ' Leave blank to keep the current password.' : '' }}
+                </span>
+              }
             </div>
-            @if (showPasswordLengthError) {
-              <small class="error">Password fields must contain at least 8 characters.</small>
-            }
-            @if (showPasswordMismatch) {
-              <small class="error">Passwords do not match.</small>
-            }
-          </label>
+
+            <div class="form-field">
+              <label class="form-field__label" for="trainer-account-confirm-password">
+                {{ isEditMode ? 'Confirm new password' : 'Confirm password' }}
+              </label>
+              <div class="password-field">
+                <input
+                  id="trainer-account-confirm-password"
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  autocomplete="new-password"
+                  formControlName="confirmPassword"
+                  aria-describedby="trainer-account-confirm-password-help"
+                  [attr.aria-invalid]="!!confirmPasswordError"
+                />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                  [title]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                  (click)="toggleConfirmPasswordVisibility()"
+                >
+                  <app-icon [name]="showConfirmPassword ? 'eye-off' : 'eye'" />
+                </button>
+              </div>
+              @if (confirmPasswordError) {
+                <span class="form-field__error" id="trainer-account-confirm-password-help">{{ confirmPasswordError }}</span>
+              } @else {
+                <span class="form-field__hint" id="trainer-account-confirm-password-help">
+                  Must match the {{ isEditMode ? 'new password' : 'password' }}.
+                </span>
+              }
+            </div>
+          </div>
         </div>
 
         @if (errorMessage) {
-          <div class="state error">{{ errorMessage }}</div>
+          <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
         }
 
         <div class="form-actions">
           @if (isEditMode) {
             <button
-              class="button button-danger"
+              class="btn btn--danger"
               type="button"
               [disabled]="deactivating"
               (click)="deactivateAccount()"
@@ -110,7 +145,7 @@
               {{ deactivating ? 'Deactivating...' : 'Deactivate account' }}
             </button>
           }
-          <button class="button button-primary" type="submit" [disabled]="submitting">
+          <button class="btn btn--primary" type="submit" [disabled]="submitting">
             {{ submitting ? 'Saving...' : isEditMode ? 'Save account changes' : 'Create account' }}
           </button>
         </div>

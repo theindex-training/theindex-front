@@ -12,11 +12,15 @@ import {
 } from '../../services/settlements.service';
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
+import { ChipComponent } from '../../components/chip/chip.component';
+import { AvatarComponent } from '../../components/avatar/avatar.component';
 
 @Component({
   selector: 'app-settlement-details',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, PageHeaderComponent, SkeletonListComponent, ChipComponent, AvatarComponent],
   templateUrl: './settlement-details.component.html',
   styleUrl: './settlement-details.component.scss'
 })

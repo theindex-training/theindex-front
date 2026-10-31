@@ -1,72 +1,70 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Trainer details</h1>
-      <p>Review trainer information and account access.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/trainers">Back to trainers</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Trainer details"
+    subtitle="Review trainer information and account access."
+    [back]="{ label: 'Back to trainers', link: '/trainers' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading trainer...</div>
+    <p class="notice" role="status">Loading trainer...</p>
   } @else if (errorMessage && !trainer) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (trainer) {
-    <div class="card">
-      <div class="details">
+    <div class="panel">
+      <dl class="detail-list">
         <div>
-          <span class="label">Name</span>
-          <strong>{{ trainer.name }}</strong>
+          <dt>Name</dt>
+          <dd>{{ trainer.name }}</dd>
         </div>
         <div>
-          <span class="label">Nickname</span>
-          <strong>{{ formatNickname() }}</strong>
+          <dt>Nickname</dt>
+          <dd>{{ formatNickname() }}</dd>
         </div>
         <div>
-          <span class="label">Account</span>
-          <strong>
+          <dt>Account</dt>
+          <dd>
             @if (hasLinkedAccount()) {
-              <span class="account-linked" title="Linked account" aria-label="Linked account">✓</span>
+              <span class="linked-mark">Linked</span>
             } @else {
-              -
+              <span class="text-muted">Not linked</span>
             }
-          </strong>
+          </dd>
         </div>
         <div>
-          <span class="label">Status</span>
-          <strong>{{ trainer.isActive ? 'Active' : 'Inactive' }}</strong>
+          <dt>Status</dt>
+          <dd>
+            <app-status-dot [tone]="trainer.isActive ? 'success' : 'neutral'">
+              {{ trainer.isActive ? 'Active' : 'Inactive' }}
+            </app-status-dot>
+          </dd>
         </div>
-      </div>
+      </dl>
 
       @if (account) {
-        <div class="account-box">
-          <h2>Account information</h2>
-          <div class="details">
+        <section class="panel-section" aria-labelledby="trainer-account-title">
+          <h2 class="panel__title" id="trainer-account-title">Account information</h2>
+          <dl class="detail-list">
             <div>
-              <span class="label">Email</span>
-              <strong>{{ account.email }}</strong>
+              <dt>Email</dt>
+              <dd>{{ account.email }}</dd>
             </div>
             <div>
-              <span class="label">Role</span>
-              <strong>{{ account.role }}</strong>
+              <dt>Role</dt>
+              <dd>{{ account.role }}</dd>
             </div>
             <div>
-              <span class="label">Status</span>
-              <strong>{{ account.status }}</strong>
+              <dt>Status</dt>
+              <dd>{{ account.status }}</dd>
             </div>
-          </div>
-        </div>
+          </dl>
+        </section>
       }
 
-      <div class="details-actions">
-        <a class="button button-secondary" [routerLink]="['/trainers', trainer.id, 'edit']">
-          Edit trainer
-        </a>
-        <a class="button button-primary" [routerLink]="['/trainers', trainer.id, 'account']">
+      <div class="form-actions">
+        <a class="btn btn--ghost" [routerLink]="['/trainers', trainer.id, 'delete']">Deactivate trainer</a>
+        <a class="btn btn--secondary" [routerLink]="['/trainers', trainer.id, 'edit']">Edit trainer</a>
+        <a class="btn btn--primary" [routerLink]="['/trainers', trainer.id, 'account']">
           {{ trainer.accountId ? 'Manage account' : 'Create account' }}
-        </a>
-        <a class="button button-ghost" [routerLink]="['/trainers', trainer.id, 'delete']">
-          Deactivate trainer
         </a>
       </div>
     </div>

@@ -7,18 +7,19 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   CreateGymSubscriptionPayload,
   GymSubscriptionsService
 } from '../../services/gym-subscriptions.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { trimmedLength } from '../../utils/form-validators.util';
 
 @Component({
   selector: 'app-gym-subscription-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './gym-subscription-create.component.html',
-  styleUrl: './gym-subscription-create.component.scss'
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  templateUrl: './gym-subscription-create.component.html'
 })
 export class GymSubscriptionCreateComponent {
   readonly form: FormGroup<{
@@ -36,8 +37,7 @@ export class GymSubscriptionCreateComponent {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        Validators.minLength(2),
-        Validators.maxLength(120)
+        trimmedLength(2, 120)
       ])
     });
   }

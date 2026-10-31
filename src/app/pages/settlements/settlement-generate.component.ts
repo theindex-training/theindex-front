@@ -1,18 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   GenerateSettlementPayload,
   SettlementsService
 } from '../../services/settlements.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 @Component({
   selector: 'app-settlement-generate',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './settlement-generate.component.html',
-  styleUrl: './settlement-generate.component.scss'
+  imports: [CommonModule, FormsModule, PageHeaderComponent],
+  templateUrl: './settlement-generate.component.html'
 })
 export class SettlementGenerateComponent {
   periodStart = this.todayIsoDate();

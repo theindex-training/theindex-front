@@ -1,99 +1,89 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Trainee details</h1>
-      <p>Review trainee information, accounts, and subscriptions.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/trainees">Back to trainees</a>
-  </header>
+<section class="page-stack">
+  <app-page-header
+    [title]="trainee?.name ?? 'Trainee details'"
+    [subtitle]="trainee ? 'Profile, app account, subscriptions and trainings.' : ''"
+    [back]="{ label: 'Back to trainees', link: '/trainees' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading trainee...</div>
+    <app-skeleton-list label="Loading trainee" [rows]="3" />
   } @else if (errorMessage && !trainee) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (trainee) {
-    <div class="card">
-      <div class="details">
-        <div>
-          <span class="label">Name</span>
-          <strong>{{ trainee.name }}</strong>
-        </div>
-        <div>
-          <span class="label">Nickname</span>
-          <strong>{{ formatNickname() }}</strong>
-        </div>
-        <div>
-          <span class="label">Phone</span>
-          <strong>{{ formatPhone() }}</strong>
-        </div>
-        <div>
-          <span class="label">Account</span>
-          <strong>
-            @if (hasLinkedAccount()) {
-              <span class="account-linked" title="Linked account" aria-label="Linked account"
-                >✓</span
-              >
-            } @else {
-              -
-            }
-          </strong>
-        </div>
-        <div>
-          <span class="label">Status</span>
-          <strong>{{ trainee.isActive ? 'Active' : 'Inactive' }}</strong>
-        </div>
+    <div class="panel">
+      <div class="profile">
+        <app-avatar class="profile__avatar" [name]="trainee.name" [muted]="!trainee.isActive" />
+        <dl class="detail-list profile__details">
+          <div>
+            <dt>Nickname</dt>
+            <dd>{{ formatNickname() }}</dd>
+          </div>
+          <div>
+            <dt>Phone</dt>
+            <dd class="num">{{ formatPhone() }}</dd>
+          </div>
+          <div>
+            <dt>App account</dt>
+            <dd>
+              @if (hasLinkedAccount()) {
+                <span class="linked-mark">Linked</span>
+              } @else {
+                <span class="text-muted">Not linked</span>
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd>
+              <app-status-dot [tone]="trainee.isActive ? 'success' : 'neutral'">
+                {{ trainee.isActive ? 'Active' : 'Inactive' }}
+              </app-status-dot>
+            </dd>
+          </div>
+        </dl>
       </div>
 
       @if (account) {
-        <div class="account-box">
-          <h2>Account information</h2>
-          <div class="details">
+        <section class="panel-section" aria-labelledby="account-title">
+          <h2 class="panel__title" id="account-title">Account information</h2>
+          <dl class="detail-list">
             <div>
-              <span class="label">Email</span>
-              <strong>{{ account.email }}</strong>
+              <dt>Email</dt>
+              <dd>{{ account.email }}</dd>
             </div>
             <div>
-              <span class="label">Role</span>
-              <strong>{{ account.role }}</strong>
+              <dt>Role</dt>
+              <dd>{{ account.role }}</dd>
             </div>
             <div>
-              <span class="label">Status</span>
-              <strong>{{ account.status }}</strong>
+              <dt>Status</dt>
+              <dd>{{ account.status }}</dd>
             </div>
-          </div>
-        </div>
+          </dl>
+        </section>
       }
 
-      <div class="details-actions">
-        <a class="button button-secondary" [routerLink]="['/trainees', trainee.id, 'edit']">
-          Edit trainee
-        </a>
-        <a class="button button-primary" [routerLink]="['/trainees', trainee.id, 'account']">
+      <div class="form-actions">
+        <a class="btn btn--ghost" [routerLink]="['/trainees', trainee.id, 'delete']">Deactivate trainee</a>
+        <a class="btn btn--secondary" [routerLink]="['/trainees', trainee.id, 'edit']">Edit trainee</a>
+        <a class="btn btn--primary" [routerLink]="['/trainees', trainee.id, 'account']">
           {{ trainee.accountId ? 'Manage account' : 'Create account' }}
-        </a>
-        <a class="button button-ghost" [routerLink]="['/trainees', trainee.id, 'delete']">
-          Deactivate trainee
         </a>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-header">
+    <section class="page-stack" aria-labelledby="subscriptions-title">
+      <div class="section-header">
         <div>
-          <h2>Subscriptions</h2>
-          <p>Track current plans and purchase new subscriptions.</p>
+          <h2 class="panel__title" id="subscriptions-title">Subscriptions</h2>
+          <p class="text-muted section-header__sub">Current plans, and purchase of new ones.</p>
         </div>
-        <label class="filter">
-          <span>Filter</span>
-          <select
-            [value]="subscriptionFilter"
-            (change)="subscriptionFilter = $any($event.target).value"
-          >
-            <option value="ACTIVE">Active</option>
-            <option value="EXHAUSTED">Exhausted</option>
-            <option value="ALL">All</option>
-          </select>
-        </label>
+        <app-segmented-control
+          label="Subscription filter"
+          [options]="subscriptionFilterOptions"
+          [value]="subscriptionFilter"
+          (valueChange)="subscriptionFilter = $event"
+        />
       </div>
 
       <app-trainee-subscriptions-table
@@ -107,64 +97,82 @@
         (deleteSubscriptionRequested)="deleteSubscription($event)"
       ></app-trainee-subscriptions-table>
 
-      <form class="form" [formGroup]="form" (ngSubmit)="handleCreateSubscription()">
+      <form class="panel" [formGroup]="form" (ngSubmit)="handleCreateSubscription()" aria-labelledby="buy-title">
+        <h3 class="panel__title" id="buy-title">Buy subscription</h3>
         <div class="form-grid">
-          <label class="field">
-            <span>Plan</span>
-            <select formControlName="planId" [disabled]="plansLoading || submitting">
-              @for (plan of plans; track plan.id) {
-                <option [value]="plan.id">{{ formatPlanOption(plan) }}</option>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-field__label" for="buy-plan">Plan</label>
+              <select
+                id="buy-plan"
+                formControlName="planId"
+                [disabled]="plansLoading || submitting"
+                aria-describedby="buy-plan-help"
+                [attr.aria-invalid]="form.controls.planId.touched && form.controls.planId.invalid"
+              >
+                @for (plan of plans; track plan.id) {
+                  <option [value]="plan.id">{{ formatPlanOption(plan) }}</option>
+                }
+              </select>
+              @if (form.controls.planId.touched && form.controls.planId.invalid) {
+                <span class="form-field__error" id="buy-plan-help">Select a plan to purchase.</span>
               }
-            </select>
-            @if (form.controls.planId.touched && form.controls.planId.invalid) {
-              <small class="error">Select a plan to purchase.</small>
-            }
-          </label>
+            </div>
 
-          <label class="field">
-            <span>Starts at</span>
-            <input type="date" formControlName="startsAt" [disabled]="submitting" />
-            @if (form.controls.startsAt.touched && form.controls.startsAt.invalid) {
-              <small class="error">Choose a start date.</small>
-            }
-          </label>
+            <div class="form-field">
+              <label class="form-field__label" for="buy-starts-at">Starts at</label>
+              <input
+                id="buy-starts-at"
+                type="date"
+                formControlName="startsAt"
+                [disabled]="submitting"
+                aria-describedby="buy-starts-at-help"
+                [attr.aria-invalid]="form.controls.startsAt.touched && form.controls.startsAt.invalid"
+              />
+              @if (form.controls.startsAt.touched && form.controls.startsAt.invalid) {
+                <span class="form-field__error" id="buy-starts-at-help">Choose a start date.</span>
+              }
+            </div>
 
-          <label class="field">
-            <span>Paid amount (EUR)</span>
-            <input
-              type="number"
-              step="0.01"
-              formControlName="paid"
-              [disabled]="submitting"
-              placeholder="0.00"
-            />
-            @if (form.controls.paid.touched && form.controls.paid.invalid) {
-              <small class="error">Enter a valid amount.</small>
-            }
-          </label>
+            <div class="form-field">
+              <label class="form-field__label" for="buy-paid">Paid amount (EUR)</label>
+              <input
+                id="buy-paid"
+                type="number"
+                inputmode="decimal"
+                step="0.01"
+                formControlName="paid"
+                [disabled]="submitting"
+                placeholder="0.00"
+                aria-describedby="buy-paid-help"
+                [attr.aria-invalid]="form.controls.paid.touched && form.controls.paid.invalid"
+              />
+              @if (form.controls.paid.touched && form.controls.paid.invalid) {
+                <span class="form-field__error" id="buy-paid-help">Enter an amount of 0 or more, with up to two decimals.</span>
+              } @else {
+                <span class="form-field__hint" id="buy-paid-help">Defaults to the plan price. Up to two decimals.</span>
+              }
+            </div>
+          </div>
         </div>
 
         @if (subscriptionErrorMessage) {
-          <div class="state error">{{ subscriptionErrorMessage }}</div>
+          <p class="notice notice--danger" role="alert">{{ subscriptionErrorMessage }}</p>
         }
 
         <div class="form-actions">
-          <button
-            class="button button-primary"
-            type="submit"
-            [disabled]="submitting || plansLoading"
-          >
+          <button class="btn btn--primary" type="submit" [disabled]="submitting || plansLoading">
             {{ submitting ? 'Purchasing...' : 'Buy subscription' }}
           </button>
         </div>
       </form>
-    </div>
+    </section>
 
-    <div class="card">
-      <div class="card-header">
+    <section class="page-stack" aria-labelledby="trainings-title">
+      <div class="section-header">
         <div>
-          <h2>Trainings</h2>
-          <p>Review completed trainings for this trainee.</p>
+          <h2 class="panel__title" id="trainings-title">Trainings</h2>
+          <p class="text-muted section-header__sub">Completed trainings for this trainee.</p>
         </div>
       </div>
 
@@ -174,7 +182,6 @@
         [errorMessage]="trainingErrorMessage"
         [emptyMessage]="'No trainings yet.'"
       ></app-trainee-trainings-table>
-    </div>
-
+    </section>
   }
 </section>

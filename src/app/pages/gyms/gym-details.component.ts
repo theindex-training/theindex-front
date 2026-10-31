@@ -4,13 +4,14 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
 
 import { displayValue } from '../../utils/display.util';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 
 @Component({
   selector: 'app-gym-details',
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './gym-details.component.html',
-  styleUrl: './gym-details.component.scss'
+  imports: [CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  templateUrl: './gym-details.component.html'
 })
 export class GymDetailsComponent implements OnInit {
   gym: GymLocation | null = null;

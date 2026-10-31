@@ -1,7 +1,7 @@
-<section class="login">
+<main class="login">
   <div class="login__panel login__panel--brand">
     <div class="login__brand">
-      <p class="login__eyebrow">The Index</p>
+      <img class="login__logo" src="brand/the-index-logo-red.png" alt="The Index" width="640" height="270" />
       <h1>Welcome back</h1>
       <p class="login__copy">Sign in to access TheIndex.</p>
       <ul class="login__highlights">
@@ -11,7 +11,7 @@
     </div>
   </div>
 
-  <div class="login__panel login__panel--form">
+  <div class="login__panel">
     <div class="login__card">
       <div class="login__header">
         <h2>Sign in</h2>
@@ -27,12 +27,9 @@
           autocomplete="email"
           formControlName="email"
         />
-        <p
-          class="login__error"
-          *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')"
-        >
-          Email is required.
-        </p>
+        @if (loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')) {
+          <p class="form-field__error login__error">Email is required.</p>
+        }
 
         <app-ui-input
           id="password"
@@ -42,38 +39,21 @@
           autocomplete="current-password"
           formControlName="password"
         />
-        <p
-          class="login__error"
-          *ngIf="
-            loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')
-          "
-        >
-          Password is required.
-        </p>
-        <p
-          class="login__error"
-          *ngIf="
-            loginForm.get('password')?.touched && loginForm.get('password')?.hasError('minlength')
-          "
-        >
-          Password must be at least 3 characters.
-        </p>
+        @if (loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')) {
+          <p class="form-field__error login__error">Password is required.</p>
+        }
+        @if (loginForm.get('password')?.touched && loginForm.get('password')?.hasError('minlength')) {
+          <p class="form-field__error login__error">Password must be at least 3 characters.</p>
+        }
 
-        <p
-          class="login__error login__error--auth"
-          role="alert"
-          aria-live="polite"
-          *ngIf="authErrorMessage"
-        >
-          {{ authErrorMessage }}
-        </p>
+        @if (authErrorMessage) {
+          <p class="notice notice--danger" role="alert" aria-live="polite">{{ authErrorMessage }}</p>
+        }
 
         <app-ui-button type="submit">Sign in</app-ui-button>
       </form>
 
-      <div class="login__footer">
-        <p>Need access? Contact admin</p>
-      </div>
+      <p class="login__footer">Need access? Contact admin</p>
     </div>
   </div>
-</section>
+</main>

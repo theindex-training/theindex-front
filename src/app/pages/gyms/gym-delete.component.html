@@ -1,48 +1,50 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Deactivate gym</h1>
-      <p>Gyms are archived by marking them inactive.</p>
-    </div>
-    <a class="button button-ghost" routerLink="/gyms">Back to gyms</a>
-  </header>
+<section class="page-stack page-narrow">
+  <app-page-header
+    title="Deactivate gym"
+    subtitle="Gyms are archived by marking them inactive."
+    [back]="{ label: 'Back to gyms', link: '/gyms' }"
+  />
 
   @if (loading) {
-    <div class="state">Loading gym...</div>
+    <p class="notice" role="status">Loading gym...</p>
   } @else if (errorMessage && !gym) {
-    <div class="state error">{{ errorMessage }}</div>
+    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
   } @else if (gym) {
-    <div class="card">
-      <div class="details">
+    <div class="panel">
+      <dl class="detail-list">
         <div>
-          <span class="label">Name</span>
-          <strong>{{ gym.name }}</strong>
+          <dt>Name</dt>
+          <dd>{{ gym.name }}</dd>
         </div>
         <div>
-          <span class="label">Address</span>
-          <strong>{{ gym.address || '—' }}</strong>
+          <dt>Address</dt>
+          <dd>{{ gym.address || '—' }}</dd>
         </div>
         <div>
-          <span class="label">Notes</span>
-          <strong>{{ gym.notes || '—' }}</strong>
+          <dt>Notes</dt>
+          <dd>{{ gym.notes || '—' }}</dd>
         </div>
         <div>
-          <span class="label">Status</span>
-          <strong>{{ gym.isActive ? 'Active' : 'Inactive' }}</strong>
+          <dt>Status</dt>
+          <dd>
+            <app-status-dot [tone]="gym.isActive ? 'success' : 'neutral'">
+              {{ gym.isActive ? 'Active' : 'Inactive' }}
+            </app-status-dot>
+          </dd>
         </div>
-      </div>
+      </dl>
 
-      <p class="warning">
+      <p class="notice notice--warning">
         Deactivating a gym hides it from new schedules, but existing references remain unchanged.
       </p>
 
       @if (errorMessage) {
-        <div class="state error">{{ errorMessage }}</div>
+        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
       }
 
       <div class="form-actions">
         <button
-          class="button button-danger"
+          class="btn btn--danger-solid"
           type="button"
           (click)="confirmDeactivate()"
           [disabled]="submitting || !gym.isActive"

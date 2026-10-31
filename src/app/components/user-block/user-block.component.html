@@ -1,0 +1,27 @@
+<div class="user" [class.user--list]="layout === 'list'">
+  <div class="user__identity">
+    <span class="user__avatar" aria-hidden="true">{{ initials }}</span>
+    <span class="user__text">
+      <span class="user__email" [title]="email">{{ email }}</span>
+      <span class="user__role">{{ roleLabel }}</span>
+    </span>
+  </div>
+
+  <div class="user__actions">
+    <a class="user__action" routerLink="/change-password">
+      @if (layout === 'list') {
+        <app-icon name="key" />
+      }
+      Change password
+    </a>
+    @if (layout === 'inline') {
+      <span class="user__separator" aria-hidden="true">·</span>
+    }
+    <button class="user__action" type="button" (click)="logout()">
+      @if (layout === 'list') {
+        <app-icon name="log-out" />
+      }
+      Log out
+    </button>
+  </div>
+</div>

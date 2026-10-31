@@ -7,19 +7,20 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   GymLocation,
   GymLocationsService,
   UpdateGymLocationPayload,
 } from '../../services/gym-locations.service';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { trimmedLength } from '../../utils/form-validators.util';
 
 @Component({
   selector: 'app-gym-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './gym-edit.component.html',
-  styleUrl: './gym-edit.component.scss',
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  templateUrl: './gym-edit.component.html'
 })
 export class GymEditComponent implements OnInit {
   readonly form: FormGroup<{
@@ -42,9 +43,9 @@ export class GymEditComponent implements OnInit {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        Validators.minLength(2),
+        trimmedLength(2, 120),
       ]),
-      address: this.formBuilder.control<string | null>(null),
+      address: this.formBuilder.control<string | null>(null, [trimmedLength(2, 250)]),
     });
   }
 

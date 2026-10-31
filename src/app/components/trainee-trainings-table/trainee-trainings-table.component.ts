@@ -1,14 +1,14 @@
-import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { ChipComponent } from '../chip/chip.component';
+import { SkeletonListComponent } from '../skeleton-list/skeleton-list.component';
 import { AttendanceTraineeTrainingItem } from '../../services/attendance.service';
 import { displayValue } from '../../utils/display.util';
 
 @Component({
   selector: 'app-trainee-trainings-table',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './trainee-trainings-table.component.html',
-  styleUrl: './trainee-trainings-table.component.scss',
+  imports: [ChipComponent, SkeletonListComponent],
+  templateUrl: './trainee-trainings-table.component.html'
 })
 export class TraineeTrainingsTableComponent {
   @Input() trainings: AttendanceTraineeTrainingItem[] = [];
@@ -32,9 +32,5 @@ export class TraineeTrainingsTableComponent {
 
   formatTrainingLocation(training: AttendanceTraineeTrainingItem): string {
     return displayValue(training.location.name);
-  }
-
-  statusClass(training: AttendanceTraineeTrainingItem): string {
-    return training.paymentStatus === 'PAID' ? 'status-paid' : 'status-unpaid';
   }
 }

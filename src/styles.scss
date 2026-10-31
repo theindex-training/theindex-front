@@ -1,21 +1,1058 @@
-:root {
-  --color-primary: #2563eb;
-  --color-accent: #38bdf8;
-  --color-background: #f4f6f8;
-  --color-surface: #ffffff;
-  --color-text: #101828;
-  --color-muted: #475467;
-  --color-border: #d0d5dd;
-  --color-brand-start: #0f172a;
-  --color-brand-end: #1d4ed8;
+// Chalk & Iron design system: tokens, themes and base element styles.
+// Every color in the app comes from the tokens below; see "Design system" in CLAUDE.md.
+
+@mixin light-theme {
+  color-scheme: light;
+
+  --bg: #f2f1ee;
+  --surface: #ffffff;
+  --surface-2: #e9e7e1;
+  --text: #121211;
+  --muted: #5a5954;
+  --border: #dcd9d2;
+  --border-strong: #8a8880;
+  --accent: #800000;
+  --on-accent: #ffffff;
+  --accent-soft: #f3e3e1;
+  --accent-text: #800000;
+  --accent-border: #dcaaa6;
+  --success: #256b3a;
+  --success-soft: #e2f0e5;
+  --success-border: #a9d3b3;
+  --warning: #8a4a00;
+  --warning-soft: #fbefd5;
+  --warning-border: #edcb8a;
+  --danger: #b42318;
+  --on-danger: #ffffff;
+  --danger-soft: #fce8e6;
+  --danger-border: #f1b4ac;
+  --nav-bg: #121211;
+  --nav-text: #b5b3ac;
+  --nav-text-strong: #f2f1ee;
+  --nav-surface: #262622;
+  --nav-border: #3a3934;
+  --nav-accent: #ff4a3d;
+  --scrim: rgba(18, 18, 17, 0.55);
+  --shadow-sm: 0 1px 2px rgba(18, 18, 17, 0.06);
+  --shadow-md: 0 10px 24px rgba(18, 18, 17, 0.12);
 }
 
-* {
+@mixin dark-theme {
+  color-scheme: dark;
+
+  --bg: #0e0e0d;
+  --surface: #191917;
+  --surface-2: #26261f;
+  --text: #f2f1ee;
+  --muted: #a3a19a;
+  --border: #2d2c29;
+  --border-strong: #6e6c66;
+  --accent: #ee4238;
+  --on-accent: #0e0e0d;
+  --accent-soft: #331412;
+  --accent-text: #ff7a70;
+  --accent-border: #6b2420;
+  --success: #7bd69a;
+  --success-soft: #16301f;
+  --success-border: #2c5a3a;
+  --warning: #f2be5c;
+  --warning-soft: #33270f;
+  --warning-border: #5e4718;
+  --danger: #ff8f84;
+  --on-danger: #1a0d0b;
+  --danger-soft: #3a1714;
+  --danger-border: #6b2a24;
+  --nav-bg: #070707;
+  --nav-text: #a3a19a;
+  --nav-text-strong: #f2f1ee;
+  --nav-surface: #1c1c1a;
+  --nav-border: #2d2c29;
+  --nav-accent: #ff4a3d;
+  --scrim: rgba(0, 0, 0, 0.65);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.5);
+}
+
+:root {
+  // Typography
+  --font-heading: 'Barlow Condensed', 'Arial Narrow', sans-serif-condensed, sans-serif;
+  --font-body: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --heading-tracking: 0.02em;
+  --label-tracking: 0.08em;
+
+  --text-xs: 0.75rem; // 12px
+  --text-sm: 0.875rem; // 14px
+  --text-base: 1rem; // 16px
+  --text-lg: 1.125rem; // 18px
+  --text-xl: 1.375rem; // 22px
+  --text-2xl: 1.75rem; // 28px
+  --text-3xl: 2.25rem; // 36px
+  --text-4xl: clamp(2.5rem, 1.9rem + 2.5vw, 3.5rem); // 40-56px, page titles
+
+  // Spacing (4px base)
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  // Radii
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  // Interaction
+  --touch-target: 44px;
+  --control-height: 3rem; // text inputs, selects, form buttons
+  --control-height-lg: 3.25rem; // search fields, page header action
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+  --transition-fast: 0.15s ease;
+
+  @include light-theme;
+}
+
+// The inline script in index.html and ThemeService set data-theme on <html>.
+:root[data-theme='dark'] {
+  @include dark-theme;
+}
+
+// Fallback when the script hasn't run (e.g. JS disabled): follow the OS.
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    @include dark-theme;
+  }
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  background: var(--color-background);
-  color: var(--color-text);
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--heading-tracking);
+  line-height: 1.05;
+  color: var(--text);
+}
+
+h1 {
+  font-size: var(--text-4xl);
+}
+
+h2 {
+  font-size: var(--text-2xl);
+}
+
+h3 {
+  font-size: var(--text-xl);
+  font-weight: 600;
+}
+
+h4,
+h5,
+h6 {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+a {
+  color: var(--accent-text);
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+strong,
+b {
+  font-weight: 600;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+// Touch-target floor for every button.
+button {
+  min-height: var(--touch-target);
+}
+
+// Base form fields. Component styles can refine these; checkboxes and radios keep native rendering.
+input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color']),
+select,
+textarea {
+  min-height: var(--touch-target);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  color: var(--text);
+  padding: var(--space-2) var(--space-3);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+textarea {
+  min-height: calc(var(--touch-target) * 2);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled,
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--accent);
+}
+
+// One focus treatment everywhere: a 2px accent ring offset from the element.
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+// Hides content visually but keeps it for screen readers (and focusable, for inputs).
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Modal dialogs (e.g. the mobile nav sheet) lock page scrolling while open.
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+// ---------------------------------------------------------------------------
+// List pages (see "List page pattern" in CLAUDE.md). Global so every list page
+// shares them without paying for them in its own component style budget.
+// ---------------------------------------------------------------------------
+
+// Buttons for page content (links or <button>). `ui-button` is the full-width form variant.
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  padding: 0 var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: var(--label-tracking);
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.btn--primary:hover {
+  background: color-mix(in srgb, var(--accent) 88%, var(--text));
+}
+
+.btn--secondary {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.btn--secondary:hover {
+  background: var(--surface-2);
+}
+
+.btn--danger {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.btn--danger:hover {
+  border-color: var(--danger);
+}
+
+// Solid fill for the confirm button of a destructive action (e.g. "Deactivate").
+.btn--danger-solid {
+  background: var(--danger);
+  color: var(--on-danger);
+}
+
+.btn--danger-solid:hover {
+  background: color-mix(in srgb, var(--danger) 88%, var(--text));
+}
+
+.btn--ghost {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+.btn--ghost:hover {
+  border-color: var(--border-strong);
+  background: var(--surface);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+// Square icon-only button; give it an aria-label.
+.icon-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--muted);
+  --icon-size: 1.25rem;
+}
+
+.icon-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.icon-btn--danger {
+  color: var(--danger);
+}
+
+.icon-btn--danger:hover {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+// Vertical rhythm for a page: header, toolbar, content.
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+// Toolbar row above a list: search, filters, count. Wraps on narrow screens.
+.list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+}
+
+.list-toolbar__search {
+  flex: 1 1 18rem;
+  max-width: 40rem;
+}
+
+.list-toolbar__count {
+  margin: 0 0 0 auto;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.list-toolbar > app-segmented-control {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 767.98px) {
+  .list-toolbar > app-segmented-control {
+    flex-basis: 100%;
+  }
+
+  .list-toolbar__count {
+    margin-left: 0;
+  }
+}
+
+// Card that holds a .data-table. Scrolls horizontally inside itself when narrow.
+// Give it tabindex="0", role="region" and an aria-label so keyboard users can scroll it.
+.data-table-wrap {
+  // Containing block for absolutely positioned children (e.g. .visually-hidden header
+  // labels), so they are clipped by the scroll container instead of widening the page.
+  position: relative;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.data-table {
+  width: 100%;
+  min-width: 48rem;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--label-tracking);
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.data-table :is(th, td):first-child {
+  padding-left: var(--space-6);
+}
+
+.data-table :is(th, td):last-child {
+  padding-right: var(--space-6);
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.data-table tbody tr:hover {
+  background: var(--bg);
+}
+
+// Shrink-to-fit column, e.g. the trailing chevron.
+.data-table .cell-fit {
+  width: 1%;
+  white-space: nowrap;
+}
+
+// The row's primary link (usually the first cell). Other cells stay plain text.
+.data-table .cell-link {
+  color: var(--text);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.data-table .cell-link:hover {
+  text-decoration: underline;
+}
+
+// Right-aligned numeric column (money, counts). Use on both <th> and <td>; the second
+// selector out-ranks `.data-table th { text-align: left }`.
+.cell-right,
+.data-table .cell-right {
+  text-align: right;
+}
+
+// Trailing chevron that repeats the row link for the mouse (tabindex="-1", aria-hidden="true").
+.row-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--muted);
+  --icon-size: 1.25rem;
+}
+
+.row-chevron:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+// Person cell: <div class="person-cell"><app-avatar/><div class="person-cell__text"><a class="cell-link">Name</a><span class="person-cell__sub">“Nick”</span></div></div>
+.person-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 14rem;
+}
+
+.person-cell__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.person-cell__sub {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+// "✓ App": a linked app account, in tables and list-row meta lines.
+.linked-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--success);
+  font-weight: 600;
+  --icon-size: 1rem;
+}
+
+// Buttons at the end of a table row (e.g. delete + chevron).
+.row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+// Table at >= 768px, list below. Put both in the page; one is display: none.
+.responsive-list {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .responsive-table {
+    display: none;
+  }
+
+  .responsive-list {
+    display: block;
+  }
+}
+
+// Card that holds a <ul> of app-list-row items on mobile.
+.list-card {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  list-style: none;
+}
+
+.list-card > li + li {
+  border-top: 1px solid var(--border);
+}
+
+// A page header with an action shows a floating "+" button below 1024px. Give <main> extra
+// bottom room then, so the button never covers the page's last row (used by main-layout).
+@media (max-width: 1023.98px) {
+  main:has(.fab) {
+    --fab-clearance: 4.5rem;
+  }
+}
+
+// Card section inside a page (forms, summaries, grouped content).
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.panel__title {
+  margin: 0;
+  font-size: var(--text-xl);
+}
+
+@media (min-width: 768px) {
+  .panel {
+    padding: var(--space-6);
+  }
+}
+
+// Key figures: <div class="stats"><div class="stat"><span class="stat__label">…</span><span class="stat__value">…</span></div></div>
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.stat__label {
+  color: var(--muted);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+}
+
+.stat__value {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+// Form and detail pages read better at a limited width.
+.page-narrow {
+  max-width: 60rem;
+}
+
+// Label/value pairs: <dl class="detail-list"><div><dt>Label</dt><dd>Value</dd></div>…</dl>
+.detail-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-5) var(--space-4);
+  margin: 0;
+}
+
+.detail-list dt {
+  margin-bottom: var(--space-1);
+  color: var(--muted);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+}
+
+.detail-list dd {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+// Forms: .form-grid stacks rows. Each .form-row holds the fields that belong together and splits
+// the width evenly between them from 768px up; on phones every field gets its own line.
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.form-row {
+  display: grid;
+  gap: var(--space-5) var(--space-4);
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .form-row {
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+  }
+}
+
+// One field: <div class="form-field"><label class="form-field__label" for="…">…</label>, the control,
+// then either .form-field__hint or .form-field__error (same id, referenced by aria-describedby).
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.form-field__label {
+  color: var(--muted);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+}
+
+// "(optional)" suffix inside a label; required is the default, so only optional fields are marked.
+.form-field__optional {
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.form-field :is(input, select, textarea) {
+  width: 100%;
+  min-height: var(--control-height);
+}
+
+.form-field [aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+// Checkbox row: <label class="form-field form-field--check"><input type="checkbox" /><span>Label</span></label>
+.form-field--check {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--touch-target);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.form-field--check input {
+  width: 1.25rem;
+  min-height: 0;
+  height: 1.25rem;
+  margin: 0;
+}
+
+// Password input with a show/hide button: <div class="password-field"><input …/><button class="password-toggle" aria-label="Show password"><app-icon name="eye"/></button></div>
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  padding-right: calc(var(--touch-target) + var(--space-2));
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--muted);
+  transform: translateY(-50%);
+  --icon-size: 1.25rem;
+}
+
+.password-toggle:hover {
+  color: var(--text);
+}
+
+// Vertical stack inside a panel or form (fields, notices, actions).
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+// Heading row for a page section: title (+ muted line) on the left, a control on the right.
+.section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+}
+
+.section-header__sub {
+  margin: var(--space-1) 0 0;
+}
+
+// A titled section inside a .panel, separated from what's above it.
+.panel-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.form-field__hint {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.form-field__error {
+  color: var(--danger);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+// Row of form buttons; the primary action goes last (rightmost on desktop).
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+// Phones: full-width buttons, primary (last in the DOM) on top, in thumb reach.
+@media (max-width: 767.98px) {
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}
+
+// Inline feedback banners. Use role="alert" for errors, role="status" for success.
+.notice {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  font-weight: 600;
+}
+
+.notice--success {
+  border-color: var(--success-border);
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.notice--warning {
+  border-color: var(--warning-border);
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.notice--danger {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+// Mobile row for records that are not a single link (they hold their own links/buttons).
+// Use inside ul.list-card: <li class="record"><div class="record__main">…</div><div class="record__aside">…</div></li>
+.record {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 4.5rem;
+  padding: var(--space-3) var(--space-4);
+}
+
+.record__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.record__title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+// A record title that links somewhere reads as a title, underlined on hover.
+a.record__title {
+  color: var(--text);
+  text-decoration: none;
+}
+
+a.record__title:hover {
+  text-decoration: underline;
+}
+
+.record__meta {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.record__aside {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  text-align: right;
+}
+
+// An app-list-row with an extra button next to it (e.g. delete).
+.list-card > li.row-with-action {
+  display: flex;
+  align-items: center;
+  padding-right: var(--space-3);
+}
+
+.row-with-action > app-list-row {
+  flex: 1;
+  min-width: 0;
+}
+
+// Multi-select toggle chip (aria-pressed button).
+.toggle-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  text-align: left;
+  --icon-size: 1rem;
+}
+
+.toggle-chip[aria-pressed='true'] {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+// Money and other figures that should line up in columns.
+.num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.text-muted {
+  color: var(--muted);
+}
+
+.text-success {
+  color: var(--success);
+}
+
+.text-danger {
+  color: var(--danger);
+}
+
+// Full-page centered card for pages outside the app shell (not found, unauthorized).
+.solo-page {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100dvh;
+  place-items: center;
+  padding: var(--space-6) var(--space-4);
+}
+
+.solo-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: min(30rem, 100%);
+  padding: var(--space-8);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.solo-card__code {
+  margin: var(--space-4) 0 0;
+  color: var(--accent-text);
+  font-family: var(--font-heading);
+  font-size: 5rem;
+  font-weight: 700;
+  line-height: 0.9;
+}
+
+.solo-card__title {
+  margin: 0;
+  font-size: var(--text-3xl);
+}
+
+.solo-card__text {
+  margin: 0 0 var(--space-3);
+  color: var(--muted);
+}
+
+// Placeholder block for loading states. Size it with width/height.
+.skeleton {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

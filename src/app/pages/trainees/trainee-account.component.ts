@@ -10,7 +10,7 @@ import {
   ValidatorFn,
   Validators
 } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   AccountProvisioningService,
   ProvisionAccountPayload,
@@ -19,6 +19,9 @@ import {
 } from '../../services/account-provisioning.service';
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
 import { displayValue } from '../../utils/display.util';
+import { IconComponent } from '../../components/icon/icon.component';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 
 const accountPasswordValidator: ValidatorFn = (
   control: AbstractControl
@@ -30,7 +33,7 @@ const accountPasswordValidator: ValidatorFn = (
     return null;
   }
 
-  if (password.length < 8 || confirmPassword.length < 8) {
+  if (password.length < 8) {
     return { passwordLength: true };
   }
 
@@ -40,9 +43,8 @@ const accountPasswordValidator: ValidatorFn = (
 @Component({
   selector: 'app-trainee-account',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './trainee-account.component.html',
-  styleUrl: './trainee-account.component.scss'
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent, IconComponent, StatusDotComponent],
+  templateUrl: './trainee-account.component.html'
 })
 export class TraineeAccountComponent implements OnInit {
   readonly form: FormGroup<{
@@ -74,8 +76,9 @@ export class TraineeAccountComponent implements OnInit {
           Validators.required,
           Validators.email
         ]),
-        password: this.formBuilder.nonNullable.control(''),
-        confirmPassword: this.formBuilder.nonNullable.control('')
+        // Required until an existing account loads; then a blank password keeps the current one.
+        password: this.formBuilder.nonNullable.control('', [Validators.required]),
+        confirmPassword: this.formBuilder.nonNullable.control('', [Validators.required])
       },
       { validators: accountPasswordValidator }
     );
@@ -195,21 +198,26 @@ export class TraineeAccountComponent implements OnInit {
     });
   }
 
-  get showPasswordMismatch(): boolean {
-    return Boolean(
-      this.form.touched &&
-        this.form.errors?.['passwordsMismatch'] &&
-        this.form.controls.confirmPassword.touched
-    );
+  get passwordError(): string {
+    const control = this.form.controls.password;
+    if (!control.touched) {
+      return '';
+    }
+    if (control.hasError('required')) {
+      return 'Password is required.';
+    }
+    return this.form.hasError('passwordLength') ? 'Password must be at least 8 characters.' : '';
   }
 
-  get showPasswordLengthError(): boolean {
-    return Boolean(
-      this.form.touched &&
-        this.form.errors?.['passwordLength'] &&
-        (this.form.controls.password.touched ||
-          this.form.controls.confirmPassword.touched)
-    );
+  get confirmPasswordError(): string {
+    const control = this.form.controls.confirmPassword;
+    if (!control.touched) {
+      return '';
+    }
+    if (control.hasError('required')) {
+      return 'Repeat the password.';
+    }
+    return this.form.hasError('passwordsMismatch') ? 'Passwords do not match.' : '';
   }
 
   formatNickname(): string {
@@ -236,6 +244,8 @@ export class TraineeAccountComponent implements OnInit {
     this.provisioningService.getById(accountId).subscribe({
       next: (account) => {
         this.account = account;
+        this.form.controls.password.clearValidators();
+        this.form.controls.confirmPassword.clearValidators();
         this.form.patchValue({
           email: account?.email ?? '',
           password: '',

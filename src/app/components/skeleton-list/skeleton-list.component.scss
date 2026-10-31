@@ -1,0 +1,45 @@
+:host {
+  display: block;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 4.5rem;
+  padding: var(--space-3) var(--space-4);
+}
+
+.skeleton-row__avatar {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-lg);
+}
+
+.skeleton-row__lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeleton-row__lines .skeleton {
+  height: 0.875rem;
+}
+
+.skeleton-row__lines .skeleton-row__line-short {
+  width: 30%;
+  height: 0.75rem;
+}
+
+.skeleton-row__chip {
+  width: 5rem;
+  height: 1.75rem;
+}
+
+@media (min-width: 768px) {
+  .skeleton-row {
+    padding: var(--space-3) var(--space-6);
+  }
+}

@@ -19,22 +19,22 @@ npx ng test --watch=false    # run unit tests once (`npm test` starts watch mode
 ```
 For a working UI locally, also run theindex-api (`npm run start:dev` there, with Postgres) and log in as the seeded admin (`admin`/`admin` with the API's `.env.example`).
 
-Known baseline on `main` (as of Oct 2026): build passes with no warnings. `ng test` has 2 of 4 tests failing in stale scaffold specs: `app.component.spec.ts` expects an `<h1>` "Hello, theindex-front", and `home.component.spec.ts` lacks router/HttpClient providers. Don't treat these as regressions you caused, and don't hide them either.
+Known baseline (as of Oct 2026): build passes with no warnings and all `ng test` specs pass. Keep it that way; a failing spec is a regression.
 
 ## Folder structure
 ```
 src/
-  main.ts, index.html, styles.scss
+  main.ts, index.html (fonts + pre-boot theme script), styles.scss (design tokens + base styles)
   environments/           # environment.ts / environment.development.ts (apiUrl: '/api'), imported as '@environments/environment'
   app/
     app.config.ts         # provideHttpClient(withInterceptors([authInterceptor])), provideRouter
     app.routes.ts         # all routes; role restrictions via data: { roles: [...] } + roleGuard
     pages/<feature>/      # one folder per feature: list, -create, -edit, -details, -delete components
-    components/           # shared UI (main-layout, ui-button/input/checkbox, trainee tables)
-    services/             # one service per API resource + auth.service, auth.interceptor
+    components/           # shared UI: navigation shell (main-layout, sidebar, tab-bar, nav-sheet, brand, theme-switch, user-block, icon, navigation.ts), list page pieces (page-header, search-field, segmented-control, chip, avatar, status-dot, list-row, empty-state, skeleton-list), ui-button/input, trainee tables, ranked-list
+    services/             # one service per API resource + auth.service, auth.interceptor, theme.service
     guards/               # authGuard, loginGuard, roleGuard
     utils/                # buildHttpParams, display/time formatting helpers
-public/                   # static assets
+public/                   # static assets; brand/ holds the official logo PNGs
 ```
 
 ## API conventions (how the app calls theindex-api)
@@ -49,10 +49,260 @@ public/                   # static assets
 - The API serves everything under `/api` (Swagger at `/api/docs` when running locally). Dev: `proxy.conf.json` forwards `/api` to `localhost:3000`. Prod: the nginx image only serves static files plus the SPA fallback; `/api` routing to the API container comes from the `docker compose` setup on the VPS (`/opt/theindex`), which is in neither repo.
 - If you need an endpoint or field that doesn't exist, the change belongs in theindex-api first. Keep service interfaces in sync with the API's DTOs/entities, and flag cross-repo changes to the user.
 
+## Design system ("Chalk & Iron")
+The app is being redesigned in phases. Phase 1 added tokens, fonts and theming. Phase 2 replaced the header with the navigation shell (sidebar on desktop, tab bar + sheet on mobile). Phase 3 redesigned the Trainees list and extracted the list page pattern below. Phase 4a applied it to the other list pages, 4b covered create/edit/details/delete pages and Register attendance, and 4c covered the trainee-facing pages, auth pages and dashboard. Phase 5 was a consistency pass over the whole app. Every page now uses the design system.
+
+**Direction:** bold and athletic, fitting a CrossFit gym. Condensed uppercase headings, chalk-white (light) or near-black (dark) backgrounds, one red accent taken from the logo, flat surfaces (no gradients), generous touch targets (44px minimum).
+
+### Tokens
+All tokens are CSS custom properties defined in `src/styles.scss` (global, so they don't count toward component style budgets). Color tokens have a light and a dark value; the theme is selected by `data-theme="light|dark"` on `<html>`.
+
+| Token | Use for | Light | Dark |
+|---|---|---|---|
+| `--bg` | page background | `#F2F1EE` | `#0E0E0D` |
+| `--surface` | cards, inputs, header | `#FFFFFF` | `#191917` |
+| `--surface-2` | subtle fills: table headers, chips, hovers | `#E9E7E1` | `#26261F` |
+| `--text` | primary text | `#121211` | `#F2F1EE` |
+| `--muted` | secondary text, labels | `#5A5954` | `#A3A19A` |
+| `--border` | decorative dividers and card outlines | `#DCD9D2` | `#2D2C29` |
+| `--border-strong` | form-control borders (≥3:1 against surface) | `#8A8880` | `#6E6C66` |
+| `--accent` | primary buttons, focus rings, active indicators (fills, not text) | `#800000` | `#EE4238` |
+| `--on-accent` | text/icons on `--accent` | `#FFFFFF` | `#0E0E0D` |
+| `--accent-soft` | tinted backgrounds (selected nav, secondary buttons, badges) | `#F3E3E1` | `#331412` |
+| `--accent-text` | accent-colored text and links | `#800000` | `#FF7A70` |
+| `--accent-border` | borders on `--accent-soft` elements | `#DCAAA6` | `#6B2420` |
+| `--success` / `--success-soft` / `--success-border` | paid, active, linked | `#256B3A` / `#E2F0E5` / `#A9D3B3` | `#7BD69A` / `#16301F` / `#2C5A3A` |
+| `--warning` / `--warning-soft` / `--warning-border` | caution notices | `#8A4A00` / `#FBEFD5` / `#EDCB8A` | `#F2BE5C` / `#33270F` / `#5E4718` |
+| `--danger` / `--danger-soft` / `--danger-border` | errors, unpaid, destructive actions | `#B42318` / `#FCE8E6` / `#F1B4AC` | `#FF8F84` / `#3A1714` / `#6B2A24` |
+| `--on-danger` | text on a solid `--danger` fill | `#FFFFFF` | `#1A0D0B` |
+| `--nav-bg` / `--nav-text` / `--nav-text-strong` | the dark "iron" navigation shell (same feel in both themes) | `#121211` / `#B5B3AC` / `#F2F1EE` | `#070707` / `#A3A19A` / `#F2F1EE` |
+| `--nav-surface` | hover/active items, tiles and the theme switch track on the nav shell | `#262622` | `#1C1C1A` |
+| `--nav-border` | dividers on the nav shell (decorative) | `#3A3934` | `#2D2C29` |
+| `--nav-accent` | accent marks on the nav shell: active marker, focus outline. `--accent` is too dark on `--nav-bg` in light mode | `#FF4A3D` | `#FF4A3D` |
+| `--scrim` | backdrop behind modal sheets/dialogs | `rgba(18,18,17,.55)` | `rgba(0,0,0,.65)` |
+| `--shadow-sm` / `--shadow-md` | card lift / popovers and menus | | |
+
+Pairing rules (all checked at ≥4.5:1 for text):
+- Text colors: `--text`, `--muted`, `--accent-text`, `--success`, `--warning`, `--danger` on `--bg`, `--surface`, `--surface-2` or their own `-soft` token.
+- Don't use `--accent` for text; it fails 4.5:1 on `--surface-2` in light mode. Use `--accent-text`.
+- On a solid `--accent` fill use `--on-accent`; on solid `--danger` use `--on-danger`. Never hard-code `#fff`.
+- `--border` is decorative (about 1.4:1). Inputs, selects and other control outlines use `--border-strong`.
+
+Other scales:
+- **Spacing** (4px base): `--space-1` 4px, `-2` 8, `-3` 12, `-4` 16, `-5` 20, `-6` 24, `-8` 32, `-10` 40, `-12` 48, `-16` 64.
+- **Radii:** `--radius-sm` 8px, `--radius-md` 10px (inputs), `--radius-lg` 12px (buttons), `--radius-xl` 16px (cards), `--radius-pill` 999px.
+- **Type:** `--text-xs` 12px, `--text-sm` 14, `--text-base` 16, `--text-lg` 18, `--text-xl` 22, `--text-2xl` 28, `--text-3xl` 36, `--text-4xl` fluid 40–56px for page titles. `--heading-tracking` (0.02em) for headings, `--label-tracking` (0.08em) for uppercase labels and buttons.
+- **Interaction:** `--touch-target` (44px), `--focus-ring` (box-shadow ring for fields), `--transition-fast`.
+- **Control heights:** `--control-height` (3rem) for inputs, selects and form buttons, including `ui-input` and `ui-button`. `--control-height-lg` (3.25rem) for search fields and the page header action.
+
+### Brand
+- **Logos** (official artwork, transparent PNG, cropped to the badge, 640×270, about 10 kB each) in `public/brand/`, served at `/brand/…`:
+  - `the-index-logo-red.png`: red badge, black lettering. This is the one the app uses, in both themes and on the nav shell. `app-brand` (sidebar, mobile top bar, Not found / Unauthorized) and the Login panel show it.
+  - `the-index-logo-grey.png`: grey badge with red speckles. Not used in the UI yet; keep it for places where the red one clashes.
+- **Icons:** `public/favicon.ico` (16/32/48) and `public/apple-touch-icon.png` (180, logo on the nav black) are generated from the red logo. There is no square version of the mark yet, so at 16px it reads as the red badge; replace both if one arrives.
+- Show the logo as an `<img>` with `width="640" height="270"` (so the space is reserved before it loads) and size it with CSS `height`. Give it an accessible name: `alt="The Index"`, or `alt=""` when the surrounding link already has an `aria-label`, as in `app-brand`.
+- **Logo colors:** red `#800000`, lettering black `#000000`, grey `#999999`. The light-theme `--accent` and `--accent-text` are the logo red; the other theme colors are tuned for contrast. Don't redraw the logo in CSS or use these values directly; use the image and the tokens.
+
+### Fonts
+- **Barlow Condensed** 600/700 (`--font-heading`): headings, buttons, uppercase labels. Always uppercase with `--heading-tracking` or `--label-tracking`.
+- **Barlow** 400/500/600 (`--font-body`): everything else.
+- Loaded from Google Fonts in `src/index.html` with `display=swap`. The production build inlines the font CSS (`optimization.fonts`), so `npm run build` needs network access to fonts.googleapis.com.
+
+### Base styles (in `src/styles.scss`)
+- `h1`–`h6` use the heading font, uppercase, 700/600 weight. `a` uses `--accent-text`.
+- `input`, `select` and `textarea` get surface background, `--border-strong` border, `--radius-md` and a 44px min height. Checkboxes and radios use `accent-color: var(--accent)`.
+- Every `button` has a 44px min height. Style buttons and button-like links with `.btn` variants; the old per-page `.button` classes are gone.
+- Focus: `:focus-visible` gets a 2px `--accent` outline with a 2px offset. Fields use `border-color: var(--accent)` plus `box-shadow: var(--focus-ring)`. Don't remove focus styles without replacing them.
+- Shared form components `components/ui-button` and `ui-input` are already built on the tokens. Prefer them to one-off styles. Checkboxes use the `.form-field--check` pattern; there is no checkbox component.
+
+### Theming
+- `ThemeService` (`services/theme.service.ts`) has three modes: `light`, `dark`, `system`. The default is `system`, which follows `prefers-color-scheme` and reacts live to OS changes. It exposes `mode()` and `resolvedTheme()` signals plus `setMode()` and `cycleMode()`. Explicit choices are stored in `localStorage` under `theme`; choosing `system` clears the key.
+- An inline script in `src/index.html` applies the theme before Angular boots, so the wrong theme never flashes. If you change the storage key or mode values, update both places.
+- Because the theme depends on an attribute set at runtime, critical-CSS inlining is turned off in `angular.json` (`optimization.styles.inlineCritical: false`). With it on, only the light tokens would be inlined, and dark mode would flash light. Keep `styles.scss` small, since it is render-blocking.
+- `ThemeSwitchComponent` (`components/theme-switch`) is the Light / Dark / Auto segmented control, built from native radios so arrow keys work. It lives in the sidebar footer and the mobile sheet, and is styled for the nav shell.
+
+### Navigation shell (`components/main-layout`)
+- **Data:** `components/navigation/navigation.ts`. `buildNavigation(role)` returns the sidebar items (`main`, `manage`), the mobile `tabs`, the sheet items (`moreMain`, `moreManage`) and the sheet's label. To add a page to the nav, add a `NavItem` there (with `roles` if it is restricted) and an `icon`. It is covered by `navigation.spec.ts`. Role filtering only shapes the UI; routes still need `roleGuard` + `data.roles`.
+- **Desktop (≥ 1024px):** `app-sidebar`, a sticky `--nav-bg` column with brand, main items, the "Manage" group, theme switch and `app-user-block`. The active item gets `--nav-surface` plus a small `--nav-accent` marker, and `aria-current="page"` via `routerLinkActive` + `ariaCurrentWhenActive`.
+- **Mobile (< 1024px):** a compact sticky top bar with `app-brand`, plus `app-tab-bar`, fixed to the bottom and padded for `env(safe-area-inset-*)` (`viewport-fit=cover` is set in `index.html`).
+  - Staff tabs: Home, Trainees, Register (accent square, the primary action), Settle, More.
+  - Trainees: Profile, Stats, Records, Account. They have no primary action, so no accent tab.
+  - The last tab opens `app-nav-sheet`, a native `<dialog>` opened with `showModal()`. It contains the remaining items as tiles, the theme switch and account actions. It gets focus containment and Escape for free, closes on backdrop tap, on navigation and when the window grows to desktop, and returns focus to the tab. The More/Account tab shows as active when the current page lives in the sheet.
+  - Page content gets bottom padding for the tab bar, so it never ends up underneath it.
+- The breakpoint is in two places: `main-layout.component.scss` and `DESKTOP_QUERY` in `main-layout.component.ts`.
+- **Icons:** `app-icon` renders inline Lucide-style SVG strokes (24px grid, 2px round strokes, `currentColor`, `aria-hidden`). Size them with `--icon-size`. To add an icon, add a name to `IconName` and an `@case` with the path data. Don't use icon fonts or emoji.
+- **Accessibility:**
+  - A "Skip to content" button is the first tab stop and focuses `<main>`. It is a button because `href="#…"` would navigate with `<base href="/">`.
+  - Nav landmarks are labelled "Main"; only one is rendered per breakpoint.
+  - Focus outlines on the nav shell use `--nav-accent`.
+- **Global helpers in `styles.scss`:**
+  - `.visually-hidden` hides content visually but keeps it for screen readers.
+  - `html:has(dialog[open])` locks page scroll while a modal dialog is open.
+
+### List page pattern (reference: `pages/trainees/trainees.component.*`)
+Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, Gym subscriptions, Trainers, Training times, Attendance history, Settlements and Cash register. Copy its template structure:
+
+```html
+<section class="page-stack">
+  <app-page-header title="Plans" subtitle="One line about the page." [action]="{ label: 'New plan', link: '/plans/new' }" />
+
+  <div class="list-toolbar">
+    <app-search-field class="list-toolbar__search" label="Search plans" [value]="term" (valueChange)="term = $event; applySearch()" />
+    <app-segmented-control label="Status" [options]="statusOptions" [value]="filter" (valueChange)="filter = $event; load()" />
+    <p class="list-toolbar__count" aria-live="polite">{{ shown }} of {{ total }} plans</p>
+  </div>
+
+  @if (loading) { <app-skeleton-list label="Loading plans" /> }
+  @else if (errorMessage) { <app-empty-state tone="danger" title="Couldn't load plans" [message]="errorMessage"> <button class="btn btn--secondary" (click)="load()">Try again</button> </app-empty-state> }
+  @else if (!items.length) { <app-empty-state icon="…" title="No plans yet" message="…"> <a class="btn btn--primary" routerLink="/plans/new">New plan</a> </app-empty-state> }
+  @else if (!filtered.length) { <app-empty-state title="No matches" …> <button class="btn btn--secondary" …>Clear search</button> </app-empty-state> }
+  @else {
+    <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Plans table"> <table class="data-table">…</table> </div>
+    <ul class="list-card responsive-list" aria-label="Plans"> <li><app-list-row …/></li> </ul>
+  }
+</section>
+```
+- **Breakpoints:** at 768px and up, show the table. Below 768px, show the `list-card` of `app-list-row`s. The global `.responsive-table` / `.responsive-list` classes do the toggling, so list pages usually need no SCSS of their own. The create action is a header button at 1024px and up, and a floating "+" below that, where the tab bar shows.
+- **Data:** keep loading and filtering in the page component; these pieces are presentational only. A segmented filter that maps to an API param keeps calling the existing load method.
+- **Only the controls a page already has:** don't add search or filters while restyling. Plans has a status filter but no search, and Training times has neither.
+- **Rows with their own actions** (delete, an inline link) can't be an `app-list-row`, which is a single link:
+  - A link row plus one button: `li.row-with-action` holding the `app-list-row` and an `.icon-btn`. Example: settlements with delete.
+  - Anything richer: `li.record` with `.record__main` and `.record__aside`. Examples: attendees and transactions.
+- **Destructive row actions:** an `.icon-btn.icon-btn--danger` with an `aria-label` that names the item, e.g. "Delete settlement 2026-10-01 to 2026-10-31".
+- **Errors after something is already loaded** (e.g. a failed delete): show a `.notice.notice--danger` above the list instead of replacing it.
+- **States:** there are always four:
+  - loading → `app-skeleton-list`
+  - error → `app-empty-state tone="danger"` with "Try again"
+  - empty → `app-empty-state` with the create action, or "Show all" when a filter caused it
+  - no search matches → `app-empty-state` with "Clear search"
+  - Hide the count when nothing is loaded.
+
+**Components** (all standalone in `components/`, presentational, built on tokens):
+
+| Component | Use |
+|---|---|
+| `app-page-header` | `title`, `subtitle`, optional `back: { label, link }` (a "← Back to …" link above the title) and optional `action: { label, link }`. It renders the desktop button and the mobile FAB. With a FAB, `<main>` gets `--fab-clearance` bottom room via a global rule, so the last row isn't covered. |
+| `app-search-field` | Search input with icon and its own 44px clear button (the native one is hidden). Takes `label` (visually hidden, required) and `placeholder`; use `[value]` + `(valueChange)`. |
+| `app-segmented-control` | Single choice built on native radios (announced as a group, arrow keys work). Takes `label` (legend, required), `options: SegmentedOption[]`, `[value]` + `(valueChange)`. |
+| `app-chip` | Uppercase label. `tone`: `accent` (e.g. gym card), `neutral` (e.g. Inactive), `success`, `warning`, `danger`. |
+| `app-avatar` | Initials (first + last word) in a rounded square. Takes `name` and `muted`; size with `--avatar-size`. It is decorative, so always show the name as text. |
+| `app-status-dot` | Dot + text label. `tone`: `success`, `warning`, `danger`, `neutral`. The text carries the meaning. |
+| `app-list-row` | Mobile row; the whole row is one link. Inputs: `link`, `title`, `titleSuffix` (muted), `avatarName`, `dimmed`. Slots: `[listRowMeta]` for the second line and `[listRowTrailing]` for a chip. Dimmed rows use `--muted` text instead of opacity, so contrast stays ≥4.5:1. |
+| `app-empty-state` | Icon, title, message, and actions in the default slot. `tone="danger"` uses the alert icon and `role="alert"`. |
+| `app-ranked-list` | Top-N card (Stats): `title`, `subtitle`, `items: { label, value }[]`, `unit`. It shows rank, label and count, plus a proportional bar that is `aria-hidden`. |
+| `app-skeleton-list` | Loading placeholder rows (`rows`, `label`). Announces `label` through `role="status"`; the blocks are `aria-hidden`. |
+
+**Global classes** (in `styles.scss`, shared without per-component budget):
+- **Page layout:** `.page-stack` stacks a page vertically. `.list-toolbar` and its `__search`/`__count` children form the toolbar row.
+- **`.data-table-wrap` + `.data-table`:**
+  - The wrap is a card that scrolls horizontally inside itself. Give it `tabindex="0"`, `role="region"` and an `aria-label`.
+  - It is `position: relative` on purpose. Without that, `.visually-hidden` header text escapes the scroll clip and widens the whole page.
+  - Use `th scope="col"`, a visually-hidden `<caption>`, and `.cell-fit` for shrink-to-fit columns.
+  - Row link pattern: the name cell holds the real link. A trailing chevron link may duplicate it for the mouse with `tabindex="-1"` and `aria-hidden="true"`, so keyboard and screen-reader users get one link per row.
+- **`.list-card`:** the bordered `<ul>` for `app-list-row`s.
+- **Tables:**
+  - `.responsive-table` / `.responsive-list` switch between table and list at 768px.
+  - `.data-table .cell-link` is the row's primary link.
+  - `.row-chevron` is the mouse-only duplicate link.
+  - `.row-actions` groups trailing buttons.
+  - `.cell-right` right-aligns numeric columns; put it on both the `th` and the `td`.
+  - `.person-cell` (with `__text` and `__sub`) is the avatar + name + nickname cell.
+  - `.linked-mark` is the success-colored "Linked" / "✓ App".
+- **Mobile rows that aren't one link:** `.record` (with `__main`, `__title`, `__meta`, `__aside`) and `li.row-with-action`. An `a.record__title` is styled as a title link, so don't add per-page link classes.
+- **`.panel` + `.panel__title`:** card section for forms, summaries and grouped content.
+- **`.stats` > `.stat`** (with `__label` and `__value`): key-figure tiles. A `<dl>` with `dt`/`dd` works too.
+- **Forms:**
+  - `.form-grid` stacks rows. A `.form-row` holds the 1–3 fields that belong together (Name + Nickname, Start + End, Plan type + Credits + Price) and splits the width evenly from 768px up; on phones every field gets its own line. Pick rows deliberately, in reading order; don't rely on auto-wrapping. A checkbox (`.form-field--check`) gets its own row, placed directly in `.form-grid`.
+  - A field is `div.form-field` with `label.form-field__label[for]`, the control (`id`, `aria-describedby="<id>-help"`, `[attr.aria-invalid]`), then **either** `.form-field__error` (when touched and invalid) **or** `.form-field__hint` (otherwise), both with `id="<id>-help"`. Use `@if … } @else {` so the hint never shows next to an error that says the same thing.
+  - Required is the default and is not marked. Optional fields end the label with `<span class="form-field__optional">(optional)</span>`.
+  - Any rule beyond "required" (length, number range, decimals, format) gets a hint stating the expected format, e.g. "2–100 characters.", "Whole number, 1 or more.", "0 or more, up to two decimals, e.g. 45.50." Take the limits from the API DTOs and enforce the same ones client-side; `utils/form-validators.util.ts` has `trimmedLength(min, max)` for text that gets trimmed before sending.
+  - Invalid fields (`[aria-invalid='true']`) get a `--danger` border automatically. `app-ui-input` takes `describedBy` and `invalid` for the same wiring.
+  - `.form-actions` holds the buttons, least important first and primary last. Below 768px they stack full width with the primary on top.
+- **Form and detail layout:**
+  - Form pages use the full content width. `.page-narrow` caps detail and delete pages at 60rem.
+  - `.detail-list` holds label/value pairs.
+  - `.form-field--check` is a checkbox row.
+  - `.password-field` + `.password-toggle` is a password input with a show/hide button.
+  - `.form-stack` is a vertical form layout.
+  - `.panel-section` is a titled section inside a panel.
+  - `.section-header` is a page section's heading row.
+- **`.solo-page` + `.solo-card`** (with `__code`, `__title` and `__text`): a full-page centered card for routes outside the app shell, such as Not found and Unauthorized. Wrap it in `<main>`, as Login does, so the page has a landmark.
+- **`.notice`** with `--success` / `--warning` / `--danger`: inline banners. Use `role="status"` for success and `role="alert"` for errors.
+- **`.toggle-chip`:** multi-select chip on a `<button aria-pressed>`, e.g. picking attendance sessions.
+- **`.icon-btn`** (and `--danger`): 44px icon-only button. It always needs an `aria-label`.
+- **Text helpers:** `.num` (tabular numbers, no wrap), `.text-muted`, `.text-success`, `.text-danger`.
+- **`.skeleton`:** pulsing placeholder block.
+- **`.btn`** + `.btn--primary` / `.btn--secondary` / `.btn--ghost` (low emphasis) / `.btn--danger` (soft) / `.btn--danger-solid` (confirming a destructive action): link or button actions in page content. `ui-button` stays the full-width form button.
+
+**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-right, plus, alert, trash, arrow-left, eye, eye-off.
+
+### Form and detail page pattern (reference: `pages/plans/plan-*.component.html`)
+Create, edit, details and delete pages share one structure. They need no page SCSS. Create/edit pages drop `page-narrow` and use the full width:
+
+```html
+<section class="page-stack">
+  <app-page-header title="Edit plan" subtitle="…" [back]="{ label: 'Back to plans', link: '/plans' }" />
+  @if (loading) { <p class="notice" role="status">Loading plan...</p> }
+  @else if (errorMessage && !plan) { <p class="notice notice--danger" role="alert">{{ errorMessage }}</p> }
+  @else {
+    <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <div class="form-grid">
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="plan-price">Price (EUR)</label>
+            <input id="plan-price" type="number" formControlName="price" aria-describedby="plan-price-help" [attr.aria-invalid]="…invalid" />
+            @if (…invalid) { <span class="form-field__error" id="plan-price-help">Enter a price of 0 or more, with up to two decimals.</span> }
+            @else { <span class="form-field__hint" id="plan-price-help">0 or more, up to two decimals, e.g. 45.50.</span> }
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="plan-notes">Notes <span class="form-field__optional">(optional)</span></label>
+            <input id="plan-notes" formControlName="notes" />
+          </div>
+        </div>
+        <label class="form-field form-field--check"><input type="checkbox" formControlName="isActive" /><span>Active plan</span></label>
+      </div>
+      @if (errorMessage) { <p class="notice notice--danger" role="alert">{{ errorMessage }}</p> }
+      <div class="form-actions"><button class="btn btn--primary" type="submit">Save plan</button></div>
+    </form>
+  }
+</section>
+```
+- **Details pages:**
+  - Use a `.panel` containing a `<dl class="detail-list">`, with `<div><dt>Label</dt><dd>Value</dd></div>` pairs. Status uses `app-status-dot`.
+  - Extra sections inside the panel go in `section.panel-section` with an `h2.panel__title`.
+  - Actions sit in `.form-actions`: least important first and primary last.
+  - With only edit and deactivate: Deactivate (`btn--ghost`), then Edit (`btn--primary`).
+  - With an account: Deactivate (`btn--ghost`), Edit (`btn--secondary`), then Manage account (`btn--primary`).
+- **Delete/deactivate pages:**
+  - The panel holds a `detail-list`, a `.notice.notice--warning` explaining the consequence, and a `btn--danger-solid` confirm button.
+  - Secondary destructive actions on other pages (e.g. "Deactivate account" next to Save) use the soft `btn--danger`.
+- **Password inputs:**
+  - Use `app-ui-input type="password"` (Login, Change password), or `.password-field` with an icon `button.password-toggle` in plain reactive forms.
+  - The button shows the `eye` / `eye-off` icon, has an `aria-label` of "Show password" or "Hide password", and must stay keyboard reachable, so no `tabindex="-1"`.
+- **Detail pages with tables** (e.g. trainee details):
+  - Put each table in its own `section.page-stack` with a `.section-header` (title, muted line and an optional control such as a segmented filter), instead of nesting the table card inside a panel.
+- **Register attendance** (`pages/attendance/attendance-register`) is the phone-first exception:
+  - Compact session fields.
+  - Full-width tappable trainee rows (a `label` around a real checkbox; `.is-selected` adds the accent tint and a left bar).
+  - A sticky save bar that sits above the tab bar on mobile and at the bottom of the viewport on desktop.
+  - Keep it usable one-handed when changing it.
+- **Behaviour:** when restyling a form, keep `formControlName`s, validators, button labels' meaning and submit flow exactly as they were. The phase 4 PRs verified this by diffing every API request body against the previous build.
+
+### Rules for components
+- **Use tokens, never hard-coded colors.** No hex, `rgb()`, named colors or gradients in component SCSS. If a token is missing, add it to both themes in `src/styles.scss` and document it here; don't inline a value.
+- Check a new pairing in both themes, at 4.5:1 for text and 3:1 for UI component boundaries.
+- Use the spacing, radius, type and control-height tokens for new styles instead of new magic numbers.
+- Only the system breakpoints: 768px (table ↔ list, form actions) and 1024px (sidebar ↔ tab bar).
+- Interactive elements must be at least 44px tall or wide.
+- On the nav shell (`--nav-bg`), use the `--nav-*` tokens, not the page tokens.
+- Component styles budget is 4kB warn / 8kB error per component. Share patterns through global styles or shared components rather than copying them.
+
 ## Rules
 - **Don't modify `.github/workflows/` (deploy pipeline), `Dockerfile` (nginx config) or `proxy.conf.json` without asking first.** Every push to `main` builds the image, pushes it to GHCR and redeploys the production VPS over SSH.
 - Don't push to `main`; work on a branch and open a PR.
 - Follow the existing patterns: standalone components, lazy routes in `app.routes.ts` with `roleGuard` + `data.roles`, one service per resource, `@if`/`@for` in templates, SCSS per component.
 - Stay within the production budgets in `angular.json` (initial 500kB warn / 1MB error; component styles 4kB warn / 8kB error).
 - Never hardcode API hosts. Always go through `environment.apiUrl`.
+- Never hardcode colors. Use the design tokens (see "Design system").
 - Run `npm run build` and `npx ng test --watch=false` before pushing.
+- Use the new control flow (`@if`, `@for`) in templates, not `*ngIf` / `*ngFor`.
