@@ -36,7 +36,8 @@
     "saveChanges": "Save changes",
     "deactivating": "Deactivating...",
     "missingId": "The link is missing an ID.",
-    "dash": "—"
+    "dash": "—",
+    "quoted": "“{text}”"
   },
   "nav": {
     "mainLabel": "Main",
@@ -130,7 +131,8 @@
       "detailsColumn": "Details",
       "noGymCard": "None",
       "appMark": "App",
-      "appMarkHidden": "account linked"
+      "appMarkHidden": "account linked",
+      "accountColumn": "App account"
     },
     "status": {
       "active": "Active",
@@ -213,7 +215,8 @@
       "noActiveSubscriptions": "No active subscriptions found for this trainee.",
       "noExhaustedSubscriptions": "No exhausted subscriptions found for this trainee.",
       "noSubscriptions": "No subscriptions found for this trainee.",
-      "confirmDeleteSubscription": "Delete the {plan} subscription from {date}?"
+      "confirmDeleteSubscription": "Delete the {plan} subscription from {date}?",
+      "buySubmit": "Buy subscription"
     },
     "account": {
       "pageTitle": "Trainee account",
@@ -262,7 +265,11 @@
     },
     "creditsUsed": "{used} / {total, plural, one {# training} other {# trainings}}",
     "fromPaid": "From {date} · Paid {amount}",
-    "deleteLabel": "Delete subscription {plan}"
+    "deleteLabel": "Delete subscription {plan}",
+    "filter": {
+      "active": "Active",
+      "exhausted": "Exhausted"
+    }
   },
   "trainings": {
     "title": "Trainings",
@@ -515,7 +522,8 @@
       "tableLabel": "Trainers table",
       "detailsColumn": "Details",
       "appMark": "App",
-      "appMarkHidden": "account linked"
+      "appMarkHidden": "account linked",
+      "accountColumn": "App account"
     },
     "status": {
       "active": "Active",
@@ -698,7 +706,8 @@
       "actions": "Actions",
       "deleteLabel": "Delete attendance for {name}",
       "confirmDelete": "Delete attendance for {name} at {date} · {time}?",
-      "deleteError": "Unable to delete attendance right now."
+      "deleteError": "Unable to delete attendance right now.",
+      "title": "Attendance history"
     }
   },
   "settlements": {

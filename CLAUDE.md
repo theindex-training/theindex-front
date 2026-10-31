@@ -5,7 +5,8 @@ Angular SPA for The Index, a CrossFit gym app (admin/trainer management screens 
 ## Stack
 - Angular 21 with standalone components, lazy `loadComponent` routes, functional guards/interceptor, and the new control flow (`@if`/`@for`)
 - TypeScript ~5.9 (strict, `strictTemplates`), SCSS, RxJS 7, `@angular/build` (esbuild) builder
-- Tests: Vitest 4 + jsdom through `ng test` (`@angular/build:unit-test`)
+- Tests: Vitest 4 + jsdom through `ng test` (`@angular/build:unit-test`); `src/test-providers.ts` gives every spec Transloco with the real language files (English)
+- i18n: Transloco (`@jsverse/transloco`) + `@jsverse/transloco-messageformat` (ICU plurals), runtime switching between Bulgarian (default) and English. See "Internationalization".
 - Node 20 (`.nvmrc`, Docker `node:20-alpine`); production image is `nginx:alpine` serving `dist/theindex-front/browser`
 - No ESLint is configured. Prettier settings sit in `package.json` (printWidth 100, single quotes, angular parser for HTML), but prettier is not a dependency.
 
@@ -24,17 +25,18 @@ Known baseline (as of Oct 2026): build passes with no warnings and all `ng test`
 ## Folder structure
 ```
 src/
-  main.ts, index.html (fonts + pre-boot theme script), styles.scss (design tokens + base styles)
+  main.ts, index.html (fonts + pre-boot theme/language script), styles.scss (design tokens + base styles)
   environments/           # environment.ts / environment.development.ts (apiUrl: '/api'), imported as '@environments/environment'
   app/
-    app.config.ts         # provideHttpClient(withInterceptors([authInterceptor])), provideRouter
-    app.routes.ts         # all routes; role restrictions via data: { roles: [...] } + roleGuard
+    app.config.ts         # provideHttpClient(withInterceptors([authInterceptor])), provideRouter, provideI18n()
+    app.routes.ts         # all routes; role restrictions via data: { roles: [...] } + roleGuard; title = translation key
+    i18n/                 # LanguageService, Transloco setup, LocaleFormatService, UiMessage, enum labels, key tests
     pages/<feature>/      # one folder per feature: list, -create, -edit, -details, -delete components
-    components/           # shared UI: navigation shell (main-layout, sidebar, tab-bar, nav-sheet, brand, theme-switch, user-block, icon, navigation.ts), list page pieces (page-header, search-field, segmented-control, chip, avatar, status-dot, list-row, empty-state, skeleton-list), ui-button/input, trainee tables, ranked-list
+    components/           # shared UI: navigation shell (main-layout, sidebar, tab-bar, nav-sheet, brand, theme-switch, language-switch, user-block, icon, navigation.ts), list page pieces (page-header, search-field, segmented-control, chip, avatar, status-dot, list-row, empty-state, skeleton-list), ui-button/input, trainee tables, ranked-list
     services/             # one service per API resource + auth.service, auth.interceptor, theme.service
     guards/               # authGuard, loginGuard, roleGuard
     utils/                # buildHttpParams, display/time formatting helpers
-public/                   # static assets; brand/ holds the official logo PNGs
+public/                   # static assets; brand/ holds the official logo PNGs; i18n/bg.json + en.json (bundled, not copied; see Internationalization)
 ```
 
 ## API conventions (how the app calls theindex-api)
@@ -104,8 +106,9 @@ Other scales:
 - **Logo colors:** red `#800000`, lettering black `#000000`, grey `#999999`. The light-theme `--accent` and `--accent-text` are the logo red; the other theme colors are tuned for contrast. Don't redraw the logo in CSS or use these values directly; use the image and the tokens.
 
 ### Fonts
-- **Barlow Condensed** 600/700 (`--font-heading`): headings, buttons, uppercase labels. Always uppercase with `--heading-tracking` or `--label-tracking`.
-- **Barlow** 400/500/600 (`--font-body`): everything else.
+- **Sofia Sans Condensed** 600/700 (`--font-heading`): headings, buttons, uppercase labels. Always uppercase with `--heading-tracking` or `--label-tracking`.
+- **Sofia Sans** 400/500/600 (`--font-body`): everything else.
+- Both need full Cyrillic. The app used Barlow / Barlow Condensed until the i18n work, but Google Fonts serves them without Cyrillic, so Bulgarian fell back to a system serif. Sofia Sans keeps the condensed, DIN-like look (its Latin is very close to Barlow) and was designed in Sofia: its lowercase Cyrillic uses the Bulgarian letterforms (in both UI languages, so Bulgarian names look the same everywhere). Any replacement font must have Cyrillic; check the `cyrillic` subset on Google Fonts.
 - Loaded from Google Fonts in `src/index.html` with `display=swap`. The production build inlines the font CSS (`optimization.fonts`), so `npm run build` needs network access to fonts.googleapis.com.
 
 ### Base styles (in `src/styles.scss`)
@@ -120,14 +123,15 @@ Other scales:
 - An inline script in `src/index.html` applies the theme before Angular boots, so the wrong theme never flashes. If you change the storage key or mode values, update both places.
 - Because the theme depends on an attribute set at runtime, critical-CSS inlining is turned off in `angular.json` (`optimization.styles.inlineCritical: false`). With it on, only the light tokens would be inlined, and dark mode would flash light. Keep `styles.scss` small, since it is render-blocking.
 - `ThemeSwitchComponent` (`components/theme-switch`) is the Light / Dark / Auto segmented control, built from native radios so arrow keys work. It lives in the sidebar footer and the mobile sheet, and is styled for the nav shell.
+- `LanguageSwitchComponent` (`components/language-switch`) is the БГ / EN control built the same way. It sits under the theme switch in the sidebar footer, in its own "Language" section of the mobile sheet, and (with `[compact]="true"`) in the top-right corner of the Login brand panel.
 
 ### Navigation shell (`components/main-layout`)
-- **Data:** `components/navigation/navigation.ts`. `buildNavigation(role)` returns the sidebar items (`main`, `manage`), the mobile `tabs`, the sheet items (`moreMain`, `moreManage`) and the sheet's label. To add a page to the nav, add a `NavItem` there (with `roles` if it is restricted) and an `icon`. It is covered by `navigation.spec.ts`. Role filtering only shapes the UI; routes still need `roleGuard` + `data.roles`.
-- **Desktop (≥ 1024px):** `app-sidebar`, a sticky `--nav-bg` column with brand, main items, the "Manage" group, theme switch and `app-user-block`. The active item gets `--nav-surface` plus a small `--nav-accent` marker, and `aria-current="page"` via `routerLinkActive` + `ariaCurrentWhenActive`.
+- **Data:** `components/navigation/navigation.ts`. Item labels are translation keys (`nav.*`). `buildNavigation(role)` returns the sidebar items (`main`, `manage`), the mobile `tabs`, the sheet items (`moreMain`, `moreManage`) and the sheet's label. To add a page to the nav, add a `NavItem` there (with `roles` if it is restricted) and an `icon`. It is covered by `navigation.spec.ts`. Role filtering only shapes the UI; routes still need `roleGuard` + `data.roles`.
+- **Desktop (≥ 1024px):** `app-sidebar`, a sticky `--nav-bg` column with brand, main items, the "Manage" group, theme and language switches and `app-user-block`. The active item gets `--nav-surface` plus a small `--nav-accent` marker, and `aria-current="page"` via `routerLinkActive` + `ariaCurrentWhenActive`.
 - **Mobile (< 1024px):** a compact sticky top bar with `app-brand`, plus `app-tab-bar`, fixed to the bottom and padded for `env(safe-area-inset-*)` (`viewport-fit=cover` is set in `index.html`).
   - Staff tabs: Home, Trainees, Register (accent square, the primary action), Settle, More.
   - Trainees: Profile, Stats, Records, Account. They have no primary action, so no accent tab.
-  - The last tab opens `app-nav-sheet`, a native `<dialog>` opened with `showModal()`. It contains the remaining items as tiles, the theme switch and account actions. It gets focus containment and Escape for free, closes on backdrop tap, on navigation and when the window grows to desktop, and returns focus to the tab. The More/Account tab shows as active when the current page lives in the sheet.
+  - The last tab opens `app-nav-sheet`, a native `<dialog>` opened with `showModal()`. It contains the remaining items as tiles, the theme and language switches and account actions. It gets focus containment and Escape for free, closes on backdrop tap, on navigation and when the window grows to desktop, and returns focus to the tab. The More/Account tab shows as active when the current page lives in the sheet.
   - Page content gets bottom padding for the tab bar, so it never ends up underneath it.
 - The breakpoint is in two places: `main-layout.component.scss` and `DESKTOP_QUERY` in `main-layout.component.ts`.
 - **Icons:** `app-icon` renders inline Lucide-style SVG strokes (24px grid, 2px round strokes, `currentColor`, `aria-hidden`). Size them with `--icon-size`. To add an icon, add a name to `IconName` and an `@case` with the path data. Don't use icon fonts or emoji.
@@ -289,6 +293,7 @@ Create, edit, details and delete pages share one structure. They need no page SC
 - **Behaviour:** when restyling a form, keep `formControlName`s, validators, button labels' meaning and submit flow exactly as they were. The phase 4 PRs verified this by diffing every API request body against the previous build.
 
 ### Rules for components
+- **Text length:** Bulgarian runs about 20–40% longer than English and the condensed uppercase style makes it wider still. Check new UI in both languages at 320px and 1280px. Tab labels shrink fluidly (`clamp`) and the segmented control's options shrink on phones; table headers and nav labels must stay short (`nav.*` labels can differ from the page titles, e.g. "Присъствия" vs "История на присъствията").
 - **Use tokens, never hard-coded colors.** No hex, `rgb()`, named colors or gradients in component SCSS. If a token is missing, add it to both themes in `src/styles.scss` and document it here; don't inline a value.
 - Check a new pairing in both themes, at 4.5:1 for text and 3:1 for UI component boundaries.
 - Use the spacing, radius, type and control-height tokens for new styles instead of new magic numbers.
@@ -297,6 +302,22 @@ Create, edit, details and delete pages share one structure. They need no page SC
 - On the nav shell (`--nav-bg`), use the `--nav-*` tokens, not the page tokens.
 - Component styles budget is 4kB warn / 8kB error per component. Share patterns through global styles or shared components rather than copying them.
 
+## Internationalization
+Bulgarian is the default language; English is the second. Users switch at runtime (БГ / EN), with no reload and no per-locale build. **All user-facing text goes through translation keys; add every key to both `public/i18n/bg.json` and `public/i18n/en.json`.** That covers headings, labels, buttons, placeholders, hints, validation messages, empty/loading/error states, confirm dialogs, `aria-label`s, table captions and route titles.
+
+- **Library:** Transloco (`@jsverse/transloco`), configured in `i18n/i18n.providers.ts` (`provideI18n()`), plus `@jsverse/transloco-messageformat` for ICU syntax. Don't use `@angular/localize`; it needs a build per locale.
+- **Files:** `public/i18n/<lang>.json`, nested by feature: `common`, `nav`, `enums`, `accounts`, `subscriptions`, `trainings`, then one namespace per page folder (`trainees`, `plans`, `attendance`, `settlements`, `cashRegister`, …), each split into `list` / `create` / `edit` / `details` / `delete` / `fields` / `errors`. Reuse `common.*` for generic words (Status, Try again, Saving..., (optional)).
+- **Loading and cache-busting:** `BundledTranslationLoader` imports the JSON through the bundler, so each file becomes a content-hashed lazy chunk and a deploy can never serve stale text. That is why `angular.json` excludes `public/i18n` from the copied assets. The app initializer waits for the active language, so the first render is already translated.
+- **LanguageService** (`i18n/language.service.ts`) mirrors ThemeService: `lang()` signal, `setLanguage()`, `toggle()`, `use()` (switch without saving), `t(key, params)`. Default `bg` whatever the browser language; an explicit choice is stored in `localStorage` under `lang`. It loads a language before switching, then updates Transloco, the signal and `<html lang>` together. The inline script in `src/index.html` sets `<html lang>` before boot; keep the key and values in sync with it.
+- **Templates:** `{{ 'trainees.list.loading' | transloco }}`, `[title]="'nav.trainees' | transloco"`, params `'trainees.list.noMatches' | transloco: { term }`. Inputs of shared components take translated text, except `SegmentedOption.label`, `NavItem.label`/`tabLabel`, the trainee tables' `emptyKey` and `app-ranked-list`'s `countKey`, which take keys.
+- **Component code:** use `LanguageService.t()` for text that a template helper returns (it reads the language signal, so the view updates on a switch) and for `window.confirm`. Don't store translated strings for later display: store a `UiMessage` (`i18nMessage(key)` or `apiErrorMessage(error, fallbackKey)`) and render it with `| uiMessage`, so it follows a language switch.
+- **Plurals:** ICU, e.g. `"{count, plural, one {# трениращ} other {# трениращи}}"`. Bulgarian needs only `one`/`other`; counted masculine nouns take the counted form ("5 плана", "3 реда"). Use typographic quotes: „…“ in Bulgarian (`common.quoted`), “…” in English. Literal `{`, `}` must be quoted per ICU rules.
+- **Enums:** never show raw API values (ACTIVE, PUNCH, PAID…). Add the value to `ENUM_VALUES` in `i18n/enum-labels.ts` and to `enums.<group>` in both files, then use `{{ value | enumLabel: 'planType' }}`.
+- **Dates, numbers, money:** use `LocaleFormatService` (`date`, `dateTime`, `shortDate`, `time`, `clock`, `weekday`, `number`, `money` from cents). It uses Angular locale data for `bg` and `en-GB` (registered in `provideI18n()`) and re-renders on a switch. Don't use `Intl.*`, `toLocaleString()` or the `date`/`currency` pipes with a fixed locale.
+- **API messages** come from theindex-api in English and are shown as is; only the frontend fallbacks are translated.
+- **Glossary (Bulgarian):** trainee трениращ, trainer треньор, plan план, subscription абонамент, gym зала, gym subscription спортна карта, training time час за тренировка, training тренировка, attendance присъствие, register attendance отбележи присъствие, settlement разчет, cash register каса, nickname прякор, account акаунт, profile профил, dashboard табло, credits (punch plans) посещения. Keep these consistent.
+- **Tests:** `i18n/i18n-keys.spec.ts` fails if the two files' keys differ, a key used in `src/app` (any quoted `namespace.key` string) is missing, an enum label is missing, an ICU message doesn't compile, or placeholders differ between languages. Build keys with `${}` only where unavoidable (enums); those can't be checked statically.
+
 ## Rules
 - **Don't modify `.github/workflows/` (deploy pipeline), `Dockerfile` (nginx config) or `proxy.conf.json` without asking first.** Every push to `main` builds the image, pushes it to GHCR and redeploys the production VPS over SSH.
 - Don't push to `main`; work on a branch and open a PR.
@@ -304,5 +325,6 @@ Create, edit, details and delete pages share one structure. They need no page SC
 - Stay within the production budgets in `angular.json` (initial 500kB warn / 1MB error; component styles 4kB warn / 8kB error).
 - Never hardcode API hosts. Always go through `environment.apiUrl`.
 - Never hardcode colors. Use the design tokens (see "Design system").
+- Never hardcode user-facing text. Use translation keys in both language files (see "Internationalization").
 - Run `npm run build` and `npx ng test --watch=false` before pushing.
 - Use the new control flow (`@if`, `@for`) in templates, not `*ngIf` / `*ngFor`.

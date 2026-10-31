@@ -61,7 +61,7 @@
         <thead>
           <tr>
             <th scope="col">{{ 'trainers.fields.trainer' | transloco }}</th>
-            <th scope="col">{{ 'trainers.fields.appAccount' | transloco }}</th>
+            <th scope="col">{{ 'trainers.list.accountColumn' | transloco }}</th>
             <th scope="col">{{ 'common.status' | transloco }}</th>
             <th scope="col" class="cell-fit"><span class="visually-hidden">{{ 'trainers.list.detailsColumn' | transloco }}</span></th>
           </tr>
@@ -107,7 +107,7 @@
           <app-list-row
             [link]="['/trainers', trainer.id]"
             [title]="trainer.name"
-            [titleSuffix]="trainer.nickname ? '“' + trainer.nickname + '”' : ''"
+            [titleSuffix]="quotedNickname(trainer.nickname)"
             [avatarName]="trainer.name"
             [dimmed]="!trainer.isActive"
           >

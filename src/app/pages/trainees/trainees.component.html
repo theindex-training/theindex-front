@@ -84,7 +84,7 @@
             <th scope="col">{{ 'trainees.fields.trainee' | transloco }}</th>
             <th scope="col">{{ 'trainees.fields.phone' | transloco }}</th>
             <th scope="col">{{ 'trainees.fields.gymCard' | transloco }}</th>
-            <th scope="col">{{ 'trainees.fields.appAccount' | transloco }}</th>
+            <th scope="col">{{ 'trainees.list.accountColumn' | transloco }}</th>
             <th scope="col">{{ 'common.status' | transloco }}</th>
             <th scope="col" class="cell-fit">
               <span class="visually-hidden">{{ 'trainees.list.detailsColumn' | transloco }}</span>
@@ -142,7 +142,7 @@
           <app-list-row
             [link]="['/trainees', trainee.id]"
             [title]="trainee.name"
-            [titleSuffix]="trainee.nickname ? '“' + trainee.nickname + '”' : ''"
+            [titleSuffix]="quotedNickname(trainee.nickname)"
             [avatarName]="trainee.name"
             [dimmed]="!trainee.isActive"
           >

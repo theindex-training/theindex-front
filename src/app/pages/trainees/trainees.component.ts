@@ -118,9 +118,14 @@ export class TraineesComponent implements OnInit {
     });
   }
 
+  /** Nickname in the language's quotes (“Gosho” / „Гошо“) for the title suffix. */
+  quotedNickname(value: string | null): string {
+    return value ? this.i18n.t('common.quoted', { text: value }) : '';
+  }
+
   nicknameLabel(trainee: TraineeProfile): string {
     const nickname = trainee.nickname?.trim();
-    return nickname ? `“${nickname}”` : this.i18n.t('common.noNickname');
+    return nickname ? this.i18n.t('common.quoted', { text: nickname }) : this.i18n.t('common.noNickname');
   }
 
   formatPhone(trainee: TraineeProfile): string {

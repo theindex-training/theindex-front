@@ -65,8 +65,15 @@
 }
 
 .who__bulk {
-  display: flex;
+  // Two equal columns that may shrink, so the (longer) Bulgarian labels never widen the page.
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
+}
+
+.who__bulk .btn {
+  white-space: normal;
 }
 
 // Big, thumb-friendly rows: the whole row toggles the checkbox.
@@ -146,7 +153,10 @@
 
 .save-bar__submit {
   flex: 1;
+  // May wrap to two lines on 320px phones instead of pushing past the screen edge.
+  min-width: 0;
   min-height: 3.5rem;
+  white-space: normal;
 }
 
 @media (min-width: 768px) {

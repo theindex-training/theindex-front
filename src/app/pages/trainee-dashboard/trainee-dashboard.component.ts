@@ -38,8 +38,8 @@ type SubscriptionFilter = 'ACTIVE' | 'EXHAUSTED' | 'ALL';
 export class TraineeDashboardComponent implements OnInit {
   subscriptionFilter: SubscriptionFilter = 'ACTIVE';
   readonly subscriptionFilterOptions: SegmentedOption<SubscriptionFilter>[] = [
-    { value: 'ACTIVE', label: 'enums.subscriptionStatus.ACTIVE' },
-    { value: 'EXHAUSTED', label: 'enums.subscriptionStatus.EXHAUSTED' },
+    { value: 'ACTIVE', label: 'subscriptions.filter.active' },
+    { value: 'EXHAUSTED', label: 'subscriptions.filter.exhausted' },
     { value: 'ALL', label: 'common.all' },
   ];
 

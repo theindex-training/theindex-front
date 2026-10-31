@@ -36,7 +36,8 @@
     "saveChanges": "Запази промените",
     "deactivating": "Деактивиране...",
     "missingId": "В адреса липсва идентификатор.",
-    "dash": "—"
+    "dash": "—",
+    "quoted": "„{text}“"
   },
   "nav": {
     "mainLabel": "Основна навигация",
@@ -50,7 +51,7 @@
     "trainees": "Трениращи",
     "registerAttendance": "Отбележи присъствие",
     "register": "Отбележи",
-    "attendanceHistory": "История на присъствията",
+    "attendanceHistory": "Присъствия",
     "settlements": "Разчети",
     "settle": "Разчети",
     "cashRegister": "Каса",
@@ -89,7 +90,7 @@
     },
     "settlementStatus": {
       "DRAFT": "Чернова",
-      "FINAL": "Окончателен"
+      "FINAL": "Приключен"
     },
     "allocationReason": {
       "PUNCH_CREDIT": "Посещение от карта",
@@ -130,7 +131,8 @@
       "detailsColumn": "Подробности",
       "noGymCard": "Няма",
       "appMark": "Акаунт",
-      "appMarkHidden": "в приложението е свързан"
+      "appMarkHidden": "в приложението е свързан",
+      "accountColumn": "Акаунт"
     },
     "status": {
       "active": "Активен",
@@ -213,7 +215,8 @@
       "noActiveSubscriptions": "Трениращият няма активни абонаменти.",
       "noExhaustedSubscriptions": "Трениращият няма изчерпани абонаменти.",
       "noSubscriptions": "Трениращият няма абонаменти.",
-      "confirmDeleteSubscription": "Да се изтрие ли абонаментът „{plan}“ от {date}?"
+      "confirmDeleteSubscription": "Да се изтрие ли абонаментът „{plan}“ от {date}?",
+      "buySubmit": "Купи абонамент"
     },
     "account": {
       "pageTitle": "Акаунт на трениращ",
@@ -262,7 +265,11 @@
     },
     "creditsUsed": "{used} / {total, plural, one {# тренировка} other {# тренировки}}",
     "fromPaid": "От {date} · Платено {amount}",
-    "deleteLabel": "Изтрий абонамента „{plan}“"
+    "deleteLabel": "Изтрий абонамента „{plan}“",
+    "filter": {
+      "active": "Активни",
+      "exhausted": "Изчерпани"
+    }
   },
   "trainings": {
     "title": "Тренировки",
@@ -515,7 +522,8 @@
       "tableLabel": "Таблица с треньори",
       "detailsColumn": "Подробности",
       "appMark": "Акаунт",
-      "appMarkHidden": "в приложението е свързан"
+      "appMarkHidden": "в приложението е свързан",
+      "accountColumn": "Акаунт"
     },
     "status": {
       "active": "Активен",
@@ -654,12 +662,12 @@
       "whoTrained": "Кой тренира?",
       "searchPlaceholder": "Търсене по име или прякор",
       "searchLabel": "Търсене на трениращи по име или прякор",
-      "selectShown": "Избери показаните",
-      "clearShown": "Изчисти показаните",
+      "selectShown": "Избери видимите",
+      "clearShown": "Изчисти видимите",
       "noMatches": "Няма трениращи, които да отговарят на търсенето.",
       "traineesLabel": "Трениращи",
       "selected": "{count, plural, one {избран} other {избрани}}",
-      "submit": "Запиши присъствието",
+      "submit": "Запиши",
       "loadError": "В момента треньорите, залите, часовете или трениращите не могат да се заредят.",
       "selectAtLeastOne": "Изберете поне един трениращ.",
       "error": "В момента присъствието не може да бъде записано."
@@ -698,7 +706,8 @@
       "actions": "Действия",
       "deleteLabel": "Изтрий присъствието на {name}",
       "confirmDelete": "Да се изтрие ли присъствието на {name} на {date} в {time}?",
-      "deleteError": "В момента присъствието не може да бъде изтрито."
+      "deleteError": "В момента присъствието не може да бъде изтрито.",
+      "title": "История на присъствията"
     }
   },
   "settlements": {

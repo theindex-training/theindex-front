@@ -83,8 +83,8 @@ import { LocaleFormatService } from '../../i18n/locale-format.service';
 export class TraineeDetailsComponent implements OnInit {
   subscriptionFilter: SubscriptionFilter = 'ACTIVE';
   readonly subscriptionFilterOptions: SegmentedOption<SubscriptionFilter>[] = [
-    { value: 'ACTIVE', label: 'enums.subscriptionStatus.ACTIVE' },
-    { value: 'EXHAUSTED', label: 'enums.subscriptionStatus.EXHAUSTED' },
+    { value: 'ACTIVE', label: 'subscriptions.filter.active' },
+    { value: 'EXHAUSTED', label: 'subscriptions.filter.exhausted' },
     { value: 'ALL', label: 'common.all' },
   ];
 

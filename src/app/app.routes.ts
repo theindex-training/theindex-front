@@ -309,7 +309,7 @@ export const routes: Routes = [
       },
       {
         path: 'attendance',
-        title: 'nav.attendanceHistory',
+        title: 'attendance.sessions.title',
         loadComponent: () =>
           import('./pages/attendance/attendance-sessions.component').then(
             m => m.AttendanceSessionsComponent
