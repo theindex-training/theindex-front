@@ -700,5 +700,73 @@
       "confirmDelete": "Delete attendance for {name} at {date} · {time}?",
       "deleteError": "Unable to delete attendance right now."
     }
+  },
+  "settlements": {
+    "list": {
+      "subtitle": "Generated settlement reports and their breakdowns.",
+      "generate": "Generate report",
+      "loading": "Loading settlements",
+      "loadError": "Couldn't load settlements",
+      "loadErrorMessage": "Unable to load settlements right now.",
+      "emptyTitle": "No settlements yet",
+      "emptyAdmin": "Generate a report to settle trainer payouts for a period.",
+      "emptyTrainer": "Reports appear here once an admin generates them.",
+      "tableLabel": "Settlements table",
+      "period": "Period",
+      "generated": "Generated",
+      "actions": "Actions",
+      "generatedOn": "Generated {date}",
+      "deleteLabel": "Delete settlement {start} to {end}",
+      "confirmDelete": "Delete settlement for {start} to {end}?",
+      "deleteError": "Unable to delete settlement right now."
+    },
+    "backToList": "Back to settlements",
+    "generate": {
+      "title": "Generate settlement report",
+      "subtitle": "Create a new settlement using period start and period end dates.",
+      "periodStart": "Period start",
+      "periodEnd": "Period end",
+      "generating": "Generating...",
+      "submit": "Generate report",
+      "missingDates": "Please provide both period start and period end.",
+      "error": "Unable to generate settlement report right now."
+    },
+    "details": {
+      "title": "Settlement report",
+      "subtitle": "Settlement totals and allocation rows for this report.",
+      "loading": "Loading settlement",
+      "generatedAt": "Generated at",
+      "finalizing": "Finalizing...",
+      "finalize": "Finalize settlement",
+      "trainerTotals": "Trainer totals",
+      "noTotals": "No trainer totals found for this settlement.",
+      "trainerTotalsTable": "Trainer totals table",
+      "trainer": "Trainer",
+      "total": "Total",
+      "trainings": "Trainings",
+      "unpaid": "Unpaid",
+      "punch": "Punch",
+      "time": "Time",
+      "trainingsCount": "{count, plural, one {# training} other {# trainings}}",
+      "unpaidCount": "{count} unpaid",
+      "punchTime": "Punch {punch} · Time {time}",
+      "allocations": "Allocations",
+      "allTrainers": "All trainers",
+      "showing": "Showing {shown} of {total, plural, one {# row} other {# rows}}",
+      "loadingAllocations": "Loading allocations",
+      "noAllocations": "No allocations to display.",
+      "allocationsTable": "Allocations table",
+      "trainedAt": "Trained at",
+      "trainee": "Trainee",
+      "subscription": "Subscription",
+      "gym": "Gym",
+      "value": "Value",
+      "loadError": "Unable to load this settlement report.",
+      "loadAllocationsError": "Unable to load allocation rows right now.",
+      "finalizeError": "Unable to finalize this settlement report."
+    },
+    "errors": {
+      "missingId": "Settlement ID is missing."
+    }
   }
 }
