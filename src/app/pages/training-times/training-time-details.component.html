@@ -1,30 +1,30 @@
 <section class="page-stack page-narrow">
   <app-page-header
-    title="Training time details"
-    subtitle="Review this configured training slot."
-    [back]="{ label: 'Back to training times', link: '/training-times' }"
+    [title]="'trainingTimes.details.title' | transloco"
+    [subtitle]="'trainingTimes.details.subtitle' | transloco"
+    [back]="{ label: ('trainingTimes.backToList' | transloco), link: '/training-times' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading training time...</p>
+    <p class="notice" role="status">{{ 'trainingTimes.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !trainingTime) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (trainingTime) {
     <div class="panel">
       <dl class="detail-list">
         <div>
-          <dt>Start time</dt>
+          <dt>{{ 'trainingTimes.fields.startTime' | transloco }}</dt>
           <dd>{{ formatTime(trainingTime.startTime) }}</dd>
         </div>
         <div>
-          <dt>End time</dt>
+          <dt>{{ 'trainingTimes.fields.endTime' | transloco }}</dt>
           <dd>{{ formatTime(trainingTime.endTime) }}</dd>
         </div>
       </dl>
 
       <div class="form-actions">
-        <a class="btn btn--ghost" [routerLink]="['/training-times', trainingTime.id, 'delete']">Delete training time</a>
-        <a class="btn btn--primary" [routerLink]="['/training-times', trainingTime.id, 'edit']">Edit training time</a>
+        <a class="btn btn--ghost" [routerLink]="['/training-times', trainingTime.id, 'delete']">{{ 'trainingTimes.details.delete' | transloco }}</a>
+        <a class="btn btn--primary" [routerLink]="['/training-times', trainingTime.id, 'edit']">{{ 'trainingTimes.details.edit' | transloco }}</a>
       </div>
     </div>
   }

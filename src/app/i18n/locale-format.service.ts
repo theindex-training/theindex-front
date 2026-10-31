@@ -31,6 +31,16 @@ export class LocaleFormatService {
     return `${this.format(value, 'mediumDate')}, ${this.format(value, 'shortTime')}`;
   }
 
+  /** Compact date for chips and dense rows: 31.10.26 г. / 31/10/2026 */
+  shortDate(value: DateInput, fallback = '—'): string {
+    return this.format(value, 'shortDate', fallback);
+  }
+
+  /** 24-hour clock without the locale suffix, for ranges like 18:30 – 19:30. */
+  clock(value: DateInput, fallback = '—'): string {
+    return this.format(value, 'HH:mm', fallback);
+  }
+
   /** 18:30 ч. / 18:30 */
   time(value: DateInput, fallback = '—'): string {
     return this.format(value, 'shortTime', fallback);

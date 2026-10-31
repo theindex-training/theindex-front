@@ -582,5 +582,123 @@
       "createError": "Unable to provision an account for this trainer.",
       "deactivateError": "Unable to deactivate this account."
     }
+  },
+  "trainingTimes": {
+    "list": {
+      "subtitle": "Time slots to pick from when registering attendance.",
+      "new": "New training time",
+      "loading": "Loading training times",
+      "loadError": "Couldn't load training times",
+      "loadErrorMessage": "Unable to load training times right now.",
+      "emptyTitle": "No training times yet",
+      "emptyMessage": "Add your class times so attendance can be registered against them.",
+      "tableLabel": "Training times table",
+      "timeSlot": "Time slot",
+      "starts": "Starts",
+      "ends": "Ends",
+      "detailsColumn": "Details"
+    },
+    "fields": {
+      "startTime": "Start time",
+      "endTime": "End time",
+      "startRequired": "Start time is required.",
+      "endRequired": "End time is required."
+    },
+    "backToList": "Back to training times",
+    "loadingOne": "Loading training time...",
+    "errors": {
+      "missingId": "Training time ID is missing.",
+      "load": "Unable to load this training time."
+    },
+    "create": {
+      "title": "Create training time",
+      "subtitle": "Add a new attendance training slot.",
+      "submit": "Create training time",
+      "error": "Unable to create this training time right now."
+    },
+    "edit": {
+      "title": "Edit training time",
+      "subtitle": "Update this attendance training slot.",
+      "error": "Unable to update this training time right now."
+    },
+    "details": {
+      "edit": "Edit training time",
+      "title": "Training time details",
+      "subtitle": "Review this configured training slot.",
+      "delete": "Delete training time"
+    },
+    "delete": {
+      "title": "Delete training time",
+      "submit": "Delete training time",
+      "subtitle": "This action removes the training time permanently.",
+      "warning": "Deleting cannot be undone.",
+      "deleting": "Deleting...",
+      "error": "Unable to delete this training time right now."
+    }
+  },
+  "attendance": {
+    "register": {
+      "subtitle": "Pick the session, tap everyone who trained, save.",
+      "loading": "Loading trainers, gyms and trainees",
+      "session": "Session",
+      "trainer": "Trainer",
+      "selectTrainer": "Select trainer",
+      "trainerRequired": "Trainer is required.",
+      "gym": "Gym",
+      "selectGym": "Select gym location",
+      "gymRequired": "Gym location is required.",
+      "date": "Date",
+      "dateRequired": "Training date is required.",
+      "time": "Time",
+      "notSpecified": "Not specified",
+      "whoTrained": "Who trained?",
+      "searchPlaceholder": "Search name or nickname",
+      "searchLabel": "Search trainees by name or nickname",
+      "selectShown": "Select shown",
+      "clearShown": "Clear shown",
+      "noMatches": "No trainees match this search.",
+      "traineesLabel": "Trainees",
+      "selected": "{count, plural, one {selected} other {selected}}",
+      "submit": "Register attendance",
+      "loadError": "Unable to load trainers, gyms, training times, or trainees right now.",
+      "selectAtLeastOne": "Select at least one trainee for this attendance batch.",
+      "error": "Unable to register attendance right now."
+    },
+    "backToList": "Back to attendance",
+    "sessions": {
+      "subtitle": "Training sessions and everyone who attended.",
+      "filters": "Filters",
+      "from": "From",
+      "to": "To",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "allTrainers": "All trainers",
+      "apply": "Apply",
+      "loading": "Loading attendance sessions",
+      "loadError": "Couldn't load sessions",
+      "loadErrorMessage": "Unable to load attendance sessions right now.",
+      "emptyTitle": "No sessions found",
+      "emptyMessage": "No attendance was registered for these filters. Try a wider date range.",
+      "sessionsCount": "Sessions ({count})",
+      "summaryLabel": "Selected sessions summary",
+      "sessions": "Sessions",
+      "attendance": "Attendance",
+      "paid": "Paid",
+      "unpaid": "Unpaid",
+      "finalTotal": "Final price total",
+      "selectHint": "Select one or more sessions to see who attended.",
+      "trainerLabel": "Trainer",
+      "gymLabel": "Gym",
+      "total": "Total",
+      "priceTotal": "Price total",
+      "attendees": "Attendees",
+      "trainee": "Trainee",
+      "payment": "Payment",
+      "price": "Price",
+      "actions": "Actions",
+      "deleteLabel": "Delete attendance for {name}",
+      "confirmDelete": "Delete attendance for {name} at {date} · {time}?",
+      "deleteError": "Unable to delete attendance right now."
+    }
   }
 }

@@ -10,11 +10,14 @@ import {
 import { Router } from '@angular/router';
 import { CreateTrainingTimePayload, TrainingTimesService } from '../../services/training-times.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-training-time-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
   templateUrl: './training-time-create.component.html'
 })
 export class TrainingTimeCreateComponent {
@@ -24,7 +27,7 @@ export class TrainingTimeCreateComponent {
   }>;
 
   submitting = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -50,7 +53,7 @@ export class TrainingTimeCreateComponent {
     };
 
     this.submitting = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.trainingTimesService.create(payload).subscribe({
       next: () => {
@@ -58,7 +61,7 @@ export class TrainingTimeCreateComponent {
         this.router.navigate(['/training-times']);
       },
       error: (error) => {
-        this.errorMessage = error?.error?.message || 'Unable to create this training time right now.';
+        this.errorMessage = apiErrorMessage(error, 'trainingTimes.create.error');
         this.submitting = false;
       }
     });
