@@ -97,10 +97,10 @@
       "UNPAID": "Unpaid"
     },
     "cashTransactionType": {
-      "SUBSCRIPTION_IN": "Subscription payment",
-      "SETTLEMENT_OUT": "Settlement payout",
-      "MANUAL_IN": "Manual deposit",
-      "MANUAL_OUT": "Manual withdrawal"
+      "SUBSCRIPTION_IN": "Subscription",
+      "SETTLEMENT_OUT": "Settlement",
+      "MANUAL_IN": "Manual in",
+      "MANUAL_OUT": "Manual out"
     },
     "cashSourceType": {
       "SUBSCRIPTION": "Subscription",
@@ -768,5 +768,42 @@
     "errors": {
       "missingId": "Settlement ID is missing."
     }
+  },
+  "cashRegister": {
+    "subtitle": "Available money and every transaction that changed it.",
+    "loading": "Loading cash register",
+    "loadError": "Couldn't load the cash register",
+    "loadErrorMessage": "Unable to load cash register right now.",
+    "balance": "Current balance",
+    "manualTitle": "Add manual transaction",
+    "direction": "Direction",
+    "directionIn": "IN (money in)",
+    "directionOut": "OUT (money out)",
+    "amount": "Amount (EUR)",
+    "amountError": "Enter an amount above 0, with up to two decimals.",
+    "amountHint": "Above 0, up to two decimals, e.g. 20.50.",
+    "notes": "Notes",
+    "saving": "Saving…",
+    "add": "Add transaction",
+    "created": "Manual transaction created successfully.",
+    "createError": "Unable to create manual transaction right now.",
+    "transactions": "Transactions",
+    "emptyTitle": "No transactions yet",
+    "emptyMessage": "Subscription payments, settlements and manual entries will show up here.",
+    "tableLabel": "Transactions table",
+    "date": "Date",
+    "type": "Type",
+    "details": "Details",
+    "amountColumn": "Amount",
+    "balanceAfter": "Balance after",
+    "balanceShort": "Balance {amount}",
+    "boughtByPrefix": "Bought by",
+    "boughtBy": "Bought by {name}",
+    "planPart": "Plan: {plan}",
+    "typePart": "Type: {type}",
+    "settlementPeriod": "Settlement period: {start} → {end}",
+    "settlementTransaction": "Settlement transaction",
+    "subscriptionPurchase": "Subscription purchase",
+    "unknownTrainee": "Unknown trainee"
   }
 }

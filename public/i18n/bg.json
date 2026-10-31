@@ -97,8 +97,8 @@
       "UNPAID": "Неплатено"
     },
     "cashTransactionType": {
-      "SUBSCRIPTION_IN": "Плащане на абонамент",
-      "SETTLEMENT_OUT": "Изплащане по разчет",
+      "SUBSCRIPTION_IN": "Абонамент",
+      "SETTLEMENT_OUT": "Разчет",
       "MANUAL_IN": "Ръчно внасяне",
       "MANUAL_OUT": "Ръчно теглене"
     },
@@ -768,5 +768,42 @@
     "errors": {
       "missingId": "Липсва идентификатор на разчета."
     }
+  },
+  "cashRegister": {
+    "subtitle": "Наличните пари и всяко движение по касата.",
+    "loading": "Зареждане на касата",
+    "loadError": "Касата не можа да се зареди",
+    "loadErrorMessage": "В момента касата не може да се зареди.",
+    "balance": "Наличност",
+    "manualTitle": "Ръчно движение",
+    "direction": "Посока",
+    "directionIn": "Внасяне (пари в касата)",
+    "directionOut": "Теглене (пари от касата)",
+    "amount": "Сума (EUR)",
+    "amountError": "Въведете сума над 0, с до два знака след десетичната запетая.",
+    "amountHint": "Над 0, до два знака след запетаята, напр. 20.50.",
+    "notes": "Бележка",
+    "saving": "Запазване...",
+    "add": "Добави движение",
+    "created": "Движението е добавено.",
+    "createError": "В момента движението не може да бъде добавено.",
+    "transactions": "Движения",
+    "emptyTitle": "Все още няма движения",
+    "emptyMessage": "Тук ще се показват плащанията на абонаменти, разчетите и ръчните движения.",
+    "tableLabel": "Таблица с движения",
+    "date": "Дата",
+    "type": "Вид",
+    "details": "Подробности",
+    "amountColumn": "Сума",
+    "balanceAfter": "Наличност след",
+    "balanceShort": "Наличност {amount}",
+    "boughtByPrefix": "Купен от",
+    "boughtBy": "Купен от {name}",
+    "planPart": "План: {plan}",
+    "typePart": "Вид: {type}",
+    "settlementPeriod": "Разчет за периода {start} → {end}",
+    "settlementTransaction": "Плащане по разчет",
+    "subscriptionPurchase": "Покупка на абонамент",
+    "unknownTrainee": "Неизвестен трениращ"
   }
 }

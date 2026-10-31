@@ -20,3 +20,7 @@ export type EnumGroup = keyof typeof ENUM_VALUES;
 export function enumLabelKey(group: EnumGroup, value: string): string {
   return `enums.${group}.${value.toUpperCase()}`;
 }
+
+export function isKnownEnum(group: EnumGroup, value: string): boolean {
+  return (ENUM_VALUES[group] as readonly string[]).includes(value.toUpperCase());
+}
