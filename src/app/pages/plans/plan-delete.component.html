@@ -1,46 +1,45 @@
 <section class="page-stack page-narrow">
   <app-page-header
-    title="Deactivate plan"
-    subtitle="Plans are archived by marking them inactive."
-    [back]="{ label: 'Back to plans', link: '/plans' }"
+    [title]="'plans.delete.title' | transloco"
+    [subtitle]="'plans.delete.subtitle' | transloco"
+    [back]="{ label: ('plans.backToList' | transloco), link: '/plans' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading plan...</p>
+    <p class="notice" role="status">{{ 'plans.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !plan) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (plan) {
     <div class="panel">
       <dl class="detail-list">
         <div>
-          <dt>Title</dt>
+          <dt>{{ 'plans.fields.title' | transloco }}</dt>
           <dd>{{ plan.title }}</dd>
         </div>
         <div>
-          <dt>Type</dt>
-          <dd>{{ plan.type }}</dd>
+          <dt>{{ 'plans.fields.type' | transloco }}</dt>
+          <dd>{{ plan.type | enumLabel: 'planType' }}</dd>
         </div>
         <div>
-          <dt>Price</dt>
+          <dt>{{ 'plans.fields.price' | transloco }}</dt>
           <dd>{{ formatPrice(plan.priceCents) }}</dd>
         </div>
         <div>
-          <dt>Status</dt>
+          <dt>{{ 'common.status' | transloco }}</dt>
           <dd>
             <app-status-dot [tone]="plan.isActive ? 'success' : 'neutral'">
-              {{ plan.isActive ? 'Active' : 'Inactive' }}
+              {{ plan.isActive ? ('plans.status.active' | transloco) : ('plans.status.inactive' | transloco) }}
             </app-status-dot>
           </dd>
         </div>
       </dl>
 
       <p class="notice notice--warning">
-        Deactivating a plan hides it from new sign-ups, but existing subscriptions remain
-        unchanged.
+        {{ 'plans.delete.warning' | transloco }}
       </p>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
       }
 
       <div class="form-actions">
@@ -50,7 +49,7 @@
           (click)="confirmDeactivate()"
           [disabled]="submitting || !plan.isActive"
         >
-          {{ plan.isActive ? (submitting ? 'Deactivating...' : 'Deactivate plan') : 'Plan inactive' }}
+          {{ plan.isActive ? (submitting ? ('common.deactivating' | transloco) : ('plans.delete.submit' | transloco)) : ('plans.delete.inactive' | transloco) }}
         </button>
       </div>
     </div>

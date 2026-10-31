@@ -1,54 +1,54 @@
 <section class="page-stack">
   <app-page-header
-    title="Gyms"
-    subtitle="Gym locations where trainings take place."
-    [action]="{ label: 'New gym', link: '/gyms/new' }"
+    [title]="'nav.gyms' | transloco"
+    [subtitle]="'gyms.list.subtitle' | transloco"
+    [action]="{ label: ('gyms.list.new' | transloco), link: '/gyms/new' }"
   />
 
   <div class="list-toolbar">
     <app-segmented-control
-      label="Status"
+      [label]="'common.status' | transloco"
       [options]="statusOptions"
       [value]="activeFilter"
       (valueChange)="activeFilter = $event; loadGyms()"
     />
     @if (!loading && !errorMessage && gyms.length) {
-      <p class="list-toolbar__count" aria-live="polite">{{ gyms.length }} gyms</p>
+      <p class="list-toolbar__count" aria-live="polite">{{ 'gyms.list.count' | transloco: { count: gyms.length } }}</p>
     }
   </div>
 
   @if (loading) {
-    <app-skeleton-list label="Loading gyms" [rows]="3" />
+    <app-skeleton-list [label]="'gyms.list.loading' | transloco" [rows]="3" />
   } @else if (errorMessage) {
-    <app-empty-state tone="danger" title="Couldn't load gyms" [message]="errorMessage">
-      <button class="btn btn--secondary" type="button" (click)="loadGyms()">Try again</button>
+    <app-empty-state tone="danger" [title]="'gyms.list.loadError' | transloco" [message]="errorMessage | uiMessage">
+      <button class="btn btn--secondary" type="button" (click)="loadGyms()">{{ 'common.tryAgain' | transloco }}</button>
     </app-empty-state>
   } @else if (!gyms.length) {
     @if (activeFilter === 'all') {
-      <app-empty-state icon="dumbbell" title="No gyms yet" message="Add the locations where you train.">
-        <a class="btn btn--primary" routerLink="/gyms/new">New gym</a>
+      <app-empty-state icon="dumbbell" [title]="'gyms.list.emptyTitle' | transloco" [message]="'gyms.list.emptyMessage' | transloco">
+        <a class="btn btn--primary" routerLink="/gyms/new">{{ 'gyms.list.new' | transloco }}</a>
       </app-empty-state>
     } @else {
       <app-empty-state
         icon="dumbbell"
-        [title]="activeFilter === 'active' ? 'No active gyms' : 'No inactive gyms'"
-        message="Try a different status filter."
+        [title]="activeFilter === 'active' ? ('gyms.list.noActive' | transloco) : ('gyms.list.noInactive' | transloco)"
+        [message]="'gyms.list.tryOtherFilter' | transloco"
       >
         <button class="btn btn--secondary" type="button" (click)="activeFilter = 'all'; loadGyms()">
-          Show all gyms
+          {{ 'gyms.list.showAll' | transloco }}
         </button>
       </app-empty-state>
     }
   } @else {
-    <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Gyms table">
+    <div class="data-table-wrap responsive-table" tabindex="0" role="region" [attr.aria-label]="'gyms.list.tableLabel' | transloco">
       <table class="data-table">
-        <caption class="visually-hidden">Gyms</caption>
+        <caption class="visually-hidden">{{ 'nav.gyms' | transloco }}</caption>
         <thead>
           <tr>
-            <th scope="col">Gym</th>
-            <th scope="col">Address</th>
-            <th scope="col">Status</th>
-            <th scope="col" class="cell-fit"><span class="visually-hidden">Details</span></th>
+            <th scope="col">{{ 'gyms.fields.gym' | transloco }}</th>
+            <th scope="col">{{ 'gyms.fields.address' | transloco }}</th>
+            <th scope="col">{{ 'common.status' | transloco }}</th>
+            <th scope="col" class="cell-fit"><span class="visually-hidden">{{ 'gyms.list.detailsColumn' | transloco }}</span></th>
           </tr>
         </thead>
         <tbody>
@@ -58,7 +58,7 @@
               <td>{{ formatAddress(gym) }}</td>
               <td>
                 <app-status-dot [tone]="gym.isActive ? 'success' : 'neutral'">
-                  {{ gym.isActive ? 'Active' : 'Inactive' }}
+                  {{ gym.isActive ? ('gyms.status.active' | transloco) : ('gyms.status.inactive' | transloco) }}
                 </app-status-dot>
               </td>
               <td class="cell-fit">
@@ -72,13 +72,13 @@
       </table>
     </div>
 
-    <ul class="list-card responsive-list" aria-label="Gyms">
+    <ul class="list-card responsive-list" [attr.aria-label]="'nav.gyms' | transloco">
       @for (gym of gyms; track gym.id) {
         <li>
           <app-list-row [link]="['/gyms', gym.id]" [title]="gym.name" [dimmed]="!gym.isActive">
             <span listRowMeta>{{ formatAddress(gym) }}</span>
             @if (!gym.isActive) {
-              <app-chip listRowTrailing>Inactive</app-chip>
+              <app-chip listRowTrailing>{{ 'gyms.status.inactive' | transloco }}</app-chip>
             }
           </app-list-row>
         </li>

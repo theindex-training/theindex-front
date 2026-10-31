@@ -14,11 +14,16 @@ import { IconComponent } from '../../components/icon/icon.component';
 import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
 
 import { displayValue } from '../../utils/display.util';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-gyms',
   standalone: true,
   imports: [
+    UiMessagePipe, 
+    TranslocoPipe, 
     RouterLink,
     PageHeaderComponent,
     SegmentedControlComponent,
@@ -35,12 +40,12 @@ export class GymsComponent implements OnInit {
   gyms: GymLocation[] = [];
   activeFilter: 'all' | 'active' | 'inactive' = 'all';
   readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
-    { value: 'all', label: 'All' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' }
+    { value: 'all', label: 'common.all' },
+    { value: 'active', label: 'common.active' },
+    { value: 'inactive', label: 'common.inactive' }
   ];
   loading = true;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly gymsService: GymLocationsService,
@@ -53,7 +58,7 @@ export class GymsComponent implements OnInit {
 
   loadGyms(): void {
     this.loading = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     const includeInactive = this.activeFilter !== 'active';
 
@@ -68,7 +73,7 @@ export class GymsComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to load gyms right now.';
+          apiErrorMessage(error, 'gyms.list.loadErrorMessage');
         this.loading = false;
         this.changeDetector.detectChanges();
       }

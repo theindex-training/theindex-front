@@ -4,18 +4,21 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-gym-delete',
   standalone: true,
-  imports: [CommonModule, PageHeaderComponent, StatusDotComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, PageHeaderComponent, StatusDotComponent],
   templateUrl: './gym-delete.component.html'
 })
 export class GymDeleteComponent implements OnInit {
   gym: GymLocation | null = null;
   loading = true;
   submitting = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly gymsService: GymLocationsService,
@@ -27,7 +30,7 @@ export class GymDeleteComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.errorMessage = 'Gym ID is missing.';
+      this.errorMessage = i18nMessage('gyms.errors.missingId');
       this.loading = false;
       return;
     }
@@ -40,7 +43,7 @@ export class GymDeleteComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to load this gym.';
+          apiErrorMessage(error, 'gyms.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
       }
@@ -53,7 +56,7 @@ export class GymDeleteComponent implements OnInit {
     }
 
     this.submitting = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.gymsService.deactivate(this.gym.id).subscribe({
       next: () => {
@@ -62,7 +65,7 @@ export class GymDeleteComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to deactivate this gym right now.';
+          apiErrorMessage(error, 'gyms.delete.error');
         this.submitting = false;
       }
     });

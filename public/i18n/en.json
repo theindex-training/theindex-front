@@ -291,5 +291,207 @@
     "noSubscriptions": "No subscriptions found for your profile.",
     "missingProfile": "Unable to load your dashboard. Missing trainee profile identifier.",
     "loadError": "Unable to load your dashboard right now. Please try again later."
+  },
+  "plans": {
+    "list": {
+      "subtitle": "Training plans, pricing and availability.",
+      "new": "New plan",
+      "count": "{count, plural, one {# plan} other {# plans}}",
+      "loading": "Loading plans",
+      "loadError": "Couldn't load plans",
+      "loadErrorMessage": "Unable to load plans right now.",
+      "emptyTitle": "No plans yet",
+      "emptyMessage": "Create the plans trainees can buy: punch cards or time-based passes.",
+      "noActive": "No active plans",
+      "noInactive": "No inactive plans",
+      "tryOtherFilter": "Try a different status filter.",
+      "showAll": "Show all plans",
+      "tableLabel": "Plans table",
+      "includes": "Includes",
+      "detailsColumn": "Details"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "fields": {
+      "plan": "Plan",
+      "title": "Title",
+      "type": "Type",
+      "price": "Price",
+      "titleRequired": "Title is required.",
+      "titlePlaceholder": "12 trainings",
+      "planType": "Plan type",
+      "typePunch": "Punch (credits)",
+      "typeTime": "Time (days)",
+      "credits": "Credits",
+      "wholeNumberError": "Enter a whole number of 1 or more.",
+      "creditsHint": "Trainings included. Whole number, 1 or more.",
+      "duration": "Duration (days)",
+      "durationHint": "Days the plan is valid. Whole number, 1 or more.",
+      "priceEur": "Price (EUR)",
+      "priceError": "Enter a price of 0 or more, with up to two decimals.",
+      "priceHint": "0 or more, up to two decimals, e.g. 45.50.",
+      "activePlan": "Active plan",
+      "creditsCount": "{count, plural, one {# credit} other {# credits}}",
+      "daysCount": "{count, plural, one {# day} other {# days}}"
+    },
+    "backToList": "Back to plans",
+    "loadingOne": "Loading plan...",
+    "errors": {
+      "missingId": "Plan ID is missing.",
+      "load": "Unable to load this plan."
+    },
+    "create": {
+      "title": "Create plan",
+      "subtitle": "Define the pricing and duration for a new training plan.",
+      "submit": "Create plan",
+      "error": "Unable to create this plan right now."
+    },
+    "edit": {
+      "title": "Edit plan",
+      "subtitle": "Update plan details or availability.",
+      "error": "Unable to update this plan right now."
+    },
+    "details": {
+      "title": "Plan details",
+      "subtitle": "Review plan information and manage availability.",
+      "details": "Details",
+      "deactivate": "Deactivate plan",
+      "edit": "Edit plan"
+    },
+    "delete": {
+      "title": "Deactivate plan",
+      "subtitle": "Plans are archived by marking them inactive.",
+      "warning": "Deactivating a plan hides it from new sign-ups, but existing subscriptions remain unchanged.",
+      "inactive": "Plan inactive",
+      "error": "Unable to deactivate this plan right now.",
+      "submit": "Deactivate plan"
+    }
+  },
+  "gyms": {
+    "list": {
+      "subtitle": "Gym locations where trainings take place.",
+      "new": "New gym",
+      "count": "{count, plural, one {# gym} other {# gyms}}",
+      "loading": "Loading gyms",
+      "loadError": "Couldn't load gyms",
+      "loadErrorMessage": "Unable to load gyms right now.",
+      "emptyTitle": "No gyms yet",
+      "emptyMessage": "Add the locations where you train.",
+      "noActive": "No active gyms",
+      "noInactive": "No inactive gyms",
+      "tryOtherFilter": "Try a different status filter.",
+      "showAll": "Show all gyms",
+      "tableLabel": "Gyms table",
+      "detailsColumn": "Details"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "fields": {
+      "gym": "Gym",
+      "name": "Name",
+      "address": "Address",
+      "notes": "Notes",
+      "nameError": "Enter a name of 2–120 characters.",
+      "nameHint": "2–120 characters.",
+      "addressError": "Address must be 2–250 characters.",
+      "addressHint": "2–250 characters.",
+      "namePlaceholder": "West Gym",
+      "addressPlaceholder": "Plovdiv, Bulgaria"
+    },
+    "backToList": "Back to gyms",
+    "loadingOne": "Loading gym...",
+    "errors": {
+      "missingId": "Gym ID is missing.",
+      "load": "Unable to load this gym."
+    },
+    "create": {
+      "title": "Create gym",
+      "subtitle": "Add a new gym location.",
+      "submit": "Create gym",
+      "error": "Unable to create this gym right now."
+    },
+    "edit": {
+      "title": "Edit gym",
+      "subtitle": "Update gym location details.",
+      "error": "Unable to update this gym right now."
+    },
+    "details": {
+      "edit": "Edit gym",
+      "title": "Gym details",
+      "subtitle": "Review gym location information and manage availability.",
+      "deactivate": "Deactivate gym"
+    },
+    "delete": {
+      "title": "Deactivate gym",
+      "submit": "Deactivate gym",
+      "subtitle": "Gyms are archived by marking them inactive.",
+      "warning": "Deactivating a gym hides it from new schedules, but existing references remain unchanged.",
+      "inactive": "Gym inactive",
+      "error": "Unable to deactivate this gym right now."
+    }
+  },
+  "gymSubscriptions": {
+    "list": {
+      "subtitle": "Gym cards and partner programs trainees can pay with.",
+      "new": "New gym subscription",
+      "count": "{count, plural, one {# gym subscription} other {# gym subscriptions}}",
+      "loading": "Loading gym subscriptions",
+      "loadError": "Couldn't load gym subscriptions",
+      "loadErrorMessage": "Unable to load gym subscriptions right now.",
+      "emptyTitle": "No gym subscriptions yet",
+      "emptyMessage": "Add gym cards such as Multisport or Coolfit so trainees can be linked to them.",
+      "noActive": "No active gym subscriptions",
+      "noInactive": "No inactive gym subscriptions",
+      "tryOtherFilter": "Try a different status filter.",
+      "showAll": "Show all gym subscriptions",
+      "tableLabel": "Gym subscriptions table",
+      "detailsColumn": "Details"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "fields": {
+      "gymSubscription": "Gym subscription",
+      "name": "Name",
+      "nameError": "Enter a name of 2–120 characters.",
+      "nameHint": "2–120 characters.",
+      "namePlaceholder": "Club card"
+    },
+    "backToList": "Back to gym subscriptions",
+    "loadingOne": "Loading gym subscription...",
+    "errors": {
+      "missingId": "Gym subscription ID is missing.",
+      "load": "Unable to load this gym subscription."
+    },
+    "create": {
+      "title": "Create gym subscription",
+      "subtitle": "Add a new gym subscription method.",
+      "submit": "Create gym subscription",
+      "error": "Unable to create this gym subscription right now."
+    },
+    "edit": {
+      "title": "Edit gym subscription",
+      "subtitle": "Update gym subscription details.",
+      "error": "Unable to update this gym subscription right now."
+    },
+    "details": {
+      "edit": "Edit gym subscription",
+      "title": "Gym subscription details",
+      "subtitle": "Review gym subscription information and manage availability.",
+      "deactivate": "Deactivate gym subscription"
+    },
+    "delete": {
+      "title": "Deactivate gym subscription",
+      "submit": "Deactivate gym subscription",
+      "subtitle": "Gym subscriptions are archived by marking them inactive.",
+      "warning": "Deactivating a gym subscription hides it from new trainee assignments.",
+      "inactive": "Gym subscription inactive",
+      "error": "Unable to deactivate this gym subscription right now."
+    }
   }
 }
