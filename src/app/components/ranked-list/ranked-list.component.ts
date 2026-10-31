@@ -19,7 +19,7 @@ export class RankedListComponent {
   @Input() subtitle = '';
   @Input({ required: true }) items: RankedItem[] = [];
   /**
-   * ICU plural key for each count, called with `{ count }`, e.g. 'stats.trainings' →
+   * ICU plural key for each count, called with `{ count }`, e.g. 'stats.trainingsCount' →
    * "{count, plural, one {# training} other {# trainings}}". Omit to show the bare number.
    */
   @Input() countKey = '';

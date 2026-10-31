@@ -1,7 +1,8 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject, signal } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
-import { TranslationParams } from './ui-message';
+import { INITIAL_LANGUAGE } from './initial-language.token';
+import type { TranslationParams } from './ui-message';
 import { Observable, map, tap } from 'rxjs';
 
 export type Language = 'bg' | 'en';
@@ -33,7 +34,9 @@ export class LanguageService {
   private readonly document = inject(DOCUMENT);
   private readonly transloco = inject(TranslocoService);
 
-  private readonly langSignal = signal<Language>(readStoredLanguage());
+  private readonly langSignal = signal<Language>(
+    inject(INITIAL_LANGUAGE, { optional: true }) ?? readStoredLanguage()
+  );
 
   /** The active language. Read it in templates/computeds to re-render when it changes. */
   readonly lang = this.langSignal.asReadonly();

@@ -1,22 +1,26 @@
 import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LanguageSwitchComponent } from '../../components/language-switch/language-switch.component';
 import { UiButtonComponent } from '../../components/ui-button/ui-button.component';
 import { UiInputComponent } from '../../components/ui-input/ui-input.component';
 import { AccountSecurityService } from '../../services/account-security.service';
 import { AuthService } from '../../services/auth.service';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   standalone: true,
-  imports: [ReactiveFormsModule, UiButtonComponent, UiInputComponent],
+  imports: [LanguageSwitchComponent, UiMessagePipe, TranslocoPipe, ReactiveFormsModule, UiButtonComponent, UiInputComponent],
 })
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
 
-  authErrorMessage = '';
+  authErrorMessage: UiMessage | null = null;
   isSubmitting = false;
 
   readonly loginForm = this.fb.group({
@@ -32,7 +36,7 @@ export class LoginComponent {
   ) {}
 
   handleLogin(): void {
-    this.authErrorMessage = '';
+    this.authErrorMessage = null;
 
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -74,8 +78,7 @@ export class LoginComponent {
       error: (error: unknown) => {
         this.isSubmitting = false;
         this.authErrorMessage =
-          (error as { error?: { message?: string } })?.error?.message ??
-          'Unable to sign in with those credentials.';
+          apiErrorMessage(error, 'auth.login.error');
         this.changeDetector.detectChanges();
       },
     });

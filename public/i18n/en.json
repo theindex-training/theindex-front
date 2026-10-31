@@ -805,5 +805,118 @@
     "settlementTransaction": "Settlement transaction",
     "subscriptionPurchase": "Subscription purchase",
     "unknownTrainee": "Unknown trainee"
+  },
+  "home": {
+    "subtitle": "Welcome back! Jump straight to what you need.",
+    "shortcuts": "Shortcuts",
+    "registerDesc": "Open the attendance register and log a new training session.",
+    "trainings": "List of trainings",
+    "trainingsDesc": "Review training sessions and who attended.",
+    "settlements": "Settlement reports",
+    "settlementsDesc": "Open settlement reports and inspect payout details.",
+    "reports": {
+      "title": "Attendance reports",
+      "subtitle": "Monitor inactive trainees and trainees with no active subscription.",
+      "inactiveTitle": "Inactive trainees",
+      "inactiveFor": "Inactive for",
+      "lastDays": "Last {count, plural, one {day} other {# days}}",
+      "loadingInactive": "Loading inactive trainees report",
+      "noInactive": "No inactive trainees found.",
+      "activeSubscription": "Active subscription",
+      "withoutTitle": "Trainees without active subscription",
+      "loadingWithout": "Loading trainees without active subscription report",
+      "noWithout": "No trainees without active subscription found.",
+      "lastActiveSubscription": "Last active subscription",
+      "reportLabel": "{name} report",
+      "trainee": "Trainee",
+      "lastTraining": "Last training",
+      "lastTrainingOn": "Last training: {date}",
+      "unknown": "Unknown",
+      "plan": "Plan: {value}",
+      "type": "Type: {value}",
+      "start": "Start: {value}",
+      "end": "End: {value}",
+      "remainingTrainings": "Remaining trainings: {value}",
+      "remainingDays": "Remaining days: {value}",
+      "inactiveError": "Unable to load inactive trainees report right now.",
+      "withoutError": "Unable to load trainees without active subscription report right now."
+    }
+  },
+  "auth": {
+    "changePassword": {
+      "title": "Change password",
+      "subtitle": "Update your password to keep your account secure.",
+      "loading": "Loading account security settings...",
+      "current": "Current password",
+      "new": "New password",
+      "newHint": "At least 8 characters.",
+      "confirm": "Confirm new password",
+      "confirmHint": "Must match the new password.",
+      "phone": "Phone number",
+      "phoneError": "Phone number is required for your first password change.",
+      "phoneHint": "Required for your first password change.",
+      "saving": "Saving...",
+      "save": "Save password",
+      "noAccount": "Unable to identify your account. Please sign in again.",
+      "success": "Password updated successfully.",
+      "error": "Unable to update your password right now.",
+      "currentRequired": "Current password is required.",
+      "currentLength": "Current password must be at least 8 characters.",
+      "newRequired": "New password is required.",
+      "newLength": "New password must be at least 8 characters.",
+      "repeat": "Repeat the new password.",
+      "mismatch": "Passwords do not match."
+    },
+    "login": {
+      "welcome": "Welcome back",
+      "copy": "Sign in to access TheIndex.",
+      "highlightTrainers": "Trainers to manage trainings",
+      "highlightTrainees": "Trainee to track their personal progress",
+      "title": "Sign in",
+      "intro": "Use your The Index account credentials to continue.",
+      "email": "Email",
+      "emailPlaceholder": "you@company.com",
+      "emailRequired": "Email is required.",
+      "password": "Password",
+      "passwordRequired": "Password is required.",
+      "passwordLength": "Password must be at least 3 characters.",
+      "error": "Unable to sign in with those credentials.",
+      "submit": "Sign in",
+      "footer": "Need access? Contact admin"
+    }
+  },
+  "stats": {
+    "subtitle": "Insights based on your training attendance.",
+    "loading": "Loading stats",
+    "loadError": "Couldn't load your stats",
+    "loadErrorMessage": "Unable to load your training stats right now. Please try again later.",
+    "partners": "Top training partners",
+    "partnersSub": "People you have trained with most often.",
+    "weekdays": "Top weekdays",
+    "weekdaysSub": "The weekdays you train on most often.",
+    "timeSlots": "Top timeslots",
+    "timeSlotsSub": "Hours of day with the most training sessions.",
+    "trainers": "Top trainers",
+    "trainersSub": "Trainers you have the most sessions with.",
+    "gyms": "Top gyms",
+    "gymsSub": "Gyms where you train most often.",
+    "togetherCount": "{count, plural, one {# together} other {# together}}",
+    "trainingsCount": "{count, plural, one {# training} other {# trainings}}"
+  },
+  "records": {
+    "subtitle": "Your personal bests and benchmark results.",
+    "comingSoon": "Coming soon",
+    "comingSoonMessage": "Personal records will show up here once tracking is available."
+  },
+  "system": {
+    "notFound": {
+      "title": "Page not found",
+      "text": "The page you're looking for doesn't exist or has moved.",
+      "back": "Back to the app"
+    },
+    "unauthorized": {
+      "title": "Access restricted",
+      "text": "You do not have permission to access the administrative areas yet."
+    }
   }
 }

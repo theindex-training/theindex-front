@@ -21,6 +21,7 @@
 }
 
 .login__panel--brand {
+  position: relative;
   background: var(--nav-bg);
   color: var(--nav-text);
 }
@@ -59,6 +60,12 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+}
+
+.login__language {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
 }
 
 // Small accent square as the bullet (decorative, so the --nav-accent contrast rule for marks applies).

@@ -1,8 +1,11 @@
 import {
+  FormStyle,
+  TranslationWidth,
   formatCurrency,
   formatDate,
   formatNumber,
-  getCurrencySymbol
+  getCurrencySymbol,
+  getLocaleDayNames
 } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { LanguageService } from './language.service';
@@ -23,7 +26,7 @@ export class LocaleFormatService {
     return this.format(value, 'mediumDate', fallback);
   }
 
-  /** 31.10.2026 г., 18:30 ч. / 31 Oct 2026, 18:30 */
+  /** 31.10.2026 г., 18:30 / 31 Oct 2026, 18:30 */
   dateTime(value: DateInput, fallback = '—'): string {
     if (!isValidDate(value)) {
       return fallback;
@@ -36,12 +39,12 @@ export class LocaleFormatService {
     return this.format(value, 'shortDate', fallback);
   }
 
-  /** 24-hour clock without the locale suffix, for ranges like 18:30 – 19:30. */
+  /** HH:mm with a leading zero, for ranges like 08:30 – 09:30. */
   clock(value: DateInput, fallback = '—'): string {
     return this.format(value, 'HH:mm', fallback);
   }
 
-  /** 18:30 ч. / 18:30 */
+  /** 18:30 (24-hour in both languages) */
   time(value: DateInput, fallback = '—'): string {
     return this.format(value, 'shortTime', fallback);
   }
@@ -49,6 +52,13 @@ export class LocaleFormatService {
   /** Any Angular date format, e.g. "EEEE" for the weekday name. */
   custom(value: DateInput, format: string, fallback = '—'): string {
     return this.format(value, format, fallback);
+  }
+
+  /** Weekday name from an ISO weekday number (1 = Monday … 7 = Sunday): Понеделник / Monday. */
+  weekday(isoWeekday: number): string {
+    const names = getLocaleDayNames(this.language.locale(), FormStyle.Standalone, TranslationWidth.Wide);
+    const name = names[isoWeekday % 7] ?? '';
+    return name.charAt(0).toLocaleUpperCase(this.language.locale()) + name.slice(1);
   }
 
   number(value: number | null | undefined, digitsInfo?: string, fallback = '—'): string {

@@ -7,6 +7,9 @@ import { UiInputComponent } from '../../components/ui-input/ui-input.component';
 import { AccountSecurityService } from '../../services/account-security.service';
 import { AuthService } from '../../services/auth.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 const passwordMatchValidator: ValidatorFn = control => {
   const newPassword = (control.get('newPassword')?.value as string | null) ?? '';
@@ -22,7 +25,7 @@ const passwordMatchValidator: ValidatorFn = control => {
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, UiInputComponent, UiButtonComponent, PageHeaderComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, UiInputComponent, UiButtonComponent, PageHeaderComponent],
   templateUrl: './change-password.component.html',
   styleUrl: './change-password.component.scss'
 })
@@ -32,8 +35,8 @@ export class ChangePasswordComponent implements OnInit {
   isSubmitting = false;
   isLoadingPasswordStatus = true;
   requiresPhone = false;
-  successMessage = '';
-  errorMessage = '';
+  successMessage: UiMessage | null = null;
+  errorMessage: UiMessage | null = null;
 
   readonly form = this.fb.group(
     {
@@ -75,8 +78,8 @@ export class ChangePasswordComponent implements OnInit {
   }
 
   handleSubmit(): void {
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.errorMessage = null;
+    this.successMessage = null;
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -86,7 +89,7 @@ export class ChangePasswordComponent implements OnInit {
     const accountId = this.authService.getAccountId();
 
     if (!accountId) {
-      this.errorMessage = 'Unable to identify your account. Please sign in again.';
+      this.errorMessage = i18nMessage('auth.changePassword.noAccount');
       return;
     }
 
@@ -124,7 +127,7 @@ export class ChangePasswordComponent implements OnInit {
       .subscribe({
         next: () => {
           this.isSubmitting = false;
-          this.successMessage = 'Password updated successfully.';
+          this.successMessage = i18nMessage('auth.changePassword.success');
           this.form.reset();
           this.changeDetector.detectChanges();
           this.router.navigate([this.getDefaultRoute()]);
@@ -132,44 +135,46 @@ export class ChangePasswordComponent implements OnInit {
         error: (error: unknown) => {
           this.isSubmitting = false;
           this.errorMessage =
-            (error as { error?: { message?: string } })?.error?.message ??
-            'Unable to update your password right now.';
+            apiErrorMessage(error, 'auth.changePassword.error');
           this.changeDetector.detectChanges();
         }
       });
   }
 
+  /** Translation key of the error, or '' when there is none. */
   get currentPasswordError(): string {
     const control = this.form.controls.currentPassword;
     if (!control.touched) {
       return '';
     }
     if (control.hasError('required')) {
-      return 'Current password is required.';
+      return 'auth.changePassword.currentRequired';
     }
-    return control.hasError('minlength') ? 'Current password must be at least 8 characters.' : '';
+    return control.hasError('minlength') ? 'auth.changePassword.currentLength' : '';
   }
 
+  /** Translation key of the error, or '' when there is none. */
   get newPasswordError(): string {
     const control = this.form.controls.newPassword;
     if (!control.touched) {
       return '';
     }
     if (control.hasError('required')) {
-      return 'New password is required.';
+      return 'auth.changePassword.newRequired';
     }
-    return control.hasError('minlength') ? 'New password must be at least 8 characters.' : '';
+    return control.hasError('minlength') ? 'auth.changePassword.newLength' : '';
   }
 
+  /** Translation key of the error, or '' when there is none. */
   get confirmPasswordError(): string {
     const control = this.form.controls.confirmPassword;
     if (!control.touched) {
       return '';
     }
     if (control.hasError('required')) {
-      return 'Repeat the new password.';
+      return 'auth.changePassword.repeat';
     }
-    return this.form.hasError('passwordMismatch') ? 'Passwords do not match.' : '';
+    return this.form.hasError('passwordMismatch') ? 'auth.changePassword.mismatch' : '';
   }
 
   private updatePhoneValidators(): void {
