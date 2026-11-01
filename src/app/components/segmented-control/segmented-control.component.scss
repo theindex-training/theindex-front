@@ -1,10 +1,13 @@
 :host {
   display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .segmented {
   display: inline-grid;
-  grid-auto-columns: 1fr;
+  // minmax(0, …) lets long labels (Bulgarian is longer) shrink instead of widening the page.
+  grid-auto-columns: minmax(0, 1fr);
   grid-auto-flow: column;
   gap: var(--space-1);
   width: 100%;
@@ -34,6 +37,15 @@
   transition:
     background-color var(--transition-fast),
     color var(--transition-fast);
+}
+
+// Phones: full-width control with tighter labels, so three uppercase options fit at 320–375px.
+@media (max-width: 767.98px) {
+  .segmented__option {
+    padding: 0 var(--space-2);
+    font-size: var(--text-base);
+    letter-spacing: 0.04em;
+  }
 }
 
 .segmented__option:hover {

@@ -45,7 +45,8 @@
   display: flex;
   align-items: center;
   min-height: var(--touch-target);
-  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-8);
+  // Small right padding so the longest Bulgarian label ("Отбележи присъствие") fits on one line.
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-8);
   border-radius: var(--radius-lg);
   color: var(--nav-text);
   font-size: var(--text-lg);

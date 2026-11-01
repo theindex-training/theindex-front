@@ -7,11 +7,14 @@ import {
   SettlementsService
 } from '../../services/settlements.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-settlement-generate',
   standalone: true,
-  imports: [CommonModule, FormsModule, PageHeaderComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, FormsModule, PageHeaderComponent],
   templateUrl: './settlement-generate.component.html'
 })
 export class SettlementGenerateComponent {
@@ -19,7 +22,7 @@ export class SettlementGenerateComponent {
   periodEnd = this.todayIsoDate();
 
   generating = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly settlementsService: SettlementsService,
@@ -28,10 +31,10 @@ export class SettlementGenerateComponent {
   ) {}
 
   generateSettlement(): void {
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     if (!this.periodStart || !this.periodEnd) {
-      this.errorMessage = 'Please provide both period start and period end.';
+      this.errorMessage = i18nMessage('settlements.generate.missingDates');
       return;
     }
 
@@ -48,7 +51,7 @@ export class SettlementGenerateComponent {
         this.router.navigate(['/settlements', response.settlement.id]);
       },
       error: error => {
-        this.errorMessage = error?.error?.message || 'Unable to generate settlement report right now.';
+        this.errorMessage = apiErrorMessage(error, 'settlements.generate.error');
         this.generating = false;
         this.changeDetector.detectChanges();
       }

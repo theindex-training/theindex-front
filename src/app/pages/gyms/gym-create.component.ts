@@ -14,11 +14,14 @@ import {
 } from '../../services/gym-locations.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { trimmedLength } from '../../utils/form-validators.util';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-gym-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
   templateUrl: './gym-create.component.html'
 })
 export class GymCreateComponent {
@@ -28,7 +31,7 @@ export class GymCreateComponent {
   }>;
 
   submitting = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -57,7 +60,7 @@ export class GymCreateComponent {
     };
 
     this.submitting = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.gymsService.create(payload).subscribe({
       next: () => {
@@ -65,7 +68,7 @@ export class GymCreateComponent {
         this.router.navigate(['/gyms']);
       },
       error: (error) => {
-        this.errorMessage = error?.error?.message || 'Unable to create this gym right now.';
+        this.errorMessage = apiErrorMessage(error, 'gyms.create.error');
         this.submitting = false;
       },
     });

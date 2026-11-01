@@ -1,5 +1,11 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
+import { LanguageService } from '../../i18n/language.service';
+import { LocaleFormatService } from '../../i18n/locale-format.service';
+import { UiMessage } from '../../i18n/ui-message';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { ChipComponent, ChipTone } from '../chip/chip.component';
 import { IconComponent } from '../icon/icon.component';
 import { SkeletonListComponent } from '../skeleton-list/skeleton-list.component';
@@ -9,15 +15,27 @@ import { Subscription } from '../../services/subscriptions.service';
 @Component({
   selector: 'app-trainee-subscriptions-table',
   standalone: true,
-  imports: [NgTemplateOutlet, ChipComponent, IconComponent, SkeletonListComponent],
+  imports: [
+    NgTemplateOutlet,
+    TranslocoPipe,
+    EnumLabelPipe,
+    UiMessagePipe,
+    ChipComponent,
+    IconComponent,
+    SkeletonListComponent
+  ],
   templateUrl: './trainee-subscriptions-table.component.html'
 })
 export class TraineeSubscriptionsTableComponent {
+  readonly format = inject(LocaleFormatService);
+  private readonly i18n = inject(LanguageService);
+
   @Input() subscriptions: Subscription[] = [];
   @Input() plans: Plan[] = [];
   @Input() loading = false;
-  @Input() errorMessage = '';
-  @Input() emptyMessage = 'No subscriptions yet.';
+  @Input() errorMessage: UiMessage | null = null;
+  /** Translation key of the message shown when there are no subscriptions. */
+  @Input() emptyKey = 'subscriptions.empty';
   @Input() canDeleteSubscriptions = false;
   @Input() deletingSubscriptionId: string | null = null;
   @Input() showActionsColumn = true;
@@ -31,13 +49,13 @@ export class TraineeSubscriptionsTableComponent {
 
   formatEndsOrCredits(subscription: Subscription): string {
     if (subscription.type === 'TIME') {
-      return subscription.endsAt ? this.formatDate(subscription.endsAt) : '—';
+      return this.format.date(subscription.endsAt);
     }
 
     const initial = subscription.initialCredits ?? 0;
     const remaining = subscription.remainingCredits ?? 0;
     const used = Math.max(initial - remaining, 0);
-    return `${used} / ${initial} trainings`;
+    return this.i18n.t('subscriptions.creditsUsed', { used, total: initial });
   }
 
   statusTone(subscription: Subscription): ChipTone {
@@ -53,25 +71,6 @@ export class TraineeSubscriptionsTableComponent {
 
   isActiveSubscription(subscription: Subscription): boolean {
     return subscription.status.toUpperCase() === 'ACTIVE';
-  }
-
-  formatDate(value: string | null | undefined): string {
-    if (!value) {
-      return '—';
-    }
-
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: '2-digit',
-      year: 'numeric',
-    }).format(new Date(value));
-  }
-
-  formatPrice(priceCents: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(priceCents / 100);
   }
 
   onDelete(subscription: Subscription): void {

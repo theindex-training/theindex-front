@@ -1,0 +1,16 @@
+{
+  "before": {
+    "title": "Трениращи · The Index",
+    "lang": "bg",
+    "docs": 1
+  },
+  "after": {
+    "marker": "set before switching",
+    "navigations": 1,
+    "lang": "en",
+    "stored": "en",
+    "title": "Trainees · The Index"
+  },
+  "documentRequestsAfterSwitch": 0,
+  "switchMs": 108
+}

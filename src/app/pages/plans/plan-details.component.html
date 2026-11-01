@@ -1,46 +1,46 @@
 <section class="page-stack page-narrow">
   <app-page-header
-    title="Plan details"
-    subtitle="Review plan information and manage availability."
-    [back]="{ label: 'Back to plans', link: '/plans' }"
+    [title]="'plans.details.title' | transloco"
+    [subtitle]="'plans.details.subtitle' | transloco"
+    [back]="{ label: ('plans.backToList' | transloco), link: '/plans' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading plan...</p>
+    <p class="notice" role="status">{{ 'plans.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !plan) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (plan) {
     <div class="panel">
       <dl class="detail-list">
         <div>
-          <dt>Title</dt>
+          <dt>{{ 'plans.fields.title' | transloco }}</dt>
           <dd>{{ plan.title }}</dd>
         </div>
         <div>
-          <dt>Type</dt>
-          <dd>{{ plan.type }}</dd>
+          <dt>{{ 'plans.fields.type' | transloco }}</dt>
+          <dd>{{ plan.type | enumLabel: 'planType' }}</dd>
         </div>
         <div>
-          <dt>Price</dt>
+          <dt>{{ 'plans.fields.price' | transloco }}</dt>
           <dd>{{ formatPrice(plan.priceCents) }}</dd>
         </div>
         <div>
-          <dt>Details</dt>
+          <dt>{{ 'plans.list.detailsColumn' | transloco }}</dt>
           <dd>{{ formatPlanDetails(plan) }}</dd>
         </div>
         <div>
-          <dt>Status</dt>
+          <dt>{{ 'common.status' | transloco }}</dt>
           <dd>
             <app-status-dot [tone]="plan.isActive ? 'success' : 'neutral'">
-              {{ plan.isActive ? 'Active' : 'Inactive' }}
+              {{ plan.isActive ? ('plans.status.active' | transloco) : ('plans.status.inactive' | transloco) }}
             </app-status-dot>
           </dd>
         </div>
       </dl>
 
       <div class="form-actions">
-        <a class="btn btn--ghost" [routerLink]="['/plans', plan.id, 'delete']">Deactivate plan</a>
-        <a class="btn btn--primary" [routerLink]="['/plans', plan.id, 'edit']">Edit plan</a>
+        <a class="btn btn--ghost" [routerLink]="['/plans', plan.id, 'delete']">{{ 'plans.details.deactivate' | transloco }}</a>
+        <a class="btn btn--primary" [routerLink]="['/plans', plan.id, 'edit']">{{ 'plans.details.edit' | transloco }}</a>
       </div>
     </div>
   }

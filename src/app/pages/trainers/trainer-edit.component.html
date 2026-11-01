@@ -1,20 +1,20 @@
 <section class="page-stack">
   <app-page-header
-    title="Edit trainer"
-    subtitle="Update trainer profile information."
-    [back]="{ label: 'Back to trainers', link: '/trainers' }"
+    [title]="'trainers.edit.title' | transloco"
+    [subtitle]="'trainers.edit.subtitle' | transloco"
+    [back]="{ label: ('trainers.backToList' | transloco), link: '/trainers' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading trainer...</p>
+    <p class="notice" role="status">{{ 'trainers.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !trainer) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (trainer) {
     <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <div class="form-grid">
         <div class="form-row">
           <div class="form-field">
-            <label class="form-field__label" for="trainer-name">Name</label>
+            <label class="form-field__label" for="trainer-name">{{ 'trainers.fields.name' | transloco }}</label>
             <input
               id="trainer-name"
               type="text"
@@ -23,15 +23,15 @@
               [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
             />
             @if (form.controls.name.touched && form.controls.name.invalid) {
-              <span class="form-field__error" id="trainer-name-help">Enter a name of 2–100 characters.</span>
+              <span class="form-field__error" id="trainer-name-help">{{ 'trainers.fields.nameError' | transloco }}</span>
             } @else {
-              <span class="form-field__hint" id="trainer-name-help">2–100 characters.</span>
+              <span class="form-field__hint" id="trainer-name-help">{{ 'trainers.fields.nameHint' | transloco }}</span>
             }
           </div>
 
           <div class="form-field">
             <label class="form-field__label" for="trainer-nickname">
-              Nickname <span class="form-field__optional">(optional)</span>
+              {{ 'trainers.fields.nickname' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span>
             </label>
             <input
               id="trainer-nickname"
@@ -41,21 +41,21 @@
               [attr.aria-invalid]="form.controls.nickname.touched && form.controls.nickname.invalid"
             />
             @if (form.controls.nickname.touched && form.controls.nickname.invalid) {
-              <span class="form-field__error" id="trainer-nickname-help">Nickname must be 1–50 characters.</span>
+              <span class="form-field__error" id="trainer-nickname-help">{{ 'trainers.fields.nicknameError' | transloco }}</span>
             } @else {
-              <span class="form-field__hint" id="trainer-nickname-help">Up to 50 characters.</span>
+              <span class="form-field__hint" id="trainer-nickname-help">{{ 'trainers.fields.nicknameHint' | transloco }}</span>
             }
           </div>
         </div>
       </div>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
       }
 
       <div class="form-actions">
         <button class="btn btn--primary" type="submit" [disabled]="submitting">
-          {{ submitting ? 'Saving...' : 'Save changes' }}
+          {{ submitting ? ('common.saving' | transloco) : ('common.saveChanges' | transloco) }}
         </button>
       </div>
     </form>

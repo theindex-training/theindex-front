@@ -1,20 +1,28 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Plan, PlansService } from '../../services/plans.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import { LocaleFormatService } from '../../i18n/locale-format.service';
+import { LanguageService } from '../../i18n/language.service';
+import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 
 @Component({
   selector: 'app-plan-details',
   standalone: true,
-  imports: [CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  imports: [EnumLabelPipe, UiMessagePipe, TranslocoPipe, CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
   templateUrl: './plan-details.component.html'
 })
 export class PlanDetailsComponent implements OnInit {
+  private readonly i18n = inject(LanguageService);
+  readonly format = inject(LocaleFormatService);
   plan: Plan | null = null;
   loading = true;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly plansService: PlansService,
@@ -25,7 +33,7 @@ export class PlanDetailsComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.errorMessage = 'Plan ID is missing.';
+      this.errorMessage = i18nMessage('plans.errors.missingId');
       this.loading = false;
       return;
     }
@@ -38,7 +46,7 @@ export class PlanDetailsComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to load this plan.';
+          apiErrorMessage(error, 'plans.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
       }
@@ -46,16 +54,13 @@ export class PlanDetailsComponent implements OnInit {
   }
 
   formatPrice(priceCents: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(priceCents / 100);
+    return this.format.money(priceCents);
   }
 
   formatPlanDetails(plan: Plan): string {
     if (plan.type === 'PUNCH') {
-      return `${plan.credits ?? 0} credits`;
+      return this.i18n.t('plans.fields.creditsCount', { count: plan.credits ?? 0 });
     }
-    return `${plan.durationDays ?? 0} days`;
+    return this.i18n.t('plans.fields.daysCount', { count: plan.durationDays ?? 0 });
   }
 }

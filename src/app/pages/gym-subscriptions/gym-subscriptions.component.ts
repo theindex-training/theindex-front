@@ -15,11 +15,16 @@ import {
   GymSubscription,
   GymSubscriptionsService
 } from '../../services/gym-subscriptions.service';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-gym-subscriptions',
   standalone: true,
   imports: [
+    UiMessagePipe, 
+    TranslocoPipe, 
     RouterLink,
     PageHeaderComponent,
     SegmentedControlComponent,
@@ -36,12 +41,12 @@ export class GymSubscriptionsComponent implements OnInit {
   gymSubscriptions: GymSubscription[] = [];
   activeFilter: 'all' | 'active' | 'inactive' = 'all';
   readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
-    { value: 'all', label: 'All' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' }
+    { value: 'all', label: 'common.all' },
+    { value: 'active', label: 'common.active' },
+    { value: 'inactive', label: 'common.inactive' }
   ];
   loading = true;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly gymSubscriptionsService: GymSubscriptionsService,
@@ -54,7 +59,7 @@ export class GymSubscriptionsComponent implements OnInit {
 
   loadGymSubscriptions(): void {
     this.loading = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     const includeInactive = this.activeFilter !== 'active';
 
@@ -69,7 +74,7 @@ export class GymSubscriptionsComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to load gym subscriptions right now.';
+          apiErrorMessage(error, 'gymSubscriptions.list.loadErrorMessage');
         this.loading = false;
         this.changeDetector.detectChanges();
       }

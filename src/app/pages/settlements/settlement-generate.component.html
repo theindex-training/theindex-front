@@ -1,32 +1,32 @@
 <section class="page-stack">
   <app-page-header
-    title="Generate settlement report"
-    subtitle="Create a new settlement using period start and period end dates."
-    [back]="{ label: 'Back to settlements', link: '/settlements' }"
+    [title]="'settlements.generate.title' | transloco"
+    [subtitle]="'settlements.generate.subtitle' | transloco"
+    [back]="{ label: ('settlements.backToList' | transloco), link: '/settlements' }"
   />
 
   <article class="panel">
     <div class="form-grid">
       <div class="form-row">
         <div class="form-field">
-          <label class="form-field__label" for="settlement-period-start">Period start</label>
+          <label class="form-field__label" for="settlement-period-start">{{ 'settlements.generate.periodStart' | transloco }}</label>
           <input id="settlement-period-start" type="date" [(ngModel)]="periodStart" />
         </div>
 
         <div class="form-field">
-          <label class="form-field__label" for="settlement-period-end">Period end</label>
+          <label class="form-field__label" for="settlement-period-end">{{ 'settlements.generate.periodEnd' | transloco }}</label>
           <input id="settlement-period-end" type="date" [(ngModel)]="periodEnd" />
         </div>
       </div>
     </div>
 
     @if (errorMessage) {
-      <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+      <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
     }
 
     <div class="form-actions">
       <button class="btn btn--primary" type="button" (click)="generateSettlement()" [disabled]="generating">
-        {{ generating ? 'Generating...' : 'Generate report' }}
+        {{ generating ? ('settlements.generate.generating' | transloco) : ('settlements.generate.submit' | transloco) }}
       </button>
     </div>
   </article>

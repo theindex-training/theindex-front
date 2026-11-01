@@ -1,68 +1,68 @@
 <section class="page-stack">
   <app-page-header
-    title="Settlement report"
-    subtitle="Settlement totals and allocation rows for this report."
-    [back]="{ label: 'Back to settlements', link: '/settlements' }"
+    [title]="'settlements.details.title' | transloco"
+    [subtitle]="'settlements.details.subtitle' | transloco"
+    [back]="{ label: ('settlements.backToList' | transloco), link: '/settlements' }"
   />
 
   @if (loading) {
-    <app-skeleton-list label="Loading settlement" [rows]="3" />
+    <app-skeleton-list [label]="'settlements.details.loading' | transloco" [rows]="3" />
   } @else if (errorMessage && !settlement) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (settlement) {
     <article class="panel">
       <dl class="detail-list">
         <div>
-          <dt>Status</dt>
+          <dt>{{ 'common.status' | transloco }}</dt>
           <dd>
             <app-chip [tone]="settlement.status === 'FINAL' ? 'success' : 'warning'">
-              {{ settlement.status === 'FINAL' ? 'Final' : 'Draft' }}
+              {{ settlement.status | enumLabel: 'settlementStatus' }}
             </app-chip>
           </dd>
         </div>
         <div>
-          <dt>Period start</dt>
-          <dd class="num">{{ settlement.periodStart }}</dd>
+          <dt>{{ 'settlements.generate.periodStart' | transloco }}</dt>
+          <dd class="num">{{ format.date(settlement.periodStart) }}</dd>
         </div>
         <div>
-          <dt>Period end</dt>
-          <dd class="num">{{ settlement.periodEnd }}</dd>
+          <dt>{{ 'settlements.generate.periodEnd' | transloco }}</dt>
+          <dd class="num">{{ format.date(settlement.periodEnd) }}</dd>
         </div>
         <div>
-          <dt>Generated at</dt>
+          <dt>{{ 'settlements.details.generatedAt' | transloco }}</dt>
           <dd class="num">{{ formatDate(settlement.generatedAt) }}</dd>
         </div>
       </dl>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
       }
 
       @if (isAdmin && settlement.status === 'DRAFT') {
         <div class="form-actions">
           <button class="btn btn--primary" type="button" (click)="finalizeSettlement()" [disabled]="finalizing">
-            {{ finalizing ? 'Finalizing...' : 'Finalize settlement' }}
+            {{ finalizing ? ('settlements.details.finalizing' | transloco) : ('settlements.details.finalize' | transloco) }}
           </button>
         </div>
       }
     </article>
 
     <section class="page-stack" aria-labelledby="lines-title">
-      <h2 class="panel__title" id="lines-title">Trainer totals</h2>
+      <h2 class="panel__title" id="lines-title">{{ 'settlements.details.trainerTotals' | transloco }}</h2>
       @if (!lines.length) {
-        <p class="notice" role="status">No trainer totals found for this settlement.</p>
+        <p class="notice" role="status">{{ 'settlements.details.noTotals' | transloco }}</p>
       } @else {
-        <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Trainer totals table">
+        <div class="data-table-wrap responsive-table" tabindex="0" role="region" [attr.aria-label]="'settlements.details.trainerTotalsTable' | transloco">
           <table class="data-table">
-            <caption class="visually-hidden">Trainer totals</caption>
+            <caption class="visually-hidden">{{ 'settlements.details.trainerTotals' | transloco }}</caption>
             <thead>
               <tr>
-                <th scope="col">Trainer</th>
-                <th scope="col" class="cell-right">Total</th>
-                <th scope="col" class="cell-right">Trainings</th>
-                <th scope="col" class="cell-right">Unpaid</th>
-                <th scope="col" class="cell-right">Punch</th>
-                <th scope="col" class="cell-right">Time</th>
+                <th scope="col">{{ 'settlements.details.trainer' | transloco }}</th>
+                <th scope="col" class="cell-right">{{ 'settlements.details.total' | transloco }}</th>
+                <th scope="col" class="cell-right">{{ 'settlements.details.trainings' | transloco }}</th>
+                <th scope="col" class="cell-right">{{ 'settlements.details.unpaid' | transloco }}</th>
+                <th scope="col" class="cell-right">{{ 'settlements.details.punch' | transloco }}</th>
+                <th scope="col" class="cell-right">{{ 'settlements.details.time' | transloco }}</th>
               </tr>
             </thead>
             <tbody>
@@ -87,21 +87,26 @@
           </table>
         </div>
 
-        <ul class="list-card responsive-list" aria-label="Trainer totals">
+        <ul class="list-card responsive-list" [attr.aria-label]="'settlements.details.trainerTotals' | transloco">
           @for (line of lines; track line.id) {
             <li class="record">
               <app-avatar [name]="formatTrainer(line.trainerId)" />
               <div class="record__main">
                 <span class="record__title">{{ formatTrainer(line.trainerId) }}</span>
                 <span class="record__meta">
-                  {{ line.attendanceCount }} trainings ·
-                  <span [class.text-danger]="line.unpaidAttendanceCount > 0">{{ line.unpaidAttendanceCount }} unpaid</span>
+                  {{ 'settlements.details.trainingsCount' | transloco: { count: line.attendanceCount } }} ·
+                  <span [class.text-danger]="line.unpaidAttendanceCount > 0">{{
+                    'settlements.details.unpaidCount' | transloco: { count: line.unpaidAttendanceCount }
+                  }}</span>
                 </span>
               </div>
               <div class="record__aside">
                 <span class="num total">{{ formatCurrency(line.amountCents) }}</span>
                 <span class="record__meta num">
-                  Punch {{ formatCurrency(line.details.punchCents) }} · Time {{ formatCurrency(line.details.timeCents) }}
+                  {{
+                    'settlements.details.punchTime'
+                      | transloco: { punch: formatCurrency(line.details.punchCents), time: formatCurrency(line.details.timeCents) }
+                  }}
                 </span>
               </div>
             </li>
@@ -111,14 +116,14 @@
     </section>
 
     <section class="page-stack" aria-labelledby="allocations-title">
-      <h2 class="panel__title" id="allocations-title">Allocations</h2>
+      <h2 class="panel__title" id="allocations-title">{{ 'settlements.details.allocations' | transloco }}</h2>
 
       @if (isAdmin) {
         <div class="list-toolbar">
           <label class="form-field allocation-filter">
-            <span class="form-field__label">Trainer</span>
+            <span class="form-field__label">{{ 'settlements.details.trainer' | transloco }}</span>
             <select [(ngModel)]="selectedTrainerId" (change)="loadAllocations()">
-              <option value="">All trainers</option>
+              <option value="">{{ 'settlements.details.allTrainers' | transloco }}</option>
               @for (trainer of trainers; track trainer.id) {
                 <option [value]="trainer.id">{{ trainer.nickname || trainer.name }}</option>
               }
@@ -126,32 +131,32 @@
           </label>
           @if (!loadingAllocations && !allocationError && allocations.length) {
             <p class="list-toolbar__count" aria-live="polite">
-              Showing {{ allocations.length }} of {{ allocationsTotal }} rows
+              {{ 'settlements.details.showing' | transloco: { shown: allocations.length, total: allocationsTotal } }}
             </p>
           }
         </div>
       } @else if (!loadingAllocations && !allocationError && allocations.length) {
-        <p class="list-toolbar__count" aria-live="polite">Showing {{ allocations.length }} of {{ allocationsTotal }} rows</p>
+        <p class="list-toolbar__count" aria-live="polite">{{ 'settlements.details.showing' | transloco: { shown: allocations.length, total: allocationsTotal } }}</p>
       }
 
       @if (loadingAllocations) {
-        <app-skeleton-list label="Loading allocations" [rows]="4" />
+        <app-skeleton-list [label]="'settlements.details.loadingAllocations' | transloco" [rows]="4" />
       } @else if (allocationError) {
-        <p class="notice notice--danger" role="alert">{{ allocationError }}</p>
+        <p class="notice notice--danger" role="alert">{{ allocationError | uiMessage }}</p>
       } @else if (!allocations.length) {
-        <p class="notice" role="status">No allocations to display.</p>
+        <p class="notice" role="status">{{ 'settlements.details.noAllocations' | transloco }}</p>
       } @else {
-        <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Allocations table">
+        <div class="data-table-wrap responsive-table" tabindex="0" role="region" [attr.aria-label]="'settlements.details.allocationsTable' | transloco">
           <table class="data-table">
-            <caption class="visually-hidden">Allocations</caption>
+            <caption class="visually-hidden">{{ 'settlements.details.allocations' | transloco }}</caption>
             <thead>
               <tr>
-                <th scope="col">Trained at</th>
-                <th scope="col">Trainee</th>
-                <th scope="col">Trainer</th>
-                <th scope="col">Subscription</th>
-                <th scope="col">Gym</th>
-                <th scope="col" class="cell-right">Value</th>
+                <th scope="col">{{ 'settlements.details.trainedAt' | transloco }}</th>
+                <th scope="col">{{ 'settlements.details.trainee' | transloco }}</th>
+                <th scope="col">{{ 'settlements.details.trainer' | transloco }}</th>
+                <th scope="col">{{ 'settlements.details.subscription' | transloco }}</th>
+                <th scope="col">{{ 'settlements.details.gym' | transloco }}</th>
+                <th scope="col" class="cell-right">{{ 'settlements.details.value' | transloco }}</th>
               </tr>
             </thead>
             <tbody>
@@ -166,7 +171,7 @@
                   <td>{{ formatTrainer(row.trainerId) }}</td>
                   <td>
                     @if (row.subscriptionType) {
-                      <app-chip>{{ row.subscriptionType }}</app-chip>
+                      <app-chip>{{ row.subscriptionType | enumLabel: 'planType' }}</app-chip>
                     } @else {
                       <span class="text-muted">—</span>
                     }
@@ -179,7 +184,7 @@
           </table>
         </div>
 
-        <ul class="list-card responsive-list" aria-label="Allocations">
+        <ul class="list-card responsive-list" [attr.aria-label]="'settlements.details.allocations' | transloco">
           @for (row of allocations; track row.id) {
             <li class="record">
               <div class="record__main">
@@ -192,7 +197,7 @@
               <div class="record__aside">
                 <span class="num total">{{ formatCurrency(row.valueCents) }}</span>
                 @if (row.subscriptionType) {
-                  <app-chip>{{ row.subscriptionType }}</app-chip>
+                  <app-chip>{{ row.subscriptionType | enumLabel: 'planType' }}</app-chip>
                 }
               </div>
             </li>

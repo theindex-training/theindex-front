@@ -75,8 +75,9 @@
 
 :root {
   // Typography
-  --font-heading: 'Barlow Condensed', 'Arial Narrow', sans-serif-condensed, sans-serif;
-  --font-body: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  // Sofia Sans has full Cyrillic with Bulgarian letterforms; Barlow had no Cyrillic on Google Fonts.
+  --font-heading: 'Sofia Sans Condensed', 'Arial Narrow', sans-serif-condensed, sans-serif;
+  --font-body: 'Sofia Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --heading-tracking: 0.02em;
   --label-tracking: 0.08em;
 

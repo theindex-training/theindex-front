@@ -7,11 +7,16 @@ import { ListRowComponent } from '../../components/list-row/list-row.component';
 import { IconComponent } from '../../components/icon/icon.component';
 import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
 import { formatTimeWithoutSeconds } from '../../utils/time-display';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-training-times',
   standalone: true,
   imports: [
+    UiMessagePipe, 
+    TranslocoPipe, 
     RouterLink,
     PageHeaderComponent,
     SkeletonListComponent,
@@ -24,7 +29,7 @@ import { formatTimeWithoutSeconds } from '../../utils/time-display';
 export class TrainingTimesComponent implements OnInit {
   trainingTimes: TrainingTime[] = [];
   loading = true;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly trainingTimesService: TrainingTimesService,
@@ -37,7 +42,7 @@ export class TrainingTimesComponent implements OnInit {
 
   loadTrainingTimes(): void {
     this.loading = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.trainingTimesService.list().subscribe({
       next: (trainingTimes) => {
@@ -46,7 +51,7 @@ export class TrainingTimesComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = error?.error?.message || 'Unable to load training times right now.';
+        this.errorMessage = apiErrorMessage(error, 'trainingTimes.list.loadErrorMessage');
         this.loading = false;
         this.changeDetector.detectChanges();
       }

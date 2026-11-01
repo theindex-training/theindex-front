@@ -8,11 +8,13 @@
     autocomplete="off"
     [id]="id"
     [value]="value"
-    [placeholder]="placeholder"
+    [placeholder]="placeholder || ('common.search' | transloco)"
     (input)="handleInput($event)"
   />
   @if (value) {
-    <button class="search__clear" type="button" aria-label="Clear search" (click)="clear(input)">
+    <button class="search__clear" type="button" [attr.aria-label]="'common.clearSearch' | transloco"
+      (click)="clear(input)"
+    >
       <app-icon name="close" />
     </button>
   }

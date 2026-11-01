@@ -1,4 +1,4 @@
-<nav class="tab-bar" aria-label="Main">
+<nav class="tab-bar" [attr.aria-label]="'nav.mainLabel' | transloco">
   <ul class="tab-bar__list">
     @for (tab of tabs; track tab.route) {
       <li>
@@ -11,7 +11,7 @@
           [routerLinkActiveOptions]="{ exact: !!tab.exact }"
         >
           <span class="tab__icon"><app-icon [name]="tab.icon" /></span>
-          <span class="tab__label">{{ tab.tabLabel ?? tab.label }}</span>
+          <span class="tab__label">{{ tab.tabLabel ?? tab.label | transloco }}</span>
         </a>
       </li>
     }
@@ -25,8 +25,8 @@
         [class.is-active]="sheetActive || sheetOpen"
         (click)="openSheet.emit(sheetButton)"
       >
-        <span class="tab__icon"><app-icon [name]="sheetLabel === 'More' ? 'more' : 'settings'" /></span>
-        <span class="tab__label">{{ sheetLabel }}</span>
+        <span class="tab__icon"><app-icon [name]="sheetLabel === 'nav.more' ? 'more' : 'settings'" /></span>
+        <span class="tab__label">{{ sheetLabel | transloco }}</span>
       </button>
     </li>
   </ul>

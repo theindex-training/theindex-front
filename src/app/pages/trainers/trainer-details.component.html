@@ -1,40 +1,40 @@
 <section class="page-stack page-narrow">
   <app-page-header
-    title="Trainer details"
-    subtitle="Review trainer information and account access."
-    [back]="{ label: 'Back to trainers', link: '/trainers' }"
+    [title]="'trainers.details.title' | transloco"
+    [subtitle]="'trainers.details.subtitle' | transloco"
+    [back]="{ label: ('trainers.backToList' | transloco), link: '/trainers' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading trainer...</p>
+    <p class="notice" role="status">{{ 'trainers.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !trainer) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (trainer) {
     <div class="panel">
       <dl class="detail-list">
         <div>
-          <dt>Name</dt>
+          <dt>{{ 'trainers.fields.name' | transloco }}</dt>
           <dd>{{ trainer.name }}</dd>
         </div>
         <div>
-          <dt>Nickname</dt>
+          <dt>{{ 'trainers.fields.nickname' | transloco }}</dt>
           <dd>{{ formatNickname() }}</dd>
         </div>
         <div>
-          <dt>Account</dt>
+          <dt>{{ 'trainers.fields.account' | transloco }}</dt>
           <dd>
             @if (hasLinkedAccount()) {
-              <span class="linked-mark">Linked</span>
+              <span class="linked-mark">{{ 'common.linked' | transloco }}</span>
             } @else {
-              <span class="text-muted">Not linked</span>
+              <span class="text-muted">{{ 'common.notLinked' | transloco }}</span>
             }
           </dd>
         </div>
         <div>
-          <dt>Status</dt>
+          <dt>{{ 'common.status' | transloco }}</dt>
           <dd>
             <app-status-dot [tone]="trainer.isActive ? 'success' : 'neutral'">
-              {{ trainer.isActive ? 'Active' : 'Inactive' }}
+              {{ trainer.isActive ? ('trainers.status.active' | transloco) : ('trainers.status.inactive' | transloco) }}
             </app-status-dot>
           </dd>
         </div>
@@ -42,29 +42,29 @@
 
       @if (account) {
         <section class="panel-section" aria-labelledby="trainer-account-title">
-          <h2 class="panel__title" id="trainer-account-title">Account information</h2>
+          <h2 class="panel__title" id="trainer-account-title">{{ 'trainers.details.accountInfo' | transloco }}</h2>
           <dl class="detail-list">
             <div>
-              <dt>Email</dt>
+              <dt>{{ 'trainers.details.email' | transloco }}</dt>
               <dd>{{ account.email }}</dd>
             </div>
             <div>
-              <dt>Role</dt>
-              <dd>{{ account.role }}</dd>
+              <dt>{{ 'trainers.details.role' | transloco }}</dt>
+              <dd>{{ account.role | enumLabel: 'role' }}</dd>
             </div>
             <div>
-              <dt>Status</dt>
-              <dd>{{ account.status }}</dd>
+              <dt>{{ 'common.status' | transloco }}</dt>
+              <dd>{{ account.status | enumLabel: 'accountStatus' }}</dd>
             </div>
           </dl>
         </section>
       }
 
       <div class="form-actions">
-        <a class="btn btn--ghost" [routerLink]="['/trainers', trainer.id, 'delete']">Deactivate trainer</a>
-        <a class="btn btn--secondary" [routerLink]="['/trainers', trainer.id, 'edit']">Edit trainer</a>
+        <a class="btn btn--ghost" [routerLink]="['/trainers', trainer.id, 'delete']">{{ 'trainers.details.deactivate' | transloco }}</a>
+        <a class="btn btn--secondary" [routerLink]="['/trainers', trainer.id, 'edit']">{{ 'trainers.details.edit' | transloco }}</a>
         <a class="btn btn--primary" [routerLink]="['/trainers', trainer.id, 'account']">
-          {{ trainer.accountId ? 'Manage account' : 'Create account' }}
+          {{ trainer.accountId ? ('trainers.details.manageAccount' | transloco) : ('trainers.details.createAccount' | transloco) }}
         </a>
       </div>
     </div>

@@ -10,7 +10,7 @@
         [checked]="option.value === value"
         (change)="select(option.value)"
       />
-      {{ option.label }}
+      {{ option.label | transloco }}
     </label>
   }
 </fieldset>

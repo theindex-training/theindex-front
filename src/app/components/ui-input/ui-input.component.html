@@ -20,8 +20,8 @@
       <button
         class="ui-input__toggle"
         type="button"
-        [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-        [title]="showPassword ? 'Hide password' : 'Show password'"
+        [attr.aria-label]="(showPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
+        [title]="(showPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
         (click)="togglePasswordVisibility()"
       >
         <app-icon [name]="showPassword ? 'eye-off' : 'eye'" />

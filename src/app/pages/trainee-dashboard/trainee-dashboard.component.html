@@ -1,17 +1,17 @@
 <section class="page-stack">
-  <app-page-header title="My profile" subtitle="Your subscriptions and training attendance." />
+  <app-page-header [title]="'traineeDashboard.title' | transloco" [subtitle]="'traineeDashboard.subtitle' | transloco" />
 
   @if (errorMessage && loading) {
-    <app-empty-state tone="danger" title="Couldn't load your profile" [message]="errorMessage" />
+    <app-empty-state tone="danger" [title]="'traineeDashboard.loadErrorTitle' | transloco" [message]="errorMessage | uiMessage" />
   } @else {
     <section class="page-stack" aria-labelledby="my-subscriptions-title">
       <div class="section-header">
         <div>
-          <h2 class="panel__title" id="my-subscriptions-title">Subscriptions</h2>
-          <p class="text-muted section-header__sub">Your current and past subscriptions.</p>
+          <h2 class="panel__title" id="my-subscriptions-title">{{ 'traineeDashboard.subscriptions' | transloco }}</h2>
+          <p class="text-muted section-header__sub">{{ 'traineeDashboard.subscriptionsSub' | transloco }}</p>
         </div>
         <app-segmented-control
-          label="Subscription filter"
+          [label]="'traineeDashboard.subscriptionFilter' | transloco"
           [options]="subscriptionFilterOptions"
           [value]="subscriptionFilter"
           (valueChange)="subscriptionFilter = $event"
@@ -23,7 +23,7 @@
         [plans]="plans"
         [loading]="subscriptionsLoading"
         [errorMessage]="subscriptionErrorMessage"
-        [emptyMessage]="filteredSubscriptionsEmptyMessage"
+        [emptyKey]="filteredSubscriptionsEmptyKey"
         [showActionsColumn]="false"
       ></app-trainee-subscriptions-table>
     </section>
@@ -31,8 +31,8 @@
     <section class="page-stack" aria-labelledby="my-trainings-title">
       <div class="section-header">
         <div>
-          <h2 class="panel__title" id="my-trainings-title">Trainings</h2>
-          <p class="text-muted section-header__sub">Your completed trainings.</p>
+          <h2 class="panel__title" id="my-trainings-title">{{ 'traineeDashboard.trainings' | transloco }}</h2>
+          <p class="text-muted section-header__sub">{{ 'traineeDashboard.trainingsSub' | transloco }}</p>
         </div>
       </div>
 
@@ -40,7 +40,7 @@
         [trainings]="trainings"
         [loading]="trainingsLoading"
         [errorMessage]="trainingErrorMessage"
-        [emptyMessage]="'No trainings yet.'"
+        emptyKey="traineeDashboard.noTrainings"
       ></app-trainee-trainings-table>
     </section>
   }

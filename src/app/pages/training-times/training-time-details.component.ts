@@ -4,17 +4,20 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
 import { formatTimeWithoutSeconds } from '../../utils/time-display';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-training-time-details',
   standalone: true,
-  imports: [CommonModule, RouterLink, PageHeaderComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, RouterLink, PageHeaderComponent],
   templateUrl: './training-time-details.component.html'
 })
 export class TrainingTimeDetailsComponent implements OnInit {
   trainingTime: TrainingTime | null = null;
   loading = true;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly trainingTimesService: TrainingTimesService,
@@ -25,7 +28,7 @@ export class TrainingTimeDetailsComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.errorMessage = 'Training time ID is missing.';
+      this.errorMessage = i18nMessage('trainingTimes.errors.missingId');
       this.loading = false;
       return;
     }
@@ -37,7 +40,7 @@ export class TrainingTimeDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = error?.error?.message || 'Unable to load this training time.';
+        this.errorMessage = apiErrorMessage(error, 'trainingTimes.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
       }

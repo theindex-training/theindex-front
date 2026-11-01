@@ -1,40 +1,40 @@
 <section class="page-stack">
-  <app-page-header title="Stats" subtitle="Insights based on your training attendance." />
+  <app-page-header [title]="'nav.stats' | transloco" [subtitle]="'stats.subtitle' | transloco" />
 
   @if (loading) {
-    <app-skeleton-list label="Loading stats" [rows]="4" />
+    <app-skeleton-list [label]="'stats.loading' | transloco" [rows]="4" />
   } @else if (errorMessage) {
-    <app-empty-state tone="danger" title="Couldn't load your stats" [message]="errorMessage" />
+    <app-empty-state tone="danger" [title]="'stats.loadError' | transloco" [message]="errorMessage | uiMessage" />
   } @else if (insights) {
     <div class="stats-grid">
       <app-ranked-list
-        title="Top training partners"
-        subtitle="People you have trained with most often."
-        unit="together"
+        [title]="'stats.partners' | transloco"
+        [subtitle]="'stats.partnersSub' | transloco"
+        countKey="stats.togetherCount"
         [items]="partners"
       />
       <app-ranked-list
-        title="Top weekdays"
-        subtitle="The weekdays you train on most often."
-        unit="trainings"
+        [title]="'stats.weekdays' | transloco"
+        [subtitle]="'stats.weekdaysSub' | transloco"
+        countKey="stats.trainingsCount"
         [items]="weekdays"
       />
       <app-ranked-list
-        title="Top timeslots"
-        subtitle="Hours of day with the most training sessions."
-        unit="trainings"
+        [title]="'stats.timeSlots' | transloco"
+        [subtitle]="'stats.timeSlotsSub' | transloco"
+        countKey="stats.trainingsCount"
         [items]="timeSlots"
       />
       <app-ranked-list
-        title="Top trainers"
-        subtitle="Trainers you have the most sessions with."
-        unit="trainings"
+        [title]="'stats.trainers' | transloco"
+        [subtitle]="'stats.trainersSub' | transloco"
+        countKey="stats.trainingsCount"
         [items]="trainers"
       />
       <app-ranked-list
-        title="Top gyms"
-        subtitle="Gyms where you train most often."
-        unit="trainings"
+        [title]="'stats.gyms' | transloco"
+        [subtitle]="'stats.gymsSub' | transloco"
+        countKey="stats.trainingsCount"
         [items]="gyms"
       />
     </div>

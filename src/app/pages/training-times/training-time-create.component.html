@@ -1,15 +1,15 @@
 <section class="page-stack">
   <app-page-header
-    title="Create training time"
-    subtitle="Add a new attendance training slot."
-    [back]="{ label: 'Back to training times', link: '/training-times' }"
+    [title]="'trainingTimes.create.title' | transloco"
+    [subtitle]="'trainingTimes.create.subtitle' | transloco"
+    [back]="{ label: ('trainingTimes.backToList' | transloco), link: '/training-times' }"
   />
 
   <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
     <div class="form-grid">
       <div class="form-row">
         <div class="form-field">
-          <label class="form-field__label" for="training-time-start-time">Start time</label>
+          <label class="form-field__label" for="training-time-start-time">{{ 'trainingTimes.fields.startTime' | transloco }}</label>
           <input
             id="training-time-start-time"
             type="time"
@@ -18,12 +18,12 @@
             [attr.aria-invalid]="form.controls.startTime.touched && form.controls.startTime.invalid"
           />
           @if (form.controls.startTime.touched && form.controls.startTime.invalid) {
-            <span class="form-field__error" id="training-time-start-time-help">Start time is required.</span>
+            <span class="form-field__error" id="training-time-start-time-help">{{ 'trainingTimes.fields.startRequired' | transloco }}</span>
           }
         </div>
 
         <div class="form-field">
-          <label class="form-field__label" for="training-time-end-time">End time</label>
+          <label class="form-field__label" for="training-time-end-time">{{ 'trainingTimes.fields.endTime' | transloco }}</label>
           <input
             id="training-time-end-time"
             type="time"
@@ -32,19 +32,19 @@
             [attr.aria-invalid]="form.controls.endTime.touched && form.controls.endTime.invalid"
           />
           @if (form.controls.endTime.touched && form.controls.endTime.invalid) {
-            <span class="form-field__error" id="training-time-end-time-help">End time is required.</span>
+            <span class="form-field__error" id="training-time-end-time-help">{{ 'trainingTimes.fields.endRequired' | transloco }}</span>
           }
         </div>
       </div>
     </div>
 
     @if (errorMessage) {
-      <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+      <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
     }
 
     <div class="form-actions">
       <button class="btn btn--primary" type="submit" [disabled]="submitting">
-        {{ submitting ? 'Saving...' : 'Create training time' }}
+        {{ submitting ? ('common.saving' | transloco) : ('trainingTimes.create.submit' | transloco) }}
       </button>
     </div>
   </form>

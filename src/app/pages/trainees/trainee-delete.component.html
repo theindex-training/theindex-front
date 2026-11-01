@@ -1,46 +1,46 @@
 <section class="page-stack page-narrow">
   <app-page-header
-    title="Deactivate trainee"
-    subtitle="Disable access for a trainee while keeping their profile."
-    [back]="{ label: 'Back to trainees', link: '/trainees' }"
+    [title]="'trainees.delete.title' | transloco"
+    [subtitle]="'trainees.delete.subtitle' | transloco"
+    [back]="{ label: ('trainees.backToList' | transloco), link: '/trainees' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading trainee...</p>
+    <p class="notice" role="status">{{ 'trainees.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !trainee) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (trainee) {
     <div class="panel">
       <dl class="detail-list">
         <div>
-          <dt>Name</dt>
+          <dt>{{ 'trainees.fields.name' | transloco }}</dt>
           <dd>{{ trainee.name }}</dd>
         </div>
         <div>
-          <dt>Nickname</dt>
+          <dt>{{ 'trainees.fields.nickname' | transloco }}</dt>
           <dd>{{ formatNickname() }}</dd>
         </div>
         <div>
-          <dt>Phone</dt>
+          <dt>{{ 'trainees.fields.phone' | transloco }}</dt>
           <dd>{{ formatPhone() }}</dd>
         </div>
         <div>
-          <dt>Account</dt>
+          <dt>{{ 'trainees.fields.account' | transloco }}</dt>
           <dd>{{ formatAccount() }}</dd>
         </div>
       </dl>
 
       <p class="notice notice--warning">
-        This trainee will no longer be active, but their profile can be reactivated later.
+        {{ 'trainees.delete.warning' | transloco }}
       </p>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
       }
 
       <div class="form-actions">
         <button class="btn btn--danger-solid" type="button" (click)="confirmDeactivate()" [disabled]="submitting">
-          {{ submitting ? 'Deactivating...' : 'Deactivate trainee' }}
+          {{ submitting ? ('common.deactivating' | transloco) : ('trainees.delete.submit' | transloco) }}
         </button>
       </div>
     </div>

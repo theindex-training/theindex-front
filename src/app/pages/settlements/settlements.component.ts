@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
@@ -8,11 +8,20 @@ import { ListRowComponent } from '../../components/list-row/list-row.component';
 import { IconComponent } from '../../components/icon/icon.component';
 import { AuthService } from '../../services/auth.service';
 import { Settlement, SettlementsService } from '../../services/settlements.service';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
+import { LocaleFormatService } from '../../i18n/locale-format.service';
+import { LanguageService } from '../../i18n/language.service';
+import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 
 @Component({
   selector: 'app-settlements',
   standalone: true,
   imports: [
+    EnumLabelPipe, 
+    UiMessagePipe, 
+    TranslocoPipe, 
     RouterLink,
     PageHeaderComponent,
     SkeletonListComponent,
@@ -24,10 +33,12 @@ import { Settlement, SettlementsService } from '../../services/settlements.servi
   templateUrl: './settlements.component.html'
 })
 export class SettlementsComponent implements OnInit {
+  private readonly i18n = inject(LanguageService);
+  readonly format = inject(LocaleFormatService);
   settlements: Settlement[] = [];
 
   loading = true;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
   deletingSettlementId: string | null = null;
   canManageSettlements = false;
 
@@ -44,7 +55,7 @@ export class SettlementsComponent implements OnInit {
 
   loadSettlements(): void {
     this.loading = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.settlementsService.list().subscribe({
       next: settlements => {
@@ -53,7 +64,7 @@ export class SettlementsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: error => {
-        this.errorMessage = error?.error?.message || 'Unable to load settlements right now.';
+        this.errorMessage = apiErrorMessage(error, 'settlements.list.loadErrorMessage');
         this.loading = false;
         this.changeDetector.detectChanges();
       }
@@ -70,7 +81,10 @@ export class SettlementsComponent implements OnInit {
     }
 
     const confirmed = window.confirm(
-      `Delete settlement for ${settlement.periodStart} to ${settlement.periodEnd}?`
+      this.i18n.t('settlements.list.confirmDelete', {
+        start: this.format.date(settlement.periodStart),
+        end: this.format.date(settlement.periodEnd)
+      })
     );
 
     if (!confirmed) {
@@ -86,7 +100,7 @@ export class SettlementsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: error => {
-        this.errorMessage = error?.error?.message || 'Unable to delete settlement right now.';
+        this.errorMessage = apiErrorMessage(error, 'settlements.list.deleteError');
         this.deletingSettlementId = null;
         this.changeDetector.detectChanges();
       }
@@ -94,6 +108,6 @@ export class SettlementsComponent implements OnInit {
   }
 
   formatDate(date: string): string {
-    return new Date(date).toLocaleString();
+    return this.format.dateTime(date);
   }
 }

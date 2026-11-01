@@ -15,11 +15,14 @@ import {
 } from '../../services/gym-subscriptions.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { trimmedLength } from '../../utils/form-validators.util';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-gym-subscription-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
   templateUrl: './gym-subscription-edit.component.html'
 })
 export class GymSubscriptionEditComponent implements OnInit {
@@ -30,7 +33,7 @@ export class GymSubscriptionEditComponent implements OnInit {
   gymSubscription: GymSubscription | null = null;
   loading = true;
   submitting = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -50,7 +53,7 @@ export class GymSubscriptionEditComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.errorMessage = 'Gym subscription ID is missing.';
+      this.errorMessage = i18nMessage('gymSubscriptions.errors.missingId');
       this.loading = false;
       return;
     }
@@ -65,7 +68,7 @@ export class GymSubscriptionEditComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = error?.error?.message || 'Unable to load this gym subscription.';
+        this.errorMessage = apiErrorMessage(error, 'gymSubscriptions.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
       }
@@ -87,7 +90,7 @@ export class GymSubscriptionEditComponent implements OnInit {
     };
 
     this.submitting = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.gymSubscriptionsService.update(this.gymSubscription.id, payload).subscribe({
       next: () => {
@@ -96,7 +99,7 @@ export class GymSubscriptionEditComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to update this gym subscription right now.';
+          apiErrorMessage(error, 'gymSubscriptions.edit.error');
         this.submitting = false;
       }
     });

@@ -12,6 +12,9 @@ import {
 import { Router } from '@angular/router';
 import { CreatePlanPayload, PlanType, PlansService } from '../../services/plans.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 
 const integerValidator: ValidatorFn = (control: AbstractControl) => {
   const value = control.value;
@@ -40,7 +43,7 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
 @Component({
   selector: 'app-plan-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
   templateUrl: './plan-create.component.html'
 })
 export class PlanCreateComponent implements OnInit {
@@ -54,7 +57,7 @@ export class PlanCreateComponent implements OnInit {
   }>;
 
   submitting = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -102,7 +105,7 @@ export class PlanCreateComponent implements OnInit {
     }
 
     this.submitting = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.plansService.create(payload).subscribe({
       next: () => {
@@ -111,7 +114,7 @@ export class PlanCreateComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to create this plan right now.';
+          apiErrorMessage(error, 'plans.create.error');
         this.submitting = false;
       }
     });

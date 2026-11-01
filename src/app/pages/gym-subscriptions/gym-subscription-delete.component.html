@@ -1,37 +1,37 @@
 <section class="page-stack page-narrow">
   <app-page-header
-    title="Deactivate gym subscription"
-    subtitle="Gym subscriptions are archived by marking them inactive."
-    [back]="{ label: 'Back to gym subscriptions', link: '/gym-subscriptions' }"
+    [title]="'gymSubscriptions.delete.title' | transloco"
+    [subtitle]="'gymSubscriptions.delete.subtitle' | transloco"
+    [back]="{ label: ('gymSubscriptions.backToList' | transloco), link: '/gym-subscriptions' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading gym subscription...</p>
+    <p class="notice" role="status">{{ 'gymSubscriptions.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !gymSubscription) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (gymSubscription) {
     <div class="panel">
       <dl class="detail-list">
         <div>
-          <dt>Name</dt>
+          <dt>{{ 'gymSubscriptions.fields.name' | transloco }}</dt>
           <dd>{{ gymSubscription.name }}</dd>
         </div>
         <div>
-          <dt>Status</dt>
+          <dt>{{ 'common.status' | transloco }}</dt>
           <dd>
             <app-status-dot [tone]="gymSubscription.isActive ? 'success' : 'neutral'">
-              {{ gymSubscription.isActive ? 'Active' : 'Inactive' }}
+              {{ gymSubscription.isActive ? ('gymSubscriptions.status.active' | transloco) : ('gymSubscriptions.status.inactive' | transloco) }}
             </app-status-dot>
           </dd>
         </div>
       </dl>
 
       <p class="notice notice--warning">
-        Deactivating a gym subscription hides it from new trainee assignments.
+        {{ 'gymSubscriptions.delete.warning' | transloco }}
       </p>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
       }
 
       <div class="form-actions">
@@ -43,8 +43,8 @@
         >
           {{
             gymSubscription.isActive
-              ? (submitting ? 'Deactivating...' : 'Deactivate gym subscription')
-              : 'Gym subscription inactive'
+              ? (submitting ? ('common.deactivating' | transloco) : ('gymSubscriptions.delete.submit' | transloco))
+              : ('gymSubscriptions.delete.inactive' | transloco)
           }}
         </button>
       </div>

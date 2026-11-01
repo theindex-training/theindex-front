@@ -3,7 +3,7 @@
     <app-brand />
   </div>
 
-  <nav class="sidebar__nav" aria-label="Main">
+  <nav class="sidebar__nav" [attr.aria-label]="'nav.mainLabel' | transloco">
     <ul class="nav-list">
       @for (item of mainItems; track item.route) {
         <li>
@@ -13,7 +13,7 @@
     </ul>
 
     @if (manageItems.length) {
-      <h2 class="nav-group-label" id="sidebar-manage">Manage</h2>
+      <h2 class="nav-group-label" id="sidebar-manage">{{ 'nav.manage' | transloco }}</h2>
       <ul class="nav-list" aria-labelledby="sidebar-manage">
         @for (item of manageItems; track item.route) {
           <li>
@@ -26,6 +26,7 @@
 
   <div class="sidebar__footer">
     <app-theme-switch />
+    <app-language-switch />
     <app-user-block />
   </div>
 </div>
@@ -38,6 +39,6 @@
     ariaCurrentWhenActive="page"
     [routerLinkActiveOptions]="{ exact: !!item.exact }"
   >
-    {{ item.label }}
+    {{ item.label | transloco }}
   </a>
 </ng-template>

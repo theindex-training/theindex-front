@@ -1,34 +1,34 @@
 <section class="page-stack">
   <app-page-header
-    title="Training times"
-    subtitle="Time slots to pick from when registering attendance."
-    [action]="{ label: 'New training time', link: '/training-times/new' }"
+    [title]="'nav.trainingTimes' | transloco"
+    [subtitle]="'trainingTimes.list.subtitle' | transloco"
+    [action]="{ label: ('trainingTimes.list.new' | transloco), link: '/training-times/new' }"
   />
 
   @if (loading) {
-    <app-skeleton-list label="Loading training times" [rows]="4" />
+    <app-skeleton-list [label]="'trainingTimes.list.loading' | transloco" [rows]="4" />
   } @else if (errorMessage) {
-    <app-empty-state tone="danger" title="Couldn't load training times" [message]="errorMessage">
-      <button class="btn btn--secondary" type="button" (click)="loadTrainingTimes()">Try again</button>
+    <app-empty-state tone="danger" [title]="'trainingTimes.list.loadError' | transloco" [message]="errorMessage | uiMessage">
+      <button class="btn btn--secondary" type="button" (click)="loadTrainingTimes()">{{ 'common.tryAgain' | transloco }}</button>
     </app-empty-state>
   } @else if (!trainingTimes.length) {
     <app-empty-state
       icon="clock"
-      title="No training times yet"
-      message="Add your class times so attendance can be registered against them."
+      [title]="'trainingTimes.list.emptyTitle' | transloco"
+      [message]="'trainingTimes.list.emptyMessage' | transloco"
     >
-      <a class="btn btn--primary" routerLink="/training-times/new">New training time</a>
+      <a class="btn btn--primary" routerLink="/training-times/new">{{ 'trainingTimes.list.new' | transloco }}</a>
     </app-empty-state>
   } @else {
-    <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Training times table">
+    <div class="data-table-wrap responsive-table" tabindex="0" role="region" [attr.aria-label]="'trainingTimes.list.tableLabel' | transloco">
       <table class="data-table">
-        <caption class="visually-hidden">Training times</caption>
+        <caption class="visually-hidden">{{ 'nav.trainingTimes' | transloco }}</caption>
         <thead>
           <tr>
-            <th scope="col">Time slot</th>
-            <th scope="col">Starts</th>
-            <th scope="col">Ends</th>
-            <th scope="col" class="cell-fit"><span class="visually-hidden">Details</span></th>
+            <th scope="col">{{ 'trainingTimes.list.timeSlot' | transloco }}</th>
+            <th scope="col">{{ 'trainingTimes.list.starts' | transloco }}</th>
+            <th scope="col">{{ 'trainingTimes.list.ends' | transloco }}</th>
+            <th scope="col" class="cell-fit"><span class="visually-hidden">{{ 'trainingTimes.list.detailsColumn' | transloco }}</span></th>
           </tr>
         </thead>
         <tbody>
@@ -57,7 +57,7 @@
       </table>
     </div>
 
-    <ul class="list-card responsive-list" aria-label="Training times">
+    <ul class="list-card responsive-list" [attr.aria-label]="'nav.trainingTimes' | transloco">
       @for (trainingTime of trainingTimes; track trainingTime.id) {
         <li>
           <app-list-row

@@ -11,11 +11,14 @@ import { Router } from '@angular/router';
 import { CreateTrainerPayload, TrainersService } from '../../services/trainers.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { trimmedLength } from '../../utils/form-validators.util';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-trainer-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
   templateUrl: './trainer-create.component.html'
 })
 export class TrainerCreateComponent {
@@ -25,7 +28,7 @@ export class TrainerCreateComponent {
   }>;
 
   submitting = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -55,7 +58,7 @@ export class TrainerCreateComponent {
     };
 
     this.submitting = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.trainersService.create(payload).subscribe({
       next: () => {
@@ -64,7 +67,7 @@ export class TrainerCreateComponent {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to create this trainer right now.';
+          apiErrorMessage(error, 'trainers.create.error');
         this.submitting = false;
       }
     });

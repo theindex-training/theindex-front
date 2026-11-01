@@ -1,20 +1,20 @@
 <section class="page-stack">
   <app-page-header
-    title="Edit plan"
-    subtitle="Update plan details or availability."
-    [back]="{ label: 'Back to plans', link: '/plans' }"
+    [title]="'plans.edit.title' | transloco"
+    [subtitle]="'plans.edit.subtitle' | transloco"
+    [back]="{ label: ('plans.backToList' | transloco), link: '/plans' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading plan...</p>
+    <p class="notice" role="status">{{ 'plans.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !plan) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (plan) {
     <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <div class="form-grid">
         <div class="form-row">
           <div class="form-field">
-            <label class="form-field__label" for="plan-title">Title</label>
+            <label class="form-field__label" for="plan-title">{{ 'plans.fields.title' | transloco }}</label>
             <input
               id="plan-title"
               type="text"
@@ -23,23 +23,23 @@
               [attr.aria-invalid]="form.controls.title.touched && form.controls.title.invalid"
             />
             @if (form.controls.title.touched && form.controls.title.invalid) {
-              <span class="form-field__error" id="plan-title-help">Title is required.</span>
+              <span class="form-field__error" id="plan-title-help">{{ 'plans.fields.titleRequired' | transloco }}</span>
             }
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-field">
-            <label class="form-field__label" for="plan-type">Plan type</label>
+            <label class="form-field__label" for="plan-type">{{ 'plans.fields.planType' | transloco }}</label>
             <select id="plan-type" formControlName="type">
-              <option value="PUNCH">Punch (credits)</option>
-              <option value="TIME">Time (days)</option>
+              <option value="PUNCH">{{ 'plans.fields.typePunch' | transloco }}</option>
+              <option value="TIME">{{ 'plans.fields.typeTime' | transloco }}</option>
             </select>
           </div>
 
           @if (form.controls.type.value === 'PUNCH') {
             <div class="form-field">
-              <label class="form-field__label" for="plan-credits">Credits</label>
+              <label class="form-field__label" for="plan-credits">{{ 'plans.fields.credits' | transloco }}</label>
               <input
                 id="plan-credits"
                 type="number"
@@ -51,14 +51,14 @@
                 [attr.aria-invalid]="form.controls.credits.touched && form.controls.credits.invalid"
               />
               @if (form.controls.credits.touched && form.controls.credits.invalid) {
-                <span class="form-field__error" id="plan-credits-help">Enter a whole number of 1 or more.</span>
+                <span class="form-field__error" id="plan-credits-help">{{ 'plans.fields.wholeNumberError' | transloco }}</span>
               } @else {
-                <span class="form-field__hint" id="plan-credits-help">Trainings included. Whole number, 1 or more.</span>
+                <span class="form-field__hint" id="plan-credits-help">{{ 'plans.fields.creditsHint' | transloco }}</span>
               }
             </div>
           } @else {
             <div class="form-field">
-              <label class="form-field__label" for="plan-duration">Duration (days)</label>
+              <label class="form-field__label" for="plan-duration">{{ 'plans.fields.duration' | transloco }}</label>
               <input
                 id="plan-duration"
                 type="number"
@@ -70,15 +70,15 @@
                 [attr.aria-invalid]="form.controls.durationDays.touched && form.controls.durationDays.invalid"
               />
               @if (form.controls.durationDays.touched && form.controls.durationDays.invalid) {
-                <span class="form-field__error" id="plan-duration-help">Enter a whole number of 1 or more.</span>
+                <span class="form-field__error" id="plan-duration-help">{{ 'plans.fields.wholeNumberError' | transloco }}</span>
               } @else {
-                <span class="form-field__hint" id="plan-duration-help">Days the plan is valid. Whole number, 1 or more.</span>
+                <span class="form-field__hint" id="plan-duration-help">{{ 'plans.fields.durationHint' | transloco }}</span>
               }
             </div>
           }
 
           <div class="form-field">
-            <label class="form-field__label" for="plan-price">Price (EUR)</label>
+            <label class="form-field__label" for="plan-price">{{ 'plans.fields.priceEur' | transloco }}</label>
             <input
               id="plan-price"
               type="number"
@@ -90,26 +90,26 @@
               [attr.aria-invalid]="form.controls.price.touched && form.controls.price.invalid"
             />
             @if (form.controls.price.touched && form.controls.price.invalid) {
-              <span class="form-field__error" id="plan-price-help">Enter a price of 0 or more, with up to two decimals.</span>
+              <span class="form-field__error" id="plan-price-help">{{ 'plans.fields.priceError' | transloco }}</span>
             } @else {
-              <span class="form-field__hint" id="plan-price-help">0 or more, up to two decimals, e.g. 45.50.</span>
+              <span class="form-field__hint" id="plan-price-help">{{ 'plans.fields.priceHint' | transloco }}</span>
             }
           </div>
         </div>
 
         <label class="form-field form-field--check">
           <input type="checkbox" formControlName="isActive" />
-          <span>Active plan</span>
+          <span>{{ 'plans.fields.activePlan' | transloco }}</span>
         </label>
       </div>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
       }
 
       <div class="form-actions">
         <button class="btn btn--primary" type="submit" [disabled]="submitting">
-          {{ submitting ? 'Saving...' : 'Save changes' }}
+          {{ submitting ? ('common.saving' | transloco) : ('common.saveChanges' | transloco) }}
         </button>
       </div>
     </form>

@@ -20,11 +20,16 @@ import { AvatarComponent } from '../../components/avatar/avatar.component';
 import { IconComponent } from '../../components/icon/icon.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-attendance-register',
   standalone: true,
   imports: [
+    UiMessagePipe, 
+    TranslocoPipe, 
     CommonModule,
     ReactiveFormsModule,
     AvatarComponent,
@@ -46,7 +51,7 @@ export class AttendanceRegisterComponent implements OnInit {
 
   loading = true;
   submitting = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   trainers: TrainerProfile[] = [];
   gymLocations: GymLocation[] = [];
@@ -99,8 +104,7 @@ export class AttendanceRegisterComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message ||
-          'Unable to load trainers, gyms, training times, or trainees right now.';
+          apiErrorMessage(error, 'attendance.register.loadError');
         this.loading = false;
         this.changeDetector.detectChanges();
       }
@@ -113,7 +117,7 @@ export class AttendanceRegisterComponent implements OnInit {
   }
 
   handleSubmit(): void {
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -122,7 +126,7 @@ export class AttendanceRegisterComponent implements OnInit {
     }
 
     if (this.selectedTraineeIds.size === 0) {
-      this.errorMessage = 'Select at least one trainee for this attendance batch.';
+      this.errorMessage = i18nMessage('attendance.register.selectAtLeastOne');
       this.changeDetector.detectChanges();
       return;
     }
@@ -147,7 +151,7 @@ export class AttendanceRegisterComponent implements OnInit {
           this.router.navigate(['/attendance']);
         },
         error: (error) => {
-          this.errorMessage = error?.error?.message || 'Unable to register attendance right now.';
+          this.errorMessage = apiErrorMessage(error, 'attendance.register.error');
           this.submitting = false;
           this.changeDetector.detectChanges();
         }

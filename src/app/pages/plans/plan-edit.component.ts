@@ -17,6 +17,9 @@ import {
   UpdatePlanPayload
 } from '../../services/plans.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 const integerValidator: ValidatorFn = (control: AbstractControl) => {
   const value = control.value;
@@ -45,7 +48,7 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
 @Component({
   selector: 'app-plan-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
   templateUrl: './plan-edit.component.html'
 })
 export class PlanEditComponent implements OnInit {
@@ -61,7 +64,7 @@ export class PlanEditComponent implements OnInit {
   plan: Plan | null = null;
   loading = true;
   submitting = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -86,7 +89,7 @@ export class PlanEditComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.errorMessage = 'Plan ID is missing.';
+      this.errorMessage = i18nMessage('plans.errors.missingId');
       this.loading = false;
       return;
     }
@@ -112,7 +115,7 @@ export class PlanEditComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to load this plan.';
+          apiErrorMessage(error, 'plans.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
       }
@@ -139,7 +142,7 @@ export class PlanEditComponent implements OnInit {
     };
 
     this.submitting = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.plansService.update(this.plan.id, payload).subscribe({
       next: () => {
@@ -148,7 +151,7 @@ export class PlanEditComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to update this plan right now.';
+          apiErrorMessage(error, 'plans.edit.error');
         this.submitting = false;
       }
     });

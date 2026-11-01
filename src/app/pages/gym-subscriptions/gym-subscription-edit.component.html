@@ -1,20 +1,20 @@
 <section class="page-stack">
   <app-page-header
-    title="Edit gym subscription"
-    subtitle="Update gym subscription details."
-    [back]="{ label: 'Back to gym subscriptions', link: '/gym-subscriptions' }"
+    [title]="'gymSubscriptions.edit.title' | transloco"
+    [subtitle]="'gymSubscriptions.edit.subtitle' | transloco"
+    [back]="{ label: ('gymSubscriptions.backToList' | transloco), link: '/gym-subscriptions' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading gym subscription...</p>
+    <p class="notice" role="status">{{ 'gymSubscriptions.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !gymSubscription) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (gymSubscription) {
     <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <div class="form-grid">
         <div class="form-row">
           <div class="form-field">
-            <label class="form-field__label" for="gym-subscription-name">Name</label>
+            <label class="form-field__label" for="gym-subscription-name">{{ 'gymSubscriptions.fields.name' | transloco }}</label>
             <input
               id="gym-subscription-name"
               type="text"
@@ -23,21 +23,21 @@
               [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
             />
             @if (form.controls.name.touched && form.controls.name.invalid) {
-              <span class="form-field__error" id="gym-subscription-name-help">Enter a name of 2–120 characters.</span>
+              <span class="form-field__error" id="gym-subscription-name-help">{{ 'gymSubscriptions.fields.nameError' | transloco }}</span>
             } @else {
-              <span class="form-field__hint" id="gym-subscription-name-help">2–120 characters.</span>
+              <span class="form-field__hint" id="gym-subscription-name-help">{{ 'gymSubscriptions.fields.nameHint' | transloco }}</span>
             }
           </div>
         </div>
       </div>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
       }
 
       <div class="form-actions">
         <button class="btn btn--primary" type="submit" [disabled]="submitting">
-          {{ submitting ? 'Saving...' : 'Save changes' }}
+          {{ submitting ? ('common.saving' | transloco) : ('common.saveChanges' | transloco) }}
         </button>
       </div>
     </form>

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -16,11 +16,20 @@ import {
 } from '../../services/attendance.service';
 import { AuthService } from '../../services/auth.service';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
+import { LocaleFormatService } from '../../i18n/locale-format.service';
+import { LanguageService } from '../../i18n/language.service';
+import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 
 @Component({
   selector: 'app-attendance-sessions',
   standalone: true,
   imports: [
+    EnumLabelPipe, 
+    UiMessagePipe, 
+    TranslocoPipe, 
     FormsModule,
     RouterLink,
     PageHeaderComponent,
@@ -34,6 +43,8 @@ import { TrainerProfile, TrainersService } from '../../services/trainers.service
   styleUrl: './attendance-sessions.component.scss'
 })
 export class AttendanceSessionsComponent implements OnInit {
+  private readonly i18n = inject(LanguageService);
+  readonly format = inject(LocaleFormatService);
   sessions: AttendanceSession[] = [];
   trainers: TrainerProfile[] = [];
 
@@ -53,7 +64,7 @@ export class AttendanceSessionsComponent implements OnInit {
 
   loading = true;
   loadingTrainers = true;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
   deletingAttendanceId: string | null = null;
   readonly canDeleteAttendance: boolean;
   readonly isAdmin: boolean;
@@ -128,7 +139,7 @@ export class AttendanceSessionsComponent implements OnInit {
 
   loadSessions(): void {
     this.loading = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     const query: AttendanceSessionsQuery = {
       startDate: this.selectedStartDate,
@@ -157,7 +168,7 @@ export class AttendanceSessionsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = error?.error?.message || 'Unable to load attendance sessions right now.';
+        this.errorMessage = apiErrorMessage(error, 'attendance.sessions.loadErrorMessage');
         this.loading = false;
         this.changeDetector.detectChanges();
       }
@@ -181,27 +192,8 @@ export class AttendanceSessionsComponent implements OnInit {
   isSessionSelected(sessionKey: string): boolean {
     return this.selectedSessionKeys.includes(sessionKey);
   }
-
-  formatDateTime(value: string): string {
-    return new Intl.DateTimeFormat('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(new Date(value));
-  }
-
-  formatDate(value: string): string {
-    return new Intl.DateTimeFormat('en-GB', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    }).format(new Date(value));
-  }
-
   formatPrice(priceCents: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(priceCents / 100);
+    return this.format.money(priceCents);
   }
 
   attendancePrice(item: AttendanceSessionAttendanceItem): string {
@@ -225,7 +217,7 @@ export class AttendanceSessionsComponent implements OnInit {
   }
 
   sessionTabTitle(session: AttendanceSession): string {
-    return `${this.formatDate(session.start)} · ${this.formatDateTime(session.start)} - ${this.formatDateTime(session.end)}, ${this.formatTrainerNickname(session.trainerId)}`;
+    return `${this.format.shortDate(session.start)} · ${this.format.clock(session.start)}–${this.format.clock(session.end)}, ${this.formatTrainerNickname(session.trainerId)}`;
   }
 
   formatTrainer(session: AttendanceSession): string {
@@ -267,14 +259,18 @@ export class AttendanceSessionsComponent implements OnInit {
     }
 
     const confirmed = window.confirm(
-      `Delete attendance for ${this.traineeName(item.traineeId)} at ${this.formatDate(item.trainedAt)} · ${this.formatDateTime(item.trainedAt)}?`
+      this.i18n.t('attendance.sessions.confirmDelete', {
+        name: this.traineeName(item.traineeId),
+        date: this.format.date(item.trainedAt),
+        time: this.format.clock(item.trainedAt)
+      })
     );
 
     if (!confirmed) {
       return;
     }
 
-    this.errorMessage = '';
+    this.errorMessage = null;
     this.deletingAttendanceId = item.id;
 
     this.attendanceService.deleteById(item.id).subscribe({
@@ -289,7 +285,7 @@ export class AttendanceSessionsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = error?.error?.message || 'Unable to delete attendance right now.';
+        this.errorMessage = apiErrorMessage(error, 'attendance.sessions.deleteError');
         this.deletingAttendanceId = null;
         this.changeDetector.detectChanges();
       }

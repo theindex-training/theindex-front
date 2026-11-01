@@ -1,30 +1,35 @@
 @if (loading) {
-  <app-skeleton-list label="Loading trainings" [rows]="3" />
+  <app-skeleton-list [label]="'trainings.loading' | transloco" [rows]="3" />
 } @else if (errorMessage) {
-  <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+  <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
 } @else if (!trainings.length) {
-  <p class="notice" role="status">{{ emptyMessage }}</p>
+  <p class="notice" role="status">{{ emptyKey | transloco }}</p>
 } @else {
-  <div class="data-table-wrap responsive-table" tabindex="0" role="region" aria-label="Trainings table">
+  <div
+    class="data-table-wrap responsive-table"
+    tabindex="0"
+    role="region"
+    [attr.aria-label]="'trainings.tableLabel' | transloco"
+  >
     <table class="data-table">
-      <caption class="visually-hidden">Trainings</caption>
+      <caption class="visually-hidden">{{ 'trainings.title' | transloco }}</caption>
       <thead>
         <tr>
-          <th scope="col">Trained at</th>
-          <th scope="col">Trainer</th>
-          <th scope="col">Location</th>
-          <th scope="col">Payment</th>
+          <th scope="col">{{ 'trainings.columns.trainedAt' | transloco }}</th>
+          <th scope="col">{{ 'trainings.columns.trainer' | transloco }}</th>
+          <th scope="col">{{ 'trainings.columns.location' | transloco }}</th>
+          <th scope="col">{{ 'trainings.columns.payment' | transloco }}</th>
         </tr>
       </thead>
       <tbody>
         @for (training of trainings; track training.id) {
           <tr>
-            <td class="num"><strong>{{ formatTrainingDateTime(training.trainedAt) }}</strong></td>
+            <td class="num"><strong>{{ format.dateTime(training.trainedAt) }}</strong></td>
             <td>{{ formatTrainingTrainer(training) }}</td>
             <td>{{ formatTrainingLocation(training) }}</td>
             <td>
               <app-chip [tone]="training.paymentStatus === 'UNPAID' ? 'danger' : 'success'">
-                {{ training.paymentStatus }}
+                {{ training.paymentStatus | enumLabel: 'paymentStatus' }}
               </app-chip>
             </td>
           </tr>
@@ -33,16 +38,16 @@
     </table>
   </div>
 
-  <ul class="list-card responsive-list" aria-label="Trainings">
+  <ul class="list-card responsive-list" [attr.aria-label]="'trainings.title' | transloco">
     @for (training of trainings; track training.id) {
       <li class="record">
         <div class="record__main">
-          <span class="record__title num">{{ formatTrainingDateTime(training.trainedAt) }}</span>
+          <span class="record__title num">{{ format.dateTime(training.trainedAt) }}</span>
           <span class="record__meta">{{ formatTrainingTrainer(training) }} · {{ formatTrainingLocation(training) }}</span>
         </div>
         <div class="record__aside">
           <app-chip [tone]="training.paymentStatus === 'UNPAID' ? 'danger' : 'success'">
-            {{ training.paymentStatus }}
+            {{ training.paymentStatus | enumLabel: 'paymentStatus' }}
           </app-chip>
         </div>
       </li>

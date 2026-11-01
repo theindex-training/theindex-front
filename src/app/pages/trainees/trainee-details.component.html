@@ -1,42 +1,42 @@
 <section class="page-stack">
   <app-page-header
-    [title]="trainee?.name ?? 'Trainee details'"
-    [subtitle]="trainee ? 'Profile, app account, subscriptions and trainings.' : ''"
-    [back]="{ label: 'Back to trainees', link: '/trainees' }"
+    [title]="trainee?.name ?? ('trainees.details.title' | transloco)"
+    [subtitle]="trainee ? ('trainees.details.subtitle' | transloco) : ''"
+    [back]="{ label: ('trainees.backToList' | transloco), link: '/trainees' }"
   />
 
   @if (loading) {
-    <app-skeleton-list label="Loading trainee" [rows]="3" />
+    <app-skeleton-list [label]="'trainees.details.loading' | transloco" [rows]="3" />
   } @else if (errorMessage && !trainee) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (trainee) {
     <div class="panel">
       <div class="profile">
         <app-avatar class="profile__avatar" [name]="trainee.name" [muted]="!trainee.isActive" />
         <dl class="detail-list profile__details">
           <div>
-            <dt>Nickname</dt>
+            <dt>{{ 'trainees.fields.nickname' | transloco }}</dt>
             <dd>{{ formatNickname() }}</dd>
           </div>
           <div>
-            <dt>Phone</dt>
+            <dt>{{ 'trainees.fields.phone' | transloco }}</dt>
             <dd class="num">{{ formatPhone() }}</dd>
           </div>
           <div>
-            <dt>App account</dt>
+            <dt>{{ 'trainees.fields.appAccount' | transloco }}</dt>
             <dd>
               @if (hasLinkedAccount()) {
-                <span class="linked-mark">Linked</span>
+                <span class="linked-mark">{{ 'common.linked' | transloco }}</span>
               } @else {
-                <span class="text-muted">Not linked</span>
+                <span class="text-muted">{{ 'common.notLinked' | transloco }}</span>
               }
             </dd>
           </div>
           <div>
-            <dt>Status</dt>
+            <dt>{{ 'common.status' | transloco }}</dt>
             <dd>
               <app-status-dot [tone]="trainee.isActive ? 'success' : 'neutral'">
-                {{ trainee.isActive ? 'Active' : 'Inactive' }}
+                {{ trainee.isActive ? ('trainees.status.active' | transloco) : ('trainees.status.inactive' | transloco) }}
               </app-status-dot>
             </dd>
           </div>
@@ -45,29 +45,29 @@
 
       @if (account) {
         <section class="panel-section" aria-labelledby="account-title">
-          <h2 class="panel__title" id="account-title">Account information</h2>
+          <h2 class="panel__title" id="account-title">{{ 'trainees.details.accountInfo' | transloco }}</h2>
           <dl class="detail-list">
             <div>
-              <dt>Email</dt>
+              <dt>{{ 'trainees.details.email' | transloco }}</dt>
               <dd>{{ account.email }}</dd>
             </div>
             <div>
-              <dt>Role</dt>
-              <dd>{{ account.role }}</dd>
+              <dt>{{ 'trainees.details.role' | transloco }}</dt>
+              <dd>{{ account.role | enumLabel: 'role' }}</dd>
             </div>
             <div>
-              <dt>Status</dt>
-              <dd>{{ account.status }}</dd>
+              <dt>{{ 'common.status' | transloco }}</dt>
+              <dd>{{ account.status | enumLabel: 'accountStatus' }}</dd>
             </div>
           </dl>
         </section>
       }
 
       <div class="form-actions">
-        <a class="btn btn--ghost" [routerLink]="['/trainees', trainee.id, 'delete']">Deactivate trainee</a>
-        <a class="btn btn--secondary" [routerLink]="['/trainees', trainee.id, 'edit']">Edit trainee</a>
+        <a class="btn btn--ghost" [routerLink]="['/trainees', trainee.id, 'delete']">{{ 'trainees.details.deactivate' | transloco }}</a>
+        <a class="btn btn--secondary" [routerLink]="['/trainees', trainee.id, 'edit']">{{ 'trainees.details.edit' | transloco }}</a>
         <a class="btn btn--primary" [routerLink]="['/trainees', trainee.id, 'account']">
-          {{ trainee.accountId ? 'Manage account' : 'Create account' }}
+          {{ trainee.accountId ? ('trainees.details.manageAccount' | transloco) : ('trainees.details.createAccount' | transloco) }}
         </a>
       </div>
     </div>
@@ -75,11 +75,11 @@
     <section class="page-stack" aria-labelledby="subscriptions-title">
       <div class="section-header">
         <div>
-          <h2 class="panel__title" id="subscriptions-title">Subscriptions</h2>
-          <p class="text-muted section-header__sub">Current plans, and purchase of new ones.</p>
+          <h2 class="panel__title" id="subscriptions-title">{{ 'trainees.details.subscriptions' | transloco }}</h2>
+          <p class="text-muted section-header__sub">{{ 'trainees.details.subscriptionsSub' | transloco }}</p>
         </div>
         <app-segmented-control
-          label="Subscription filter"
+          [label]="'trainees.details.subscriptionFilter' | transloco"
           [options]="subscriptionFilterOptions"
           [value]="subscriptionFilter"
           (valueChange)="subscriptionFilter = $event"
@@ -91,18 +91,18 @@
         [plans]="plans"
         [loading]="subscriptionsLoading"
         [errorMessage]="subscriptionErrorMessage"
-        [emptyMessage]="filteredSubscriptionsEmptyMessage"
+        [emptyKey]="filteredSubscriptionsEmptyKey"
         [canDeleteSubscriptions]="canDeleteSubscriptions"
         [deletingSubscriptionId]="deletingSubscriptionId"
         (deleteSubscriptionRequested)="deleteSubscription($event)"
       ></app-trainee-subscriptions-table>
 
       <form class="panel" [formGroup]="form" (ngSubmit)="handleCreateSubscription()" aria-labelledby="buy-title">
-        <h3 class="panel__title" id="buy-title">Buy subscription</h3>
+        <h3 class="panel__title" id="buy-title">{{ 'trainees.details.buyTitle' | transloco }}</h3>
         <div class="form-grid">
           <div class="form-row">
             <div class="form-field">
-              <label class="form-field__label" for="buy-plan">Plan</label>
+              <label class="form-field__label" for="buy-plan">{{ 'trainees.details.plan' | transloco }}</label>
               <select
                 id="buy-plan"
                 formControlName="planId"
@@ -115,12 +115,12 @@
                 }
               </select>
               @if (form.controls.planId.touched && form.controls.planId.invalid) {
-                <span class="form-field__error" id="buy-plan-help">Select a plan to purchase.</span>
+                <span class="form-field__error" id="buy-plan-help">{{ 'trainees.details.planError' | transloco }}</span>
               }
             </div>
 
             <div class="form-field">
-              <label class="form-field__label" for="buy-starts-at">Starts at</label>
+              <label class="form-field__label" for="buy-starts-at">{{ 'trainees.details.startsAt' | transloco }}</label>
               <input
                 id="buy-starts-at"
                 type="date"
@@ -130,12 +130,12 @@
                 [attr.aria-invalid]="form.controls.startsAt.touched && form.controls.startsAt.invalid"
               />
               @if (form.controls.startsAt.touched && form.controls.startsAt.invalid) {
-                <span class="form-field__error" id="buy-starts-at-help">Choose a start date.</span>
+                <span class="form-field__error" id="buy-starts-at-help">{{ 'trainees.details.startsAtError' | transloco }}</span>
               }
             </div>
 
             <div class="form-field">
-              <label class="form-field__label" for="buy-paid">Paid amount (EUR)</label>
+              <label class="form-field__label" for="buy-paid">{{ 'trainees.details.paid' | transloco }}</label>
               <input
                 id="buy-paid"
                 type="number"
@@ -148,21 +148,21 @@
                 [attr.aria-invalid]="form.controls.paid.touched && form.controls.paid.invalid"
               />
               @if (form.controls.paid.touched && form.controls.paid.invalid) {
-                <span class="form-field__error" id="buy-paid-help">Enter an amount of 0 or more, with up to two decimals.</span>
+                <span class="form-field__error" id="buy-paid-help">{{ 'trainees.details.paidError' | transloco }}</span>
               } @else {
-                <span class="form-field__hint" id="buy-paid-help">Defaults to the plan price. Up to two decimals.</span>
+                <span class="form-field__hint" id="buy-paid-help">{{ 'trainees.details.paidHint' | transloco }}</span>
               }
             </div>
           </div>
         </div>
 
         @if (subscriptionErrorMessage) {
-          <p class="notice notice--danger" role="alert">{{ subscriptionErrorMessage }}</p>
+          <p class="notice notice--danger" role="alert">{{ subscriptionErrorMessage | uiMessage }}</p>
         }
 
         <div class="form-actions">
           <button class="btn btn--primary" type="submit" [disabled]="submitting || plansLoading">
-            {{ submitting ? 'Purchasing...' : 'Buy subscription' }}
+            {{ submitting ? ('trainees.details.purchasing' | transloco) : ('trainees.details.buySubmit' | transloco) }}
           </button>
         </div>
       </form>
@@ -171,8 +171,8 @@
     <section class="page-stack" aria-labelledby="trainings-title">
       <div class="section-header">
         <div>
-          <h2 class="panel__title" id="trainings-title">Trainings</h2>
-          <p class="text-muted section-header__sub">Completed trainings for this trainee.</p>
+          <h2 class="panel__title" id="trainings-title">{{ 'trainees.details.trainings' | transloco }}</h2>
+          <p class="text-muted section-header__sub">{{ 'trainees.details.trainingsSub' | transloco }}</p>
         </div>
       </div>
 
@@ -180,7 +180,7 @@
         [trainings]="trainings"
         [loading]="trainingsLoading"
         [errorMessage]="trainingErrorMessage"
-        [emptyMessage]="'No trainings yet.'"
+        emptyKey="trainees.details.noTrainings"
       ></app-trainee-trainings-table>
     </section>
   }

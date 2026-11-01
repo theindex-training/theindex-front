@@ -1,24 +1,36 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { IconComponent } from '../icon/icon.component';
+import { LanguageSwitchComponent } from '../language-switch/language-switch.component';
 import { NavItem } from '../navigation/navigation';
 import { ThemeSwitchComponent } from '../theme-switch/theme-switch.component';
 import { UserBlockComponent } from '../user-block/user-block.component';
 
 /**
- * Mobile bottom sheet with the nav items that don't fit the tab bar, the theme switch and account actions.
+ * Mobile bottom sheet with the nav items that don't fit the tab bar, theme and language switches and account actions.
  * A modal <dialog> gives focus containment, Escape to close and an inert page behind it.
  */
 @Component({
   selector: 'app-nav-sheet',
   standalone: true,
-  imports: [NgTemplateOutlet, RouterLink, RouterLinkActive, IconComponent, ThemeSwitchComponent, UserBlockComponent],
+  imports: [
+    NgTemplateOutlet,
+    RouterLink,
+    RouterLinkActive,
+    TranslocoPipe,
+    IconComponent,
+    LanguageSwitchComponent,
+    ThemeSwitchComponent,
+    UserBlockComponent
+  ],
   templateUrl: './nav-sheet.component.html',
   styleUrl: './nav-sheet.component.scss'
 })
 export class NavSheetComponent {
-  @Input({ required: true }) title = 'More';
+  /** Translation key of the sheet title (the same as its tab). */
+  @Input({ required: true }) title = 'nav.more';
   @Input() mainItems: NavItem[] = [];
   @Input() manageItems: NavItem[] = [];
   @Output() readonly openChange = new EventEmitter<boolean>();

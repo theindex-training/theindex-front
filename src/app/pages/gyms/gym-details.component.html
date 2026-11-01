@@ -1,38 +1,38 @@
 <section class="page-stack page-narrow">
   <app-page-header
-    title="Gym details"
-    subtitle="Review gym location information and manage availability."
-    [back]="{ label: 'Back to gyms', link: '/gyms' }"
+    [title]="'gyms.details.title' | transloco"
+    [subtitle]="'gyms.details.subtitle' | transloco"
+    [back]="{ label: ('gyms.backToList' | transloco), link: '/gyms' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading gym...</p>
+    <p class="notice" role="status">{{ 'gyms.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !gym) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (gym) {
     <div class="panel">
       <dl class="detail-list">
         <div>
-          <dt>Name</dt>
+          <dt>{{ 'gyms.fields.name' | transloco }}</dt>
           <dd>{{ gym.name }}</dd>
         </div>
         <div>
-          <dt>Address</dt>
+          <dt>{{ 'gyms.fields.address' | transloco }}</dt>
           <dd>{{ formatAddress() }}</dd>
         </div>
         <div>
-          <dt>Status</dt>
+          <dt>{{ 'common.status' | transloco }}</dt>
           <dd>
             <app-status-dot [tone]="gym.isActive ? 'success' : 'neutral'">
-              {{ gym.isActive ? 'Active' : 'Inactive' }}
+              {{ gym.isActive ? ('gyms.status.active' | transloco) : ('gyms.status.inactive' | transloco) }}
             </app-status-dot>
           </dd>
         </div>
       </dl>
 
       <div class="form-actions">
-        <a class="btn btn--ghost" [routerLink]="['/gyms', gym.id, 'delete']">Deactivate gym</a>
-        <a class="btn btn--primary" [routerLink]="['/gyms', gym.id, 'edit']">Edit gym</a>
+        <a class="btn btn--ghost" [routerLink]="['/gyms', gym.id, 'delete']">{{ 'gyms.details.deactivate' | transloco }}</a>
+        <a class="btn btn--primary" [routerLink]="['/gyms', gym.id, 'edit']">{{ 'gyms.details.edit' | transloco }}</a>
       </div>
     </div>
   }

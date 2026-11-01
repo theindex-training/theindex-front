@@ -17,6 +17,12 @@ import {
   CashRegisterTransaction,
   CreateManualCashRegisterTransactionPayload
 } from '../../services/cash-register.service';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import { LocaleFormatService } from '../../i18n/locale-format.service';
+import { LanguageService } from '../../i18n/language.service';
+import { enumLabelKey, isKnownEnum } from '../../i18n/enum-labels';
 
 const currencyValidator: ValidatorFn = (control: AbstractControl) => {
   if (control.value === null || control.value === undefined || control.value === '') {
@@ -37,6 +43,8 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
   selector: 'app-cash-register',
   standalone: true,
   imports: [
+    UiMessagePipe, 
+    TranslocoPipe, 
     NgTemplateOutlet,
     ReactiveFormsModule,
     RouterLink,
@@ -49,6 +57,8 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
   styleUrl: './cash-register.component.scss'
 })
 export class CashRegisterComponent implements OnInit {
+  private readonly i18n = inject(LanguageService);
+  readonly format = inject(LocaleFormatService);
   private readonly formBuilder = inject(FormBuilder);
 
   balanceCents = 0;
@@ -56,9 +66,9 @@ export class CashRegisterComponent implements OnInit {
 
   loading = true;
   creatingTransaction = false;
-  errorMessage = '';
-  formErrorMessage = '';
-  formSuccessMessage = '';
+  errorMessage: UiMessage | null = null;
+  formErrorMessage: UiMessage | null = null;
+  formSuccessMessage: UiMessage | null = null;
 
   readonly form = this.formBuilder.nonNullable.group({
     direction: this.formBuilder.nonNullable.control<'IN' | 'OUT'>('IN', [Validators.required]),
@@ -81,7 +91,7 @@ export class CashRegisterComponent implements OnInit {
 
   loadState(): void {
     this.loading = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.cashRegisterService.getCurrentState().subscribe({
       next: response => {
@@ -91,7 +101,7 @@ export class CashRegisterComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: error => {
-        this.errorMessage = error?.error?.message || 'Unable to load cash register data right now.';
+        this.errorMessage = apiErrorMessage(error, 'cashRegister.loadErrorMessage');
         this.loading = false;
         this.changeDetector.detectChanges();
       }
@@ -99,8 +109,8 @@ export class CashRegisterComponent implements OnInit {
   }
 
   createManualTransaction(): void {
-    this.formSuccessMessage = '';
-    this.formErrorMessage = '';
+    this.formSuccessMessage = null;
+    this.formErrorMessage = null;
 
     if (this.creatingTransaction) {
       return;
@@ -127,12 +137,12 @@ export class CashRegisterComponent implements OnInit {
         this.form.markAsPristine();
         this.form.markAsUntouched();
         this.creatingTransaction = false;
-        this.formSuccessMessage = 'Manual transaction created successfully.';
+        this.formSuccessMessage = i18nMessage('cashRegister.created');
         this.loadState();
       },
       error: error => {
         this.formErrorMessage =
-          error?.error?.message || 'Unable to create manual transaction right now.';
+          apiErrorMessage(error, 'cashRegister.createError');
         this.creatingTransaction = false;
         this.changeDetector.detectChanges();
       }
@@ -140,14 +150,11 @@ export class CashRegisterComponent implements OnInit {
   }
 
   formatCurrency(amountCents: number): string {
-    return new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(amountCents / 100);
+    return this.format.money(amountCents);
   }
 
   formatDate(value: string): string {
-    return new Date(value).toLocaleString();
+    return this.format.dateTime(value);
   }
 
   formatTransactionDetails(transaction: CashRegisterTransaction): string {
@@ -159,15 +166,18 @@ export class CashRegisterComponent implements OnInit {
 
     if (transaction.sourceType === 'SETTLEMENT') {
       if (details.periodStart && details.periodEnd) {
-        return `Settlement period: ${details.periodStart} → ${details.periodEnd}`;
+        return this.i18n.t('cashRegister.settlementPeriod', {
+          start: this.format.date(details.periodStart),
+          end: this.format.date(details.periodEnd)
+        });
       }
 
-      return 'Settlement transaction';
+      return this.i18n.t('cashRegister.settlementTransaction');
     }
 
     if (transaction.sourceType === 'SUBSCRIPTION') {
       const parts = this.formatSubscriptionDetailParts(transaction);
-      return parts.length ? parts.join(' • ') : 'Subscription purchase';
+      return parts.length ? parts.join(' • ') : this.i18n.t('cashRegister.subscriptionPurchase');
     }
 
     return '-';
@@ -180,7 +190,7 @@ export class CashRegisterComponent implements OnInit {
   formatSubscriptionBuyerLabel(transaction: CashRegisterTransaction): string {
     const boughtBy = transaction.sourceDetails?.boughtBy;
     if (!boughtBy) {
-      return 'Unknown trainee';
+      return this.i18n.t('cashRegister.unknownTrainee');
     }
 
     const nickname = boughtBy.nickname?.trim();
@@ -198,46 +208,50 @@ export class CashRegisterComponent implements OnInit {
       return '';
     }
 
-    const parts = this.formatSubscriptionDetailParts(transaction).filter(
-      part => !part.startsWith('Bought by ')
-    );
+    const parts = this.formatSubscriptionDetailParts(transaction, false);
 
     return parts.length ? ` • ${parts.join(' • ')}` : '';
   }
 
   formatTransactionType(type: string): string {
-    const friendlyTypeMap: Record<string, string> = {
-      SETTLEMENT_OUT: 'Settlement',
-      SUBSCRIPTION_IN: 'Subscription',
-      MANUAL_IN: 'Manual'
-    };
-
-    return friendlyTypeMap[type] || type;
+    const key = enumLabelKey('cashTransactionType', type);
+    return isKnownEnum('cashTransactionType', type) ? this.i18n.t(key) : this.formatLabel(type);
   }
 
-  private formatSubscriptionDetailParts(transaction: CashRegisterTransaction): string[] {
+  private formatSubscriptionDetailParts(
+    transaction: CashRegisterTransaction,
+    includeBuyer = true
+  ): string[] {
     const details = transaction.sourceDetails;
     if (!details) {
       return [];
     }
 
-    const boughtByLabel = details.boughtBy
-      ? `Bought by ${this.formatSubscriptionBuyerLabel(transaction)}`
-      : undefined;
+    const boughtByLabel =
+      includeBuyer && details.boughtBy
+        ? this.i18n.t('cashRegister.boughtBy', { name: this.formatSubscriptionBuyerLabel(transaction) })
+        : undefined;
     const planTitle = details.planTitle;
     const subscriptionType = details.subscriptionType
-      ? this.formatLabel(details.subscriptionType)
+      ? this.formatSubscriptionType(details.subscriptionType)
       : undefined;
 
     return [
       boughtByLabel,
-      planTitle ? `Plan: ${planTitle}` : undefined,
-      subscriptionType ? `Type: ${subscriptionType}` : undefined
+      planTitle ? this.i18n.t('cashRegister.planPart', { plan: planTitle }) : undefined,
+      subscriptionType ? this.i18n.t('cashRegister.typePart', { type: subscriptionType }) : undefined
     ].filter((part): part is string => Boolean(part));
   }
 
   private toCents(amount: number): number {
     return Math.round(amount * 100);
+  }
+
+  /** PUNCH / TIME through the plan type labels; anything unknown is humanized. */
+  private formatSubscriptionType(value: string): string {
+    return isKnownEnum('planType', value)
+      ? this.i18n.t(enumLabelKey('planType', value))
+      : this.formatLabel(value);
   }
 
   private formatLabel(value: string): string {

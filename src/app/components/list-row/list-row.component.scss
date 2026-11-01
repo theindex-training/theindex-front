@@ -63,7 +63,8 @@
 .list-row__trailing {
   display: inline-flex;
   flex-shrink: 0;
-  max-width: 40%;
+  // Room for the longer Bulgarian chips ("ОКОНЧАТЕЛЕН", "ПО ПОСЕЩЕНИЯ") at 320px.
+  max-width: 45%;
 }
 
 .list-row__trailing:empty {

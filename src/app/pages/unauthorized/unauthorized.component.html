@@ -1,8 +1,8 @@
 <main class="solo-page">
   <div class="solo-card">
     <app-brand />
-    <h1 class="solo-card__title">Access restricted</h1>
-    <p class="solo-card__text">You do not have permission to access the administrative areas yet.</p>
-    <button class="btn btn--primary" type="button" (click)="handleLogout()">Log out</button>
+    <h1 class="solo-card__title">{{ 'system.unauthorized.title' | transloco }}</h1>
+    <p class="solo-card__text">{{ 'system.unauthorized.text' | transloco }}</p>
+    <button class="btn btn--primary" type="button" (click)="handleLogout()">{{ 'common.logOut' | transloco }}</button>
   </div>
 </main>

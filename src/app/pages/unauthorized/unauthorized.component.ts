@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { BrandComponent } from '../../components/brand/brand.component';
 import { AuthService } from '../../services/auth.service';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-unauthorized',
   standalone: true,
-  imports: [BrandComponent],
+  imports: [TranslocoPipe, BrandComponent],
   templateUrl: './unauthorized.component.html'
 })
 export class UnauthorizedComponent {

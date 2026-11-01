@@ -1,20 +1,20 @@
 <section class="page-stack page-narrow">
   <app-page-header
-    title="Register attendance"
-    subtitle="Pick the session, tap everyone who trained, save."
-    [back]="{ label: 'Back to attendance', link: '/attendance' }"
+    [title]="'nav.registerAttendance' | transloco"
+    [subtitle]="'attendance.register.subtitle' | transloco"
+    [back]="{ label: ('attendance.backToList' | transloco), link: '/attendance' }"
   />
 
   @if (loading) {
-    <app-skeleton-list label="Loading trainers, gyms and trainees" [rows]="5" />
+    <app-skeleton-list [label]="'attendance.register.loading' | transloco" [rows]="5" />
   } @else {
     <form class="register" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <fieldset class="panel session">
-        <legend class="visually-hidden">Session</legend>
+        <legend class="visually-hidden">{{ 'attendance.register.session' | transloco }}</legend>
         <label class="form-field session__pick">
-          <span class="form-field__label">Trainer</span>
+          <span class="form-field__label">{{ 'attendance.register.trainer' | transloco }}</span>
           <select formControlName="trainerId">
-            <option value="" disabled>Select trainer</option>
+            <option value="" disabled>{{ 'attendance.register.selectTrainer' | transloco }}</option>
             @for (trainer of trainers; track trainer.id) {
               <option [value]="trainer.id">
                 {{ trainer.name }}{{ trainer.nickname ? ' (' + trainer.nickname + ')' : '' }}
@@ -22,35 +22,35 @@
             }
           </select>
           @if (form.controls.trainerId.touched && form.controls.trainerId.invalid) {
-            <span class="form-field__error">Trainer is required.</span>
+            <span class="form-field__error">{{ 'attendance.register.trainerRequired' | transloco }}</span>
           }
         </label>
 
         <label class="form-field session__pick">
-          <span class="form-field__label">Gym</span>
+          <span class="form-field__label">{{ 'attendance.register.gym' | transloco }}</span>
           <select formControlName="locationId">
-            <option value="" disabled>Select gym location</option>
+            <option value="" disabled>{{ 'attendance.register.selectGym' | transloco }}</option>
             @for (gym of gymLocations; track gym.id) {
               <option [value]="gym.id">{{ gym.name }}</option>
             }
           </select>
           @if (form.controls.locationId.touched && form.controls.locationId.invalid) {
-            <span class="form-field__error">Gym location is required.</span>
+            <span class="form-field__error">{{ 'attendance.register.gymRequired' | transloco }}</span>
           }
         </label>
 
         <label class="form-field">
-          <span class="form-field__label">Date</span>
+          <span class="form-field__label">{{ 'attendance.register.date' | transloco }}</span>
           <input type="date" formControlName="trainedDate" />
           @if (form.controls.trainedDate.touched && form.controls.trainedDate.invalid) {
-            <span class="form-field__error">Training date is required.</span>
+            <span class="form-field__error">{{ 'attendance.register.dateRequired' | transloco }}</span>
           }
         </label>
 
         <label class="form-field">
-          <span class="form-field__label">Time <span class="form-field__optional">(optional)</span></span>
+          <span class="form-field__label">{{ 'attendance.register.time' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span></span>
           <select formControlName="trainedTime">
-            <option value="">Not specified</option>
+            <option value="">{{ 'attendance.register.notSpecified' | transloco }}</option>
             @for (trainingTime of trainingTimes; track trainingTime.id) {
               <option [value]="formatTimeWithoutSeconds(trainingTime.startTime)">
                 {{ formatTrainingTimeOption(trainingTime) }}
@@ -61,7 +61,7 @@
       </fieldset>
 
       <fieldset class="who">
-        <legend class="who__title">Who trained?</legend>
+        <legend class="who__title">{{ 'attendance.register.whoTrained' | transloco }}</legend>
 
         <div class="who__tools">
           <div class="who__search">
@@ -69,21 +69,21 @@
             <input
               type="search"
               formControlName="traineeSearch"
-              placeholder="Search name or nickname"
-              aria-label="Search trainees by name or nickname"
+              [placeholder]="'attendance.register.searchPlaceholder' | transloco"
+              [attr.aria-label]="'attendance.register.searchLabel' | transloco"
               autocomplete="off"
             />
           </div>
           <div class="who__bulk">
-            <button class="btn btn--ghost" type="button" (click)="selectFiltered()">Select shown</button>
-            <button class="btn btn--ghost" type="button" (click)="clearFiltered()">Clear shown</button>
+            <button class="btn btn--ghost" type="button" (click)="selectFiltered()">{{ 'attendance.register.selectShown' | transloco }}</button>
+            <button class="btn btn--ghost" type="button" (click)="clearFiltered()">{{ 'attendance.register.clearShown' | transloco }}</button>
           </div>
         </div>
 
         @if (filteredTrainees.length === 0) {
-          <p class="notice" role="status">No trainees match this search.</p>
+          <p class="notice" role="status">{{ 'attendance.register.noMatches' | transloco }}</p>
         } @else {
-          <ul class="list-card" aria-label="Trainees">
+          <ul class="list-card" [attr.aria-label]="'attendance.register.traineesLabel' | transloco">
             @for (trainee of filteredTrainees; track trainee.id) {
               <li>
                 <label class="trainee" [class.is-selected]="isSelected(trainee.id)">
@@ -107,14 +107,15 @@
 
       <div class="save-bar">
         @if (errorMessage) {
-          <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+          <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
         }
         <div class="save-bar__inner">
           <p class="save-bar__count" aria-live="polite">
-            <strong class="num">{{ selectedTraineeIds.size }}</strong> selected
+            <strong class="num">{{ selectedTraineeIds.size }}</strong>
+            {{ 'attendance.register.selected' | transloco: { count: selectedTraineeIds.size } }}
           </p>
           <button class="btn btn--primary save-bar__submit" type="submit" [disabled]="submitting">
-            {{ submitting ? 'Saving...' : 'Register attendance' }}
+            {{ submitting ? ('common.saving' | transloco) : ('attendance.register.submit' | transloco) }}
           </button>
         </div>
       </div>

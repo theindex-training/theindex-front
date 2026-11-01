@@ -15,11 +15,14 @@ import {
 } from '../../services/trainers.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { trimmedLength } from '../../utils/form-validators.util';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-trainer-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
   templateUrl: './trainer-edit.component.html'
 })
 export class TrainerEditComponent implements OnInit {
@@ -31,7 +34,7 @@ export class TrainerEditComponent implements OnInit {
   trainer: TrainerProfile | null = null;
   loading = true;
   submitting = false;
-  errorMessage = '';
+  errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -52,7 +55,7 @@ export class TrainerEditComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.errorMessage = 'Trainer ID is missing.';
+      this.errorMessage = i18nMessage('trainers.errors.missingId');
       this.loading = false;
       return;
     }
@@ -69,7 +72,7 @@ export class TrainerEditComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to load this trainer.';
+          apiErrorMessage(error, 'trainers.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
       }
@@ -92,7 +95,7 @@ export class TrainerEditComponent implements OnInit {
     };
 
     this.submitting = true;
-    this.errorMessage = '';
+    this.errorMessage = null;
 
     this.trainersService.update(this.trainer.id, payload).subscribe({
       next: () => {
@@ -101,7 +104,7 @@ export class TrainerEditComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage =
-          error?.error?.message || 'Unable to update this trainer right now.';
+          apiErrorMessage(error, 'trainers.edit.error');
         this.submitting = false;
       }
     });

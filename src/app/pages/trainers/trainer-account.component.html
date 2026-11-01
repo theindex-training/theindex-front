@@ -1,30 +1,30 @@
 <section class="page-stack">
   <app-page-header
-    [title]="isEditMode ? 'Manage trainer account' : 'Create trainer account'"
-    [subtitle]="isEditMode ? 'Update login credentials for this trainer account.' : 'Provision login credentials for the selected trainer.'"
-    [back]="{ label: 'Back to trainers', link: '/trainers' }"
+    [title]="isEditMode ? ('trainers.account.manageTitle' | transloco) : ('trainers.account.createTitle' | transloco)"
+    [subtitle]="isEditMode ? ('trainers.account.manageSubtitle' | transloco) : ('trainers.account.createSubtitle' | transloco)"
+    [back]="{ label: ('trainers.backToList' | transloco), link: '/trainers' }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">Loading trainer...</p>
+    <p class="notice" role="status">{{ 'trainers.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !trainer) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
   } @else if (trainer) {
     <div class="panel">
       <dl class="detail-list">
         <div>
-          <dt>Trainer</dt>
+          <dt>{{ 'trainers.fields.trainer' | transloco }}</dt>
           <dd>{{ trainer.name }}</dd>
         </div>
         <div>
-          <dt>Nickname</dt>
+          <dt>{{ 'trainers.fields.nickname' | transloco }}</dt>
           <dd>{{ formatNickname() }}</dd>
         </div>
         <div>
-          <dt>Profile status</dt>
+          <dt>{{ 'trainers.fields.profileStatus' | transloco }}</dt>
           <dd>
             <app-status-dot [tone]="trainer.isActive ? 'success' : 'neutral'">
-              {{ trainer.isActive ? 'Active' : 'Inactive' }}
+              {{ trainer.isActive ? ('trainers.status.active' | transloco) : ('trainers.status.inactive' | transloco) }}
             </app-status-dot>
           </dd>
         </div>
@@ -34,7 +34,7 @@
         <div class="form-grid">
           <div class="form-row">
             <div class="form-field">
-              <label class="form-field__label" for="trainer-account-email">Email</label>
+              <label class="form-field__label" for="trainer-account-email">{{ 'accounts.email' | transloco }}</label>
               <input
                 id="trainer-account-email"
                 type="email"
@@ -46,14 +46,14 @@
               @if (form.controls.email.touched && form.controls.email.invalid) {
                 <span class="form-field__error" id="trainer-account-email-help">
                   @if (form.controls.email.hasError('required')) {
-                    Email is required.
+                    {{ 'accounts.emailRequired' | transloco }}
                   } @else {
-                    Enter a valid email address, e.g. trainer&#64;example.com.
+                    {{ 'trainers.account.emailInvalid' | transloco }}
                   }
                 </span>
               } @else {
                 <span class="form-field__hint" id="trainer-account-email-help">
-                  Used to log in, e.g. trainer&#64;example.com.
+                  {{ 'trainers.account.emailHint' | transloco }}
                 </span>
               }
             </div>
@@ -63,9 +63,9 @@
             <div class="form-field">
               <label class="form-field__label" for="trainer-account-password">
                 @if (isEditMode) {
-                  New password <span class="form-field__optional">(optional)</span>
+                  {{ 'accounts.newPassword' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span>
                 } @else {
-                  Password
+                  {{ 'accounts.password' | transloco }}
                 }
               </label>
               <div class="password-field">
@@ -80,25 +80,25 @@
                 <button
                   type="button"
                   class="password-toggle"
-                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-                  [title]="showPassword ? 'Hide password' : 'Show password'"
+                  [attr.aria-label]="(showPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
+                  [title]="(showPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
                   (click)="togglePasswordVisibility()"
                 >
                   <app-icon [name]="showPassword ? 'eye-off' : 'eye'" />
                 </button>
               </div>
               @if (passwordError) {
-                <span class="form-field__error" id="trainer-account-password-help">{{ passwordError }}</span>
+                <span class="form-field__error" id="trainer-account-password-help">{{ passwordError | transloco }}</span>
               } @else {
                 <span class="form-field__hint" id="trainer-account-password-help">
-                  At least 8 characters.{{ isEditMode ? ' Leave blank to keep the current password.' : '' }}
+                  {{ (isEditMode ? 'accounts.passwordHintEdit' : 'accounts.passwordHint') | transloco }}
                 </span>
               }
             </div>
 
             <div class="form-field">
               <label class="form-field__label" for="trainer-account-confirm-password">
-                {{ isEditMode ? 'Confirm new password' : 'Confirm password' }}
+                {{ isEditMode ? ('accounts.confirmNewPassword' | transloco) : ('accounts.confirmPassword' | transloco) }}
               </label>
               <div class="password-field">
                 <input
@@ -112,18 +112,18 @@
                 <button
                   type="button"
                   class="password-toggle"
-                  [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
-                  [title]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                  [attr.aria-label]="(showConfirmPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
+                  [title]="(showConfirmPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
                   (click)="toggleConfirmPasswordVisibility()"
                 >
                   <app-icon [name]="showConfirmPassword ? 'eye-off' : 'eye'" />
                 </button>
               </div>
               @if (confirmPasswordError) {
-                <span class="form-field__error" id="trainer-account-confirm-password-help">{{ confirmPasswordError }}</span>
+                <span class="form-field__error" id="trainer-account-confirm-password-help">{{ confirmPasswordError | transloco }}</span>
               } @else {
                 <span class="form-field__hint" id="trainer-account-confirm-password-help">
-                  Must match the {{ isEditMode ? 'new password' : 'password' }}.
+                  {{ (isEditMode ? 'accounts.mustMatchNew' : 'accounts.mustMatch') | transloco }}
                 </span>
               }
             </div>
@@ -131,7 +131,7 @@
         </div>
 
         @if (errorMessage) {
-          <p class="notice notice--danger" role="alert">{{ errorMessage }}</p>
+          <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
         }
 
         <div class="form-actions">
@@ -142,11 +142,11 @@
               [disabled]="deactivating"
               (click)="deactivateAccount()"
             >
-              {{ deactivating ? 'Deactivating...' : 'Deactivate account' }}
+              {{ deactivating ? ('common.deactivating' | transloco) : ('accounts.deactivate' | transloco) }}
             </button>
           }
           <button class="btn btn--primary" type="submit" [disabled]="submitting">
-            {{ submitting ? 'Saving...' : isEditMode ? 'Save account changes' : 'Create account' }}
+            {{ submitting ? ('common.saving' | transloco) : isEditMode ? ('accounts.saveChanges' | transloco) : ('accounts.create' | transloco) }}
           </button>
         </div>
       </form>

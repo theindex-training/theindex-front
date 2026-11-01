@@ -1,12 +1,13 @@
 <main class="login">
   <div class="login__panel login__panel--brand">
+    <app-language-switch class="login__language" [compact]="true" />
     <div class="login__brand">
       <img class="login__logo" src="brand/the-index-logo-red.png" alt="The Index" width="640" height="270" />
-      <h1>Welcome back</h1>
-      <p class="login__copy">Sign in to access TheIndex.</p>
+      <h1>{{ 'auth.login.welcome' | transloco }}</h1>
+      <p class="login__copy">{{ 'auth.login.copy' | transloco }}</p>
       <ul class="login__highlights">
-        <li>Trainers to manage trainings</li>
-        <li>Trainee to track their personal progress</li>
+        <li>{{ 'auth.login.highlightTrainers' | transloco }}</li>
+        <li>{{ 'auth.login.highlightTrainees' | transloco }}</li>
       </ul>
     </div>
   </div>
@@ -14,46 +15,46 @@
   <div class="login__panel">
     <div class="login__card">
       <div class="login__header">
-        <h2>Sign in</h2>
-        <p>Use your The Index account credentials to continue.</p>
+        <h2>{{ 'auth.login.title' | transloco }}</h2>
+        <p>{{ 'auth.login.intro' | transloco }}</p>
       </div>
 
       <form class="login__form" novalidate [formGroup]="loginForm" (ngSubmit)="handleLogin()">
         <app-ui-input
           id="email"
-          label="Email"
+          [label]="'auth.login.email' | transloco"
           type="email"
-          placeholder="you@company.com"
+          [placeholder]="'auth.login.emailPlaceholder' | transloco"
           autocomplete="email"
           formControlName="email"
         />
         @if (loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')) {
-          <p class="form-field__error login__error">Email is required.</p>
+          <p class="form-field__error login__error">{{ 'auth.login.emailRequired' | transloco }}</p>
         }
 
         <app-ui-input
           id="password"
-          label="Password"
+          [label]="'auth.login.password' | transloco"
           type="password"
           placeholder="••••••••"
           autocomplete="current-password"
           formControlName="password"
         />
         @if (loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')) {
-          <p class="form-field__error login__error">Password is required.</p>
+          <p class="form-field__error login__error">{{ 'auth.login.passwordRequired' | transloco }}</p>
         }
         @if (loginForm.get('password')?.touched && loginForm.get('password')?.hasError('minlength')) {
-          <p class="form-field__error login__error">Password must be at least 3 characters.</p>
+          <p class="form-field__error login__error">{{ 'auth.login.passwordLength' | transloco }}</p>
         }
 
         @if (authErrorMessage) {
-          <p class="notice notice--danger" role="alert" aria-live="polite">{{ authErrorMessage }}</p>
+          <p class="notice notice--danger" role="alert" aria-live="polite">{{ authErrorMessage | uiMessage }}</p>
         }
 
-        <app-ui-button type="submit">Sign in</app-ui-button>
+        <app-ui-button type="submit">{{ 'auth.login.submit' | transloco }}</app-ui-button>
       </form>
 
-      <p class="login__footer">Need access? Contact admin</p>
+      <p class="login__footer">{{ 'auth.login.footer' | transloco }}</p>
     </div>
   </div>
 </main>

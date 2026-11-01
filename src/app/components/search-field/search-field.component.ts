@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { IconComponent } from '../icon/icon.component';
 
 let nextId = 0;
@@ -7,14 +8,15 @@ let nextId = 0;
 @Component({
   selector: 'app-search-field',
   standalone: true,
-  imports: [IconComponent],
+  imports: [TranslocoPipe, IconComponent],
   templateUrl: './search-field.component.html',
   styleUrl: './search-field.component.scss'
 })
 export class SearchFieldComponent {
-  /** Accessible label (visually hidden), e.g. "Search trainees". */
+  /** Accessible label (visually hidden, already translated), e.g. "Search trainees". */
   @Input({ required: true }) label = '';
-  @Input() placeholder = 'Search';
+  /** Defaults to the translated "Search". */
+  @Input() placeholder = '';
   @Input() value = '';
   @Output() readonly valueChange = new EventEmitter<string>();
 
