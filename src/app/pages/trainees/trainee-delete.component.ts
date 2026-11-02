@@ -70,6 +70,7 @@ export class TraineeDeleteComponent implements OnInit {
         this.errorMessage =
           apiErrorMessage(error, 'trainees.delete.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

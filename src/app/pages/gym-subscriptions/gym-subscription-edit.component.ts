@@ -101,6 +101,7 @@ export class GymSubscriptionEditComponent implements OnInit {
         this.errorMessage =
           apiErrorMessage(error, 'gymSubscriptions.edit.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

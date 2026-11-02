@@ -69,6 +69,7 @@ export class GymSubscriptionDeleteComponent implements OnInit {
         this.errorMessage =
           apiErrorMessage(error, 'gymSubscriptions.delete.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

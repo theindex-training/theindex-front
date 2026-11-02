@@ -12,6 +12,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - PR 2 (§1–§4, the P0 sections): 27 spec files, 249 tests.
 - Every P0 area was mutation-checked: 12 deliberate breaks in production code, and each one was caught by a spec.
 - CI (`.github/workflows/ci.yml`) runs the tests and the production build on every pull request.
+- PR 3 fixed S1 and S2. It added `pages/save-errors.spec.ts`, the error-handling row of §7's table for every catalog and trainee form, and brought the suite to 28 spec files and 267 tests.
 
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
 - **P0:** access control, sessions, money, and anything that writes attendance, subscriptions, settlements or cash. A bug here loses money or data, or exposes screens to the wrong role.
@@ -29,7 +30,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 
 The review below turned up a few traps. Every spec should follow these.
 
-- **Zoneless app.** After `HttpTestingController.flush()`, call `await fixture.whenStable()` before reading the DOM. Many pages update fields in HTTP callbacks without `detectChanges()`, so the field and the DOM can disagree (see S1 below). Assert what the user sees. Where the DOM is stale, assert both the stale DOM and the field, and mark the test CHARACTERIZATION.
+- **Zoneless app.** After `HttpTestingController.flush()`, call `await fixture.whenStable()` before reading the DOM. A field updated in an HTTP callback without `detectChanges()` never reaches the DOM; S1 was exactly this, in 19 handlers. Assert what the user sees. Where the DOM is stale, assert both the stale DOM and the field, and mark the test CHARACTERIZATION.
 - **Real collaborators.** Use the real services, interceptor, router and Transloco (from `src/test-providers.ts`, English). For navigation, use `provideRouter([{ path: '**', children: [] }])` and assert `TestBed.inject(Router).url`. Don't spy on `navigate`.
 - **Page interaction** goes through `src/testing/dom.ts`. `driver(root, whenStable)` gives `type`, `select`, `check`, `click`, `submit`, `settle`, `text` and `alert`; `apiError(message, status)` builds a NestJS-shaped error to flush.
 - **Request bodies:** assert optional keys on the wire with `JSON.parse(req.request.serializeBody())`. A payload property set to `undefined` is dropped by JSON, but `toEqual` can't see the difference.
@@ -141,7 +142,7 @@ The review below turned up a few traps. Every spec should follow these.
   - **Paid** resets to the chosen plan's price;
   - `startsAt` resets to today (UTC);
   - the plan stays selected.
-- [x] Error: `subscriptionErrorMessage` is set and `submitting` is reset, but the DOM is not updated (no `detectChanges`). CHARACTERIZATION, see S1.
+- [x] Error: the API message shows and the button is usable again (S1, fixed in PR 3).
 
 **`pages/plans/plan-create.component.ts` / `plan-edit.component.ts`**
 - [x] Price → `priceCents` via `Math.round(price*100)`, including a float edge case.
@@ -152,7 +153,7 @@ The review below turned up a few traps. Every spec should follow these.
 - [x] Edit payload: the same, but always sends both keys, the unused one as `null`.
 - [x] Edit: patches the form from GET `/api/plans/<id>`, prices shown in euros (`toEuros`).
 - [x] The title has only `Validators.required`, so whitespace-only passes and is sent as `''`. CHARACTERIZATION, see S7.
-- [x] Success → `/plans`. Error → the field is set but the DOM is stale. CHARACTERIZATION, see S1.
+- [x] Success → `/plans`. Error: the API message shows and the button is usable again (S1, fixed in PR 3).
 
 **`pages/cash-register/cash-register.component.ts`**
 - [x] Load: GET `/api/cash-register` shows the balance and transactions. Error → the danger state with "Try again", which reloads.
@@ -239,7 +240,7 @@ The review below turned up a few traps. Every spec should follow these.
 - [ ] Create payload: `{ name (trimmed), nickname|null, phone|null, gymSubscriptionId, isActive: true }`. Blank optional fields become `null`.
 - [ ] Create loads gym cards with `GET /api/gym-subscriptions` (no `includeInactive`); edit loads them with `includeInactive=true`.
 - [ ] Edit patches the form from GET. Its payload has no `isActive`.
-- [ ] Success → `/trainees`. Error → stale DOM. CHARACTERIZATION, see S1.
+- [ ] Success → `/trainees`. (The error path is covered by `pages/save-errors.spec.ts`.)
 
 **`trainee-details`** (beyond §3)
 - [ ] On init: four parallel GETs (`/api/trainees/<id>`, `…/subscriptions`, `/api/attendance/trainees/<id>`, `/api/plans?active=true`), plus `GET /api/accounts/<accountId>` when the trainee is linked. An account error → no account section.
@@ -255,7 +256,7 @@ The review below turned up a few traps. Every spec should follow these.
 - [ ] `formatPlanOption`: "Title · Punch card · €45.00".
 
 **`trainee-delete`**
-- [ ] Shows the details with linked/not-linked status. Confirm → `DELETE /api/trainees/<id>` → `/trainees`. Error → stale DOM (S1).
+- [ ] Shows the details with linked/not-linked status. Confirm → `DELETE /api/trainees/<id>` → `/trainees`. (The error path is covered by `pages/save-errors.spec.ts`.)
 
 **`trainee-account` and `trainer-account`** (the same code with a different role; one table-driven spec)
 - [ ] Profile without `accountId` → create mode. Password and confirm are required; the validator returns `passwordLength` for fewer than 8 characters and `passwordsMismatch` otherwise.
@@ -302,8 +303,9 @@ The review below turned up a few traps. Every spec should follow these.
 
 One table-driven spec per page type (`crud-details.spec.ts`, `crud-forms.spec.ts`, `crud-delete.spec.ts`), with one row per resource. Every row checks:
 - [ ] details / edit / delete: a missing `:id` → that resource's `errors.missingId` and no request. A load error → the API message or `errors.load`. A loaded record is shown (details) or patched into the form (edit).
-- [ ] create / edit: an invalid form sends nothing and marks fields touched. The payload is exactly as listed below. Success → the list URL. Error → the field is set but the DOM is stale (S1).
-- [ ] delete/deactivate: `DELETE /api/<resource>/<id>` → the list URL. Error → stale DOM (S1).
+- [ ] create / edit: an invalid form sends nothing and marks fields touched. The payload is exactly as listed below. Success → the list URL.
+- [ ] delete/deactivate: `DELETE /api/<resource>/<id>` → the list URL.
+- [x] Every create / edit / delete page shows the API error and gives the button back after a failed save (`pages/save-errors.spec.ts`, the S1 fix).
 
 | Resource | Create/edit payload and validators | List request and filter |
 |---|---|---|
@@ -588,7 +590,7 @@ Role access to this page is checked in J2 only.
    - switch to Time-based; credits is cleared and duration is required;
    - set 30 days and save → `PATCH /api/plans/<id> {type:'TIME', title, priceCents, isActive, credits:null, durationDays:30}`.
 4. Deactivate → `DELETE /api/plans/<id>` → `/plans`.
-5. Variant: the POST → 400. Characterize what the user sees (S1). Today the error doesn't render and the button stays "Saving..." until the next interaction.
+5. Variant: the POST → 400. The API message shows in an alert, and the save button is enabled again (S1, fixed in PR 3).
 
 ---
 
@@ -596,14 +598,14 @@ Role access to this page is checked in J2 only.
 
 These come from reading the code. Each gets a `// CHARACTERIZATION: possibly unintended` test pinning today's behavior. Copy the entry to `TEST_NOTES.md` when its test lands. Nothing here gets fixed in the test PRs.
 
-- **S1 — Form errors don't render (zoneless).** Confirmed with a throwaway probe spec on plan-create (not committed).
+- **S1 — Form errors don't render (zoneless).** ✅ Fixed in PR 3. Confirmed with a throwaway probe spec on plan-create (not committed).
   - Some create, edit and delete handlers set `errorMessage`/`submitting` in the HTTP callback without `detectChanges()`. A failed save then shows nothing, and the submit button stays disabled on "Saving..." until the user interacts again.
   - Affected pages:
     - create, edit and delete for plans, gyms, gym subscriptions, training times and trainers;
     - create, edit and delete for trainees;
     - the subscription sale on trainee details.
   - The same handlers call `router.navigate` on success, so success looks fine.
-- **S2 — Subscription start date is UTC.** Trainee details defaults `startsAt` to the UTC date. Between 00:00 and 02:00/03:00 Sofia time it is yesterday. Register attendance and settlements use the local date.
+- **S2 — Subscription start date is UTC.** ✅ Fixed in PR 3. Trainee details defaults `startsAt` to the UTC date. Between 00:00 and 02:00/03:00 Sofia time it is yesterday. Register attendance and settlements use the local date.
 - **S3 — Subscriptions on inactive plans show an id.** Trainee details loads only active plans, so a subscription on a deactivated plan shows its raw `planId` as the plan name.
 - **S4 — Stale report data.** On Home, inactive-report requests aren't cancelled when the selection changes; a slow earlier response can overwrite a newer one.
 - **S5 — Invisible success notice.** Change password sets the success notice and navigates away immediately, so it is never seen.
@@ -646,7 +648,7 @@ The plan was reviewed against three goals: tests that survive a redesign, fail w
 - [x] **CI:** a separate PR-check workflow (`.github/workflows/ci.yml`) runs unit tests and the production build on every pull request. E2E joins it once Part B lands. The deploy workflow is untouched. To block merges on red checks, make the check required in branch protection for `main`.
 - [x] **Real-API E2E:** not now. Revisit when theindex-api has its own compose setup.
 - [x] **Fixes:**
-  - PR 3 fixes S1 and S2;
+  - PR 3 fixes S1 and S2 (done);
   - S3, S4, S5, S7, S8, S11, S12 and S14 get fixed after their tests land;
   - S6 is kept;
   - S9 needs a check in theindex-api;

@@ -100,6 +100,7 @@ export class TrainingTimeEditComponent implements OnInit {
       error: (error) => {
         this.errorMessage = apiErrorMessage(error, 'trainingTimes.edit.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

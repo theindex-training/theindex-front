@@ -98,6 +98,7 @@ export class TraineeCreateComponent implements OnInit {
         this.errorMessage =
           apiErrorMessage(error, 'trainees.create.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

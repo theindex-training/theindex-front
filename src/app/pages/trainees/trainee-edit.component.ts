@@ -131,6 +131,7 @@ export class TraineeEditComponent implements OnInit {
         this.errorMessage =
           apiErrorMessage(error, 'trainees.edit.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

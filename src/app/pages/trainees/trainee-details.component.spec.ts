@@ -132,13 +132,11 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     expect(value('#buy-paid')).toBe('60');
   });
 
-  it("defaults the start date to today's UTC date", async () => {
+  it("defaults the start date to today's local date", async () => {
     await open();
 
-    // CHARACTERIZATION: possibly unintended — toISOString() gives the UTC date: at 00:30 Sofia time
-    // on 2 Nov this is still 1 Nov. Register attendance and settlements use the local date.
-    // TEST_NOTES.md S2.
-    expect(value('#buy-starts-at')).toBe('2026-11-01');
+    // Fixed S2 (TEST_NOTES.md): at 00:30 Sofia time on 2 Nov this used to be 1 Nov (the UTC date).
+    expect(value('#buy-starts-at')).toBe('2026-11-02');
   });
 
   it('sells the subscription: plan, start date and the paid amount in cents', async () => {
@@ -161,7 +159,7 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     expect(page.text()).toContain('Monthly');
     expect(value('#buy-plan')).toBe('p2');
     expect(value('#buy-paid')).toBe('60');
-    expect(value('#buy-starts-at')).toBe('2026-11-01');
+    expect(value('#buy-starts-at')).toBe('2026-11-02');
   });
 
   it('converts euros to cents without floating-point drift', async () => {
@@ -193,7 +191,7 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     expect(expectSale().request.body.paidCents).toBe(0);
   });
 
-  it('does not show a failed sale to the user', async () => {
+  it('shows a failed sale and gives the button back', async () => {
     await open();
     await page.submit('form');
     expect(page.text()).toContain(copy.purchasing);
@@ -202,14 +200,10 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     expectSale().flush(error.body, error.options);
     await page.settle();
 
-    expect(component.subscriptionErrorMessage).toEqual({
-      text: 'Trainee already has an active subscription'
-    });
-    // CHARACTERIZATION: possibly unintended — no detectChanges() in the error handler (zoneless):
-    // the alert never renders and the button stays "Purchasing..." until the next interaction.
-    // TEST_NOTES.md S1.
-    expect(page.alert()).toBeUndefined();
-    expect(page.text()).toContain(copy.purchasing);
+    // Fixed S1 (TEST_NOTES.md): the alert used to stay invisible and the button stuck on "Purchasing...".
+    expect(page.alert()).toBe('Trainee already has an active subscription');
+    expect(page.text()).not.toContain(copy.purchasing);
+    expect(page.text()).toContain(copy.buySubmit);
   });
 
   it('names a subscription on a deactivated plan by its raw plan id', async () => {

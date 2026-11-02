@@ -139,17 +139,16 @@ describe('PlanEditComponent', () => {
     expect(page.alert()).toBe(en.plans.errors.missingId);
   });
 
-  it('does not show a failed save to the user', async () => {
+  it('shows a failed save and gives the button back', async () => {
     await open();
     await page.submit();
     const error = apiError('Validation failed');
     expectPatch().flush(error.body, error.options);
     await page.settle();
 
-    expect(component.errorMessage).toEqual({ text: 'Validation failed' });
-    // CHARACTERIZATION: possibly unintended — no detectChanges() in the error handler (zoneless):
-    // the message never renders and the button stays "Saving...". TEST_NOTES.md S1.
-    expect(page.alert()).toBeUndefined();
-    expect(page.text()).toContain(en.common.saving);
+    // Fixed S1 (TEST_NOTES.md).
+    expect(page.alert()).toBe('Validation failed');
+    expect(page.text()).not.toContain(en.common.saving);
+    expect(page.query<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(false);
   });
 });

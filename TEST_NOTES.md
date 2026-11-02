@@ -20,18 +20,19 @@ IDs match "Suspected unintended behavior" in `TEST_PLAN.md`. Gaps (S4, S8, S10�
 - **Behavior:** the app is zoneless, so nothing re-renders after the callback. The alert never appears and the submit button stays disabled on "Saving..." / "Purchasing...", until some other event (typing, a click) triggers a render.
 - **Why it looks wrong:** the user gets no feedback that the save failed, and the page looks stuck. Other pages (cash register, attendance register, accounts) call `detectChanges()` in the same place and work.
 - **Pinned by:**
-  - `plan-create.component.spec.ts` › "does not show a failed save to the user";
-  - `plan-edit.component.spec.ts` › same name;
-  - `trainee-details.component.spec.ts` › "does not show a failed sale to the user".
-  - The other 16 handlers get the same test in the §5/§7 PR.
-- **Status:** open. Fix planned (PR 3).
+  - `pages/save-errors.spec.ts`: one row per handler (18 of them). Each row fails the save and checks that the API message shows and the button is enabled with its normal label.
+  - `trainee-details.component.spec.ts` › "shows a failed sale and gives the button back".
+  - `plan-create` / `plan-edit` specs › "shows a failed save and gives the button back".
+- **Status:** **fixed in PR 3.** Each of the 19 error handlers now calls `detectChanges()`, the codebase's convention for async updates. The five create pages that had no `ChangeDetectorRef` now inject one. Before the fix, every test above failed on the missing alert.
 
 ## S2 — Subscription start date defaults to the UTC date
 - **Where:** `TraineeDetailsComponent.todayString()` (`new Date().toISOString().slice(0, 10)`).
 - **Behavior:** between 00:00 and 02:00 (03:00 in summer) Sofia time, the default "Starts" date is yesterday.
 - **Why it looks wrong:** Register attendance and Generate settlement use the local date. A subscription sold just after midnight would start a day early unless the trainer notices.
-- **Pinned by:** `trainee-details.component.spec.ts` › "defaults the start date to today's UTC date". The spec runs at 00:30 Sofia time, set in `src/test-providers.ts` and with a faked Date.
-- **Status:** open. Fix planned (PR 3).
+- **Pinned by:** `trainee-details.component.spec.ts`:
+  - "defaults the start date to today's local date" (00:30 Sofia time, with a faked Date);
+  - the reset after a sale, in "sells the subscription…".
+- **Status:** **fixed in PR 3.** `todayString()` now builds the date from local fields, like Register attendance. Both tests failed before the fix.
 
 ## S3 — Subscriptions on a deactivated plan show the plan id
 - **Where:** `TraineeDetailsComponent.loadPlans()` loads `GET /api/plans?active=true`; `formatPlanLabel()` falls back to `planId`.

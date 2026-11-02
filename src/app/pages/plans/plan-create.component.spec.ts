@@ -162,7 +162,7 @@ describe('PlanCreateComponent', () => {
     expect(expectPost().request.body.title).toBe('');
   });
 
-  it('does not show a failed save to the user', async () => {
+  it('shows a failed save and gives the button back', async () => {
     await fill({ title: 'Plan', credits: '10', price: '10' });
     await page.submit();
     expect(page.text()).toContain(en.common.saving);
@@ -171,15 +171,10 @@ describe('PlanCreateComponent', () => {
     expectPost().flush(error.body, error.options);
     await page.settle();
 
-    expect(fixture.componentInstance.errorMessage).toEqual({
-      text: 'A plan with this title already exists'
-    });
-    expect(fixture.componentInstance.submitting).toBe(false);
-    // CHARACTERIZATION: possibly unintended — zoneless app and no detectChanges() in the error
-    // handler: the message never renders and the button stays "Saving..." (disabled) until the user
-    // interacts with the page again. TEST_NOTES.md S1.
-    expect(page.alert()).toBeUndefined();
-    expect(page.text()).toContain(en.common.saving);
+    // Fixed S1 (TEST_NOTES.md): the error used to stay invisible and the button stuck on "Saving...".
+    expect(page.alert()).toBe('A plan with this title already exists');
+    expect(page.text()).not.toContain(en.common.saving);
+    expect(page.query<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(false);
     expect(router.url).toBe('/plans/new');
   });
 });

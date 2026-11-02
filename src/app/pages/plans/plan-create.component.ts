@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -62,7 +62,8 @@ export class PlanCreateComponent implements OnInit {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly plansService: PlansService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly changeDetector: ChangeDetectorRef
   ) {
     this.form = this.formBuilder.group({
       type: this.formBuilder.nonNullable.control<PlanType>('PUNCH', [Validators.required]),
@@ -116,6 +117,7 @@ export class PlanCreateComponent implements OnInit {
         this.errorMessage =
           apiErrorMessage(error, 'plans.create.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }
