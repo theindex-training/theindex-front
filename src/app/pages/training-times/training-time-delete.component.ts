@@ -65,6 +65,7 @@ export class TrainingTimeDeleteComponent implements OnInit {
       error: (error) => {
         this.errorMessage = apiErrorMessage(error, 'trainingTimes.delete.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

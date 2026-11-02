@@ -67,6 +67,7 @@ export class GymDeleteComponent implements OnInit {
         this.errorMessage =
           apiErrorMessage(error, 'gyms.delete.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

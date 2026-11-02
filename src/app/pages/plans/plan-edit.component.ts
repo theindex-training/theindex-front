@@ -153,6 +153,7 @@ export class PlanEditComponent implements OnInit {
         this.errorMessage =
           apiErrorMessage(error, 'plans.edit.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

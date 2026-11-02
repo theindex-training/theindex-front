@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -33,7 +33,8 @@ export class TrainerCreateComponent {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly trainersService: TrainersService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly changeDetector: ChangeDetectorRef
   ) {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
@@ -69,6 +70,7 @@ export class TrainerCreateComponent {
         this.errorMessage =
           apiErrorMessage(error, 'trainers.create.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -32,7 +32,8 @@ export class TrainingTimeCreateComponent {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly trainingTimesService: TrainingTimesService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly changeDetector: ChangeDetectorRef
   ) {
     this.form = this.formBuilder.group({
       startTime: this.formBuilder.nonNullable.control('', [Validators.required]),
@@ -63,6 +64,7 @@ export class TrainingTimeCreateComponent {
       error: (error) => {
         this.errorMessage = apiErrorMessage(error, 'trainingTimes.create.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

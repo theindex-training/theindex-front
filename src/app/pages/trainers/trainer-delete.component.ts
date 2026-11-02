@@ -70,6 +70,7 @@ export class TrainerDeleteComponent implements OnInit {
         this.errorMessage =
           apiErrorMessage(error, 'trainers.delete.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

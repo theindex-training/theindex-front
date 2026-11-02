@@ -70,6 +70,7 @@ export class PlanDeleteComponent implements OnInit {
         this.errorMessage =
           apiErrorMessage(error, 'plans.delete.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

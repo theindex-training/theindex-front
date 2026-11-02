@@ -106,6 +106,7 @@ export class TrainerEditComponent implements OnInit {
         this.errorMessage =
           apiErrorMessage(error, 'trainers.edit.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       }
     });
   }

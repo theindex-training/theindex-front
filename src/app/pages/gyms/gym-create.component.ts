@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -37,6 +37,7 @@ export class GymCreateComponent {
     private readonly formBuilder: FormBuilder,
     private readonly gymsService: GymLocationsService,
     private readonly router: Router,
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
@@ -70,6 +71,7 @@ export class GymCreateComponent {
       error: (error) => {
         this.errorMessage = apiErrorMessage(error, 'gyms.create.error');
         this.submitting = false;
+        this.changeDetector.detectChanges();
       },
     });
   }
