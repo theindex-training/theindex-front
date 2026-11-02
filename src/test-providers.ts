@@ -1,3 +1,7 @@
+// Every spec runs in the gym's timezone, so date defaults (local vs UTC) are tested the same way on
+// every machine and in CI. Must run before anything creates a Date.
+process.env['TZ'] = 'Europe/Sofia';
+
 import { registerLocaleData } from '@angular/common';
 import localeBg from '@angular/common/locales/bg';
 import localeEnGb from '@angular/common/locales/en-GB';
