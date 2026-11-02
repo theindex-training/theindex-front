@@ -22,6 +22,40 @@ For a working UI locally, also run theindex-api (`npm run start:dev` there, with
 
 Known baseline (as of Oct 2026): build passes with no warnings and all `ng test` specs pass. Keep it that way; a failing spec is a regression.
 
+## Testing (characterization tests)
+We are adding characterization tests to a production app. The plan and its progress live in `TEST_PLAN.md`; anything a test reveals that looks wrong goes in `TEST_NOTES.md`.
+
+**The spec is current production behavior.** Tests describe what the app does today, not what it should do.
+- **Never change production code to make a test pass.** The one exception: adding `data-testid` attributes to templates.
+- **If behavior looks like a bug,** test the current behavior anyway. Put a `// CHARACTERIZATION: possibly unintended` comment on the assertion and add an entry to `TEST_NOTES.md` (what happens, where, why it looks wrong, the spec that pins it). Fixing it is a separate, deliberate change.
+- **When fixing a bug later,** first add (or flip) a test that reproduces it and fails, then fix the code, then update the `TEST_NOTES.md` entry.
+
+**What to unit-test** (Vitest via `npx ng test --watch=false`, specs next to the code as `*.spec.ts`):
+- Logic: services, guards, the interceptor, pipes, utils, i18n helpers, and components with real logic (payload building, validation, filtering, role checks, state after success/error).
+- Not purely presentational components (chip, icon, status-dot, skeleton, empty-state, page-header, brand, list-row…). Their output is covered through the pages that use them and by E2E.
+- Don't test Angular or libraries themselves (e.g. that `Validators.required` works); test our use of them.
+
+**Mock only at boundaries:**
+- HTTP: `provideHttpClient()` + `provideHttpClientTesting()` and `HttpTestingController`. Assert method, URL, query params and body; `verify()` in `afterEach`. Use the real services, interceptor, router and Transloco (already provided by `src/test-providers.ts`).
+- Time: `vi.useFakeTimers()` / `vi.setSystemTime()` for anything that depends on "today" or the timezone.
+- Storage: jsdom's real `localStorage`, cleared in `beforeEach`. Build JWTs with a helper that base64url-encodes a payload; never paste real tokens.
+- Browser dialogs and media queries (`window.confirm`, `matchMedia`) may be stubbed with `vi.spyOn`.
+- Don't mock our own services, guards or components to test another unit of ours. Navigation is checked through the real router (`provideRouter` with stub routes, then `router.url`), not a spied `navigate`.
+
+**Every test must fail if the behavior it covers is broken.**
+- "should create" and "renders without error" don't count on their own.
+- Assert the observable outcome: the request sent, the URL navigated to, the value stored, the text or state shown.
+- For P0/P1 items in the plan, break the code locally once (flip a condition, drop a field) and watch the test fail before committing.
+
+**The app is zoneless.** Nothing re-renders after an async callback unless the code calls `detectChanges()`/`markForCheck()` or a signal changes. In component specs, `await fixture.whenStable()` after flushing HTTP, and assert on what the user would actually see. Where the component state and the DOM disagree, that is behavior to characterize (see `TEST_NOTES.md`).
+
+**E2E selectors** (Playwright, see `TEST_PLAN.md`):
+- Use only roles (`getByRole`), accessible names and labels (`getByLabel`), or `data-testid` (`getByTestId`).
+- Never CSS classes, tag structure (`div > span:nth-child(2)`), or visible copy that is likely to change in a redesign.
+- Accessible names come from the translation files. Resolve them with a helper that reads `public/i18n/en.json` by key, so a copy change doesn't break the test but a missing label does.
+- Need a hook that has no role or label (a balance figure, a count)? Add a `data-testid` in the template. That is the only allowed production change; name it `<feature>-<thing>`, e.g. `cash-register-balance`.
+- Mock the API at the network boundary (`page.route('**/api/**')`) with fixtures shaped like theindex-api responses, and assert the requests the page sends.
+
 ## Folder structure
 ```
 src/
@@ -327,4 +361,5 @@ Bulgarian is the default language; English is the second. Users switch at runtim
 - Never hardcode colors. Use the design tokens (see "Design system").
 - Never hardcode user-facing text. Use translation keys in both language files (see "Internationalization").
 - Run `npm run build` and `npx ng test --watch=false` before pushing.
+- Tests follow "Testing (characterization tests)" above: current behavior is the spec, and production code changes only for `data-testid`s.
 - Use the new control flow (`@if`, `@for`) in templates, not `*ngIf` / `*ngFor`.
