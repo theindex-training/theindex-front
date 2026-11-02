@@ -13,6 +13,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - Every P0 area was mutation-checked: 12 deliberate breaks in production code, and each one was caught by a spec.
 - CI (`.github/workflows/ci.yml`) runs the tests and the production build on every pull request.
 - PR 3 fixed S1 and S2. It added `pages/save-errors.spec.ts`, the error-handling row of §7's table for every catalog and trainee form, and brought the suite to 28 spec files and 267 tests.
+- PR 4 covered §5–§12 (62 spec files, 547 tests; 17 more breaks in production code, all caught). It pinned S4, S8, S10, S11 and S12, and found S15 and S16.
 
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
 - **P0:** access control, sessions, money, and anything that writes attendance, subscriptions, settlements or cash. A bug here loses money or data, or exposes screens to the wrong role.
@@ -229,69 +230,69 @@ The review below turned up a few traps. Every spec should follow these.
 ### 5. Trainees and accounts (P1)
 
 **`pages/trainees/trainees.component.ts`** (extends the existing spec, which covers display helpers only)
-- [ ] The filter maps to the request: All → no `active` param; Active → `active=true`; Inactive → `active=false`.
-- [ ] Gym cards load from `/api/gym-subscriptions?includeInactive=true`. A failure falls back to `[]`, and the list still renders.
-- [ ] Search is client-side, trimmed, case-insensitive, over name or nickname. Changing the filter keeps the term applied. `TraineesService.list` supports `search`, but the page never sends it.
-- [ ] The count shows shown / total. "Clear search" restores all rows.
+- [x] The filter maps to the request: All → no `active` param; Active → `active=true`; Inactive → `active=false`.
+- [x] Gym cards load from `/api/gym-subscriptions?includeInactive=true`. A failure falls back to `[]`, and the list still renders.
+- [x] Search is client-side, trimmed, case-insensitive, over name or nickname. Changing the filter keeps the term applied. `TraineesService.list` supports `search`, but the page never sends it.
+- [x] The count shows shown / total. "Clear search" restores all rows.
 - [x] Nickname quoting, gym card lookup, trailing chip (existing spec).
 
 **`trainee-create` / `trainee-edit`**
-- [ ] Validation: name required and 2–100 trimmed; nickname optional, 1–50 trimmed.
-- [ ] Create payload: `{ name (trimmed), nickname|null, phone|null, gymSubscriptionId, isActive: true }`. Blank optional fields become `null`.
-- [ ] Create loads gym cards with `GET /api/gym-subscriptions` (no `includeInactive`); edit loads them with `includeInactive=true`.
-- [ ] Edit patches the form from GET. Its payload has no `isActive`.
-- [ ] Success → `/trainees`. (The error path is covered by `pages/save-errors.spec.ts`.)
+- [x] Validation: name required and 2–100 trimmed; nickname optional, 1–50 trimmed.
+- [x] Create payload: `{ name (trimmed), nickname|null, phone|null, gymSubscriptionId, isActive: true }`. Blank optional fields become `null`.
+- [x] Create loads gym cards with `GET /api/gym-subscriptions` (no `includeInactive`); edit loads them with `includeInactive=true`.
+- [x] Edit patches the form from GET. Its payload has no `isActive`.
+- [x] Success → `/trainees`. (The error path is covered by `pages/save-errors.spec.ts`.)
 
 **`trainee-details`** (beyond §3)
-- [ ] On init: four parallel GETs (`/api/trainees/<id>`, `…/subscriptions`, `/api/attendance/trainees/<id>`, `/api/plans?active=true`), plus `GET /api/accounts/<accountId>` when the trainee is linked. An account error → no account section.
-- [ ] `canDeleteSubscriptions` is true for ADMIN and TRAINER (any other role can't reach the page).
-- [ ] The subscription filter defaults to ACTIVE. The status match ignores case. Each filter has its own empty-message key.
-- [ ] Deleting a subscription:
+- [x] On init: four parallel GETs (`/api/trainees/<id>`, `…/subscriptions`, `/api/attendance/trainees/<id>`, `/api/plans?active=true`), plus `GET /api/accounts/<accountId>` when the trainee is linked. An account error → no account section.
+- [x] `canDeleteSubscriptions` is true for ADMIN and TRAINER (any other role can't reach the page).
+- [x] The subscription filter defaults to ACTIVE. The status match ignores case. Each filter has its own empty-message key.
+- [x] Deleting a subscription:
   - confirm text includes the plan and start date; cancel → no request;
   - `DELETE /api/subscriptions/<id>` removes it locally;
   - a second delete is blocked while one is in flight;
   - error → message.
-- [ ] A plans load error is written into `subscriptionErrorMessage`, the same slot as subscription errors.
-- [ ] A subscription whose plan isn't in the active-plans list shows the raw `planId` as its name. CHARACTERIZATION, see S3.
-- [ ] `formatPlanOption`: "Title · Punch card · €45.00".
+- [x] A plans load error is written into `subscriptionErrorMessage`, the same slot as subscription errors.
+- [x] A subscription whose plan isn't in the active-plans list shows the raw `planId` as its name. CHARACTERIZATION, see S3.
+- [x] `formatPlanOption`: "Title · Punch card · €45.00".
 
 **`trainee-delete`**
-- [ ] Shows the details with linked/not-linked status. Confirm → `DELETE /api/trainees/<id>` → `/trainees`. (The error path is covered by `pages/save-errors.spec.ts`.)
+- [x] Shows the details with linked/not-linked status. Confirm → `DELETE /api/trainees/<id>` → `/trainees`. (The error path is covered by `pages/save-errors.spec.ts`.)
 
 **`trainee-account` and `trainer-account`** (the same code with a different role; one table-driven spec)
-- [ ] Profile without `accountId` → create mode. Password and confirm are required; the validator returns `passwordLength` for fewer than 8 characters and `passwordsMismatch` otherwise.
-- [ ] Create payload `POST /api/accounts/{trainee|trainer}/<profileId>`: `{ email (trimmed), role: 'TRAINEE'|'TRAINER', status: 'ACTIVE', password, confirmPassword }`.
-- [ ] Profile with `accountId` → `GET /api/accounts/<accountId>`, then edit mode with the email prefilled. A blank password is allowed and omitted from the PATCH; a filled one sends both password fields.
-- [ ] The account GET fails, or returns `null`, while the profile has `accountId`: the page falls back to create mode, and submitting would provision a second account. CHARACTERIZATION, see S8.
-- [ ] Deactivate: `DELETE /api/accounts/<accountId>` → back to the profile details. A second click while in flight is ignored. There is no confirm dialog (record as behavior).
-- [ ] Success → `/trainees/<id>` or `/trainers/<id>`. Errors → the API message or the create/update/deactivate fallback keys, shown in the DOM (these handlers call `detectChanges`).
+- [x] Profile without `accountId` → create mode. Password and confirm are required; the validator returns `passwordLength` for fewer than 8 characters and `passwordsMismatch` otherwise.
+- [x] Create payload `POST /api/accounts/{trainee|trainer}/<profileId>`: `{ email (trimmed), role: 'TRAINEE'|'TRAINER', status: 'ACTIVE', password, confirmPassword }`.
+- [x] Profile with `accountId` → `GET /api/accounts/<accountId>`, then edit mode with the email prefilled. A blank password is allowed and omitted from the PATCH; a filled one sends both password fields.
+- [x] The account GET fails, or returns `null`, while the profile has `accountId`: the page falls back to create mode, and submitting would provision a second account. CHARACTERIZATION, see S8.
+- [x] Deactivate: `DELETE /api/accounts/<accountId>` → back to the profile details. A second click while in flight is ignored. There is no confirm dialog (record as behavior).
+- [x] Success → `/trainees/<id>` or `/trainers/<id>`. Errors → the API message or the create/update/deactivate fallback keys, shown in the DOM (these handlers call `detectChanges`).
 
 ### 6. Settlements (P1, money-adjacent)
 
 **`settlements.component.ts`**
-- [ ] `canManageSettlements` only for ADMIN. For a TRAINER the generate action is hidden, the delete buttons are hidden, and `deleteSettlement()` is a no-op.
-- [ ] Delete:
+- [x] `canManageSettlements` only for ADMIN. For a TRAINER the generate action is hidden, the delete buttons are hidden, and `deleteSettlement()` is a no-op.
+- [x] Delete:
   - confirm text with the period; cancel → no request;
   - `DELETE /api/settlements/<id>` → removed locally;
   - error → the list stays, with a danger notice above it;
   - a second delete while one is in flight is ignored.
 
 **`settlement-generate.component.ts`**
-- [ ] Both dates default to local today (fake clock).
-- [ ] An empty date → `missingDates` and no request.
-- [ ] No start ≤ end check: the request goes out and the API decides. CHARACTERIZATION, see S11.
-- [ ] `POST /api/settlements {periodStart, periodEnd}` → `/settlements/<response.settlement.id>`. Error → message.
+- [x] Both dates default to local today (fake clock).
+- [x] An empty date → `missingDates` and no request.
+- [x] No start ≤ end check: the request goes out and the API decides. CHARACTERIZATION, see S11.
+- [x] `POST /api/settlements {periodStart, periodEnd}` → `/settlements/<response.settlement.id>`. Error → message.
 
 **`settlement-details.component.ts`**
-- [ ] On init:
+- [x] On init:
   - `GET /api/settlements/<id>`;
   - `GET …/allocations?offset=0&limit=500`;
   - `GET /api/trainers`, `GET /api/trainees` (no params);
   - `GET /api/gym-locations?includeInactive=true`.
-- [ ] The admin trainer filter re-requests allocations with `trainerId`; "All" omits it.
-- [ ] Allocations are capped at 500 with no paging; the page shows "N of total". CHARACTERIZATION, see S10.
-- [ ] Finalize is visible and works only for ADMIN on a DRAFT settlement: `POST …/finalize` with `{}`, the status updates and the button disappears. Error → message. `finalizeSettlement()` is a no-op for a TRAINER or a FINAL settlement.
-- [ ] Labels:
+- [x] The admin trainer filter re-requests allocations with `trainerId`; "All" omits it.
+- [x] Allocations are capped at 500 with no paging; the page shows "N of total". CHARACTERIZATION, see S10.
+- [x] Finalize is visible and works only for ADMIN on a DRAFT settlement: `POST …/finalize` with `{}`, the status updates and the button disappears. Error → message. `finalizeSettlement()` is a no-op for a TRAINER or a FINAL settlement.
+- [x] Labels:
   - trainer = trimmed nickname or name;
   - trainee = "Name (nick)";
   - gym name;
@@ -302,9 +303,9 @@ The review below turned up a few traps. Every spec should follow these.
 ### 7. Catalog CRUD family (P1): plans, gyms, gym subscriptions, training times, trainers
 
 One table-driven spec per page type (`crud-details.spec.ts`, `crud-forms.spec.ts`, `crud-delete.spec.ts`), with one row per resource. Every row checks:
-- [ ] details / edit / delete: a missing `:id` → that resource's `errors.missingId` and no request. A load error → the API message or `errors.load`. A loaded record is shown (details) or patched into the form (edit).
-- [ ] create / edit: an invalid form sends nothing and marks fields touched. The payload is exactly as listed below. Success → the list URL.
-- [ ] delete/deactivate: `DELETE /api/<resource>/<id>` → the list URL.
+- [x] details / edit / delete: a missing `:id` → that resource's `errors.missingId` and no request. A load error → the API message or `errors.load`. A loaded record is shown (details) or patched into the form (edit).
+- [x] create / edit: an invalid form sends nothing and marks fields touched. The payload is exactly as listed below. Success → the list URL.
+- [x] delete/deactivate: `DELETE /api/<resource>/<id>` → the list URL.
 - [x] Every create / edit / delete page shows the API error and gives the button back after a failed save (`pages/save-errors.spec.ts`, the S1 fix).
 
 | Resource | Create/edit payload and validators | List request and filter |
@@ -315,18 +316,18 @@ One table-driven spec per page type (`crud-details.spec.ts`, `crud-forms.spec.ts
 | Training times | `{ startTime, endTime }`, both required; no end > start check (S12) | no filter; times shown as `HH:mm` |
 | Trainers | create `{ name (2–100), nickname|null (1–50), isActive: true }`; edit without isActive | filter as Plans plus client-side search as Trainees |
 
-- [ ] Plans list `formatPlanDetails`: PUNCH → "10 visits" (ICU), TIME → "30 days". A null count shows 0.
-- [ ] Trainers list: search, count, nickname label (mirrors §5).
+- [x] Plans list `formatPlanDetails`: PUNCH → "10 credits" (ICU), TIME → "30 days". A null count shows 0.
+- [x] Trainers list: search, count, nickname label (mirrors §5).
 
 ### 8. Dashboards (P1)
 
 **`pages/home/home.component.ts`** (replaces the existing "should create" spec, which is `[~]`)
-- [~] Existing spec only checks that the component is created.
-- [ ] Reports load only for ADMIN or TRAINER: `GET /api/attendance/reports/inactive-trainees?skipDays=7` and `GET …/reports/without-active-subscription`.
-- [ ] Changing "Inactive for" to 30 sends `skipDays=30`. Each report has its own loading, error and empty states.
-- [ ] Changing the selection twice quickly: responses aren't cancelled, so a late response for 7 days can overwrite the 30-day result. CHARACTERIZATION, see S4.
-- [ ] `traineeDisplayName`: "Name (nick)", a trimmed name, or `home.reports.unknown`.
-- [ ] `formatSubscriptionSummary` (P2):
+- [x] The old "should create" spec was replaced in PR 4.
+- [x] Reports load only for ADMIN or TRAINER: `GET /api/attendance/reports/inactive-trainees?skipDays=7` and `GET …/reports/without-active-subscription`.
+- [x] Changing "Inactive for" to 30 sends `skipDays=30`. Each report has its own loading, error and empty states.
+- [x] Changing the selection twice quickly: responses aren't cancelled, so a late response for 7 days can overwrite the 30-day result. CHARACTERIZATION, see S4.
+- [x] `traineeDisplayName`: "Name (nick)", a trimmed name, or `home.reports.unknown`.
+- [x] `formatSubscriptionSummary` (P2):
   - `null` → '—';
   - parts in order, joined by " • ";
   - `remainingTrainings: 0` is included (it only skips `null`);
@@ -334,21 +335,21 @@ One table-driven spec per page type (`crud-details.spec.ts`, `crud-forms.spec.ts
   - no parts → '—'.
 
 **`pages/trainee-dashboard/trainee-dashboard.component.ts`**
-- [ ] No `traineeProfileId` in the token: `traineeDashboard.missingProfile` and no requests.
-- [ ] Three parallel GETs: `/api/attendance/trainees/<id>`, `/api/trainees/<id>/subscriptions`, `/api/plans` (no `active` param, unlike trainee details).
-- [ ] If any of the three fails, every section shows the same error.
-- [ ] The filter defaults to ACTIVE. Each filter's empty key and the case-insensitive match are checked.
+- [x] No `traineeProfileId` in the token: no requests. The missing-profile message is set but never shown; empty lists show instead. CHARACTERIZATION, see S16.
+- [x] Three parallel GETs: `/api/attendance/trainees/<id>`, `/api/trainees/<id>/subscriptions`, `/api/plans` (no `active` param, unlike trainee details).
+- [x] If any of the three fails, every section shows the same error.
+- [x] The filter defaults to ACTIVE. Each filter's empty key and the case-insensitive match are checked.
 
 **`pages/stats/stats.component.ts`**
-- [ ] `GET /api/trainees/me/training-insights` maps into the five ranked lists.
-- [ ] A weekday label comes from `weekdayNumber` in the active language (7 → Sunday / Неделя). Number 0 or missing → the API's `weekday` string.
-- [ ] Error → API message or fallback.
+- [x] `GET /api/trainees/me/training-insights` maps into the five ranked lists.
+- [x] A weekday label comes from `weekdayNumber` in the active language (7 → Sunday / Неделя). Number 0 or missing → the API's `weekday` string.
+- [x] Error → API message or fallback.
 
 ### 9. Navigation shell (P1)
 
 - [x] `buildNavigation` / `isUrlInItems` (existing `navigation.spec.ts`; it already fails on role leaks).
-- [ ] `MainLayoutComponent.isSheetPageActive()` follows `router.url` after a `NavigationEnd`. Navigation closes an open sheet.
-- [ ] `UserBlockComponent`:
+- [x] `MainLayoutComponent.isSheetPageActive()` follows `router.url` after a `NavigationEnd`. (Closing the sheet on navigation needs a real `<dialog>`, so it is checked in E2E J8.)
+- [x] `UserBlockComponent`:
   - initials are the first two alphanumerics of the email, upper-cased, or `U`;
   - Log out removes the token and the router ends at `/login`;
   - the role label is translated.
@@ -356,63 +357,63 @@ One table-driven spec per page type (`crud-details.spec.ts`, `crud-forms.spec.ts
 
 ### 10. i18n and formatting (P1/P2)
 
-- [ ] `apiErrorMessage`:
+- [x] `apiErrorMessage`:
   - a string message → `{text}`;
   - whitespace-only → fallback;
   - a string array → joined with ", ";
   - an empty array, a number, a missing body or a `null` error → `{key, params}`.
-- [ ] `UiMessagePipe`: `null` → ''; `{text}` is passed through; `{key}` is translated and re-translated after `LanguageService.use('bg')`.
-- [ ] `EnumLabelPipe`: a known value is translated (lower-case input works); an unknown value is shown raw; empty → ''; the label follows a language switch.
-- [ ] `enumLabelKey` / `isKnownEnum` are case-insensitive.
-- [ ] `TranslatedTitleStrategy`: "<page> · The Index"; just "The Index" for a route without a title; re-titles on a language switch.
-- [ ] `BundledTranslationLoader`: `en` → the English file; `bg` or any other value → Bulgarian.
+- [x] `UiMessagePipe`: `null` → ''; `{text}` is passed through; `{key}` is translated and re-translated after `LanguageService.use('bg')`.
+- [x] `EnumLabelPipe`: a known value is translated (lower-case input works); an unknown value is shown raw; empty → ''; the label follows a language switch.
+- [x] `enumLabelKey` / `isKnownEnum` are case-insensitive.
+- [x] `TranslatedTitleStrategy`: "<page> · The Index"; just "The Index" for a route without a title; re-titles on a language switch.
+- [x] `BundledTranslationLoader`: `en` → the English file; `bg` or any other value → Bulgarian.
 - [x] `LanguageService` default / switch / restore / toggle / plurals (existing).
-- [ ] `LanguageService.setLanguage` when `localStorage.setItem` throws: it still switches.
+- [x] `LanguageService.setLanguage` when `localStorage.setItem` throws: it still switches.
 - [x] `LocaleFormatService` money, dates, date-only values without a timezone shift, fallbacks (existing).
-- [ ] `LocaleFormatService`: `dateTime`, `clock` (leading zero), `weekday(7)`, `number` with `digitsInfo`, and `money` for negative values.
+- [x] `LocaleFormatService`: `dateTime`, `clock` (leading zero), `weekday(7)`, `number` with `digitsInfo`, and `money` for negative values.
 - [x] `ThemeService` (existing).
-- [ ] `ThemeService` when storage throws: reading falls back to `system`, and `setMode` still applies the theme.
+- [x] `ThemeService` when storage throws: reading falls back to `system`, and `setMode` still applies the theme.
 - [x] Translation file consistency (`i18n-keys.spec.ts`, existing).
 
 ### 11. Services: HTTP contract (P1)
 
 One spec per service, each method asserting method, URL, query and body. These pin the hand-written API contract.
-- [ ] `buildHttpParams`: drops `undefined`, `null` and `''`; keeps `false` → `'false'` and `0` → `'0'`. The status filters depend on this.
-- [ ] `PlansService.list()` sends no param; `list(true)` / `list(false)` send `active=`. CRUD URLs; `deactivate` is DELETE.
-- [ ] `GymLocationsService` and `GymSubscriptionsService`: `includeInactive` param; CRUD.
-- [ ] `TraineesService`: `list(active, search)` params; `getMyTrainingInsights` → `/api/trainees/me/training-insights`.
-- [ ] `TrainersService` and `TrainingTimesService`: CRUD. Training times have `delete` (DELETE, typed `{ deleted: boolean }`) where the others have `deactivate`.
-- [ ] `SubscriptionsService`: list and create under `/api/trainees/<id>/subscriptions`; delete is `/api/subscriptions/<id>`.
-- [ ] `AttendanceService`:
+- [x] `buildHttpParams`: drops `undefined`, `null` and `''`; keeps `false` → `'false'` and `0` → `'0'`. The status filters depend on this.
+- [x] `PlansService.list()` sends no param; `list(true)` / `list(false)` send `active=`. CRUD URLs; `deactivate` is DELETE.
+- [x] `GymLocationsService` and `GymSubscriptionsService`: `includeInactive` param; CRUD.
+- [x] `TraineesService`: `list(active, search)` params; `getMyTrainingInsights` → `/api/trainees/me/training-insights`.
+- [x] `TrainersService` and `TrainingTimesService`: CRUD. Training times have `delete` (DELETE, typed `{ deleted: boolean }`) where the others have `deactivate`.
+- [x] `SubscriptionsService`: list and create under `/api/trainees/<id>/subscriptions`; delete is `/api/subscriptions/<id>`.
+- [x] `AttendanceService`:
   - `sessions` params (optional ones dropped);
   - `createBatch`;
   - `deleteById`;
   - trainee lists (`/trainees/<id>`, `/paid`, `/unpaid`);
   - the two report URLs and `skipDays`.
-- [ ] `SettlementsService`: `finalize` POSTs `{}`; `allocations` params; `delete`.
-- [ ] `CashRegisterService`: state GET; manual POST to `/transactions/manual`.
-- [ ] `AccountProvisioningService`: `/api/accounts/{trainer|trainee}/<profileId>` and by-id GET, PATCH, DELETE.
-- [ ] `AccountSecurityService`: `hasChangedPassword` maps the response to its boolean; `changePassword` URL and body.
+- [x] `SettlementsService`: `finalize` POSTs `{}`; `allocations` params; `delete`.
+- [x] `CashRegisterService`: state GET; manual POST to `/transactions/manual`.
+- [x] `AccountProvisioningService`: `/api/accounts/{trainer|trainee}/<profileId>` and by-id GET, PATCH, DELETE.
+- [x] `AccountSecurityService`: `hasChangedPassword` maps the response to its boolean; `changePassword` URL and body.
 - [x] `ApiService.health` via `app.component.spec.ts` (GET `/api/health` on startup).
 
 ### 12. Utilities and shared components with logic (P2)
 
-- [ ] `formatTimeWithoutSeconds`: `'18:30:00'` → `'18:30'`; `'8:5'` → `'08:05'`; `'1830'` is returned unchanged.
-- [ ] `displayValue`: trims; `null`, `''` or whitespace → '—'; custom fallback.
+- [x] `formatTimeWithoutSeconds`: `'18:30:00'` → `'18:30'`; `'8:5'` → `'08:05'`; `'1830'` is returned unchanged.
+- [x] `displayValue`: trims; `null`, `''` or whitespace → '—'; custom fallback.
 - [x] `trimmedLength` (existing).
-- [ ] `TraineeSubscriptionsTableComponent`:
+- [x] `TraineeSubscriptionsTableComponent`:
   - the plan title falls back to `planId`;
   - TIME → end date;
   - PUNCH → "used of total", where `used = max(initial − remaining, 0)` and nulls count as 0;
   - `statusTone` ACTIVE → success, EXHAUSTED → danger, otherwise neutral, case-insensitive;
   - the delete button renders only when both `showActionsColumn` and `canDeleteSubscriptions` are set, is disabled while that row is deleting, and emits the subscription.
-- [ ] `TraineeTrainingsTableComponent`: trainer is nickname or name, or '—'; location name or '—'.
-- [ ] `UiInputComponent` (it is a form control, so it has logic):
+- [x] `TraineeTrainingsTableComponent`: trainer is nickname or name, or '—'; location name or '—'.
+- [x] `UiInputComponent` (it is a form control, so it has logic):
   - `writeValue(null)` → '';
   - input calls `onChange`; blur calls `onTouched`;
   - `setDisabledState`;
   - the password toggle flips the input type and the button's accessible name.
-- [ ] `SearchFieldComponent`: input emits the value; Clear emits '' and refocuses the input.
+- [x] `SearchFieldComponent`: input emits the value; Clear emits '' and refocuses the input.
 - [x] `AvatarComponent` initials, `RankedListComponent`, `SegmentedControlComponent` (existing).
 - [~] `AppComponent` "should create" adds nothing; the health-check test covers it.
 - Not unit-tested (presentational, covered by the pages and E2E): brand, chip, icon, status-dot, skeleton-list, empty-state, page-header, list-row, ui-button, sidebar, tab-bar, theme-switch, language-switch, not-found, unauthorized, records.
@@ -616,6 +617,8 @@ These come from reading the code. Each gets a `// CHARACTERIZATION: possibly uni
 - **S10 — Allocations capped at 500.** Settlement allocations stop at 500 rows with no paging.
 - **S13 — Login can be submitted twice.** The submit button isn't disabled while signing in, so a double click sends two login requests (found while writing §2).
 - **S14 — A whitespace-only phone silently blocks the first password change.** "   " passes `Validators.required`, so no error shows, then the submit handler trims it to nothing and returns without a word (found while writing §2).
+- **S15 — An inactive trainer or trainee can be deactivated again** (found in PR 4). Plans, gyms and gym subscriptions disable the button for an inactive record; these two pages don't.
+- **S16 — The trainee dashboard never shows its page-level error** (found in PR 4). The error block renders only `@if (errorMessage && loading)`, which is never true. With no `traineeProfileId`, the trainee sees "No active subscriptions" instead of the missing-profile message.
 - **S11 / S12 — No range checks.** Settlement generate and training times have no client-side range check (start ≤ end); only the API validates.
 - **Also note, low priority:**
   - `AppComponent` logs `environment.production` and the health response to the console in production.

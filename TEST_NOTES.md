@@ -9,7 +9,7 @@ Entry format: **ID — title**, then:
 - **Pinned by:** the spec file and test name.
 - **Status:** open, fixed in a PR, or confirmed intended.
 
-IDs match "Suspected unintended behavior" in `TEST_PLAN.md`. Gaps (S4, S8, S10–S12) are pinned in later PRs.
+IDs match "Suspected unintended behavior" in `TEST_PLAN.md`. Entries are in ID order.
 
 ---
 
@@ -41,6 +41,13 @@ IDs match "Suspected unintended behavior" in `TEST_PLAN.md`. Gaps (S4, S8, S10�
 - **Pinned by:** `trainee-details.component.spec.ts` › "names a subscription on a deactivated plan by its raw plan id".
 - **Status:** open. Planned: load all plans for names, offer only active ones in the picker.
 
+## S4 — The inactive-trainees report can show stale results
+- **Where:** `HomeComponent.loadInactiveReport()`: each change of "Inactive for" starts a new request, and older requests are not cancelled.
+- **Behavior:** pick 30 days and then 90 days. If the 30-day answer arrives last, it replaces the 90-day report while the selector still says 90 days.
+- **Why it looks wrong:** what the report shows no longer matches the selection, and nothing indicates it.
+- **Pinned by:** `home.component.spec.ts` › "shows the newest answer only if it arrives last".
+- **Status:** open. Planned: cancel the previous request (`switchMap`).
+
 ## S5 — The "password updated" notice is never seen
 - **Where:** `ChangePasswordComponent.handleSubmit()` success handler.
 - **Behavior:** it sets `successMessage` and then immediately navigates to the home page, which destroys the component.
@@ -62,12 +69,40 @@ IDs match "Suspected unintended behavior" in `TEST_PLAN.md`. Gaps (S4, S8, S10�
 - **Pinned by:** `plan-create.component.spec.ts` › "accepts a title of only spaces and sends it as an empty string".
 - **Status:** open. Planned: `trimmedLength` with the API's limits.
 
+## S8 — A failed account load offers to create a second account
+- **Where:** `TraineeAccountComponent` / `TrainerAccountComponent.loadExistingAccount()`.
+- **Behavior:** the profile has an `accountId`, but `GET /api/accounts/<id>` fails or returns `null`. The page then stays in "Create account" mode, and saving POSTs a new account for the profile. In the `null` case the password validators are already cleared, so even a blank password would be sent.
+- **Why it looks wrong:** it can create a second login for one person, or fail at the API with a confusing message, instead of saying the account couldn't be loaded.
+- **Pinned by:** `account-pages.spec.ts` › "falls back to "create" when the linked account cannot be loaded" (trainee and trainer, error and `null`).
+- **Status:** open. Planned: show a load error instead of create mode.
+
 ## S9 — A trainer without a trainer profile sees every trainer's sessions
 - **Where:** `AttendanceSessionsComponent.loadSessions()`: `trainerId` is taken from the token's `trainerProfileId`, and the filter is dropped when that is null.
 - **Behavior:** such a trainer's attendance history is unfiltered, showing all trainers. They can't delete anything.
 - **Why it looks wrong:** trainers otherwise only see their own sessions. Whether the API filters by role is unknown; check theindex-api.
 - **Pinned by:** `attendance-sessions.component.spec.ts` › "without a trainer profile, loads every trainer's sessions but can delete nothing".
 - **Status:** open. Needs a cross-repo check.
+
+## S10 — Settlement allocations stop at 500 rows
+- **Where:** `SettlementDetailsComponent.loadAllocations()` asks for `offset=0&limit=500` only.
+- **Behavior:** a report with more rows shows the first 500 and "Showing 500 of N rows", with no way to see the rest.
+- **Why it looks wrong:** part of a payout breakdown is unreachable. It only matters once a single settlement has more than 500 allocations.
+- **Pinned by:** `settlement-details.component.spec.ts` › "shows at most 500 allocation rows, with no way to see the rest".
+- **Status:** open, deferred (agreed with the owner).
+
+## S11 — A settlement period can end before it starts
+- **Where:** `SettlementGenerateComponent.generateSettlement()` checks only that both dates are filled.
+- **Behavior:** start 31 Oct and end 1 Oct is sent to the API as is.
+- **Why it looks wrong:** the user gets whatever the API says (or a nonsense report) instead of a clear form error.
+- **Pinned by:** `settlement-generate.component.spec.ts` › "sends a period that ends before it starts".
+- **Status:** open. Planned: a client-side check.
+
+## S12 — A training time can end before it starts
+- **Where:** training time create/edit forms: both times are only `Validators.required`.
+- **Behavior:** 19:00 to 18:00 is sent to the API as is.
+- **Why it looks wrong:** same as S11.
+- **Pinned by:** `catalog-pages.spec.ts` › "accepts a training time that ends before it starts".
+- **Status:** open. Planned: a client-side check.
 
 ## S13 — Login can be submitted twice
 - **Where:** `login.component.html`: the submit button doesn't use `isSubmitting`.
@@ -82,3 +117,19 @@ IDs match "Suspected unintended behavior" in `TEST_PLAN.md`. Gaps (S4, S8, S10�
 - **Why it looks wrong:** the user is stuck with no explanation.
 - **Pinned by:** `change-password.component.spec.ts` › "silently does nothing when the phone is only spaces".
 - **Status:** open. Planned: validate the trimmed value, so the existing phone error shows.
+
+## S15 — An inactive trainer or trainee can be deactivated again
+- **Where:** `trainer-delete` / `trainee-delete` templates. The confirm button is disabled only while saving.
+- **Behavior:** for an already-inactive trainer or trainee, "Deactivate" stays enabled and sends `DELETE` again. Plans, gyms and gym subscriptions disable it and say the record is already inactive.
+- **Why it looks wrong:** inconsistent with the other three pages. Harmless if the API treats the call as a no-op, but that's unverified.
+- **Pinned by:** `catalog-pages.spec.ts` › "an inactive trainer/trainee can still be deactivated again".
+- **Status:** open. Low priority (found in PR 4; not on the original fix list).
+
+## S16 — The trainee dashboard never shows its page-level error
+- **Where:** `trainee-dashboard.component.html`: the error state renders only `@if (errorMessage && loading)`. But both code paths set `loading = false` together with `errorMessage`.
+- **Behavior:**
+  - When loading fails, the page-level "Couldn't load your profile" state never appears. The two tables still show the error, so the user does see it.
+  - When the token has no `traineeProfileId`, nothing shows the "missing profile" message at all. The trainee reads "No active subscriptions found for your profile" and "No trainings yet", as if their history were empty.
+- **Why it looks wrong:** the condition can never be true, and in the missing-profile case it tells a trainee they have no subscriptions when the app just couldn't identify them.
+- **Pinned by:** `trainee-dashboard.component.spec.ts` › "shows empty lists, not an explanation, for a token without a trainee profile" and "never shows the page-level error, even when loading fails".
+- **Status:** open. Found in PR 4; proposed for the fix list.

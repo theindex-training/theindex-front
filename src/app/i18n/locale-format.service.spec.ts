@@ -51,4 +51,26 @@ describe('LocaleFormatService', () => {
     expect(format.dateTime('not a date')).toBe('—');
     expect(format.money(undefined)).toBe('—');
   });
+
+  it('formats clock times with a leading zero, and compact dates', () => {
+    language.use('en').subscribe();
+    expect(format.clock('2026-10-31T08:05:00')).toBe('08:05');
+    expect(format.shortDate('2026-10-31T08:05:00')).toBe('31/10/2026');
+    expect(format.weekday(7)).toBe('Sunday');
+
+    language.use('bg').subscribe();
+    expect(format.clock('2026-10-31T08:05:00')).toBe('08:05');
+  });
+
+  it('formats numbers with optional digits info and negative money', () => {
+    language.use('en').subscribe();
+    expect(format.number(1234.5)).toBe('1,234.5');
+    expect(format.number(1234.5, '1.2-2')).toBe('1,234.50');
+    expect(format.number(null)).toBe('—');
+    expect(format.number(Number.NaN, undefined, 'n/a')).toBe('n/a');
+    expect(format.money(-2050)).toBe('-€20.50');
+
+    language.use('bg').subscribe();
+    expect(plain(format.number(1234.5))).toBe('1 234,5');
+  });
 });

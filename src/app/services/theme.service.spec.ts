@@ -93,4 +93,23 @@ describe('ThemeService', () => {
 
     expect(createService().mode()).toBe('system');
   });
+
+  it('follows the OS when storage cannot be read, and still applies a chosen theme', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError');
+    });
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError');
+    });
+    osPrefersDark = true;
+
+    const service = createService();
+    expect(service.mode()).toBe('system');
+    expect(appliedTheme()).toBe('dark');
+
+    service.setMode('light');
+    TestBed.tick();
+    expect(appliedTheme()).toBe('light');
+    vi.restoreAllMocks();
+  });
 });

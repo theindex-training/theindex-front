@@ -77,4 +77,25 @@ describe('LanguageService', () => {
     expect(count(1)).toBe('1 of 1 trainee');
     expect(count(5)).toBe('5 of 5 trainees');
   });
+
+  it('still switches when the choice cannot be saved (storage blocked)', () => {
+    const service = create();
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError');
+    });
+
+    expect(() => service.setLanguage('en')).not.toThrow();
+    expect(service.lang()).toBe('en');
+    expect(document.documentElement.lang).toBe('en');
+    vi.restoreAllMocks();
+  });
+
+  it('starts in Bulgarian when storage cannot be read', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError');
+    });
+
+    expect(create().lang()).toBe('bg');
+    vi.restoreAllMocks();
+  });
 });
