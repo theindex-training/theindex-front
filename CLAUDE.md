@@ -47,6 +47,12 @@ We are adding characterization tests to a production app. The plan and its progr
 - Assert the observable outcome: the request sent, the URL navigated to, the value stored, the text or state shown.
 - For P0/P1 items in the plan, break the code locally once (flip a condition, drop a field) and watch the test fail before committing.
 
+**Shared test helpers** live in `src/testing/`:
+- `jwt.ts`: `makeToken`, `signInAs`.
+- `dom.ts`: `driver(...)` to type, select, submit and settle; `apiError(...)` for NestJS-shaped errors.
+
+They are plain TypeScript with no Vitest globals, because the app build type-checks them. Every spec runs in `Europe/Sofia` (set in `src/test-providers.ts`); for "today" logic, fake only `Date` at a time near midnight, so local and UTC dates differ.
+
 **The app is zoneless.** Nothing re-renders after an async callback unless the code calls `detectChanges()`/`markForCheck()` or a signal changes. In component specs, `await fixture.whenStable()` after flushing HTTP, and assert on what the user would actually see. Where the component state and the DOM disagree, that is behavior to characterize (see `TEST_NOTES.md`).
 
 **E2E selectors** (Playwright, see `TEST_PLAN.md`):

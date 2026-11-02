@@ -8,6 +8,11 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 
 **Baseline (2 Nov 2026):** 13 spec files and 47 tests, all passing (`npx ng test --watch=false`). There are no E2E tests and Playwright is not a dependency yet.
 
+**Progress:**
+- PR 2 (§1–§4, the P0 sections): 27 spec files, 249 tests.
+- Every P0 area was mutation-checked: 12 deliberate breaks in production code, and each one was caught by a spec.
+- CI (`.github/workflows/ci.yml`) runs the tests and the production build on every pull request.
+
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
 - **P0:** access control, sessions, money, and anything that writes attendance, subscriptions, settlements or cash. A bug here loses money or data, or exposes screens to the wrong role.
 - **P1:** workflow logic: request parameters, payload shaping, defaults, selection, and error and empty handling.
@@ -26,9 +31,14 @@ The review below turned up a few traps. Every spec should follow these.
 
 - **Zoneless app.** After `HttpTestingController.flush()`, call `await fixture.whenStable()` before reading the DOM. Many pages update fields in HTTP callbacks without `detectChanges()`, so the field and the DOM can disagree (see S1 below). Assert what the user sees. Where the DOM is stale, assert both the stale DOM and the field, and mark the test CHARACTERIZATION.
 - **Real collaborators.** Use the real services, interceptor, router and Transloco (from `src/test-providers.ts`, English). For navigation, use `provideRouter([{ path: '**', children: [] }])` and assert `TestBed.inject(Router).url`. Don't spy on `navigate`.
+- **Page interaction** goes through `src/testing/dom.ts`. `driver(root, whenStable)` gives `type`, `select`, `check`, `click`, `submit`, `settle`, `text` and `alert`; `apiError(message, status)` builds a NestJS-shaped error to flush.
+- **Request bodies:** assert optional keys on the wire with `JSON.parse(req.request.serializeBody())`. A payload property set to `undefined` is dropped by JSON, but `toEqual` can't see the difference.
 - **Auth state** comes from a shared `src/testing/jwt.ts` helper. It holds `makeToken({ sub, role, email, trainerProfileId, traineeProfileId })` and `signInAs(role, claims?)`, which writes `localStorage.accessToken`. `localStorage.clear()` runs in `beforeEach`.
 - **Shared helpers in `src/testing/`** get type-checked by the production build: `tsconfig.app.json` includes `src/**/*.ts` and excludes only `*.spec.ts`. So they must be plain TypeScript with no `vi`/`describe` globals and no app imports. Anything that needs Vitest stays inside the spec files.
-- **Time:** `vi.useFakeTimers({ now: new Date('2026-11-02T00:30:00+02:00') })` and similar. Pick instants where local time and UTC fall on different dates, so date defaults are actually tested. Tests run under the machine's TZ; pin `TZ=Europe/Sofia` for the date specs, either in the npm script or by asserting against values computed the same way. Decide this once in the first date spec and record the choice here.
+- **Time:** every spec runs in `Europe/Sofia`; `src/test-providers.ts` sets `process.env.TZ`, so it applies locally and in CI. For "today" defaults:
+  - fake only the clock: `vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-11-01T22:30:00Z') })`, which is 00:30 on 2 Nov in Sofia and still 1 Nov in UTC;
+  - leave timers real, so `whenStable()` and router navigation still work;
+  - `vi.useRealTimers()` in `afterEach`.
 - **Private validators** (the plan, trainee-details and cash-register `currencyValidator`s, and `integerValidator`) aren't exported. Exporting them would change production code, so test them through the form controls of the component that owns them.
 - **Table-driven specs** for the near-identical CRUD pages (§7) instead of twenty copy-pasted files. Each row must still fail on its own when that page breaks.
 - **Spec files are not scanned by `i18n-keys.spec.ts`,** so specs may use key strings freely.
@@ -40,28 +50,28 @@ The review below turned up a few traps. Every spec should follow these.
 ### 1. Access control and session (P0)
 
 **`services/auth.service.ts` → `auth.service.spec.ts`**
-- [ ] `login()` POSTs `/api/auth/login` with `{ email, password }` exactly as given, untrimmed. On success it stores `accessToken` under `localStorage.accessToken`.
-- [ ] `login()` stores nothing when the request fails, and the error reaches the subscriber.
-- [ ] `logout()` removes only `accessToken`; `theme` and `lang` survive.
-- [ ] `isAuthenticated()` is true for any non-empty stored string, including a malformed token and a token whose `exp` is in the past. There is no expiry check. CHARACTERIZATION, see S6.
-- [ ] Claim getters (`getUserRole`, `getAccountId`/`sub`, `getTrainerProfileId`, `getTraineeProfileId`):
+- [x] `login()` POSTs `/api/auth/login` with `{ email, password }` exactly as given, untrimmed. On success it stores `accessToken` under `localStorage.accessToken`.
+- [x] `login()` stores nothing when the request fails, and the error reaches the subscriber.
+- [x] `logout()` removes only `accessToken`; `theme` and `lang` survive.
+- [x] `isAuthenticated()` is true for any non-empty stored string, including a malformed token and a token whose `exp` is in the past. There is no expiry check. CHARACTERIZATION, see S6.
+- [x] Claim getters (`getUserRole`, `getAccountId`/`sub`, `getTrainerProfileId`, `getTraineeProfileId`):
   - return the claim, or `null` when it is missing or explicitly `null`;
   - return `null` with no token;
   - return `null` for a token without a payload segment, with invalid base64, or with invalid JSON (never throw).
-- [ ] Decoding handles base64url (`-`, `_`) and missing `=` padding, using a payload crafted to contain both.
-- [ ] `getUserEmail()` returns `email`, falls back to `sub`, then `null`.
+- [x] Decoding handles base64url (`-`, `_`) and missing `=` padding, using a payload crafted to contain both.
+- [x] `getUserEmail()` returns `email`, falls back to `sub`, then `null`.
 
 **`services/auth.interceptor.ts` → `auth.interceptor.spec.ts`** (real `HttpClient` with `withInterceptors([authInterceptor])`)
-- [ ] With a token: the request carries `Authorization: Bearer <token>`. Without one: no `Authorization` header.
-- [ ] The token is read per request: log in, and the next request carries the new token.
-- [ ] 401 with a token stored: the token is removed, the router ends at `/login`, and the original error still reaches the caller.
-- [ ] 401 without a token (e.g. a wrong-password login): the token is untouched, there is no navigation, and the error is rethrown.
-- [ ] 403, 500 and status 0: the token is kept and there is no navigation.
+- [x] With a token: the request carries `Authorization: Bearer <token>`. Without one: no `Authorization` header.
+- [x] The token is read per request: log in, and the next request carries the new token.
+- [x] 401 with a token stored: the token is removed, the router ends at `/login`, and the original error still reaches the caller.
+- [x] 401 without a token (e.g. a wrong-password login): the token is untouched, there is no navigation, and the error is rethrown.
+- [x] 403, 500 and status 0: the token is kept and there is no navigation.
 
 **`guards/*.ts` → one spec per guard, using `TestBed.runInInjectionContext`**
-- [ ] `authGuard`: no token → `UrlTree('/login')`; any token → `true`.
-- [ ] `loginGuard`: no token → `true`; `TRAINEE` → `/my-profile`; `ADMIN`, `TRAINER`, an unknown role or an undecodable token → `/home`.
-- [ ] `roleGuard`:
+- [x] `authGuard`: no token → `UrlTree('/login')`; any token → `true`.
+- [x] `loginGuard`: no token → `true`; `TRAINEE` → `/my-profile`; `ADMIN`, `TRAINER`, an unknown role or an undecodable token → `/home`.
+- [x] `roleGuard`:
   - no token → `/login`;
   - no `data.roles` or an empty list → `true`;
   - role allowed → `true`;
@@ -69,14 +79,14 @@ The review below turned up a few traps. Every spec should follow these.
   - `TRAINER` not allowed, or no role → `/unauthorized`.
 
 **`app.routes.ts` → `app.routes.spec.ts`** (route config is access control, so it gets pinned)
-- [ ] Table test over the flattened route tree. Every path has exactly the documented `roleGuard` + `data.roles`:
+- [x] Table test over the flattened route tree. Every path has exactly the documented `roleGuard` + `data.roles`:
   - ADMIN only: `trainers/**`, `settlements/new`, `cash-register`;
   - TRAINEE only: `my-profile`, `stats`, `records`;
   - `change-password`: authenticated users of any role, with no `roleGuard`;
   - everything else under the shell: ADMIN + TRAINER;
   - the shell itself has `authGuard`, and `login` has `loginGuard`.
-- [ ] A new route without a row in the table fails the test.
-- [ ] Integration with `RouterTestingHarness` and the real routes (lazy components load):
+- [x] A new route without a row in the table fails the test.
+- [x] Integration with `RouterTestingHarness` and the real routes (lazy components load):
   - `/` → `/login`;
   - signed-in staff at `/` → `/home`;
   - `/plans/new` resolves to the create page, not to details with id `new` (order matters);
@@ -86,131 +96,131 @@ The review below turned up a few traps. Every spec should follow these.
 ### 2. Sign-in and password change (P0)
 
 **`pages/login/login.component.ts` → `login.component.spec.ts`**
-- [ ] Empty submit sends no request and shows both field errors. A password shorter than 3 characters shows the length error.
-- [ ] Success with a token without `sub`: no password-status call; it navigates to `/home` (staff) or `/my-profile` (trainee).
-- [ ] Success with `sub`: GET `/api/accounts/<sub>/password-status`.
+- [x] Empty submit sends no request and shows both field errors. A password shorter than 3 characters shows the length error.
+- [x] Success with a token without `sub`: no password-status call; it navigates to `/home` (staff) or `/my-profile` (trainee).
+- [x] Success with `sub`: GET `/api/accounts/<sub>/password-status`.
   - `true` → the default route by role;
   - `false` → `/change-password`;
   - an HTTP error → the default route.
-- [ ] Login error:
+- [x] Login error:
   - shows the API `message` (a string, or an array joined with ", ");
   - falls back to `auth.login.error` when there is no usable message;
   - the button is enabled again;
   - no token is stored.
 
 **`pages/change-password/change-password.component.ts` → `change-password.component.spec.ts`**
-- [ ] On init with an account: GET password-status.
+- [x] On init with an account: GET password-status.
   - `false` → the phone field appears and is required;
   - `true` → no phone field;
   - error → no phone field and loading ends.
-- [ ] No `sub` in the token: no request. Submit shows `auth.changePassword.noAccount` and sends nothing.
-- [ ] Validation:
+- [x] No `sub` in the token: no request. Submit shows `auth.changePassword.noAccount` and sends nothing.
+- [x] Validation:
   - each password field needs 8 or more characters;
   - mismatched new and confirm show `mismatch` only on the confirm field;
   - the error getters return '' until the field is touched.
-- [ ] Phone required but blank or whitespace: the phone is marked touched and no request is sent.
-- [ ] Payload: `{ currentPassword, newPassword, confirmPassword }`, plus `phone` (trimmed) only when it is required.
-- [ ] Success: the form resets and the app navigates by role. `successMessage` is set but the page navigates away at once, so it is never seen. CHARACTERIZATION, see S5.
-- [ ] Error: the API message or the `auth.changePassword.error` fallback; the button is enabled again.
+- [x] Phone required but blank or whitespace: the phone is marked touched and no request is sent.
+- [x] Payload: `{ currentPassword, newPassword, confirmPassword }`, plus `phone` (trimmed) only when it is required.
+- [x] Success: the form resets and the app navigates by role. `successMessage` is set but the page navigates away at once, so it is never seen. CHARACTERIZATION, see S5.
+- [x] Error: the API message or the `auth.changePassword.error` fallback; the button is enabled again.
 
 ### 3. Money: subscriptions, plans, cash (P0)
 
 **`pages/trainees/trainee-details.component.ts`, selling a subscription** (the spec covers the whole page; this part first)
-- [ ] Plans load from `GET /api/plans?active=true`. The first plan is preselected and **Paid** is prefilled with its price in euros (`4550` cents → `45.5`).
-- [ ] Changing the plan re-fills **Paid** from that plan's price, overwriting a manual edit.
-- [ ] Paid validation:
+- [x] Plans load from `GET /api/plans?active=true`. The first plan is preselected and **Paid** is prefilled with its price in euros (`4550` cents → `45.5`).
+- [x] Changing the plan re-fills **Paid** from that plan's price, overwriting a manual edit.
+- [x] Paid validation:
   - blank fails required;
   - negative is invalid;
   - three decimals is invalid;
   - `45.50` is valid;
   - `0.1 + 0.2`-style floats round correctly (`0.3` → `30` cents).
-- [ ] Submit POSTs `/api/trainees/<id>/subscriptions` with `{ planId, startsAt, paidCents }`.
-- [ ] The default `startsAt` comes from `new Date().toISOString().slice(0,10)`, which is the **UTC** date. At 00:30 Sofia time it pins yesterday's date. CHARACTERIZATION, see S2.
-- [ ] After success:
+- [x] Submit POSTs `/api/trainees/<id>/subscriptions` with `{ planId, startsAt, paidCents }`.
+- [x] The default `startsAt` comes from `new Date().toISOString().slice(0,10)`, which is the **UTC** date. At 00:30 Sofia time it pins yesterday's date. CHARACTERIZATION, see S2.
+- [x] After success:
   - the subscription list is fetched again;
   - **Paid** resets to the chosen plan's price;
   - `startsAt` resets to today (UTC);
   - the plan stays selected.
-- [ ] Error: `subscriptionErrorMessage` is set and `submitting` is reset, but the DOM is not updated (no `detectChanges`). CHARACTERIZATION, see S1.
+- [x] Error: `subscriptionErrorMessage` is set and `submitting` is reset, but the DOM is not updated (no `detectChanges`). CHARACTERIZATION, see S1.
 
 **`pages/plans/plan-create.component.ts` / `plan-edit.component.ts`**
-- [ ] Price → `priceCents` via `Math.round(price*100)`, including a float edge case.
-- [ ] Type PUNCH: credits required, ≥ 1 and an integer; duration has no validators and is cleared.
-- [ ] Type TIME: the reverse.
-- [ ] Switching type clears the other field's value.
-- [ ] Create payload: `{ type, title (trimmed), priceCents, isActive }` plus `credits` (PUNCH) or `durationDays` (TIME). The other key is absent.
-- [ ] Edit payload: the same, but always sends both keys, the unused one as `null`.
-- [ ] Edit: patches the form from GET `/api/plans/<id>`, prices shown in euros (`toEuros`).
-- [ ] The title has only `Validators.required`, so whitespace-only passes and is sent as `''`. CHARACTERIZATION, see S7.
-- [ ] Success → `/plans`. Error → the field is set but the DOM is stale. CHARACTERIZATION, see S1.
+- [x] Price → `priceCents` via `Math.round(price*100)`, including a float edge case.
+- [x] Type PUNCH: credits required, ≥ 1 and an integer; duration has no validators and is cleared.
+- [x] Type TIME: the reverse.
+- [x] Switching type clears the other field's value.
+- [x] Create payload: `{ type, title (trimmed), priceCents, isActive }` plus `credits` (PUNCH) or `durationDays` (TIME). The other key is absent.
+- [x] Edit payload: the same, but always sends both keys, the unused one as `null`.
+- [x] Edit: patches the form from GET `/api/plans/<id>`, prices shown in euros (`toEuros`).
+- [x] The title has only `Validators.required`, so whitespace-only passes and is sent as `''`. CHARACTERIZATION, see S7.
+- [x] Success → `/plans`. Error → the field is set but the DOM is stale. CHARACTERIZATION, see S1.
 
 **`pages/cash-register/cash-register.component.ts`**
-- [ ] Load: GET `/api/cash-register` shows the balance and transactions. Error → the danger state with "Try again", which reloads.
-- [ ] Amount:
+- [x] Load: GET `/api/cash-register` shows the balance and transactions. Error → the danger state with "Try again", which reloads.
+- [x] Amount:
   - `0` and negative values fail `min(0.01)`;
   - three decimals fail;
   - `12.34` → `amountCents: 1234`.
-- [ ] Payload `{ direction, amountCents, notes? }`: notes are trimmed, and whitespace-only notes are omitted (`notes` absent from the JSON body).
-- [ ] A second submit while one is in flight is ignored (exactly one request).
-- [ ] Success:
+- [x] Payload `{ direction, amountCents, notes? }`: notes are trimmed, and whitespace-only notes are omitted (`notes` absent from the JSON body).
+- [x] A second submit while one is in flight is ignored (exactly one request).
+- [x] Success:
   - the form resets to IN / 0 / '', untouched;
   - the `cashRegister.created` notice shows;
   - the state is reloaded (second GET).
-- [ ] Error: the `formErrorMessage` notice; the form keeps its values.
-- [ ] `formatTransactionDetails` (P2):
+- [x] Error: the `formErrorMessage` notice; the form keeps its values.
+- [x] `formatTransactionDetails` (P2):
   - SETTLEMENT with a period, and without one;
   - SUBSCRIPTION with buyer, plan and type parts joined by " • ", and with no parts;
   - any other type → `-`;
   - `sourceDetails` null → `-`.
-- [ ] `formatTransactionType` (P2): a known enum is translated; an unknown `SOME_NEW_TYPE` becomes "Some New Type".
-- [ ] Buyer label "Name (nick)" or `unknownTrainee`. The buyer link goes to `/trainees/<id>`, or `/trainees` when there is no id.
+- [x] `formatTransactionType` (P2): a known enum is translated; an unknown `SOME_NEW_TYPE` becomes "Some New Type".
+- [x] Buyer label "Name (nick)" or `unknownTrainee`. The buyer link goes to `/trainees/<id>`, or `/trainees` when there is no id.
 
 ### 4. Attendance (P0)
 
 **`pages/attendance/attendance-register.component.ts`**
-- [ ] On init: exactly four GETs.
+- [x] On init: exactly four GETs.
   - `/api/trainers?active=true`
   - `/api/gym-locations?includeInactive=false`
   - `/api/training-times`
   - `/api/trainees?active=true`
-- [ ] Inactive items in the responses are still filtered out on the client.
-- [ ] Training times are sorted by start time ("08:00" before "18:30", whatever order the API sends).
-- [ ] Preselection:
+- [x] Inactive items in the responses are still filtered out on the client.
+- [x] Training times are sorted by start time ("08:00" before "18:30", whatever order the API sends).
+- [x] Preselection:
   - the signed-in trainer's `trainerProfileId` when it is in the list, otherwise the first trainer;
   - the first gym;
   - the date is today in **local** time (contrast with S2).
-- [ ] Search is case-insensitive over name or nickname. "Select shown" and "Clear shown" affect only the filtered trainees. Selections survive filter changes.
-- [ ] Submit with an invalid form: no request, fields touched.
-- [ ] Submit with no trainee selected: `attendance.register.selectAtLeastOne` and no request.
-- [ ] Payload `POST /api/attendance/batch`: `{ trainerId, locationId, traineeIds, trainedDate }`, plus `trainedTime` as `HH:mm` only when a time is picked ("Not specified" omits the key).
-- [ ] Success → `/attendance`.
-- [ ] Error → the API message is shown in the DOM (this page does call `detectChanges`); the selection is kept.
-- [ ] Load error → `attendance.register.loadError`.
+- [x] Search is case-insensitive over name or nickname. "Select shown" and "Clear shown" affect only the filtered trainees. Selections survive filter changes.
+- [x] Submit with an invalid form: no request, fields touched.
+- [x] Submit with no trainee selected: `attendance.register.selectAtLeastOne` and no request.
+- [x] Payload `POST /api/attendance/batch`: `{ trainerId, locationId, traineeIds, trainedDate }`, plus `trainedTime` as `HH:mm` only when a time is picked ("Not specified" omits the key).
+- [x] Success → `/attendance`.
+- [x] Error → the API message is shown in the DOM (this page does call `detectChanges`); the selection is kept.
+- [x] Load error → `attendance.register.loadError`.
 
 **`pages/attendance/attendance-sessions.component.ts`**
-- [ ] Default range: from 7 days ago to today, local dates (fake clock).
-- [ ] ADMIN:
+- [x] Default range: from 7 days ago to today, local dates (fake clock).
+- [x] ADMIN:
   - loads `/api/trainers?active=true`;
   - `trainerId` is sent only when a trainer is picked;
   - `startTime` and `endTime` are sent only when set.
-- [ ] TRAINER:
+- [x] TRAINER:
   - no trainers request;
   - `trainerId` is always their own profile id;
   - a trainer token without `trainerProfileId` sends no `trainerId`, so it sees every trainer's sessions. CHARACTERIZATION, see S9.
-- [ ] Session selection after a load:
+- [x] Session selection after a load:
   - keys still present stay selected;
   - if none remain, all sessions are selected;
   - no sessions → none selected;
   - `toggleSession` adds and removes keys.
-- [ ] Summary over the selected sessions: sessions, attendance, paid and unpaid come from `totals`; `finalPriceCents` sums only `price.isFinal` items.
-- [ ] Price helpers: `attendancePrice` gives '—' when the price isn't final; `sessionTotalPrice` sums final prices only.
-- [ ] `canDeleteSessionAttendance`: ADMIN can delete in any session; TRAINER only in sessions with their own `trainerId`.
-- [ ] Delete:
+- [x] Summary over the selected sessions: sessions, attendance, paid and unpaid come from `totals`; `finalPriceCents` sums only `price.isFinal` items.
+- [x] Price helpers: `attendancePrice` gives '—' when the price isn't final; `sessionTotalPrice` sums final prices only.
+- [x] `canDeleteSessionAttendance`: ADMIN can delete in any session; TRAINER only in sessions with their own `trainerId`.
+- [x] Delete:
   - `window.confirm` gets the translated text with name, date and time; cancel → no request;
   - OK → `DELETE /api/attendance/<id>`, the row is removed locally and `totals` are recomputed from the remaining items;
   - a second delete while one is in flight is ignored;
   - error → message.
-- [ ] Label helpers:
+- [x] Label helpers:
   - trainer is "Name (nick)" or "Name", or '—' when unknown;
   - the tab title uses the nickname, falling back to the name;
   - trainee and location fall back to '—'.
@@ -437,7 +447,7 @@ One spec per service, each method asserting method, URL, query and body. These p
   - `list-count` on each `.list-toolbar__count`;
   - `settlement-status` (the status value on the details page).
   - Everything else is reachable by role, label or accessible name. Recheck while writing each journey and extend this list rather than using a CSS selector.
-- [ ] `npm run e2e` script. Wiring it into CI means editing `.github/workflows/`, which needs the owner's approval first (CLAUDE.md rule).
+- [ ] `npm run e2e` script, plus an E2E job in `.github/workflows/ci.yml`. The owner approved the PR-check workflow; the deploy workflow stays untouched.
 
 Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'ok'}` and not repeated below.
 
@@ -602,6 +612,8 @@ These come from reading the code. Each gets a `// CHARACTERIZATION: possibly uni
 - **S8 — A failed account load allows a second account.** On the trainee/trainer account page, a failed or `null` account GET for a linked profile falls back to "create account" mode.
 - **S9 — Trainer without a profile sees all sessions.** A TRAINER token without `trainerProfileId` gets unfiltered attendance history (but can't delete anything).
 - **S10 — Allocations capped at 500.** Settlement allocations stop at 500 rows with no paging.
+- **S13 — Login can be submitted twice.** The submit button isn't disabled while signing in, so a double click sends two login requests (found while writing §2).
+- **S14 — A whitespace-only phone silently blocks the first password change.** "   " passes `Validators.required`, so no error shows, then the submit handler trims it to nothing and returns without a word (found while writing §2).
 - **S11 / S12 — No range checks.** Settlement generate and training times have no client-side range check (start ≤ end); only the API validates.
 - **Also note, low priority:**
   - `AppComponent` logs `environment.production` and the health response to the console in production.
@@ -630,9 +642,17 @@ The plan was reviewed against three goals: tests that survive a redesign, fail w
     - the sheet tab exposes `aria-expanded`, so J8 asserts that rather than a vague "active state";
     - `src/testing/` helpers are type-checked by the app build (§0).
 
-### Open questions for the owner
-- [ ] May we add the `@real-api` E2E smoke run against a local theindex-api (Docker Postgres + seed), and may the deploy workflow run unit and E2E tests before building? Both touch `.github/workflows/`, which needs your approval.
-- [ ] Should S1 get fixed soon after it is pinned? It affects every catalog form and the trainee forms. Per the rules, the fix PR will flip the characterization tests first.
+### Decisions (owner, 2 Nov 2026)
+- [x] **CI:** a separate PR-check workflow (`.github/workflows/ci.yml`) runs unit tests and the production build on every pull request. E2E joins it once Part B lands. The deploy workflow is untouched. To block merges on red checks, make the check required in branch protection for `main`.
+- [x] **Real-API E2E:** not now. Revisit when theindex-api has its own compose setup.
+- [x] **Fixes:**
+  - PR 3 fixes S1 and S2;
+  - S3, S4, S5, S7, S8, S11, S12 and S14 get fixed after their tests land;
+  - S6 is kept;
+  - S9 needs a check in theindex-api;
+  - S10 is deferred.
+  - Of the low-priority notes, remove the production console logs and add a confirm to account deactivation.
+  - Each fix flips its characterization test first.
 
 ## Suggested order of work
 1. Shared test helpers (`src/testing/jwt.ts`, HTTP flush helpers) and §1 (access control).
