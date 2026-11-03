@@ -14,7 +14,7 @@
     <div class="cash-top">
       <div class="stat balance">
         <span class="stat__label">{{ 'cashRegister.balance' | transloco }}</span>
-        <span class="stat__value" [class.text-danger]="balanceCents < 0">{{ formatCurrency(balanceCents) }}</span>
+        <span class="stat__value" data-testid="cash-register-balance" [class.text-danger]="balanceCents < 0">{{ formatCurrency(balanceCents) }}</span>
       </div>
 
       <section class="panel" aria-labelledby="manual-transaction-title">

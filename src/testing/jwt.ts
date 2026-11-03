@@ -44,9 +44,14 @@ const DEFAULT_CLAIMS: Record<TestRole, TestClaims> = {
   }
 };
 
+/** The claims of a test user with this role: the defaults above, overridden by `claims`. */
+export function claimsFor(role: TestRole, claims: TestClaims = {}): TestClaims {
+  return { ...DEFAULT_CLAIMS[role], ...claims };
+}
+
 /** Stores a token for the role (defaults above, overridden by `claims`) and returns it. */
 export function signInAs(role: TestRole, claims: TestClaims = {}): string {
-  const token = makeToken({ ...DEFAULT_CLAIMS[role], ...claims });
+  const token = makeToken(claimsFor(role, claims));
   localStorage.setItem('accessToken', token);
   return token;
 }

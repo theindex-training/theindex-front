@@ -14,6 +14,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - CI (`.github/workflows/ci.yml`) runs the tests and the production build on every pull request.
 - PR 3 fixed S1 and S2. It added `pages/save-errors.spec.ts`, the error-handling row of §7's table for every catalog and trainee form, and brought the suite to 28 spec files and 267 tests.
 - PR 4 covered §5–§12 (62 spec files, 547 tests; 17 more breaks in production code, all caught). It pinned S4, S8, S10, S11 and S12, and found S15 and S16.
+- PR 5 set up E2E (Playwright, API mock, CI job) and added all nine journeys: 37 E2E tests over the desktop and mobile projects. It found S17.
 
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
 - **P0:** access control, sessions, money, and anything that writes attendance, subscriptions, settlements or cash. A bug here loses money or data, or exposes screens to the wrong role.
@@ -422,39 +423,55 @@ One spec per service, each method asserting method, URL, query and body. These p
 
 ## Part B — E2E user journeys (Playwright)
 
-### B0. Setup (do this first, in its own PR)
+### B0. Setup ✅ (PR 5, together with J1 and J2)
 
-- [ ] Add `@playwright/test` (a dev dependency), `playwright.config.ts` and `e2e/`.
+- [x] Add `@playwright/test` (a dev dependency), `playwright.config.ts` and `e2e/`.
   - `webServer`: `ng serve` on :4200.
   - Projects:
     - `desktop`: Chromium, 1280×800;
     - `mobile`: Chromium, 390×844, touch.
   - Journeys say which projects they run in.
-- [ ] **API strategy:** mock at the network boundary with `page.route('**/api/**')`.
+- [x] **API strategy:** mock at the network boundary with `page.route('**/api/**')`.
   - A small `ApiMock` holds fixtures shaped like theindex-api DTOs.
   - It **records every request** (method, URL, query, JSON body) so tests can assert the calls listed below.
   - It **fails the test on any unmocked `/api` call**.
   - Why: CI-friendly, deterministic, and doesn't need the sibling repo and Postgres. The risk is fixture drift from the real API. It is mitigated by an optional `@real-api` smoke tag that runs J1 against a local theindex-api (seeded `admin`/`admin`); see "Open questions".
-- [ ] **Clock:** `page.clock.setFixedTime('2026-11-02T10:00:00+02:00')`, with `timezoneId: 'Europe/Sofia'` in the config. Journeys that check date defaults pin it.
-- [ ] **Auth helpers:**
+- [x] **Clock:** `timezoneId: 'Europe/Sofia'` is set in the config. Journeys that check date defaults (J3, J5, J6) pin the time with `page.clock.setFixedTime('2026-11-02T10:00:00+02:00')`.
+- [x] **Auth helpers:**
   - `loginViaUi(role)` is used by J1 only;
   - every other journey uses `signInAs(page, role, claims)`, which seeds `localStorage.accessToken` with a fake JWT through `addInitScript`.
-- [ ] **Language:**
+- [x] **Language:**
   - default fixture: seed `localStorage.lang='en'`;
   - `t(key, params?)` reads `public/i18n/en.json` and formats ICU, so selectors use `getByRole('button', { name: t('plans.create.submit') })` and not literal text;
   - J8 also runs one check in Bulgarian, using `bg.json`.
-- [ ] **Dialogs:** handle `window.confirm` with `page.once('dialog')`. Assert the message and accept or dismiss.
-- [ ] **`data-testid`s to add** (the only allowed production change; add them in the setup PR):
+- [x] **Dialogs:** handle `window.confirm` with `page.once('dialog')`. Assert the message and accept or dismiss (J4, J5, J6).
+- [x] **`data-testid`s to add** (the only allowed production change; add them in the setup PR):
   - `cash-register-balance` (the balance value);
   - `attendance-summary-sessions`, `-attendance`, `-paid`, `-unpaid`, `-total` (summary values);
   - `list-count` on each `.list-toolbar__count`;
   - `settlement-status` (the status value on the details page).
   - Everything else is reachable by role, label or accessible name. Recheck while writing each journey and extend this list rather than using a CSS selector.
-- [ ] `npm run e2e` script, plus an E2E job in `.github/workflows/ci.yml`. The owner approved the PR-check workflow; the deploy workflow stays untouched.
+- [x] `npm run e2e` script, plus an E2E job in `.github/workflows/ci.yml`. The owner approved the PR-check workflow; the deploy workflow stays untouched.
+
+**As built** (details in CLAUDE.md, "E2E layout"):
+- `@playwright/test` is pinned to 1.63.0, the version of the Chromium preinstalled in the dev environment; CI installs its own.
+- Test files are `e2e/**/*.e2e.ts`. The `desktop` and `mobile` projects select tests by the `@desktop` / `@mobile` tags.
+- `ApiMock` fails a test on any `/api` request it doesn't answer. This was checked by removing two mocks from J1: the test failed and named both requests.
+- `signInAs` / `seedToken` seed `localStorage` once per tab (a `sessionStorage` flag), so logging out or a 401 isn't undone by the next reload.
+- The CI `e2e` job runs both projects and uploads the HTML report when it fails.
+- Mutation check: 7 deliberate breaks in production code, each failing a journey:
+  - J2: the Trainers nav item shown to every role;
+  - J3: the optional time always sent;
+  - J5: the paid amount sent in euros;
+  - J6: a trainer given admin rights on settlements;
+  - J7: cents truncated instead of rounded. J7 first missed this: 12.34 converts exactly, so it now pays 19.99;
+  - J8: the language choice not saved;
+  - J9: the S1 fix reverted.
 
 Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'ok'}` and not repeated below.
 
 ### J1. Staff sign-in with forced first password change (P0) [desktop, mobile]
+✅ Done in PR 5: `e2e/journeys/j1-sign-in.e2e.ts`, 4 tests × 2 viewports.
 1. Open `/`. The app redirects to `/login`.
 2. Submit empty. Field errors show and no request is sent.
 3. Wrong credentials: `POST /api/auth/login` → 401 `{message:'Invalid credentials'}`. The alert shows the API message, the app stays on `/login`, and no token is stored. A 401 without a token must not trigger the logout redirect.
@@ -467,6 +484,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 10. Variant: password-status `true` → straight to `/home`. A TRAINEE token → `/my-profile` (its calls are listed in J8).
 
 ### J2. Access control and session expiry (P0) [desktop]
+✅ Done in PR 5: `e2e/journeys/j2-access-control.e2e.ts`, 7 tests. Step 3 also checks `/settlements` for a trainee.
 1. No token, deep link `/trainees` → `/login`. No `/api/trainees` call.
 2. TRAINER token:
    - the sidebar has no Trainers and no Cash register;
@@ -481,6 +499,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 7. Characterization: a token with a past `exp` is let in, and the first API 401 logs the user out (S6).
 
 ### J3. Register attendance as a trainer on a phone (P0) [mobile, plus a desktop smoke run]
+✅ Done in PR 5: `e2e/journeys/j3-register-attendance.e2e.ts`, 3 tests. The trainer, gym and date are preselected; the training-time options are sorted.
 1. TRAINER token with `trainerProfileId=T1`. Tap the primary "Register" tab.
 2. The page calls:
    - `GET /api/trainers?active=true`
@@ -496,6 +515,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 9. Variant: the batch POST → 400 `{message:[…]}`. The joined message shows, the app stays on the page, and the selection is kept.
 
 ### J4. Review and correct attendance history (P0) [desktop, plus a mobile list check]
+✅ Done in PR 5: `e2e/journeys/j4-attendance-history.e2e.ts`, 3 tests.
 1. ADMIN token, `/attendance` → `GET /api/trainers?active=true` and `GET /api/attendance/sessions?startDate=…&endDate=…`, with no `trainerId`.
 2. Every session chip is pressed (`aria-pressed=true`). The summary testids show the totals over all sessions; the price total counts final prices only.
 3. Unpress one session: the summary updates. Unpress all, then press "Apply": the page reloads, and all sessions are selected again.
@@ -510,6 +530,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
    - delete buttons appear only in T1's sessions (the fixture also contains another trainer's session).
 
 ### J5. New trainee: profile → subscription → app account (P0) [desktop]
+✅ Done in PR 5: `e2e/journeys/j5-trainee-onboarding.e2e.ts`, 1 test running the whole flow against a stateful fake API.
 1. ADMIN token. `/trainees` → `GET /api/trainees` (filter All, so no param) and `GET /api/gym-subscriptions?includeInactive=true`.
 2. "New trainee" → `GET /api/gym-subscriptions`.
    - Submit empty: errors, no POST.
@@ -534,6 +555,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 8. With `accountId` now in the trainee fixture, details also calls `GET /api/accounts/<accountId>`, and the account section shows the email and status.
 
 ### J6. Settlement lifecycle (P1, money) [desktop]
+✅ Done in PR 5: `e2e/journeys/j6-settlements.e2e.ts`, 3 tests.
 1. ADMIN token. `/settlements` → `GET /api/settlements`. "Generate settlement".
 2. Both dates default to 2026-11-02. Set 2026-10-01 to 2026-10-31. Submit → `POST /api/settlements {periodStart:'2026-10-01', periodEnd:'2026-10-31'}` → the app lands on `/settlements/<id>`.
 3. Details calls:
@@ -548,6 +570,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 8. Same flow as a TRAINER: no generate action, no delete buttons, no finalize button, no trainer filter.
 
 ### J7. Cash register manual entry (P1, money) [desktop, mobile]
+✅ Done in PR 5: `e2e/journeys/j7-cash-register.e2e.ts`, 3 tests × 2 viewports.
 1. ADMIN token. `/cash-register` → `GET /api/cash-register`. `cash-register-balance` shows the fixture balance.
 2. Amount 0 → error, no POST. Amount 12.345 → error, no POST.
 3. Direction OUT, amount 12.34, notes "  float top-up  ".
@@ -560,6 +583,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 Role access to this page is checked in J2 only.
 
 ### J8. Trainee self-service, navigation shell and preferences (P1) [mobile, plus a desktop smoke run]
+✅ Done in PR 5: `e2e/journeys/j8-trainee-self-service.e2e.ts`, 4 tests. The More tab's "current" state is CSS-only and can't be asserted (S17).
 1. TRAINEE token with `traineeProfileId=P1`, landing on `/my-profile`. The page calls:
    - `GET /api/attendance/trainees/P1`
    - `GET /api/trainees/P1/subscriptions`
@@ -582,6 +606,7 @@ Role access to this page is checked in J2 only.
 9. Variant: a token without `traineeProfileId` → the missing-profile message, and no data calls.
 
 ### J9. Plan catalog management (P1) [desktop]
+✅ Done in PR 5: `e2e/journeys/j9-plans.e2e.ts`, 2 tests.
 1. ADMIN token. `/plans` → `GET /api/plans`. The Active filter → `GET /api/plans?active=true`; Inactive → `active=false`.
 2. "New plan":
    - type Punch card, so credits are required (an empty value shows an error);
@@ -615,6 +640,7 @@ These come from reading the code. Each gets a `// CHARACTERIZATION: possibly uni
 - **S8 — A failed account load allows a second account.** On the trainee/trainer account page, a failed or `null` account GET for a linked profile falls back to "create account" mode.
 - **S9 — Trainer without a profile sees all sessions.** A TRAINER token without `trainerProfileId` gets unfiltered attendance history (but can't delete anything).
 - **S10 — Allocations capped at 500.** Settlement allocations stop at 500 rows with no paging.
+- **S17 — The More/Account tab's "current page" state is visual only** (found in PR 5). It is shown with a CSS class only; there is no `aria-current`.
 - **S11 / S12 — No range checks.** Settlement generate and training times have no client-side range check (start ≤ end); only the API validates.
 - **S13 — Login can be submitted twice.** The submit button isn't disabled while signing in, so a double click sends two login requests (found while writing §2).
 - **S14 — A whitespace-only phone silently blocks the first password change.** "   " passes `Validators.required`, so no error shows, then the submit handler trims it to nothing and returns without a word (found while writing §2).
@@ -659,6 +685,6 @@ The plan was reviewed against three goals: tests that survive a redesign, fail w
 1. [x] Shared test helpers and §1 (access control). PR 2.
 2. [x] §2 and §3 (sign-in and money), then §4 (attendance). PR 2.
 3. [x] §5–§12: services, pages, i18n, utils and shared components. PR 4.
-4. [ ] E2E setup (B0) with the `data-testid` additions, then J1, J2, J3, J5, J4, J6, J7, J8, J9.
+4. [x] E2E setup (B0) with the `data-testid` additions, and journeys J1–J9. PR 5.
 
 E2E findings go in `TEST_NOTES.md` the same way: characterize, don't fix.

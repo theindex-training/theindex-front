@@ -61,7 +61,7 @@ This file records findings only. Fixes are on hold: as in theindex-api, no fixes
 - **Where:** `AuthService.isAuthenticated()`, used by `authGuard`, `loginGuard` and `roleGuard`.
 - **Behavior:** any stored token passes; `exp` is never checked. The first API call then returns 401, and the interceptor logs the user out.
 - **Why it looks wrong:** the shell renders briefly for an expired session. Low impact: the API is the real gate.
-- **Pinned by:** `auth.service.spec.ts` › "accepts an expired token" (and "accepts any stored string…").
+- **Pinned by:** `auth.service.spec.ts` › "accepts an expired token" (and "accepts any stored string…"); E2E `j2-access-control.e2e.ts` › "an expired token gets in until the first API call is refused".
 - **Status:** open.
 
 ## S7 — A plan title of only spaces is accepted
@@ -133,5 +133,12 @@ This file records findings only. Fixes are on hold: as in theindex-api, no fixes
   - When loading fails, the page-level "Couldn't load your profile" state never appears. The two tables still show the error, so the user does see it.
   - When the token has no `traineeProfileId`, nothing shows the "missing profile" message at all. The trainee reads "No active subscriptions found for your profile" and "No trainings yet", as if their history were empty.
 - **Why it looks wrong:** the condition can never be true, and in the missing-profile case it tells a trainee they have no subscriptions when the app just couldn't identify them.
-- **Pinned by:** `trainee-dashboard.component.spec.ts` › "shows empty lists, not an explanation, for a token without a trainee profile" and "never shows the page-level error, even when loading fails".
+- **Pinned by:** `trainee-dashboard.component.spec.ts` › "shows empty lists, not an explanation, for a token without a trainee profile" and "never shows the page-level error, even when loading fails". Also E2E `j8-trainee-self-service.e2e.ts` › "a token without a trainee profile shows empty lists and loads nothing".
 - **Status:** open (found in PR 4).
+
+## S17 — The More/Account tab's "current page" state is visual only
+- **Where:** `tab-bar.component.html`: the sheet tab gets `[class.is-active]="sheetActive || sheetOpen"`. The tab links use `ariaCurrentWhenActive="page"`, but this button has no equivalent.
+- **Behavior:** on a page that lives in the More sheet (e.g. `/plans`), the More tab is styled as current. Nothing tells assistive technology: there is no `aria-current` and no other state. The open state is announced, through `aria-expanded`.
+- **Why it looks wrong:** CLAUDE.md says the More/Account tab "shows as active when the current page lives in the sheet". Screen-reader users don't get that, unlike the other tabs, and E2E tests can't assert it, because the E2E rules forbid CSS selectors.
+- **Pinned by:** E2E `j8-trainee-self-service.e2e.ts` › "on a staff phone, the More sheet closes when a page is picked" (a comment on what can't be asserted). The unit test `main-layout.component.spec.ts` › "marks the More tab as current on pages that live in the sheet" covers the logic behind the class.
+- **Status:** open (found in PR 5).

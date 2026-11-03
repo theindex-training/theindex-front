@@ -17,6 +17,7 @@ npm start                    # ng serve on :4200, proxies /api -> http://localho
 npm run build                # production build -> dist/theindex-front/browser
 npm run watch                # dev build in watch mode
 npx ng test --watch=false    # run unit tests once (`npm test` starts watch mode)
+npm run e2e                  # Playwright E2E journeys (starts `ng serve` itself; API is mocked)
 ```
 For a working UI locally, also run theindex-api (`npm run start:dev` there, with Postgres) and log in as the seeded admin (`admin`/`admin` with the API's `.env.example`).
 
@@ -61,6 +62,21 @@ They are plain TypeScript with no Vitest globals, because the app build type-che
 - Accessible names come from the translation files. Resolve them with a helper that reads `public/i18n/en.json` by key, so a copy change doesn't break the test but a missing label does.
 - Need a hook that has no role or label (a balance figure, a count)? Add a `data-testid` in the template. That is the only allowed production change; name it `<feature>-<thing>`, e.g. `cash-register-balance`.
 - Mock the API at the network boundary (`page.route('**/api/**')`) with fixtures shaped like theindex-api responses, and assert the requests the page sends.
+
+**E2E layout** (`e2e/`, Playwright, files named `*.e2e.ts` so `ng test` never picks them up):
+- `e2e/support/fixtures.ts` gives every test:
+  - `api`, an `ApiMock`: `api.on(method, path, response)` answers requests, and `api.calls()` / `api.last()` return what was sent. Any `/api` request without a rule fails the test.
+  - `signInAs(role, claims?)` / `seedToken(token)`, which seed `localStorage` once per tab, so a reload or logout behaves as in real use.
+- The UI starts in English. `t(key, params)` and `tBg(...)` in `e2e/support/i18n.ts` give the shown text for a translation key.
+- Response fixtures shaped like the API's DTOs live in `e2e/support/data.ts`.
+- Pick viewports with tags: `{ tag: '@desktop' }` (1280×800), `'@mobile'` (390×844), or both. The browser runs in `Europe/Sofia` time.
+- Locally, Playwright uses the Chromium in `PLAYWRIGHT_BROWSERS_PATH`; `@playwright/test` is pinned to match it. CI installs its own Chromium.
+- Lessons from writing J1–J9:
+  - **Requests:** `api.calls()` / `api.last()` read what has been sent so far. Right after a navigation, wrap them in `expect.poll(...)`.
+  - **Lists render twice** (a desktop table and a phone list, one hidden by CSS). For text, use `getByText(...).filter({ visible: true })`; roles already skip hidden elements.
+  - **Segmented controls** (filters, theme, language) use visually hidden radios. Click the option's text inside `getByRole('group', { name: <legend> })`, then assert `getByRole('radio', { name })`.
+  - **Translated names:** landmark and dialog names are translated too. After switching to Bulgarian, find them with `tBg(...)` (or by role alone).
+  - **Ambiguous labels:** `getByLabel` matches substrings and `aria-label`s ("Password" vs "Show password", "Trainer" vs "Trainer totals table"). Use `{ exact: true }`, or a role with a name.
 
 ## Folder structure
 ```
