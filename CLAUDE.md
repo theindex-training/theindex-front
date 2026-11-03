@@ -56,6 +56,8 @@ They are plain TypeScript with no Vitest globals, because the app build type-che
 
 **The app is zoneless.** Nothing re-renders after an async callback unless the code calls `detectChanges()`/`markForCheck()` or a signal changes. In component specs, `await fixture.whenStable()` after flushing HTTP, and assert on what the user would actually see. Where the component state and the DOM disagree, that is behavior to characterize (see `TEST_NOTES.md`).
 
+**Pages that navigate away** (after a save, a generate, a delete) must be rendered through `RouterTestingHarness` with the page on its own route, as in `plan-edit.component.spec.ts`, not with `TestBed.createComponent`. Since Angular 21.2, `RouterLink` reads router-state signals that change on `NavigationEnd`, which schedules a tick. A page created outside the outlet is still alive at that tick, and the dev-mode check throws NG0100 for any field set without `markForCheck()`. In the app, the outlet destroys the page first.
+
 **E2E selectors** (Playwright, see `TEST_PLAN.md`):
 - Use only roles (`getByRole`), accessible names and labels (`getByLabel`), or `data-testid` (`getByTestId`).
 - Never CSS classes, tag structure (`div > span:nth-child(2)`), or visible copy that is likely to change in a redesign.

@@ -1,31 +1,35 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import en from '../../../../public/i18n/en.json';
 import { PageDriver, apiError, driver } from '../../../testing/dom';
 import { PlanCreateComponent } from './plan-create.component';
 
 describe('PlanCreateComponent', () => {
-  let fixture: ComponentFixture<PlanCreateComponent>;
+  let component: PlanCreateComponent;
   let http: HttpTestingController;
   let router: Router;
   let page: PageDriver;
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      imports: [PlanCreateComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideRouter([{ path: '**', children: [] }])
+        // Routed as in the app, so navigating away after a save destroys the page.
+        provideRouter([
+          { path: 'plans/new', component: PlanCreateComponent },
+          { path: '**', children: [] }
+        ])
       ]
     });
     http = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
-    await router.navigateByUrl('/plans/new');
-    fixture = TestBed.createComponent(PlanCreateComponent);
-    page = driver(() => fixture.nativeElement, () => fixture.whenStable());
+    const harness = await RouterTestingHarness.create();
+    component = await harness.navigateByUrl('/plans/new', PlanCreateComponent);
+    page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
     await page.settle();
   });
 
@@ -142,7 +146,7 @@ describe('PlanCreateComponent', () => {
 
     expect(page.query<HTMLInputElement>('#plan-credits')!.value).toBe('');
 
-    expect(fixture.componentInstance.form.controls.credits.value).toBeNull();
+    expect(component.form.controls.credits.value).toBeNull();
   });
 
   it('requires a title', async () => {

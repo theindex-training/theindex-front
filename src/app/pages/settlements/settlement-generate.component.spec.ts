@@ -1,7 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import en from '../../../../public/i18n/en.json';
 import { PageDriver, apiError, driver } from '../../../testing/dom';
 import { signInAs } from '../../../testing/jwt';
@@ -10,7 +11,6 @@ import { SettlementGenerateComponent } from './settlement-generate.component';
 const copy = en.settlements.generate;
 
 describe('SettlementGenerateComponent', () => {
-  let fixture: ComponentFixture<SettlementGenerateComponent>;
   let http: HttpTestingController;
   let router: Router;
   let page: PageDriver;
@@ -24,14 +24,18 @@ describe('SettlementGenerateComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideRouter([{ path: '**', children: [] }])
+        // Routed as in the app, so navigating away after generating destroys the page.
+        provideRouter([
+          { path: 'settlements/new', component: SettlementGenerateComponent },
+          { path: '**', children: [] }
+        ])
       ]
     });
     http = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
-    await router.navigateByUrl('/settlements/new');
-    fixture = TestBed.createComponent(SettlementGenerateComponent);
-    page = driver(() => fixture.nativeElement, () => fixture.whenStable());
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/settlements/new', SettlementGenerateComponent);
+    page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
     await page.settle();
   });
 
