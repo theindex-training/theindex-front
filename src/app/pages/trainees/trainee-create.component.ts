@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -23,6 +23,7 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-trainee-create',
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainee-create.component.html'
 })
 export class TraineeCreateComponent implements OnInit {

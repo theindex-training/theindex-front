@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
 import { formatTimeWithoutSeconds } from '../../utils/time-display';
@@ -12,6 +12,7 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-training-time-delete',
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, PageHeaderComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './training-time-delete.component.html'
 })
 export class TrainingTimeDeleteComponent implements OnInit {

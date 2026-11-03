@@ -1,4 +1,4 @@
-import { Component, DestroyRef, ElementRef, ViewChild, inject } from '@angular/core';
+import { Component, DestroyRef, ElementRef, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -18,6 +18,7 @@ const DESKTOP_QUERY = '(min-width: 1024px)';
   standalone: true,
   imports: [RouterOutlet, TranslocoPipe, BrandComponent, SidebarComponent, TabBarComponent, NavSheetComponent],
   templateUrl: './main-layout.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './main-layout.component.scss'
 })
 export class MainLayoutComponent {

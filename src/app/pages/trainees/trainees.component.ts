@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
@@ -40,6 +40,7 @@ import { displayValue } from '../../utils/display.util';
     SkeletonListComponent,
     StatusDotComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainees.component.html',
 })
 export class TraineesComponent implements OnInit {

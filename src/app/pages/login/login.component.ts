@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LanguageSwitchComponent } from '../../components/language-switch/language-switch.component';
@@ -15,6 +15,7 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [LanguageSwitchComponent, UiMessagePipe, TranslocoPipe, ReactiveFormsModule, UiButtonComponent, UiInputComponent],
 })
 export class LoginComponent {

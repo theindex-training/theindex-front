@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 export type IconName =
   | 'home'
@@ -37,6 +37,7 @@ export type IconName =
   selector: 'app-icon',
   standalone: true,
   templateUrl: './icon.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './icon.component.scss'
 })
 export class IconComponent {

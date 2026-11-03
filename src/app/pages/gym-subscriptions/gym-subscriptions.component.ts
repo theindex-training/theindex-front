@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import {
@@ -35,6 +35,7 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
     ListRowComponent,
     IconComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './gym-subscriptions.component.html'
 })
 export class GymSubscriptionsComponent implements OnInit {

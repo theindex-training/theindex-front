@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -23,6 +23,7 @@ import { UserBlockComponent } from '../user-block/user-block.component';
     UserBlockComponent
   ],
   templateUrl: './sidebar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent {

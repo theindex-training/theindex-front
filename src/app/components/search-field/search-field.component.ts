@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { IconComponent } from '../icon/icon.component';
 
@@ -10,6 +10,7 @@ let nextId = 0;
   standalone: true,
   imports: [TranslocoPipe, IconComponent],
   templateUrl: './search-field.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './search-field.component.scss'
 })
 export class SearchFieldComponent {

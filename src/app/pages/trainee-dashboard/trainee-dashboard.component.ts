@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -33,6 +33,7 @@ type SubscriptionFilter = 'ACTIVE' | 'EXHAUSTED' | 'ALL';
     TraineeSubscriptionsTableComponent,
     TraineeTrainingsTableComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainee-dashboard.component.html',
 })
 export class TraineeDashboardComponent implements OnInit {

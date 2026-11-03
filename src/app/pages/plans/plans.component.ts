@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import {
@@ -36,6 +36,7 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
     ListRowComponent,
     IconComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './plans.component.html'
 })
 export class PlansComponent implements OnInit {

@@ -3,9 +3,13 @@
 Angular SPA for The Index, a CrossFit gym app (admin/trainer management screens plus a trainee dashboard). The backend lives in the sibling repo `theindex-training/theindex-api`.
 
 ## Stack
-- Angular 21 with standalone components, lazy `loadComponent` routes, functional guards/interceptor, and the new control flow (`@if`/`@for`)
-- TypeScript ~5.9 (strict, `strictTemplates`), SCSS, RxJS 7, `@angular/build` (esbuild) builder
-- Tests: Vitest 4 + jsdom through `ng test` (`@angular/build:unit-test`); `src/test-providers.ts` gives every spec Transloco with the real language files (English)
+- Angular 22 with standalone components, lazy `loadComponent` routes, functional guards/interceptor, and the new control flow (`@if`/`@for`)
+- Angular 22 changed three defaults; the v22 migration pinned the old behavior, so keep it that way unless you mean to change it:
+  - Components default to OnPush. Every existing component sets `changeDetection: ChangeDetectionStrategy.Eager`, because the pages mutate plain fields and call `detectChanges()` themselves. Give new components `Eager` too, unless they are built on signals.
+  - `HttpClient` defaults to `fetch`. `app.config.ts` keeps the XHR backend with `withXhr()`.
+  - A template `?.` on a missing value now yields `undefined` instead of `null`. `settlement-details.component.html` wraps its reads in `$safeNavigationMigration(...)` to keep `null`.
+- TypeScript ~6.0 (Angular 22 needs `>=6.0 <6.1`; strict, `strictTemplates`), SCSS, RxJS 7, `@angular/build` (esbuild) builder
+- Tests: Vitest 5 + jsdom through `ng test` (`@angular/build:unit-test`); `src/test-providers.ts` gives every spec Transloco with the real language files (English)
 - i18n: Transloco (`@jsverse/transloco`) + `@jsverse/transloco-messageformat` (ICU plurals), runtime switching between Bulgarian (default) and English. See "Internationalization".
 - Node 24 LTS (`.nvmrc`, Docker `node:24-alpine`; CI reads `.nvmrc`); production image is `nginx:alpine` serving `dist/theindex-front/browser`
 - No ESLint is configured. Prettier settings sit in `package.json` (printWidth 100, single quotes, angular parser for HTML), but prettier is not a dependency.

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   AccountProvisioningService,
@@ -19,6 +19,7 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
   selector: 'app-trainer-details',
   standalone: true,
   imports: [EnumLabelPipe, UiMessagePipe, TranslocoPipe, CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainer-details.component.html'
 })
 export class TrainerDetailsComponent implements OnInit {

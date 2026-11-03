@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 /** Colored dot + text label (the label carries the meaning; the dot is decorative). */
 @Component({
   selector: 'app-status-dot',
   standalone: true,
   templateUrl: './status-dot.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './status-dot.component.scss'
 })
 export class StatusDotComponent {

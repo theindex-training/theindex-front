@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -23,6 +23,7 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-trainer-edit',
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainer-edit.component.html'
 })
 export class TrainerEditComponent implements OnInit {

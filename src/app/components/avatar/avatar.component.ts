@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 /** Initials in a rounded square. Decorative: the name must also be shown as text next to it. */
 @Component({
   selector: 'app-avatar',
   standalone: true,
   templateUrl: './avatar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './avatar.component.scss'
 })
 export class AvatarComponent {

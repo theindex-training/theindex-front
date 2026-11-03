@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 export interface RankedItem {
@@ -12,6 +12,7 @@ export interface RankedItem {
   standalone: true,
   imports: [TranslocoPipe],
   templateUrl: './ranked-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './ranked-list.component.scss'
 })
 export class RankedListComponent {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -49,6 +49,7 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
   selector: 'app-plan-edit',
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './plan-edit.component.html'
 })
 export class PlanEditComponent implements OnInit {

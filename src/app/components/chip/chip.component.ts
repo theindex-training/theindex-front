@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 export type ChipTone = 'accent' | 'neutral' | 'success' | 'warning' | 'danger';
 
@@ -7,6 +7,7 @@ export type ChipTone = 'accent' | 'neutral' | 'success' | 'warning' | 'danger';
   selector: 'app-chip',
   standalone: true,
   templateUrl: './chip.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './chip.component.scss'
 })
 export class ChipComponent {

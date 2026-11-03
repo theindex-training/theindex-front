@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -54,6 +54,7 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
     ChipComponent
   ],
   templateUrl: './cash-register.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './cash-register.component.scss'
 })
 export class CashRegisterComponent implements OnInit {

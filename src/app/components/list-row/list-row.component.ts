@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { IconComponent } from '../icon/icon.component';
@@ -14,6 +14,7 @@ import { IconComponent } from '../icon/icon.component';
   standalone: true,
   imports: [RouterLink, AvatarComponent, IconComponent],
   templateUrl: './list-row.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './list-row.component.scss'
 })
 export class ListRowComponent {

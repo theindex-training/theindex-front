@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -26,6 +26,7 @@ import { UserBlockComponent } from '../user-block/user-block.component';
     UserBlockComponent
   ],
   templateUrl: './nav-sheet.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './nav-sheet.component.scss'
 })
 export class NavSheetComponent {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -19,6 +19,7 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-trainer-create',
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainer-create.component.html'
 })
 export class TrainerCreateComponent {

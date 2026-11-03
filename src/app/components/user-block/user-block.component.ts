@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
@@ -11,6 +11,7 @@ import { IconComponent } from '../icon/icon.component';
   standalone: true,
   imports: [RouterLink, TranslocoPipe, EnumLabelPipe, IconComponent],
   templateUrl: './user-block.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './user-block.component.scss'
 })
 export class UserBlockComponent {
