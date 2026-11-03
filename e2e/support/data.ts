@@ -29,3 +29,48 @@ export function mockTraineeHome(api: ApiMock, traineeId = 'trainee-1'): void {
   api.on('GET', `/api/trainees/${traineeId}/subscriptions`, { body: [] });
   api.on('GET', '/api/plans', { body: [] });
 }
+
+export const trainer = (id: string, name: string, nickname: string | null = null, isActive = true) => ({
+  id,
+  name,
+  nickname,
+  accountId: null,
+  isActive
+});
+
+export const gym = (id: string, name: string, isActive = true) => ({ id, name, address: null, notes: null, isActive });
+
+export const trainee = (id: string, name: string, nickname: string | null = null, overrides: object = {}) => ({
+  id,
+  name,
+  nickname,
+  phone: null,
+  accountId: null,
+  gymSubscriptionId: null,
+  isActive: true,
+  ...overrides
+});
+
+export const plan = (id: string, title: string, overrides: object = {}) => ({
+  id,
+  type: 'PUNCH',
+  title,
+  priceCents: 4550,
+  credits: 10,
+  durationDays: null,
+  isActive: true,
+  ...overrides
+});
+
+/** An attendance-sessions response (GET /api/attendance/sessions). */
+export function sessionsResponse(sessions: object[], entities: { trainees?: object[]; trainers?: object[] } = {}) {
+  return {
+    filters: { startDate: '', endDate: '', startTime: '', endTime: '', trainerId: null },
+    sessions,
+    entities: {
+      trainees: entities.trainees ?? [],
+      trainers: entities.trainers ?? [],
+      locations: [{ id: 'gym-1', name: 'Center' }]
+    }
+  };
+}

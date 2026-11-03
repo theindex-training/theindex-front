@@ -71,6 +71,12 @@ They are plain TypeScript with no Vitest globals, because the app build type-che
 - Response fixtures shaped like the API's DTOs live in `e2e/support/data.ts`.
 - Pick viewports with tags: `{ tag: '@desktop' }` (1280×800), `'@mobile'` (390×844), or both. The browser runs in `Europe/Sofia` time.
 - Locally, Playwright uses the Chromium in `PLAYWRIGHT_BROWSERS_PATH`; `@playwright/test` is pinned to match it. CI installs its own Chromium.
+- Lessons from writing J1–J9:
+  - **Requests:** `api.calls()` / `api.last()` read what has been sent so far. Right after a navigation, wrap them in `expect.poll(...)`.
+  - **Lists render twice** (a desktop table and a phone list, one hidden by CSS). For text, use `getByText(...).filter({ visible: true })`; roles already skip hidden elements.
+  - **Segmented controls** (filters, theme, language) use visually hidden radios. Click the option's text inside `getByRole('group', { name: <legend> })`, then assert `getByRole('radio', { name })`.
+  - **Translated names:** landmark and dialog names are translated too. After switching to Bulgarian, find them with `tBg(...)` (or by role alone).
+  - **Ambiguous labels:** `getByLabel` matches substrings and `aria-label`s ("Password" vs "Show password", "Trainer" vs "Trainer totals table"). Use `{ exact: true }`, or a role with a name.
 
 ## Folder structure
 ```
