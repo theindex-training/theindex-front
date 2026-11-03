@@ -13,7 +13,7 @@
       (valueChange)="activeFilter = $event; loadPlans()"
     />
     @if (!loading && !errorMessage && plans.length) {
-      <p class="list-toolbar__count" aria-live="polite">{{ 'plans.list.count' | transloco: { count: plans.length } }}</p>
+      <p class="list-toolbar__count" data-testid="list-count" aria-live="polite">{{ 'plans.list.count' | transloco: { count: plans.length } }}</p>
     }
   </div>
 

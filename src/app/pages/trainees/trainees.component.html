@@ -20,7 +20,7 @@
       (valueChange)="activeFilter = $event; loadTrainees()"
     />
     @if (!loading && !errorMessage && trainees.length) {
-      <p class="list-toolbar__count" aria-live="polite">
+      <p class="list-toolbar__count" data-testid="list-count" aria-live="polite">
         {{ 'trainees.list.count' | transloco: { shown: filteredTrainees.length, total: trainees.length } }}
       </p>
     }

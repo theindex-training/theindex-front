@@ -13,7 +13,7 @@
       (valueChange)="activeFilter = $event; loadGyms()"
     />
     @if (!loading && !errorMessage && gyms.length) {
-      <p class="list-toolbar__count" aria-live="polite">{{ 'gyms.list.count' | transloco: { count: gyms.length } }}</p>
+      <p class="list-toolbar__count" data-testid="list-count" aria-live="polite">{{ 'gyms.list.count' | transloco: { count: gyms.length } }}</p>
     }
   </div>
 

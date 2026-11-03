@@ -14,7 +14,7 @@
       <dl class="detail-list">
         <div>
           <dt>{{ 'common.status' | transloco }}</dt>
-          <dd>
+          <dd data-testid="settlement-status">
             <app-chip [tone]="settlement.status === 'FINAL' ? 'success' : 'warning'">
               {{ settlement.status | enumLabel: 'settlementStatus' }}
             </app-chip>
@@ -130,13 +130,13 @@
             </select>
           </label>
           @if (!loadingAllocations && !allocationError && allocations.length) {
-            <p class="list-toolbar__count" aria-live="polite">
+            <p class="list-toolbar__count" data-testid="list-count" aria-live="polite">
               {{ 'settlements.details.showing' | transloco: { shown: allocations.length, total: allocationsTotal } }}
             </p>
           }
         </div>
       } @else if (!loadingAllocations && !allocationError && allocations.length) {
-        <p class="list-toolbar__count" aria-live="polite">{{ 'settlements.details.showing' | transloco: { shown: allocations.length, total: allocationsTotal } }}</p>
+        <p class="list-toolbar__count" data-testid="list-count" aria-live="polite">{{ 'settlements.details.showing' | transloco: { shown: allocations.length, total: allocationsTotal } }}</p>
       }
 
       @if (loadingAllocations) {

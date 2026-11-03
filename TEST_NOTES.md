@@ -61,7 +61,7 @@ This file records findings only. Fixes are on hold: as in theindex-api, no fixes
 - **Where:** `AuthService.isAuthenticated()`, used by `authGuard`, `loginGuard` and `roleGuard`.
 - **Behavior:** any stored token passes; `exp` is never checked. The first API call then returns 401, and the interceptor logs the user out.
 - **Why it looks wrong:** the shell renders briefly for an expired session. Low impact: the API is the real gate.
-- **Pinned by:** `auth.service.spec.ts` › "accepts an expired token" (and "accepts any stored string…").
+- **Pinned by:** `auth.service.spec.ts` › "accepts an expired token" (and "accepts any stored string…"); E2E `j2-access-control.e2e.ts` › "an expired token gets in until the first API call is refused".
 - **Status:** open.
 
 ## S7 — A plan title of only spaces is accepted

@@ -78,11 +78,11 @@
 
     @if (selectedSessions.length) {
       <dl class="stats" [attr.aria-label]="'attendance.sessions.summaryLabel' | transloco">
-        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.sessions' | transloco }}</dt><dd class="stat__value">{{ selectedSessionsSummary.sessions }}</dd></div>
-        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.attendance' | transloco }}</dt><dd class="stat__value">{{ selectedSessionsSummary.attendance }}</dd></div>
-        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.paid' | transloco }}</dt><dd class="stat__value">{{ selectedSessionsSummary.paid }}</dd></div>
-        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.unpaid' | transloco }}</dt><dd class="stat__value" [class.text-danger]="selectedSessionsSummary.unpaid > 0">{{ selectedSessionsSummary.unpaid }}</dd></div>
-        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.finalTotal' | transloco }}</dt><dd class="stat__value">{{ formatPrice(selectedSessionsSummary.finalPriceCents) }}</dd></div>
+        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.sessions' | transloco }}</dt><dd class="stat__value" data-testid="attendance-summary-sessions">{{ selectedSessionsSummary.sessions }}</dd></div>
+        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.attendance' | transloco }}</dt><dd class="stat__value" data-testid="attendance-summary-attendance">{{ selectedSessionsSummary.attendance }}</dd></div>
+        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.paid' | transloco }}</dt><dd class="stat__value" data-testid="attendance-summary-paid">{{ selectedSessionsSummary.paid }}</dd></div>
+        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.unpaid' | transloco }}</dt><dd class="stat__value" data-testid="attendance-summary-unpaid" [class.text-danger]="selectedSessionsSummary.unpaid > 0">{{ selectedSessionsSummary.unpaid }}</dd></div>
+        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.finalTotal' | transloco }}</dt><dd class="stat__value" data-testid="attendance-summary-total">{{ formatPrice(selectedSessionsSummary.finalPriceCents) }}</dd></div>
       </dl>
     } @else {
       <p class="notice">{{ 'attendance.sessions.selectHint' | transloco }}</p>

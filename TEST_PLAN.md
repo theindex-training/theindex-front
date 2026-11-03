@@ -14,6 +14,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - CI (`.github/workflows/ci.yml`) runs the tests and the production build on every pull request.
 - PR 3 fixed S1 and S2. It added `pages/save-errors.spec.ts`, the error-handling row of §7's table for every catalog and trainee form, and brought the suite to 28 spec files and 267 tests.
 - PR 4 covered §5–§12 (62 spec files, 547 tests; 17 more breaks in production code, all caught). It pinned S4, S8, S10, S11 and S12, and found S15 and S16.
+- PR 5 set up E2E (Playwright, API mock, CI job) and added J1 and J2: 15 E2E tests.
 
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
 - **P0:** access control, sessions, money, and anything that writes attendance, subscriptions, settlements or cash. A bug here loses money or data, or exposes screens to the wrong role.
@@ -422,39 +423,48 @@ One spec per service, each method asserting method, URL, query and body. These p
 
 ## Part B — E2E user journeys (Playwright)
 
-### B0. Setup (do this first, in its own PR)
+### B0. Setup ✅ (PR 5, together with J1 and J2)
 
-- [ ] Add `@playwright/test` (a dev dependency), `playwright.config.ts` and `e2e/`.
+- [x] Add `@playwright/test` (a dev dependency), `playwright.config.ts` and `e2e/`.
   - `webServer`: `ng serve` on :4200.
   - Projects:
     - `desktop`: Chromium, 1280×800;
     - `mobile`: Chromium, 390×844, touch.
   - Journeys say which projects they run in.
-- [ ] **API strategy:** mock at the network boundary with `page.route('**/api/**')`.
+- [x] **API strategy:** mock at the network boundary with `page.route('**/api/**')`.
   - A small `ApiMock` holds fixtures shaped like theindex-api DTOs.
   - It **records every request** (method, URL, query, JSON body) so tests can assert the calls listed below.
   - It **fails the test on any unmocked `/api` call**.
   - Why: CI-friendly, deterministic, and doesn't need the sibling repo and Postgres. The risk is fixture drift from the real API. It is mitigated by an optional `@real-api` smoke tag that runs J1 against a local theindex-api (seeded `admin`/`admin`); see "Open questions".
-- [ ] **Clock:** `page.clock.setFixedTime('2026-11-02T10:00:00+02:00')`, with `timezoneId: 'Europe/Sofia'` in the config. Journeys that check date defaults pin it.
-- [ ] **Auth helpers:**
+- [x] **Clock:** `timezoneId: 'Europe/Sofia'` is set in the config. Journeys that check date defaults (J3, J5, J6) pin the time with `page.clock.setFixedTime('2026-11-02T10:00:00+02:00')`.
+- [x] **Auth helpers:**
   - `loginViaUi(role)` is used by J1 only;
   - every other journey uses `signInAs(page, role, claims)`, which seeds `localStorage.accessToken` with a fake JWT through `addInitScript`.
-- [ ] **Language:**
+- [x] **Language:**
   - default fixture: seed `localStorage.lang='en'`;
   - `t(key, params?)` reads `public/i18n/en.json` and formats ICU, so selectors use `getByRole('button', { name: t('plans.create.submit') })` and not literal text;
   - J8 also runs one check in Bulgarian, using `bg.json`.
-- [ ] **Dialogs:** handle `window.confirm` with `page.once('dialog')`. Assert the message and accept or dismiss.
-- [ ] **`data-testid`s to add** (the only allowed production change; add them in the setup PR):
+- [ ] **Dialogs:** handle `window.confirm` with `page.once('dialog')`. Assert the message and accept or dismiss. (No helper is needed; it is first used in J4.)
+- [x] **`data-testid`s to add** (the only allowed production change; add them in the setup PR):
   - `cash-register-balance` (the balance value);
   - `attendance-summary-sessions`, `-attendance`, `-paid`, `-unpaid`, `-total` (summary values);
   - `list-count` on each `.list-toolbar__count`;
   - `settlement-status` (the status value on the details page).
   - Everything else is reachable by role, label or accessible name. Recheck while writing each journey and extend this list rather than using a CSS selector.
-- [ ] `npm run e2e` script, plus an E2E job in `.github/workflows/ci.yml`. The owner approved the PR-check workflow; the deploy workflow stays untouched.
+- [x] `npm run e2e` script, plus an E2E job in `.github/workflows/ci.yml`. The owner approved the PR-check workflow; the deploy workflow stays untouched.
+
+**As built** (details in CLAUDE.md, "E2E layout"):
+- `@playwright/test` is pinned to 1.63.0, the version of the Chromium preinstalled in the dev environment; CI installs its own.
+- Test files are `e2e/**/*.e2e.ts`. The `desktop` and `mobile` projects select tests by the `@desktop` / `@mobile` tags.
+- `ApiMock` fails a test on any `/api` request it doesn't answer. This was checked by removing two mocks from J1: the test failed and named both requests.
+- `signInAs` / `seedToken` seed `localStorage` once per tab (a `sessionStorage` flag), so logging out or a 401 isn't undone by the next reload.
+- The CI `e2e` job runs both projects and uploads the HTML report when it fails.
+- Mutation check: giving the Trainers nav item to every role fails J2's trainer test.
 
 Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'ok'}` and not repeated below.
 
 ### J1. Staff sign-in with forced first password change (P0) [desktop, mobile]
+✅ Done in PR 5: `e2e/journeys/j1-sign-in.e2e.ts`, 4 tests × 2 viewports.
 1. Open `/`. The app redirects to `/login`.
 2. Submit empty. Field errors show and no request is sent.
 3. Wrong credentials: `POST /api/auth/login` → 401 `{message:'Invalid credentials'}`. The alert shows the API message, the app stays on `/login`, and no token is stored. A 401 without a token must not trigger the logout redirect.
@@ -467,6 +477,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 10. Variant: password-status `true` → straight to `/home`. A TRAINEE token → `/my-profile` (its calls are listed in J8).
 
 ### J2. Access control and session expiry (P0) [desktop]
+✅ Done in PR 5: `e2e/journeys/j2-access-control.e2e.ts`, 7 tests. Step 3 also checks `/settlements` for a trainee.
 1. No token, deep link `/trainees` → `/login`. No `/api/trainees` call.
 2. TRAINER token:
    - the sidebar has no Trainers and no Cash register;
@@ -659,6 +670,7 @@ The plan was reviewed against three goals: tests that survive a redesign, fail w
 1. [x] Shared test helpers and §1 (access control). PR 2.
 2. [x] §2 and §3 (sign-in and money), then §4 (attendance). PR 2.
 3. [x] §5–§12: services, pages, i18n, utils and shared components. PR 4.
-4. [ ] E2E setup (B0) with the `data-testid` additions, then J1, J2, J3, J5, J4, J6, J7, J8, J9.
+4. [x] E2E setup (B0) with the `data-testid` additions, J1 and J2. PR 5.
+5. [ ] E2E journeys J3, J5, J4, J6, J7, J8, J9.
 
 E2E findings go in `TEST_NOTES.md` the same way: characterize, don't fix.
