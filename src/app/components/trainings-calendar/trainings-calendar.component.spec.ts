@@ -276,6 +276,25 @@ describe('TrainingsCalendarComponent', () => {
     expect(tabStops()).toEqual(['2026-11-26']);
   });
 
+  it('clears the selection when the keyboard moves into another month', async () => {
+    await render(october);
+    await goToOctober();
+    await page.click('[data-testid="calendar-day-2026-10-07"]');
+    day('2026-10-07').focus();
+
+    document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await page.settle();
+    // Within the month the selection stays.
+    expect(day('2026-10-07').getAttribute('aria-pressed')).toBe('true');
+
+    document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: 'PageDown', bubbles: true }));
+    await page.settle();
+    expect(text('calendar-month')).toBe('November 2026');
+    expect(page.query('.cal-panel__header')).toBeNull();
+    expect(page.query('[data-testid="calendar-panel"]')!.classList).toContain('cal-panel--month');
+    expect(document.activeElement).toBe(day('2026-11-08'));
+  });
+
   it('clamps PageUp to the last day of a shorter month', async () => {
     await render([]);
     await page.click('[data-testid="calendar-next"]');

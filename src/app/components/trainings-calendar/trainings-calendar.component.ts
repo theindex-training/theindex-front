@@ -193,7 +193,7 @@ export class TrainingsCalendarComponent {
     event.preventDefault();
     const target = move();
     if (!inMonth(target, this.month)) {
-      this.setMonth(monthOf(target));
+      this.showMonth(monthOf(target));
     }
     this.focusKey = target;
     afterNextRender(

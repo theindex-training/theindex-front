@@ -15,7 +15,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - PR 3 fixed S1 and S2. It added `pages/save-errors.spec.ts`, the error-handling row of §7's table for every catalog and trainee form, and brought the suite to 28 spec files and 267 tests.
 - PR 4 covered §5–§12 (62 spec files, 547 tests; 17 more breaks in production code, all caught). It pinned S4, S8, S10, S11 and S12, and found S15 and S16.
 - PR 5 set up E2E (Playwright, API mock, CI job) and added all nine journeys: 37 E2E tests over the desktop and mobile projects. It found S17.
-- The trainings calendar (a feature, not a test PR) came with its own specs: 65 spec files, 586 unit tests, plus journey J10 (39 E2E tests). Three deliberate breaks (UTC day keys, list as the default view, no unpaid marker) were each caught.
+- The trainings calendar (a feature, not a test PR) came with its own specs: 65 spec files, 587 unit tests, plus journey J10 (39 E2E tests). Three deliberate breaks (UTC day keys, list as the default view, no unpaid marker) were each caught.
 
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
 - **P0:** access control, sessions, money, and anything that writes attendance, subscriptions, settlements or cash. A bug here loses money or data, or exposes screens to the wrong role.
@@ -418,7 +418,7 @@ One spec per service, each method asserting method, URL, query and body. These p
   - each day button's name gives the date and the training and unpaid counts;
   - the summary counts only the shown month; "no trainings at all" uses the page's empty key;
   - previous/next across year ends, Today; selecting a day lists it below the grid, again or "Show whole month" clears it, and so does changing month; with nothing selected the month is listed by day;
-  - one tab stop; arrows, Home/End, PageUp/PageDown (clamped to a shorter month) move focus across months;
+  - one tab stop; arrows, Home/End, PageUp/PageDown (clamped to a shorter month) move focus across months, and leaving the month clears the selection;
   - loading and error replace the grid; Bulgarian month, weekdays and plurals.
 - [x] `TraineeTrainingsComponent`: Calendar by default; List on request, stored in `localStorage.trainingsView` and restored; an unknown stored value or blocked storage falls back to the calendar.
 - [x] `LocaleFormatService.weekdayShort` / `monthYear` in both languages (in §10's spec).
