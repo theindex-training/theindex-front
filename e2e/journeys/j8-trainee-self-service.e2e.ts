@@ -85,7 +85,8 @@ test.describe('J8 trainee self-service', () => {
     // 1–2. My profile: active subscriptions first, then the other filters.
     await page.goto('/');
     await expect(page).toHaveURL(/\/my-profile$/);
-    expect(api.last('GET', '/api/plans')?.query).toEqual({});
+    // The page may not have sent its requests yet when the URL changes, so wait for them.
+    await expect.poll(() => api.last('GET', '/api/plans')?.query).toEqual({});
     await expect(shown(page, 'Ten visits')).toBeVisible();
     await expect(shown(page, 'Eight pack')).toHaveCount(0);
     await expect(shown(page, 'Pepi')).toBeVisible();
