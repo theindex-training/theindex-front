@@ -11,7 +11,7 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TraineeSubscriptionsTableComponent } from '../../components/trainee-subscriptions-table/trainee-subscriptions-table.component';
-import { TraineeTrainingsTableComponent } from '../../components/trainee-trainings-table/trainee-trainings-table.component';
+import { TraineeTrainingsComponent } from '../../components/trainee-trainings/trainee-trainings.component';
 import { AuthService } from '../../services/auth.service';
 import {
   AttendanceService,
@@ -70,7 +70,7 @@ import { LocaleFormatService } from '../../i18n/locale-format.service';
     ReactiveFormsModule,
     RouterLink,
     TraineeSubscriptionsTableComponent,
-    TraineeTrainingsTableComponent,
+    TraineeTrainingsComponent,
     PageHeaderComponent,
     SkeletonListComponent,
     AvatarComponent,

@@ -21,6 +21,7 @@ export type IconName =
   | 'log-out'
   | 'close'
   | 'search'
+  | 'chevron-left'
   | 'chevron-right'
   | 'plus'
   | 'alert'

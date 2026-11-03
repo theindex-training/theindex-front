@@ -61,6 +61,18 @@ export class LocaleFormatService {
     return name.charAt(0).toLocaleUpperCase(this.language.locale()) + name.slice(1);
   }
 
+  /** Short weekday name from an ISO weekday number (1 = Monday … 7 = Sunday): пн / Mo. */
+  weekdayShort(isoWeekday: number): string {
+    const names = getLocaleDayNames(this.language.locale(), FormStyle.Standalone, TranslationWidth.Short);
+    return names[isoWeekday % 7] ?? '';
+  }
+
+  /** Month and year as a title: Октомври 2026 / October 2026. */
+  monthYear(value: DateInput, fallback = '—'): string {
+    const text = this.format(value, 'LLLL y', fallback);
+    return text.charAt(0).toLocaleUpperCase(this.language.locale()) + text.slice(1);
+  }
+
   number(value: number | null | undefined, digitsInfo?: string, fallback = '—'): string {
     if (value === null || value === undefined || Number.isNaN(value)) {
       return fallback;

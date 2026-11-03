@@ -77,6 +77,8 @@ async function choose(scope: Page | import('@playwright/test').Locator, group: s
 
 test.describe('J8 trainee self-service', () => {
   test('a trainee uses their pages, the Account sheet and their preferences on a phone', { tag: '@mobile' }, async ({ page, api, signInAs }) => {
+    // The trainings calendar opens on the current month; fix the clock to the month of the training.
+    await page.clock.setFixedTime(new Date('2026-10-31T12:00:00+02:00'));
     await signInAs('TRAINEE');
     mockTraineeData(api);
 

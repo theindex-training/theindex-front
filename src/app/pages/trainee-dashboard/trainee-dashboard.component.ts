@@ -8,7 +8,7 @@ import {
   SegmentedOption
 } from '../../components/segmented-control/segmented-control.component';
 import { TraineeSubscriptionsTableComponent } from '../../components/trainee-subscriptions-table/trainee-subscriptions-table.component';
-import { TraineeTrainingsTableComponent } from '../../components/trainee-trainings-table/trainee-trainings-table.component';
+import { TraineeTrainingsComponent } from '../../components/trainee-trainings/trainee-trainings.component';
 import {
   AttendanceService,
   AttendanceTraineeTrainingItem,
@@ -31,7 +31,7 @@ type SubscriptionFilter = 'ACTIVE' | 'EXHAUSTED' | 'ALL';
     PageHeaderComponent,
     SegmentedControlComponent,
     TraineeSubscriptionsTableComponent,
-    TraineeTrainingsTableComponent,
+    TraineeTrainingsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainee-dashboard.component.html',

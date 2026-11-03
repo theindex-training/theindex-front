@@ -28,20 +28,16 @@
       ></app-trainee-subscriptions-table>
     </section>
 
-    <section class="page-stack" aria-labelledby="my-trainings-title">
-      <div class="section-header">
-        <div>
-          <h2 class="panel__title" id="my-trainings-title">{{ 'traineeDashboard.trainings' | transloco }}</h2>
-          <p class="text-muted section-header__sub">{{ 'traineeDashboard.trainingsSub' | transloco }}</p>
-        </div>
-      </div>
-
-      <app-trainee-trainings-table
+    <section aria-labelledby="my-trainings-title">
+      <app-trainee-trainings
+        headingId="my-trainings-title"
+        [heading]="'traineeDashboard.trainings' | transloco"
+        [subheading]="'traineeDashboard.trainingsSub' | transloco"
         [trainings]="trainings"
         [loading]="trainingsLoading"
         [errorMessage]="trainingErrorMessage"
         emptyKey="traineeDashboard.noTrainings"
-      ></app-trainee-trainings-table>
+      />
     </section>
   }
 </section>

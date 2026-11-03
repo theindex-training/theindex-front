@@ -75,12 +75,14 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     vi.useRealTimers();
   });
 
-  async function open(options: { plans?: Plan[]; subscriptions?: Subscription[]; trainee?: TraineeProfile } = {}) {
+  async function open(
+    options: { plans?: Plan[]; subscriptions?: Subscription[]; trainee?: TraineeProfile; trainings?: object[] } = {}
+  ) {
     component = await harness.navigateByUrl('/trainees/tr1', TraineeDetailsComponent);
     page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
     http.expectOne('/api/trainees/tr1').flush(options.trainee ?? TRAINEE);
     http.expectOne('/api/trainees/tr1/subscriptions').flush(options.subscriptions ?? []);
-    http.expectOne('/api/attendance/trainees/tr1').flush([]);
+    http.expectOne('/api/attendance/trainees/tr1').flush(options.trainings ?? []);
     http.expectOne('/api/plans?active=true').flush(options.plans ?? PLANS);
     await page.settle();
   }
@@ -101,6 +103,43 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
       component.formatPlanOption(PLANS[0]),
       component.formatPlanOption(PLANS[1])
     ]);
+  });
+
+  it("shows the trainee's trainings in a calendar of the current month by default, and as a list on request", async () => {
+    await open({
+      trainings: [
+        {
+          id: 'a1',
+          traineeId: 'tr1',
+          trainerId: 'trn1',
+          trainer: { id: 'trn1', name: 'Petar Petrov', nickname: 'Pepi' },
+          locationId: 'g1',
+          location: { id: 'g1', name: 'Center' },
+          trainedAt: '2026-11-01T16:30:00Z',
+          subscriptionId: null,
+          gymSubscriptionId: null,
+          paymentStatus: 'UNPAID',
+          createdAt: '2026-11-01T16:30:00Z'
+        }
+      ]
+    });
+
+    const section = page.query('section[aria-labelledby="trainings-title"]')!;
+    expect(section.querySelector('#trainings-title')!.textContent!.trim()).toBe(copy.trainings);
+    expect(section.querySelector('[data-testid="calendar-month"]')!.textContent!.trim()).toBe('November 2026');
+    expect(section.querySelector('[data-testid="calendar-day-2026-11-01"]')!.getAttribute('aria-label')).toBe(
+      'Sunday, 1 November 2026, 1 training, 1 unpaid'
+    );
+
+    await page.click('section[aria-labelledby="trainings-title"] input[type="radio"][value="list"]');
+    expect(section.querySelector('table caption')!.textContent!.trim()).toBe('Trainings');
+    expect(section.querySelector('tbody')!.textContent).toContain('Pepi');
+  });
+
+  it('says there are no trainings yet in the calendar', async () => {
+    await open();
+
+    expect(page.query('[data-testid="calendar-summary"]')!.textContent!.trim()).toBe(copy.noTrainings);
   });
 
   it('also loads the linked account', async () => {

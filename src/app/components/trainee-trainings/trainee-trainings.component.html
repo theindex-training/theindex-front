@@ -1,0 +1,30 @@
+<div class="section-header">
+  <div>
+    <h2 class="panel__title" [id]="headingId">{{ heading }}</h2>
+    @if (subheading) {
+      <p class="text-muted section-header__sub">{{ subheading }}</p>
+    }
+  </div>
+  <app-segmented-control
+    [label]="'trainings.view.label' | transloco"
+    [options]="viewOptions"
+    [value]="view"
+    (valueChange)="setView($event)"
+  />
+</div>
+
+@if (view === 'calendar') {
+  <app-trainings-calendar
+    [trainings]="trainings"
+    [loading]="loading"
+    [errorMessage]="errorMessage"
+    [emptyKey]="emptyKey"
+  />
+} @else {
+  <app-trainee-trainings-table
+    [trainings]="trainings"
+    [loading]="loading"
+    [errorMessage]="errorMessage"
+    [emptyKey]="emptyKey"
+  />
+}

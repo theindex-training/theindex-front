@@ -63,6 +63,42 @@ describe('TraineeDashboardComponent', () => {
     expect(page.text()).toContain(copy.noTrainings);
   });
 
+  it('shows my trainings in a calendar of the current month by default, and as a list on request', async () => {
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-31T10:00:00Z') });
+    try {
+      await render();
+      http.expectOne('/api/attendance/trainees/trainee-1').flush([
+        {
+          id: 'a1',
+          traineeId: 'trainee-1',
+          trainerId: 'tr1',
+          trainer: { id: 'tr1', name: 'Petar Petrov', nickname: 'Pepi' },
+          locationId: 'g1',
+          location: { id: 'g1', name: 'Center' },
+          trainedAt: '2026-10-30T16:30:00Z',
+          subscriptionId: null,
+          gymSubscriptionId: null,
+          paymentStatus: 'PAID',
+          createdAt: '2026-10-30T16:30:00Z'
+        }
+      ]);
+      http.expectOne('/api/trainees/trainee-1/subscriptions').flush([]);
+      http.expectOne(req => req.urlWithParams === '/api/plans').flush([]);
+      await page.settle();
+
+      expect(page.query('#my-trainings-title')!.textContent!.trim()).toBe(copy.trainings);
+      expect(page.query('[data-testid="calendar-month"]')!.textContent!.trim()).toBe('October 2026');
+      expect(page.query('[data-testid="calendar-summary"]')!.textContent!.trim()).toBe('1 training · 1 paid · 0 unpaid');
+      expect(page.query('[data-testid="calendar-day-2026-10-30"]')!.textContent).toContain('Pepi');
+
+      await page.click('input[type="radio"][value="list"]');
+      expect(page.query('app-trainings-calendar')).toBeNull();
+      expect(page.query('table caption')?.textContent?.trim()).toBe('Trainings');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('shows active subscriptions first and filters by status, in any case', async () => {
     await render();
     await flushAll([subscription('s1', 'active'), subscription('s2', 'EXHAUSTED'), subscription('s3', 'EXPIRED')]);
