@@ -18,6 +18,11 @@ describe('ThemeService', () => {
 
   const appliedTheme = () => document.documentElement.getAttribute('data-theme');
 
+  // Test files share one environment (the Angular runner sets isolate: false), so the matchMedia
+  // stub must be complete and must be removed again; other specs (e.g. main-layout) rely on jsdom's
+  // default, which has no matchMedia at all.
+  const originalMatchMedia = window.matchMedia;
+
   beforeEach(() => {
     osPrefersDark = false;
     listeners = [];
@@ -27,9 +32,17 @@ describe('ThemeService', () => {
       matches: osPrefersDark,
       media: query,
       addEventListener: (_: string, listener: (event: { matches: boolean }) => void) =>
-        listeners.push(listener)
+        listeners.push(listener),
+      removeEventListener: (_: string, listener: (event: { matches: boolean }) => void) => {
+        listeners = listeners.filter(registered => registered !== listener);
+      }
     })) as unknown as typeof window.matchMedia;
     TestBed.resetTestingModule();
+  });
+
+  afterEach(() => {
+    window.matchMedia = originalMatchMedia;
+    vi.restoreAllMocks();
   });
 
   it('defaults to system mode and follows the OS preference', () => {
@@ -110,6 +123,5 @@ describe('ThemeService', () => {
     service.setMode('light');
     TestBed.tick();
     expect(appliedTheme()).toBe('light');
-    vi.restoreAllMocks();
   });
 });
