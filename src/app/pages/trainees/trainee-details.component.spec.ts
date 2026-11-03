@@ -6,6 +6,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import en from '../../../../public/i18n/en.json';
 import { PageDriver, apiError, driver } from '../../../testing/dom';
 import { signInAs } from '../../../testing/jwt';
+import { LocaleFormatService } from '../../i18n/locale-format.service';
 import { Plan } from '../../services/plans.service';
 import { Subscription } from '../../services/subscriptions.service';
 import { TraineeProfile } from '../../services/trainees.service';
@@ -212,5 +213,159 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     // CHARACTERIZATION: possibly unintended — only active plans are loaded (?active=true), so a
     // subscription on a deactivated plan shows the plan's id instead of its title. TEST_NOTES.md S3.
     expect(page.text()).toContain('retired-plan-id');
+  });
+});
+
+describe('TraineeDetailsComponent: subscriptions list', () => {
+  let http: HttpTestingController;
+  let harness: RouterTestingHarness;
+  let component: TraineeDetailsComponent;
+  let page: PageDriver;
+
+  const SUBSCRIPTIONS = [
+    subscription({ id: 's-active', status: 'ACTIVE', startsAt: '2026-10-01' }),
+    subscription({ id: 's-used', status: 'exhausted', remainingCredits: 0, startsAt: '2026-09-01' }),
+    subscription({ id: 's-old', planId: 'p2', type: 'TIME', status: 'EXPIRED', endsAt: '2026-08-31', startsAt: '2026-08-01' })
+  ];
+
+  beforeEach(async () => {
+    localStorage.clear();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([
+          { path: 'trainees/:id', component: TraineeDetailsComponent },
+          { path: '**', children: [] }
+        ])
+      ]
+    });
+    http = TestBed.inject(HttpTestingController);
+    harness = await RouterTestingHarness.create();
+  });
+
+  afterEach(() => {
+    http.verify();
+    vi.restoreAllMocks();
+  });
+
+  async function open(options: { role?: 'ADMIN' | 'TRAINER'; subscriptions?: Subscription[]; plans?: 'ok' | 'error' } = {}) {
+    signInAs(options.role ?? 'TRAINER');
+    component = await harness.navigateByUrl('/trainees/tr1', TraineeDetailsComponent);
+    page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
+    http.expectOne('/api/trainees/tr1').flush(TRAINEE);
+    http.expectOne('/api/trainees/tr1/subscriptions').flush(options.subscriptions ?? SUBSCRIPTIONS);
+    http.expectOne('/api/attendance/trainees/tr1').flush([]);
+    const plans = http.expectOne('/api/plans?active=true');
+    if (options.plans === 'error') {
+      const error = apiError('Plans are unavailable', 503);
+      plans.flush(error.body, error.options);
+    } else {
+      plans.flush(PLANS);
+    }
+    await page.settle();
+  }
+
+  const deleteButtons = () => page.queryAll<HTMLButtonElement>('button[aria-label^="Delete subscription"]');
+
+  async function showFilter(value: 'ACTIVE' | 'EXHAUSTED' | 'ALL') {
+    await page.click(`input[type="radio"][value="${value}"]`);
+  }
+
+  it('shows active subscriptions first, and filters by status (any case)', async () => {
+    await open();
+    expect(component.filteredSubscriptions.map(item => item.id)).toEqual(['s-active']);
+
+    await showFilter('EXHAUSTED');
+    expect(component.filteredSubscriptions.map(item => item.id)).toEqual(['s-used']);
+
+    await showFilter('ALL');
+    expect(component.filteredSubscriptions.map(item => item.id)).toEqual(['s-active', 's-used', 's-old']);
+  });
+
+  it.each([
+    ['ACTIVE', copy.noActiveSubscriptions],
+    ['EXHAUSTED', copy.noExhaustedSubscriptions],
+    ['ALL', copy.noSubscriptions]
+  ] as const)('explains an empty %s list', async (filter, message) => {
+    await open({ subscriptions: [] });
+    await showFilter(filter);
+
+    expect(page.text()).toContain(message);
+  });
+
+  it.each(['ADMIN', 'TRAINER'] as const)('lets a %s delete subscriptions', async role => {
+    await open({ role });
+
+    expect(component.canDeleteSubscriptions).toBe(true);
+    expect(deleteButtons().length).toBeGreaterThan(0);
+  });
+
+  it('asks before deleting, and does nothing when cancelled', async () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    await open();
+    const format = TestBed.inject(LocaleFormatService);
+
+    deleteButtons()[0].click();
+    await page.settle();
+
+    expect(confirm).toHaveBeenCalledWith(`Delete the 10 visits subscription from ${format.date('2026-10-01')}?`);
+    http.expectNone('/api/subscriptions/s-active');
+  });
+
+  it('deletes the subscription and removes it from the list', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    await open();
+
+    deleteButtons()[0].click();
+    await page.settle();
+    const req = http.expectOne('/api/subscriptions/s-active');
+    expect(req.request.method).toBe('DELETE');
+    req.flush({ deleted: true });
+    await page.settle();
+
+    expect(component.subscriptions.map(item => item.id)).toEqual(['s-used', 's-old']);
+    expect(page.text()).toContain(copy.noActiveSubscriptions);
+  });
+
+  it('ignores a second delete while one is in progress', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    await open();
+    await showFilter('ALL');
+
+    component.deleteSubscription(SUBSCRIPTIONS[0]);
+    component.deleteSubscription(SUBSCRIPTIONS[1]);
+
+    http.expectOne('/api/subscriptions/s-active').flush({ deleted: true });
+    http.expectNone('/api/subscriptions/s-used');
+  });
+
+  it('shows the API error when a delete fails, and keeps the subscription', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    await open();
+
+    deleteButtons()[0].click();
+    await page.settle();
+    const error = apiError('Subscription has attendance', 409);
+    http.expectOne('/api/subscriptions/s-active').flush(error.body, error.options);
+    await page.settle();
+
+    expect(page.alert()).toBe('Subscription has attendance');
+    expect(component.subscriptions.length).toBe(3);
+  });
+
+  it('reports a plans load error in the subscriptions area', async () => {
+    await open({ plans: 'error' });
+
+    expect(component.subscriptionErrorMessage).toEqual({ text: 'Plans are unavailable' });
+    expect(page.alert()).toBe('Plans are unavailable');
+    expect(page.queryAll('#buy-plan option').length).toBe(0);
+  });
+
+  it('describes each plan option as "title · type · price"', async () => {
+    await open();
+    const format = TestBed.inject(LocaleFormatService);
+
+    expect(component.formatPlanOption(PLANS[1])).toBe(`Monthly · ${en.enums.planType.TIME} · ${format.money(6000)}`);
   });
 });

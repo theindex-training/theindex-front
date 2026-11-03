@@ -10,6 +10,9 @@ describe('LanguageService', () => {
     TestBed.resetTestingModule();
   });
 
+  // Restore storage spies even when a test fails, so they can't leak into other spec files.
+  afterEach(() => vi.restoreAllMocks());
+
   // The global spec setup starts every app in English; these tests need the real startup logic.
   const create = () => {
     TestBed.configureTestingModule({ providers: [{ provide: INITIAL_LANGUAGE, useValue: null }] });
@@ -76,5 +79,24 @@ describe('LanguageService', () => {
     service.setLanguage('en');
     expect(count(1)).toBe('1 of 1 trainee');
     expect(count(5)).toBe('5 of 5 trainees');
+  });
+
+  it('still switches when the choice cannot be saved (storage blocked)', () => {
+    const service = create();
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError');
+    });
+
+    expect(() => service.setLanguage('en')).not.toThrow();
+    expect(service.lang()).toBe('en');
+    expect(document.documentElement.lang).toBe('en');
+  });
+
+  it('starts in Bulgarian when storage cannot be read', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError');
+    });
+
+    expect(create().lang()).toBe('bg');
   });
 });
