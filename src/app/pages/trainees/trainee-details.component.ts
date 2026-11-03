@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -78,6 +78,7 @@ import { LocaleFormatService } from '../../i18n/locale-format.service';
     SegmentedControlComponent,
   ],
   templateUrl: './trainee-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './trainee-details.component.scss',
 })
 export class TraineeDetailsComponent implements OnInit {

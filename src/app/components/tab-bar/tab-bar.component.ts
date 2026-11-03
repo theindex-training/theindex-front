@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { IconComponent } from '../icon/icon.component';
@@ -10,6 +10,7 @@ import { NavItem } from '../navigation/navigation';
   standalone: true,
   imports: [RouterLink, RouterLinkActive, TranslocoPipe, IconComponent],
   templateUrl: './tab-bar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './tab-bar.component.scss'
 })
 export class TabBarComponent {

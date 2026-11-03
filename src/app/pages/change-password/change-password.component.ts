@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UiButtonComponent } from '../../components/ui-button/ui-button.component';
@@ -27,6 +27,7 @@ const passwordMatchValidator: ValidatorFn = control => {
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, UiInputComponent, UiButtonComponent, PageHeaderComponent],
   templateUrl: './change-password.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './change-password.component.scss'
 })
 export class ChangePasswordComponent implements OnInit {

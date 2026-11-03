@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../icon/icon.component';
 
@@ -17,6 +17,7 @@ export interface PageHeaderAction {
   standalone: true,
   imports: [RouterLink, IconComponent],
   templateUrl: './page-header.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './page-header.component.scss'
 })
 export class PageHeaderComponent {

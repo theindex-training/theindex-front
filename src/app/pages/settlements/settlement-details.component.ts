@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -27,6 +27,7 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
   standalone: true,
   imports: [EnumLabelPipe, UiMessagePipe, TranslocoPipe, CommonModule, FormsModule, RouterLink, PageHeaderComponent, SkeletonListComponent, ChipComponent, AvatarComponent],
   templateUrl: './settlement-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './settlement-details.component.scss'
 })
 export class SettlementDetailsComponent implements OnInit {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -38,6 +38,7 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
     SkeletonListComponent
   ],
   templateUrl: './attendance-register.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './attendance-register.component.scss'
 })
 export class AttendanceRegisterComponent implements OnInit {

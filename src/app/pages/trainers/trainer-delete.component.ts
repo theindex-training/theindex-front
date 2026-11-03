@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TrainerProfile, TrainersService } from '../../services/trainers.service';
 
@@ -14,6 +14,7 @@ import { LanguageService } from '../../i18n/language.service';
   selector: 'app-trainer-delete',
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, PageHeaderComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainer-delete.component.html'
 })
 export class TrainerDeleteComponent implements OnInit {

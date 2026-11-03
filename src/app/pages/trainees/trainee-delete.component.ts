@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TraineeProfile, TraineesService } from '../../services/trainees.service';
 
@@ -14,6 +14,7 @@ import { LanguageService } from '../../i18n/language.service';
   selector: 'app-trainee-delete',
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, PageHeaderComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainee-delete.component.html'
 })
 export class TraineeDeleteComponent implements OnInit {

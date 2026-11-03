@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ThemeMode, ThemeService } from '../../services/theme.service';
 
@@ -10,6 +10,7 @@ let nextId = 0;
   standalone: true,
   imports: [TranslocoPipe],
   templateUrl: './theme-switch.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './theme-switch.component.scss'
 })
 export class ThemeSwitchComponent {

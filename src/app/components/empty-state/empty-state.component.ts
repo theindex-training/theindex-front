@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { IconComponent, IconName } from '../icon/icon.component';
 
 /**
@@ -10,6 +10,7 @@ import { IconComponent, IconName } from '../icon/icon.component';
   standalone: true,
   imports: [IconComponent],
   templateUrl: './empty-state.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './empty-state.component.scss'
 })
 export class EmptyStateComponent {

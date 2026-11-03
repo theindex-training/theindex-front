@@ -1,4 +1,4 @@
-import { Component, Input, forwardRef } from '@angular/core';
+import { Component, Input, forwardRef, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { IconComponent } from '../icon/icon.component';
@@ -11,6 +11,7 @@ import { IconComponent } from '../icon/icon.component';
   styleUrl: './ui-input.component.scss',
   // `id` belongs on the inner <input>; leaving it on the host would duplicate it and break <label for>.
   host: { '[attr.id]': 'null' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

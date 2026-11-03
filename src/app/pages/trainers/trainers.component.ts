@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import {
@@ -38,6 +38,7 @@ import { LanguageService } from '../../i18n/language.service';
     IconComponent,
     AvatarComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainers.component.html'
 })
 export class TrainersComponent implements OnInit {

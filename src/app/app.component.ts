@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { environment } from '@environments/environment';
 import { ApiService } from './services/api.service';
@@ -9,6 +9,7 @@ import { ThemeService } from './services/theme.service';
   imports: [RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true
 })
 export class AppComponent implements OnInit {

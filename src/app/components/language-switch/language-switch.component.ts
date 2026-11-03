@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { Language, LanguageService } from '../../i18n/language.service';
 
@@ -13,6 +13,7 @@ let nextId = 0;
   standalone: true,
   imports: [TranslocoPipe],
   templateUrl: './language-switch.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './language-switch.component.scss'
 })
 export class LanguageSwitchComponent {

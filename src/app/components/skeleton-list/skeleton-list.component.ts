@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 /** Loading placeholder shaped like list rows (avatar, two lines, chip). Announces `label` to screen readers. */
@@ -7,6 +7,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
   standalone: true,
   imports: [TranslocoPipe],
   templateUrl: './skeleton-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './skeleton-list.component.scss'
 })
 export class SkeletonListComponent {

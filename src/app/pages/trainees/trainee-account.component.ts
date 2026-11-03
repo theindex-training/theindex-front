@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -47,6 +47,7 @@ const accountPasswordValidator: ValidatorFn = (
   selector: 'app-trainee-account',
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent, IconComponent, StatusDotComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainee-account.component.html'
 })
 export class TraineeAccountComponent implements OnInit {

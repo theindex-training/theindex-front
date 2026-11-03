@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -40,6 +40,7 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
     AvatarComponent
   ],
   templateUrl: './attendance-sessions.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './attendance-sessions.component.scss'
 })
 export class AttendanceSessionsComponent implements OnInit {

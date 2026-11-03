@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -15,6 +15,7 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-settlement-generate',
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, FormsModule, PageHeaderComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './settlement-generate.component.html'
 })
 export class SettlementGenerateComponent {

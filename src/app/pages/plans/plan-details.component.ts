@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Plan, PlansService } from '../../services/plans.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -15,6 +15,7 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
   selector: 'app-plan-details',
   standalone: true,
   imports: [EnumLabelPipe, UiMessagePipe, TranslocoPipe, CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './plan-details.component.html'
 })
 export class PlanDetailsComponent implements OnInit {

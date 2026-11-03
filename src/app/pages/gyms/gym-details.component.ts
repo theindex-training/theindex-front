@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
 
@@ -14,6 +14,7 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-gym-details',
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './gym-details.component.html'
 })
 export class GymDetailsComponent implements OnInit {

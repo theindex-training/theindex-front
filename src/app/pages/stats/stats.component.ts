@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TraineeTrainingInsights, TraineesService } from '../../services/trainees.service';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -24,6 +24,7 @@ import { LocaleFormatService } from '../../i18n/locale-format.service';
     SkeletonListComponent
   ],
   templateUrl: './stats.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './stats.component.scss'
 })
 export class StatsComponent implements OnInit {

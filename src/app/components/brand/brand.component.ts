@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 
@@ -8,6 +8,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
   standalone: true,
   imports: [RouterLink, TranslocoPipe],
   templateUrl: './brand.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './brand.component.scss'
 })
 export class BrandComponent {}

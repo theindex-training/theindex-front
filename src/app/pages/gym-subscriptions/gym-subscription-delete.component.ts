@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   GymSubscription,
@@ -15,6 +15,7 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-gym-subscription-delete',
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, PageHeaderComponent, StatusDotComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './gym-subscription-delete.component.html'
 })
 export class GymSubscriptionDeleteComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { BrandComponent } from '../../components/brand/brand.component';
 import { AuthService } from '../../services/auth.service';
@@ -8,6 +8,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
   selector: 'app-unauthorized',
   standalone: true,
   imports: [TranslocoPipe, BrandComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './unauthorized.component.html'
 })
 export class UnauthorizedComponent {
