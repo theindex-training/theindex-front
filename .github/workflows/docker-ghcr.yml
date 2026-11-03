@@ -1,21 +1,93 @@
 name: Build and push Docker images (GHCR)
 
+# One pipeline, laid out like theindex-api's:
+# - every PR (any base branch): unit tests, production build and the E2E journeys; build/deploy are skipped;
+# - push to main (or a v* tag): the same tests, then build and push the image, then deploy.
+# The image is never built or deployed unless both test jobs pass.
+# To block merging on red checks, mark "test-and-build" and "e2e" as required in the
+# branch protection settings for main.
 on:
   push:
     branches: [ "main" ]
     tags: [ "v*" ]   # optional: push a v1.0.0 tag to publish a versioned image
+  pull_request:   # every PR (any base branch): runs the tests only; build/deploy are skipped
   workflow_dispatch:
 
 permissions:
   contents: read
   packages: write
 
+concurrency:
+  # A new push to a PR cancels its older run; runs on main queue instead, so a deploy is never cut off.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   REGISTRY: ghcr.io
   IMAGE_OWNER: ${{ github.repository_owner }}
 
 jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npx ng test --watch=false
+
+      - name: Production build
+        run: npm run build
+
+  e2e:
+    # User journeys in a real browser (TEST_PLAN.md Part B). The API is mocked inside the tests,
+    # so this needs only the Angular dev server, which Playwright starts itself.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E journeys
+        run: npm run e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
   build-front:
+    needs: [test-and-build, e2e]
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -49,7 +121,9 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   deploy:
-    needs: [build-front]
+    # Listed explicitly so a red test job always blocks the deploy.
+    needs: [test-and-build, e2e, build-front]
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to VPS

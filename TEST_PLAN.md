@@ -11,7 +11,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 **Progress:**
 - PR 2 (§1–§4, the P0 sections): 27 spec files, 249 tests.
 - Every P0 area was mutation-checked: 12 deliberate breaks in production code, and each one was caught by a spec.
-- CI (`.github/workflows/ci.yml`) runs the tests and the production build on every pull request.
+- CI (`.github/workflows/docker-ghcr.yml`) runs the unit tests, the production build and the E2E journeys on every pull request and every push to `main`. The image is built and deployed only after both test jobs pass (PR 6, laid out like theindex-api's workflow).
 - PR 3 fixed S1 and S2. It added `pages/save-errors.spec.ts`, the error-handling row of §7's table for every catalog and trainee form, and brought the suite to 28 spec files and 267 tests.
 - PR 4 covered §5–§12 (62 spec files, 547 tests; 17 more breaks in production code, all caught). It pinned S4, S8, S10, S11 and S12, and found S15 and S16.
 - PR 5 set up E2E (Playwright, API mock, CI job) and added all nine journeys: 37 E2E tests over the desktop and mobile projects. It found S17.
@@ -451,7 +451,7 @@ One spec per service, each method asserting method, URL, query and body. These p
   - `list-count` on each `.list-toolbar__count`;
   - `settlement-status` (the status value on the details page).
   - Everything else is reachable by role, label or accessible name. Recheck while writing each journey and extend this list rather than using a CSS selector.
-- [x] `npm run e2e` script, plus an E2E job in `.github/workflows/ci.yml`. The owner approved the PR-check workflow; the deploy workflow stays untouched.
+- [x] `npm run e2e` script, plus an E2E job in CI. It started in a separate `ci.yml`; PR 6 moved both test jobs into `docker-ghcr.yml`, where they gate the deploy.
 
 **As built** (details in CLAUDE.md, "E2E layout"):
 - `@playwright/test` is pinned to 1.63.0, the version of the Chromium preinstalled in the dev environment; CI installs its own.
@@ -675,6 +675,7 @@ The plan was reviewed against three goals: tests that survive a redesign, fail w
 
 ### Decisions (owner, 2 Nov 2026)
 - [x] **CI:** a separate PR-check workflow (`.github/workflows/ci.yml`) runs unit tests and the production build on every pull request. E2E joins it once Part B lands. The deploy workflow is untouched. To block merges on red checks, make the check required in branch protection for `main`.
+  - Superseded on 3 Nov 2026 (owner): deploy must depend on the tests, as in theindex-api. PR 6 merged `ci.yml` into `docker-ghcr.yml`: `test-and-build` and `e2e` run on every PR and push to `main`, and `build-front` and `deploy` need both and are skipped for PRs. The check names are unchanged, so branch protection keeps working.
 - [x] **Real-API E2E:** not now. Revisit when theindex-api has its own compose setup.
 - [x] **Fixes:** S1 and S2 were fixed in PR 3, test-first.
 

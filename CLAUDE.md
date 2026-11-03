@@ -375,7 +375,7 @@ Bulgarian is the default language; English is the second. Users switch at runtim
 - **Tests:** `i18n/i18n-keys.spec.ts` fails if the two files' keys differ, a key used in `src/app` (any quoted `namespace.key` string) is missing, an enum label is missing, an ICU message doesn't compile, or placeholders differ between languages. Build keys with `${}` only where unavoidable (enums); those can't be checked statically.
 
 ## Rules
-- **Don't modify `.github/workflows/` (deploy pipeline), `Dockerfile` (nginx config) or `proxy.conf.json` without asking first.** Every push to `main` builds the image, pushes it to GHCR and redeploys the production VPS over SSH.
+- **Don't modify `.github/workflows/` (deploy pipeline), `Dockerfile` (nginx config) or `proxy.conf.json` without asking first.** `docker-ghcr.yml` runs the unit tests, the production build and the E2E journeys on every PR and push to `main`. On `main` only, once both test jobs pass, it builds the image, pushes it to GHCR and redeploys the production VPS over SSH (same layout as theindex-api).
 - Don't push to `main`; work on a branch and open a PR.
 - Follow the existing patterns: standalone components, lazy routes in `app.routes.ts` with `roleGuard` + `data.roles`, one service per resource, `@if`/`@for` in templates, SCSS per component.
 - Stay within the production budgets in `angular.json` (initial 500kB warn / 1MB error; component styles 4kB warn / 8kB error).
