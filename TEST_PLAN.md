@@ -615,11 +615,11 @@ These come from reading the code. Each gets a `// CHARACTERIZATION: possibly uni
 - **S8 — A failed account load allows a second account.** On the trainee/trainer account page, a failed or `null` account GET for a linked profile falls back to "create account" mode.
 - **S9 — Trainer without a profile sees all sessions.** A TRAINER token without `trainerProfileId` gets unfiltered attendance history (but can't delete anything).
 - **S10 — Allocations capped at 500.** Settlement allocations stop at 500 rows with no paging.
+- **S11 / S12 — No range checks.** Settlement generate and training times have no client-side range check (start ≤ end); only the API validates.
 - **S13 — Login can be submitted twice.** The submit button isn't disabled while signing in, so a double click sends two login requests (found while writing §2).
 - **S14 — A whitespace-only phone silently blocks the first password change.** "   " passes `Validators.required`, so no error shows, then the submit handler trims it to nothing and returns without a word (found while writing §2).
 - **S15 — An inactive trainer or trainee can be deactivated again** (found in PR 4). Plans, gyms and gym subscriptions disable the button for an inactive record; these two pages don't.
 - **S16 — The trainee dashboard never shows its page-level error** (found in PR 4). The error block renders only `@if (errorMessage && loading)`, which is never true. With no `traineeProfileId`, the trainee sees "No active subscriptions" instead of the missing-profile message.
-- **S11 / S12 — No range checks.** Settlement generate and training times have no client-side range check (start ≤ end); only the API validates.
 - **Also note, low priority:**
   - `AppComponent` logs `environment.production` and the health response to the console in production.
   - The login password minimum is 3, but 8 everywhere else.
@@ -650,18 +650,15 @@ The plan was reviewed against three goals: tests that survive a redesign, fail w
 ### Decisions (owner, 2 Nov 2026)
 - [x] **CI:** a separate PR-check workflow (`.github/workflows/ci.yml`) runs unit tests and the production build on every pull request. E2E joins it once Part B lands. The deploy workflow is untouched. To block merges on red checks, make the check required in branch protection for `main`.
 - [x] **Real-API E2E:** not now. Revisit when theindex-api has its own compose setup.
-- [x] **Fixes:**
-  - PR 3 fixes S1 and S2 (done);
-  - S3, S4, S5, S7, S8, S11, S12 and S14 get fixed after their tests land;
-  - S6 is kept;
-  - S9 needs a check in theindex-api;
-  - S10 is deferred.
-  - Of the low-priority notes, remove the production console logs and add a confirm to account deactivation.
-  - Each fix flips its characterization test first.
+- [x] **Fixes:** S1 and S2 were fixed in PR 3, test-first.
 
-## Suggested order of work
-1. Shared test helpers (`src/testing/jwt.ts`, HTTP flush helpers) and §1 (access control).
-2. §2 and §3 (sign-in and money), then §4 (attendance).
-3. §11 services (fast, broad), then §5–§8.
-4. E2E setup (B0) with the `data-testid` PR, then J1, J2, J3, J5, J4, J6, J7, J8, J9.
-5. §9, §10, §12 last.
+### Decisions (owner, 3 Nov 2026)
+- [x] **Fixes are on hold.** This repo now works like theindex-api: the test PRs record findings in `TEST_NOTES.md` and update this plan, and propose no fixes. When a fix is taken up later, it follows the CLAUDE.md rule: flip the characterization test first, then change the code.
+
+## Order of work
+1. [x] Shared test helpers and §1 (access control). PR 2.
+2. [x] §2 and §3 (sign-in and money), then §4 (attendance). PR 2.
+3. [x] §5–§12: services, pages, i18n, utils and shared components. PR 4.
+4. [ ] E2E setup (B0) with the `data-testid` additions, then J1, J2, J3, J5, J4, J6, J7, J8, J9.
+
+E2E findings go in `TEST_NOTES.md` the same way: characterize, don't fix.
