@@ -7,7 +7,7 @@ Angular SPA for The Index, a CrossFit gym app (admin/trainer management screens 
 - TypeScript ~5.9 (strict, `strictTemplates`), SCSS, RxJS 7, `@angular/build` (esbuild) builder
 - Tests: Vitest 4 + jsdom through `ng test` (`@angular/build:unit-test`); `src/test-providers.ts` gives every spec Transloco with the real language files (English)
 - i18n: Transloco (`@jsverse/transloco`) + `@jsverse/transloco-messageformat` (ICU plurals), runtime switching between Bulgarian (default) and English. See "Internationalization".
-- Node 20 (`.nvmrc`, Docker `node:20-alpine`); production image is `nginx:alpine` serving `dist/theindex-front/browser`
+- Node 24 LTS (`.nvmrc`, Docker `node:24-alpine`; CI reads `.nvmrc`); production image is `nginx:alpine` serving `dist/theindex-front/browser`
 - No ESLint is configured. Prettier settings sit in `package.json` (printWidth 100, single quotes, angular parser for HTML), but prettier is not a dependency.
 
 ## Commands
