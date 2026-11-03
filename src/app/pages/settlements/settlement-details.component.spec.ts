@@ -91,6 +91,19 @@ describe('SettlementDetailsComponent', () => {
     expect(page.text()).toContain(en.enums.settlementStatus.DRAFT);
   });
 
+  it('links each allocation row to its trainee and shows when the training was', async () => {
+    await open('ADMIN');
+
+    const traineeLinks = page
+      .queryAll<HTMLAnchorElement>('a')
+      .filter(link => link.textContent?.includes('Ivan Petrov (Vanko)'));
+    // The desktop table and the phone list both render the row.
+    expect(traineeLinks.map(link => link.getAttribute('href'))).toEqual(['/trainees/t1', '/trainees/t1']);
+    const trainedAt = component.formatOptionalDate(ALLOCATION.attendance!.trainedAt);
+    expect(trainedAt).not.toBe('—');
+    expect(page.text().split(trainedAt).length - 1).toBe(2);
+  });
+
   it('shows raw ids when the names cannot be loaded', async () => {
     await open('TRAINER', { entities: 'error' });
 

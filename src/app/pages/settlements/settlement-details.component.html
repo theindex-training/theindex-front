@@ -162,10 +162,10 @@
             <tbody>
               @for (row of allocations; track row.id) {
                 <tr>
-                  <td class="num">{{ formatOptionalDate($safeNavigationMigration(row.attendance?.trainedAt)) }}</td>
+                  <td class="num">{{ formatOptionalDate(row.attendance?.trainedAt) }}</td>
                   <td>
-                    <a class="cell-link" [routerLink]="['/trainees', $safeNavigationMigration(row.attendance?.traineeId)]">
-                      {{ formatTrainee($safeNavigationMigration(row.attendance?.traineeId)) }}
+                    <a class="cell-link" [routerLink]="['/trainees', row.attendance?.traineeId]">
+                      {{ formatTrainee(row.attendance?.traineeId) }}
                     </a>
                   </td>
                   <td>{{ formatTrainer(row.trainerId) }}</td>
@@ -176,7 +176,7 @@
                       <span class="text-muted">—</span>
                     }
                   </td>
-                  <td>{{ formatGym($safeNavigationMigration(row.attendance?.locationId)) }}</td>
+                  <td>{{ formatGym(row.attendance?.locationId) }}</td>
                   <td class="num cell-right">{{ formatCurrency(row.valueCents) }}</td>
                 </tr>
               }
@@ -188,11 +188,11 @@
           @for (row of allocations; track row.id) {
             <li class="record">
               <div class="record__main">
-                <a class="record__title" [routerLink]="['/trainees', $safeNavigationMigration(row.attendance?.traineeId)]">
-                  {{ formatTrainee($safeNavigationMigration(row.attendance?.traineeId)) }}
+                <a class="record__title" [routerLink]="['/trainees', row.attendance?.traineeId]">
+                  {{ formatTrainee(row.attendance?.traineeId) }}
                 </a>
-                <span class="record__meta num">{{ formatOptionalDate($safeNavigationMigration(row.attendance?.trainedAt)) }}</span>
-                <span class="record__meta">{{ formatTrainer(row.trainerId) }} · {{ formatGym($safeNavigationMigration(row.attendance?.locationId)) }}</span>
+                <span class="record__meta num">{{ formatOptionalDate(row.attendance?.trainedAt) }}</span>
+                <span class="record__meta">{{ formatTrainer(row.trainerId) }} · {{ formatGym(row.attendance?.locationId) }}</span>
               </div>
               <div class="record__aside">
                 <span class="num total">{{ formatCurrency(row.valueCents) }}</span>
