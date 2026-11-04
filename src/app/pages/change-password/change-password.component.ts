@@ -1,6 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import {
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { UiButtonComponent } from '../../components/ui-button/ui-button.component';
 import { UiInputComponent } from '../../components/ui-input/ui-input.component';
@@ -11,24 +22,34 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
-const passwordMatchValidator: ValidatorFn = control => {
-  const newPassword = (control.get('newPassword')?.value as string | null) ?? '';
-  const confirmPassword = (control.get('confirmPassword')?.value as string | null) ?? '';
+const passwordMatchValidator: ValidatorFn = (control) => {
+  const newPassword =
+    (control.get('newPassword')?.value as string | null) ?? '';
+  const confirmPassword =
+    (control.get('confirmPassword')?.value as string | null) ?? '';
 
   if (!newPassword && !confirmPassword) {
     return null;
   }
 
-  return newPassword === confirmPassword ? null : ({ passwordMismatch: true });
+  return newPassword === confirmPassword ? null : { passwordMismatch: true };
 };
 
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, UiInputComponent, UiButtonComponent, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    UiInputComponent,
+    UiButtonComponent,
+    PageHeaderComponent,
+  ],
   templateUrl: './change-password.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './change-password.component.scss'
+  styleUrl: './change-password.component.scss',
 })
 export class ChangePasswordComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
@@ -44,16 +65,16 @@ export class ChangePasswordComponent implements OnInit {
       currentPassword: ['', [Validators.required, Validators.minLength(8)]],
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required, Validators.minLength(8)]],
-      phone: ['']
+      phone: [''],
     },
-    { validators: passwordMatchValidator }
+    { validators: passwordMatchValidator },
   );
 
   constructor(
     private readonly authService: AuthService,
     private readonly accountSecurityService: AccountSecurityService,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -65,7 +86,7 @@ export class ChangePasswordComponent implements OnInit {
     }
 
     this.accountSecurityService.hasChangedPassword(accountId).subscribe({
-      next: hasChangedPassword => {
+      next: (hasChangedPassword) => {
         this.requiresPhone = !hasChangedPassword;
         this.updatePhoneValidators();
         this.isLoadingPasswordStatus = false;
@@ -74,7 +95,7 @@ export class ChangePasswordComponent implements OnInit {
       error: () => {
         this.isLoadingPasswordStatus = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -116,30 +137,27 @@ export class ChangePasswordComponent implements OnInit {
     } = {
       currentPassword: raw.currentPassword,
       newPassword: raw.newPassword,
-      confirmPassword: raw.confirmPassword
+      confirmPassword: raw.confirmPassword,
     };
 
     if (this.requiresPhone && normalizedPhone) {
       payload.phone = normalizedPhone;
     }
 
-    this.accountSecurityService
-      .changePassword(accountId, payload)
-      .subscribe({
-        next: () => {
-          this.isSubmitting = false;
-          this.successMessage = i18nMessage('auth.changePassword.success');
-          this.form.reset();
-          this.changeDetector.detectChanges();
-          this.router.navigate([this.getDefaultRoute()]);
-        },
-        error: (error: unknown) => {
-          this.isSubmitting = false;
-          this.errorMessage =
-            apiErrorMessage(error, 'auth.changePassword.error');
-          this.changeDetector.detectChanges();
-        }
-      });
+    this.accountSecurityService.changePassword(accountId, payload).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.successMessage = i18nMessage('auth.changePassword.success');
+        this.form.reset();
+        this.changeDetector.detectChanges();
+        this.router.navigate([this.getDefaultRoute()]);
+      },
+      error: (error: unknown) => {
+        this.isSubmitting = false;
+        this.errorMessage = apiErrorMessage(error, 'auth.changePassword.error');
+        this.changeDetector.detectChanges();
+      },
+    });
   }
 
   /** Translation key of the error, or '' when there is none. */
@@ -151,7 +169,9 @@ export class ChangePasswordComponent implements OnInit {
     if (control.hasError('required')) {
       return 'auth.changePassword.currentRequired';
     }
-    return control.hasError('minlength') ? 'auth.changePassword.currentLength' : '';
+    return control.hasError('minlength')
+      ? 'auth.changePassword.currentLength'
+      : '';
   }
 
   /** Translation key of the error, or '' when there is none. */
@@ -175,7 +195,9 @@ export class ChangePasswordComponent implements OnInit {
     if (control.hasError('required')) {
       return 'auth.changePassword.repeat';
     }
-    return this.form.hasError('passwordMismatch') ? 'auth.changePassword.mismatch' : '';
+    return this.form.hasError('passwordMismatch')
+      ? 'auth.changePassword.mismatch'
+      : '';
   }
 
   private updatePhoneValidators(): void {

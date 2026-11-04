@@ -1,4 +1,12 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -23,11 +31,11 @@ import { UserBlockComponent } from '../user-block/user-block.component';
     IconComponent,
     LanguageSwitchComponent,
     ThemeSwitchComponent,
-    UserBlockComponent
+    UserBlockComponent,
   ],
   templateUrl: './nav-sheet.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './nav-sheet.component.scss'
+  styleUrl: './nav-sheet.component.scss',
 })
 export class NavSheetComponent {
   /** Translation key of the sheet title (the same as its tab). */
@@ -36,7 +44,8 @@ export class NavSheetComponent {
   @Input() manageItems: NavItem[] = [];
   @Output() readonly openChange = new EventEmitter<boolean>();
 
-  @ViewChild('dialog', { static: true }) private readonly dialog!: ElementRef<HTMLDialogElement>;
+  @ViewChild('dialog', { static: true })
+  private readonly dialog!: ElementRef<HTMLDialogElement>;
   private returnFocusTo: HTMLElement | null = null;
 
   get isOpen(): boolean {
@@ -47,7 +56,8 @@ export class NavSheetComponent {
     if (this.isOpen) {
       return;
     }
-    this.returnFocusTo = trigger ?? (document.activeElement as HTMLElement | null);
+    this.returnFocusTo =
+      trigger ?? (document.activeElement as HTMLElement | null);
     this.dialog.nativeElement.showModal();
     this.openChange.emit(true);
   }

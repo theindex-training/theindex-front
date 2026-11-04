@@ -1,10 +1,19 @@
-import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { TraineeTrainingInsights, TraineesService } from '../../services/trainees.service';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import {
+  TraineeTrainingInsights,
+  TraineesService,
+} from '../../services/trainees.service';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import {
   RankedItem,
-  RankedListComponent
+  RankedListComponent,
 } from '../../components/ranked-list/ranked-list.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -16,16 +25,16 @@ import { LocaleFormatService } from '../../i18n/locale-format.service';
   selector: 'app-stats',
   standalone: true,
   imports: [
-    UiMessagePipe, 
-    TranslocoPipe, 
+    UiMessagePipe,
+    TranslocoPipe,
     EmptyStateComponent,
     PageHeaderComponent,
     RankedListComponent,
-    SkeletonListComponent
+    SkeletonListComponent,
   ],
   templateUrl: './stats.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './stats.component.scss'
+  styleUrl: './stats.component.scss',
 })
 export class StatsComponent implements OnInit {
   readonly format = inject(LocaleFormatService);
@@ -35,7 +44,7 @@ export class StatsComponent implements OnInit {
 
   constructor(
     private readonly traineesService: TraineesService,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -43,38 +52,40 @@ export class StatsComponent implements OnInit {
   }
 
   get partners(): RankedItem[] {
-    return (this.insights?.topTrainingPartners ?? []).map(item => ({
+    return (this.insights?.topTrainingPartners ?? []).map((item) => ({
       label: item.traineeName,
-      value: item.trainingsTogether
+      value: item.trainingsTogether,
     }));
   }
 
   get weekdays(): RankedItem[] {
-    return (this.insights?.topWeekdays ?? []).map(item => ({
+    return (this.insights?.topWeekdays ?? []).map((item) => ({
       // The API sends an English day name plus the ISO number (1 = Monday); localize from the number.
-      label: item.weekdayNumber ? this.format.weekday(item.weekdayNumber) : item.weekday,
-      value: item.trainingsCount
+      label: item.weekdayNumber
+        ? this.format.weekday(item.weekdayNumber)
+        : item.weekday,
+      value: item.trainingsCount,
     }));
   }
 
   get timeSlots(): RankedItem[] {
-    return (this.insights?.topTimeSlots ?? []).map(item => ({
+    return (this.insights?.topTimeSlots ?? []).map((item) => ({
       label: item.timeSlot,
-      value: item.trainingsCount
+      value: item.trainingsCount,
     }));
   }
 
   get trainers(): RankedItem[] {
-    return (this.insights?.topTrainers ?? []).map(item => ({
+    return (this.insights?.topTrainers ?? []).map((item) => ({
       label: item.trainerName,
-      value: item.trainingsCount
+      value: item.trainingsCount,
     }));
   }
 
   get gyms(): RankedItem[] {
-    return (this.insights?.topGyms ?? []).map(item => ({
+    return (this.insights?.topGyms ?? []).map((item) => ({
       label: item.gymName,
-      value: item.trainingsCount
+      value: item.trainingsCount,
     }));
   }
 
@@ -83,17 +94,16 @@ export class StatsComponent implements OnInit {
     this.errorMessage = null;
 
     this.traineesService.getMyTrainingInsights().subscribe({
-      next: insights => {
+      next: (insights) => {
         this.insights = insights;
         this.loading = false;
         this.changeDetector.detectChanges();
       },
-      error: error => {
-        this.errorMessage =
-          apiErrorMessage(error, 'stats.loadErrorMessage');
+      error: (error) => {
+        this.errorMessage = apiErrorMessage(error, 'stats.loadErrorMessage');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 }

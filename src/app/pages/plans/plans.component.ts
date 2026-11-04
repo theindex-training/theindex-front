@@ -1,9 +1,15 @@
-import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import {
   SegmentedControlComponent,
-  SegmentedOption
+  SegmentedOption,
 } from '../../components/segmented-control/segmented-control.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
@@ -23,9 +29,9 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
   selector: 'app-plans',
   standalone: true,
   imports: [
-    EnumLabelPipe, 
-    UiMessagePipe, 
-    TranslocoPipe, 
+    EnumLabelPipe,
+    UiMessagePipe,
+    TranslocoPipe,
     RouterLink,
     PageHeaderComponent,
     SegmentedControlComponent,
@@ -34,10 +40,10 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
     ChipComponent,
     StatusDotComponent,
     ListRowComponent,
-    IconComponent
+    IconComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './plans.component.html'
+  templateUrl: './plans.component.html',
 })
 export class PlansComponent implements OnInit {
   private readonly i18n = inject(LanguageService);
@@ -47,14 +53,14 @@ export class PlansComponent implements OnInit {
   readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
     { value: 'all', label: 'common.all' },
     { value: 'active', label: 'common.active' },
-    { value: 'inactive', label: 'common.inactive' }
+    { value: 'inactive', label: 'common.inactive' },
   ];
   loading = true;
   errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly plansService: PlansService,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -79,11 +85,13 @@ export class PlansComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'plans.list.loadErrorMessage');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'plans.list.loadErrorMessage',
+        );
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -93,8 +101,12 @@ export class PlansComponent implements OnInit {
 
   formatPlanDetails(plan: Plan): string {
     if (plan.type === 'PUNCH') {
-      return this.i18n.t('plans.fields.creditsCount', { count: plan.credits ?? 0 });
+      return this.i18n.t('plans.fields.creditsCount', {
+        count: plan.credits ?? 0,
+      });
     }
-    return this.i18n.t('plans.fields.daysCount', { count: plan.durationDays ?? 0 });
+    return this.i18n.t('plans.fields.daysCount', {
+      count: plan.durationDays ?? 0,
+    });
   }
 }

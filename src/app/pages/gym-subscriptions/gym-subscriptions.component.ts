@@ -1,9 +1,14 @@
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import {
   SegmentedControlComponent,
-  SegmentedOption
+  SegmentedOption,
 } from '../../components/segmented-control/segmented-control.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
@@ -13,7 +18,7 @@ import { ListRowComponent } from '../../components/list-row/list-row.component';
 import { IconComponent } from '../../components/icon/icon.component';
 import {
   GymSubscription,
-  GymSubscriptionsService
+  GymSubscriptionsService,
 } from '../../services/gym-subscriptions.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
@@ -23,8 +28,8 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-gym-subscriptions',
   standalone: true,
   imports: [
-    UiMessagePipe, 
-    TranslocoPipe, 
+    UiMessagePipe,
+    TranslocoPipe,
     RouterLink,
     PageHeaderComponent,
     SegmentedControlComponent,
@@ -33,10 +38,10 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
     ChipComponent,
     StatusDotComponent,
     ListRowComponent,
-    IconComponent
+    IconComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './gym-subscriptions.component.html'
+  templateUrl: './gym-subscriptions.component.html',
 })
 export class GymSubscriptionsComponent implements OnInit {
   gymSubscriptions: GymSubscription[] = [];
@@ -44,14 +49,14 @@ export class GymSubscriptionsComponent implements OnInit {
   readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
     { value: 'all', label: 'common.all' },
     { value: 'active', label: 'common.active' },
-    { value: 'inactive', label: 'common.inactive' }
+    { value: 'inactive', label: 'common.inactive' },
   ];
   loading = true;
   errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly gymSubscriptionsService: GymSubscriptionsService,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -68,17 +73,21 @@ export class GymSubscriptionsComponent implements OnInit {
       next: (gymSubscriptions) => {
         this.gymSubscriptions =
           this.activeFilter === 'inactive'
-            ? gymSubscriptions.filter((gymSubscription) => !gymSubscription.isActive)
+            ? gymSubscriptions.filter(
+                (gymSubscription) => !gymSubscription.isActive,
+              )
             : gymSubscriptions;
         this.loading = false;
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'gymSubscriptions.list.loadErrorMessage');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'gymSubscriptions.list.loadErrorMessage',
+        );
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 }

@@ -1,7 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
+import {
+  TrainingTime,
+  TrainingTimesService,
+} from '../../services/training-times.service';
 import { formatTimeWithoutSeconds } from '../../utils/time-display';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -13,7 +21,7 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, PageHeaderComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './training-time-delete.component.html'
+  templateUrl: './training-time-delete.component.html',
 })
 export class TrainingTimeDeleteComponent implements OnInit {
   trainingTime: TrainingTime | null = null;
@@ -25,7 +33,7 @@ export class TrainingTimeDeleteComponent implements OnInit {
     private readonly trainingTimesService: TrainingTimesService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -46,7 +54,7 @@ export class TrainingTimeDeleteComponent implements OnInit {
         this.errorMessage = apiErrorMessage(error, 'trainingTimes.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -64,10 +72,13 @@ export class TrainingTimeDeleteComponent implements OnInit {
         this.router.navigate(['/training-times']);
       },
       error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'trainingTimes.delete.error');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'trainingTimes.delete.error',
+        );
         this.submitting = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 

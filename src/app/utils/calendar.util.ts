@@ -30,7 +30,7 @@ export function localDayKey(value: Date | string): string | null {
   return [
     date.getFullYear(),
     String(date.getMonth() + 1).padStart(2, '0'),
-    String(date.getDate()).padStart(2, '0')
+    String(date.getDate()).padStart(2, '0'),
   ].join('-');
 }
 
@@ -52,7 +52,10 @@ export function monthOf(value: Date | string): CalendarMonth {
   return { year: date.getFullYear(), month: date.getMonth() };
 }
 
-export function addMonths({ year, month }: CalendarMonth, delta: number): CalendarMonth {
+export function addMonths(
+  { year, month }: CalendarMonth,
+  delta: number,
+): CalendarMonth {
   const index = year * 12 + month + delta;
   return { year: Math.floor(index / 12), month: ((index % 12) + 12) % 12 };
 }
@@ -71,7 +74,10 @@ export function monthWeeks({ year, month }: CalendarMonth): CalendarWeek[] {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   // getDay(): 0 = Sunday … 6 = Saturday; shift so Monday is column 0.
   const leading = (new Date(year, month, 1).getDay() + 6) % 7;
-  const cells: (CalendarDay | null)[] = Array.from({ length: leading }, () => null);
+  const cells: (CalendarDay | null)[] = Array.from(
+    { length: leading },
+    () => null,
+  );
 
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(year, month, day);

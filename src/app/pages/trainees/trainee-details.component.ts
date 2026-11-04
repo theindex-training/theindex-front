@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -18,8 +24,14 @@ import {
   AttendanceTraineeTrainingItem,
 } from '../../services/attendance.service';
 import { Plan, PlansService } from '../../services/plans.service';
-import { SubscriptionsService, Subscription } from '../../services/subscriptions.service';
-import { TraineeProfile, TraineesService } from '../../services/trainees.service';
+import {
+  SubscriptionsService,
+  Subscription,
+} from '../../services/subscriptions.service';
+import {
+  TraineeProfile,
+  TraineesService,
+} from '../../services/trainees.service';
 import {
   AccountProvisioningService,
   ProvisionedAccount,
@@ -50,7 +62,7 @@ import { AvatarComponent } from '../../components/avatar/avatar.component';
 import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import {
   SegmentedControlComponent,
-  SegmentedOption
+  SegmentedOption,
 } from '../../components/segmented-control/segmented-control.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
@@ -126,8 +138,13 @@ export class TraineeDetailsComponent implements OnInit {
   ) {
     this.form = this.formBuilder.group({
       planId: this.formBuilder.nonNullable.control('', [Validators.required]),
-      startsAt: this.formBuilder.nonNullable.control(this.todayString(), [Validators.required]),
-      paid: this.formBuilder.nonNullable.control(0, [Validators.required, currencyValidator]),
+      startsAt: this.formBuilder.nonNullable.control(this.todayString(), [
+        Validators.required,
+      ]),
+      paid: this.formBuilder.nonNullable.control(0, [
+        Validators.required,
+        currencyValidator,
+      ]),
     });
   }
 
@@ -171,19 +188,23 @@ export class TraineeDetailsComponent implements OnInit {
     this.submitting = true;
     this.subscriptionErrorMessage = null;
 
-    this.subscriptionsService.createForTrainee(this.trainee.id, payload).subscribe({
-      next: () => {
-        this.submitting = false;
-        this.loadSubscriptions(this.trainee!.id);
-        this.resetSubscriptionDefaults(raw.planId);
-      },
-      error: (error) => {
-        this.subscriptionErrorMessage =
-          apiErrorMessage(error, 'trainees.details.createSubscriptionError');
-        this.submitting = false;
-        this.changeDetector.detectChanges();
-      },
-    });
+    this.subscriptionsService
+      .createForTrainee(this.trainee.id, payload)
+      .subscribe({
+        next: () => {
+          this.submitting = false;
+          this.loadSubscriptions(this.trainee!.id);
+          this.resetSubscriptionDefaults(raw.planId);
+        },
+        error: (error) => {
+          this.subscriptionErrorMessage = apiErrorMessage(
+            error,
+            'trainees.details.createSubscriptionError',
+          );
+          this.submitting = false;
+          this.changeDetector.detectChanges();
+        },
+      });
   }
 
   formatNickname(): string {
@@ -214,7 +235,8 @@ export class TraineeDetailsComponent implements OnInit {
     }
 
     return this.subscriptions.filter(
-      (subscription) => subscription.status.toUpperCase() === this.subscriptionFilter,
+      (subscription) =>
+        subscription.status.toUpperCase() === this.subscriptionFilter,
     );
   }
 
@@ -231,7 +253,11 @@ export class TraineeDetailsComponent implements OnInit {
   }
 
   deleteSubscription(subscription: Subscription): void {
-    if (!this.canDeleteSubscriptions || this.deletingSubscriptionId || !this.trainee) {
+    if (
+      !this.canDeleteSubscriptions ||
+      this.deletingSubscriptionId ||
+      !this.trainee
+    ) {
       return;
     }
 
@@ -251,13 +277,17 @@ export class TraineeDetailsComponent implements OnInit {
 
     this.subscriptionsService.delete(subscription.id).subscribe({
       next: () => {
-        this.subscriptions = this.subscriptions.filter((entry) => entry.id !== subscription.id);
+        this.subscriptions = this.subscriptions.filter(
+          (entry) => entry.id !== subscription.id,
+        );
         this.deletingSubscriptionId = null;
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.subscriptionErrorMessage =
-          apiErrorMessage(error, 'trainees.details.deleteSubscriptionError');
+        this.subscriptionErrorMessage = apiErrorMessage(
+          error,
+          'trainees.details.deleteSubscriptionError',
+        );
         this.deletingSubscriptionId = null;
         this.changeDetector.detectChanges();
       },
@@ -306,8 +336,10 @@ export class TraineeDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.subscriptionErrorMessage =
-          apiErrorMessage(error, 'trainees.details.loadSubscriptionsError');
+        this.subscriptionErrorMessage = apiErrorMessage(
+          error,
+          'trainees.details.loadSubscriptionsError',
+        );
         this.subscriptionsLoading = false;
         this.changeDetector.detectChanges();
       },
@@ -324,7 +356,10 @@ export class TraineeDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.subscriptionErrorMessage = apiErrorMessage(error, 'trainees.details.loadPlansError');
+        this.subscriptionErrorMessage = apiErrorMessage(
+          error,
+          'trainees.details.loadPlansError',
+        );
         this.plansLoading = false;
         this.changeDetector.detectChanges();
       },
@@ -342,7 +377,10 @@ export class TraineeDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.trainingErrorMessage = apiErrorMessage(error, 'trainees.details.loadTrainingsError');
+        this.trainingErrorMessage = apiErrorMessage(
+          error,
+          'trainees.details.loadTrainingsError',
+        );
         this.trainingsLoading = false;
         this.changeDetector.detectChanges();
       },
@@ -355,7 +393,8 @@ export class TraineeDetailsComponent implements OnInit {
     }
 
     const currentPlanId = this.form.controls.planId.value;
-    const plan = this.plans.find((entry) => entry.id === currentPlanId) ?? this.plans[0];
+    const plan =
+      this.plans.find((entry) => entry.id === currentPlanId) ?? this.plans[0];
     this.form.controls.planId.setValue(plan.id);
     this.form.controls.paid.setValue(this.toEuros(plan.priceCents));
   }

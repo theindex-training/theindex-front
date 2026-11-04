@@ -7,12 +7,16 @@ import {
   inject,
   isDevMode,
   makeEnvironmentProviders,
-  provideAppInitializer
+  provideAppInitializer,
 } from '@angular/core';
 import { TitleStrategy } from '@angular/router';
 import { provideTransloco } from '@jsverse/transloco';
 import { provideTranslocoMessageformat } from '@jsverse/transloco-messageformat';
-import { DEFAULT_LANGUAGE, LANGUAGES, LanguageService } from './language.service';
+import {
+  DEFAULT_LANGUAGE,
+  LANGUAGES,
+  LanguageService,
+} from './language.service';
 import { BundledTranslationLoader } from './translation-loader';
 import { TranslatedTitleStrategy } from './translated-title.strategy';
 
@@ -32,15 +36,15 @@ export function provideI18n(): EnvironmentProviders {
         defaultLang: DEFAULT_LANGUAGE,
         reRenderOnLangChange: true,
         prodMode: !isDevMode(),
-        missingHandler: { logMissingKey: isDevMode() }
+        missingHandler: { logMissingKey: isDevMode() },
       },
-      loader: BundledTranslationLoader
+      loader: BundledTranslationLoader,
     }),
     // ICU message syntax, e.g. "{count, plural, one {# трениращ} other {# трениращи}}".
     provideTranslocoMessageformat({ locales: DEFAULT_LANGUAGE }),
     // Bootstrap waits for this, so the first render is already translated (no flash of keys).
     provideAppInitializer(() => inject(LanguageService).init()),
-    { provide: TitleStrategy, useClass: TranslatedTitleStrategy }
+    { provide: TitleStrategy, useClass: TranslatedTitleStrategy },
   ];
   return makeEnvironmentProviders(providers);
 }

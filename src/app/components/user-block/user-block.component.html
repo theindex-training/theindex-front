@@ -2,8 +2,14 @@
   <div class="user__identity">
     <span class="user__avatar" aria-hidden="true">{{ initials }}</span>
     <span class="user__text">
-      <span class="user__email" [title]="email ?? ('common.user' | transloco)">{{ email ?? ('common.user' | transloco) }}</span>
-      <span class="user__role">{{ role ? (role | enumLabel: 'role') : ('common.signedIn' | transloco) }}</span>
+      <span
+        class="user__email"
+        [title]="email ?? ('common.user' | transloco)"
+        >{{ email ?? ('common.user' | transloco) }}</span
+      >
+      <span class="user__role">{{
+        role ? (role | enumLabel: 'role') : ('common.signedIn' | transloco)
+      }}</span>
     </span>
   </div>
 

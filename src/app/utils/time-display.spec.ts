@@ -5,7 +5,7 @@ describe('formatTimeWithoutSeconds', () => {
     ['18:30:00', '18:30'],
     ['08:05', '08:05'],
     ['8:5', '08:05'],
-    ['8:05:59', '08:05']
+    ['8:05:59', '08:05'],
   ])('%s → %s', (input, expected) => {
     expect(formatTimeWithoutSeconds(input)).toBe(expected);
   });

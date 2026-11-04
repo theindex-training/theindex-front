@@ -19,7 +19,7 @@ interface TokenPayload {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly tokenKey = 'accessToken';
@@ -30,9 +30,9 @@ export class AuthService {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/auth/login`, {
         email,
-        password
+        password,
       })
-      .pipe(tap(response => this.setToken(response.accessToken)));
+      .pipe(tap((response) => this.setToken(response.accessToken)));
   }
 
   logout(): void {

@@ -23,7 +23,6 @@ export interface CreateTraineePayload {
   gymSubscriptionId?: string | null;
 }
 
-
 export interface TraineeTrainingInsights {
   traineeId: string;
   totalAttendances: number;
@@ -62,7 +61,7 @@ export interface UpdateTraineePayload {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TraineesService {
   private readonly baseUrl = `${environment.apiUrl}/trainees`;
@@ -72,7 +71,7 @@ export class TraineesService {
   list(active?: boolean, search?: string): Observable<TraineeProfile[]> {
     const params = buildHttpParams({
       active,
-      search
+      search,
     });
 
     return this.http.get<TraineeProfile[]>(this.baseUrl, { params });
@@ -86,7 +85,10 @@ export class TraineesService {
     return this.http.post<TraineeProfile>(this.baseUrl, payload);
   }
 
-  update(id: string, payload: UpdateTraineePayload): Observable<TraineeProfile> {
+  update(
+    id: string,
+    payload: UpdateTraineePayload,
+  ): Observable<TraineeProfile> {
     return this.http.patch<TraineeProfile>(`${this.baseUrl}/${id}`, payload);
   }
 
@@ -95,6 +97,8 @@ export class TraineesService {
   }
 
   getMyTrainingInsights(): Observable<TraineeTrainingInsights> {
-    return this.http.get<TraineeTrainingInsights>(`${this.baseUrl}/me/training-insights`);
+    return this.http.get<TraineeTrainingInsights>(
+      `${this.baseUrl}/me/training-insights`,
+    );
   }
 }

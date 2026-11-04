@@ -1,7 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AttendanceTraineeTrainingItem } from '../../services/attendance.service';
 import { PageDriver, driver } from '../../../testing/dom';
-import { TRAININGS_VIEW_STORAGE_KEY, TraineeTrainingsComponent } from './trainee-trainings.component';
+import {
+  TRAININGS_VIEW_STORAGE_KEY,
+  TraineeTrainingsComponent,
+} from './trainee-trainings.component';
 
 const training: AttendanceTraineeTrainingItem = {
   id: 'a1',
@@ -14,7 +17,7 @@ const training: AttendanceTraineeTrainingItem = {
   subscriptionId: null,
   gymSubscriptionId: null,
   paymentStatus: 'PAID',
-  createdAt: '2026-10-30T16:30:00Z'
+  createdAt: '2026-10-30T16:30:00Z',
 };
 
 describe('TraineeTrainingsComponent', () => {
@@ -23,24 +26,34 @@ describe('TraineeTrainingsComponent', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-31T10:00:00Z') });
+    vi.useFakeTimers({
+      toFake: ['Date'],
+      now: new Date('2026-10-31T10:00:00Z'),
+    });
   });
 
   afterEach(() => vi.useRealTimers());
 
-  async function render(trainings: AttendanceTraineeTrainingItem[] = [training]) {
+  async function render(
+    trainings: AttendanceTraineeTrainingItem[] = [training],
+  ) {
     fixture = TestBed.createComponent(TraineeTrainingsComponent);
     fixture.componentRef.setInput('heading', 'Trainings');
     fixture.componentRef.setInput('subheading', 'Your completed trainings.');
     fixture.componentRef.setInput('headingId', 'my-trainings-title');
     fixture.componentRef.setInput('trainings', trainings);
     fixture.componentRef.setInput('emptyKey', 'traineeDashboard.noTrainings');
-    page = driver(() => fixture.nativeElement, () => fixture.whenStable());
+    page = driver(
+      () => fixture.nativeElement,
+      () => fixture.whenStable(),
+    );
     await page.settle();
   }
 
   const radio = (label: string) =>
-    page.queryAll<HTMLLabelElement>('label.segmented__option').find(item => item.textContent.trim() === label)!
+    page
+      .queryAll<HTMLLabelElement>('label.segmented__option')
+      .find((item) => item.textContent.trim() === label)!
       .querySelector('input')!;
   const showsCalendar = () => page.query('app-trainings-calendar') !== null;
   const showsList = () => page.query('app-trainee-trainings-table') !== null;
@@ -52,7 +65,11 @@ describe('TraineeTrainingsComponent', () => {
     expect(page.query('h2')!.textContent.trim()).toBe('Trainings');
     expect(page.text()).toContain('Your completed trainings.');
     expect(page.query('legend')!.textContent.trim()).toBe('Trainings view');
-    expect(page.queryAll('label.segmented__option').map(item => item.textContent.trim())).toEqual(['Calendar', 'List']);
+    expect(
+      page
+        .queryAll('label.segmented__option')
+        .map((item) => item.textContent.trim()),
+    ).toEqual(['Calendar', 'List']);
   });
 
   it('shows the calendar by default, on the current month, with the trainings in it', async () => {
@@ -61,8 +78,12 @@ describe('TraineeTrainingsComponent', () => {
     expect(radio('Calendar').checked).toBe(true);
     expect(showsCalendar()).toBe(true);
     expect(showsList()).toBe(false);
-    expect(page.query('[data-testid="calendar-month"]')!.textContent.trim()).toBe('October 2026');
-    expect(page.query('[data-testid="calendar-day-2026-10-30"]')!.textContent).toContain('Pepi');
+    expect(
+      page.query('[data-testid="calendar-month"]')!.textContent.trim(),
+    ).toBe('October 2026');
+    expect(
+      page.query('[data-testid="calendar-day-2026-10-30"]')!.textContent,
+    ).toContain('Pepi');
   });
 
   it('switches to the list and remembers the choice on this device', async () => {
@@ -112,9 +133,13 @@ describe('TraineeTrainingsComponent', () => {
 
   it('passes the empty message to both views', async () => {
     await render([]);
-    expect(page.query('[data-testid="calendar-summary"]')!.textContent.trim()).toBe('No trainings yet.');
+    expect(
+      page.query('[data-testid="calendar-summary"]')!.textContent.trim(),
+    ).toBe('No trainings yet.');
 
     await page.click('label.segmented__option:nth-of-type(2) input');
-    expect(page.query('p.notice')!.textContent.trim()).toBe('No trainings yet.');
+    expect(page.query('p.notice')!.textContent.trim()).toBe(
+      'No trainings yet.',
+    );
   });
 });

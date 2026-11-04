@@ -15,7 +15,9 @@ describe('LanguageService', () => {
 
   // The global spec setup starts every app in English; these tests need the real startup logic.
   const create = () => {
-    TestBed.configureTestingModule({ providers: [{ provide: INITIAL_LANGUAGE, useValue: null }] });
+    TestBed.configureTestingModule({
+      providers: [{ provide: INITIAL_LANGUAGE, useValue: null }],
+    });
     return TestBed.inject(LanguageService);
   };
 
@@ -69,7 +71,8 @@ describe('LanguageService', () => {
   it('handles Bulgarian plurals', () => {
     const service = create();
     service.setLanguage('bg');
-    const count = (total: number) => service.t('trainees.list.count', { shown: total, total });
+    const count = (total: number) =>
+      service.t('trainees.list.count', { shown: total, total });
 
     expect(count(1)).toBe('1 от 1 трениращ');
     expect(count(5)).toBe('5 от 5 трениращи');

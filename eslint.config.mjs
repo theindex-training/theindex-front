@@ -53,7 +53,11 @@ export default tseslint.config(
         {
           // Pages navigate and move on; the router reports navigation errors itself.
           allowForKnownSafeCalls: [
-            { from: 'package', package: '@angular/router', name: ['navigate', 'navigateByUrl'] },
+            {
+              from: 'package',
+              package: '@angular/router',
+              name: ['navigate', 'navigateByUrl'],
+            },
           ],
         },
       ],

@@ -41,7 +41,8 @@
   display: flex;
   align-items: center;
   min-height: 3.5rem;
-  padding: env(safe-area-inset-top) calc(var(--space-4) + env(safe-area-inset-right)) 0
+  padding: env(safe-area-inset-top)
+    calc(var(--space-4) + env(safe-area-inset-right)) 0
     calc(var(--space-4) + env(safe-area-inset-left));
   border-bottom: 1px solid var(--border);
   background: var(--bg);
@@ -50,7 +51,10 @@
 
 .content {
   padding: var(--space-5) calc(var(--space-4) + env(safe-area-inset-right))
-    calc(var(--tab-bar-height) + env(safe-area-inset-bottom) + var(--space-8) + var(--fab-clearance, 0rem))
+    calc(
+      var(--tab-bar-height) + env(safe-area-inset-bottom) + var(--space-8) +
+        var(--fab-clearance, 0rem)
+    )
     calc(var(--space-4) + env(safe-area-inset-left));
 }
 

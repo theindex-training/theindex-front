@@ -1,20 +1,37 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AttendanceService } from '../../services/attendance.service';
 import { AuthService } from '../../services/auth.service';
-import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
-import { TraineeProfile, TraineesService } from '../../services/trainees.service';
-import { TrainerProfile, TrainersService } from '../../services/trainers.service';
-import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
+import {
+  GymLocation,
+  GymLocationsService,
+} from '../../services/gym-locations.service';
+import {
+  TraineeProfile,
+  TraineesService,
+} from '../../services/trainees.service';
+import {
+  TrainerProfile,
+  TrainersService,
+} from '../../services/trainers.service';
+import {
+  TrainingTime,
+  TrainingTimesService,
+} from '../../services/training-times.service';
 import { formatTimeWithoutSeconds } from '../../utils/time-display';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
 import { IconComponent } from '../../components/icon/icon.component';
@@ -28,18 +45,18 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-attendance-register',
   standalone: true,
   imports: [
-    UiMessagePipe, 
-    TranslocoPipe, 
+    UiMessagePipe,
+    TranslocoPipe,
     CommonModule,
     ReactiveFormsModule,
     AvatarComponent,
     IconComponent,
     PageHeaderComponent,
-    SkeletonListComponent
+    SkeletonListComponent,
   ],
   templateUrl: './attendance-register.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './attendance-register.component.scss'
+  styleUrl: './attendance-register.component.scss',
 })
 export class AttendanceRegisterComponent implements OnInit {
   readonly form: FormGroup<{
@@ -72,14 +89,20 @@ export class AttendanceRegisterComponent implements OnInit {
     private readonly attendanceService: AttendanceService,
     private readonly authService: AuthService,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
-      trainerId: this.formBuilder.nonNullable.control('', [Validators.required]),
-      locationId: this.formBuilder.nonNullable.control('', [Validators.required]),
-      trainedDate: this.formBuilder.nonNullable.control(this.todayIsoDate(), [Validators.required]),
+      trainerId: this.formBuilder.nonNullable.control('', [
+        Validators.required,
+      ]),
+      locationId: this.formBuilder.nonNullable.control('', [
+        Validators.required,
+      ]),
+      trainedDate: this.formBuilder.nonNullable.control(this.todayIsoDate(), [
+        Validators.required,
+      ]),
       trainedTime: this.formBuilder.nonNullable.control(''),
-      traineeSearch: this.formBuilder.nonNullable.control('')
+      traineeSearch: this.formBuilder.nonNullable.control(''),
     });
   }
 
@@ -88,15 +111,16 @@ export class AttendanceRegisterComponent implements OnInit {
       trainers: this.trainersService.list(true),
       gymLocations: this.gymsService.list(false),
       trainingTimes: this.trainingTimesService.list(),
-      trainees: this.traineesService.list(true)
+      trainees: this.traineesService.list(true),
     }).subscribe({
       next: ({ trainers, gymLocations, trainingTimes, trainees }) => {
-        this.trainers = trainers.filter(item => item.isActive);
-        this.gymLocations = gymLocations.filter(item => item.isActive);
+        this.trainers = trainers.filter((item) => item.isActive);
+        this.gymLocations = gymLocations.filter((item) => item.isActive);
         this.trainingTimes = [...trainingTimes].sort(
-          (first, second) => this.toMinutes(first.startTime) - this.toMinutes(second.startTime)
+          (first, second) =>
+            this.toMinutes(first.startTime) - this.toMinutes(second.startTime),
         );
-        this.trainees = trainees.filter(item => item.isActive);
+        this.trainees = trainees.filter((item) => item.isActive);
         this.filteredTrainees = [...this.trainees];
         this.preselectCurrentTrainer();
         this.preselectDefaultLocation();
@@ -104,14 +128,16 @@ export class AttendanceRegisterComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'attendance.register.loadError');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'attendance.register.loadError',
+        );
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
 
-    this.form.controls.traineeSearch.valueChanges.subscribe(value => {
+    this.form.controls.traineeSearch.valueChanges.subscribe((value) => {
       this.applyTraineeFilter(value);
       this.changeDetector.detectChanges();
     });
@@ -143,7 +169,7 @@ export class AttendanceRegisterComponent implements OnInit {
         locationId: raw.locationId,
         traineeIds: Array.from(this.selectedTraineeIds),
         trainedDate: raw.trainedDate,
-        ...(trainedTime ? { trainedTime } : {})
+        ...(trainedTime ? { trainedTime } : {}),
       })
       .subscribe({
         next: () => {
@@ -152,10 +178,13 @@ export class AttendanceRegisterComponent implements OnInit {
           this.router.navigate(['/attendance']);
         },
         error: (error) => {
-          this.errorMessage = apiErrorMessage(error, 'attendance.register.error');
+          this.errorMessage = apiErrorMessage(
+            error,
+            'attendance.register.error',
+          );
           this.submitting = false;
           this.changeDetector.detectChanges();
-        }
+        },
       });
   }
 
@@ -174,12 +203,16 @@ export class AttendanceRegisterComponent implements OnInit {
   }
 
   selectFiltered(): void {
-    this.filteredTrainees.forEach(trainee => this.selectedTraineeIds.add(trainee.id));
+    this.filteredTrainees.forEach((trainee) =>
+      this.selectedTraineeIds.add(trainee.id),
+    );
     this.changeDetector.detectChanges();
   }
 
   clearFiltered(): void {
-    this.filteredTrainees.forEach(trainee => this.selectedTraineeIds.delete(trainee.id));
+    this.filteredTrainees.forEach((trainee) =>
+      this.selectedTraineeIds.delete(trainee.id),
+    );
     this.changeDetector.detectChanges();
   }
 
@@ -197,7 +230,10 @@ export class AttendanceRegisterComponent implements OnInit {
   private preselectCurrentTrainer(): void {
     const currentTrainerId = this.authService.getTrainerProfileId();
 
-    if (currentTrainerId && this.trainers.some(item => item.id === currentTrainerId)) {
+    if (
+      currentTrainerId &&
+      this.trainers.some((item) => item.id === currentTrainerId)
+    ) {
       this.form.controls.trainerId.setValue(currentTrainerId);
       return;
     }
@@ -216,9 +252,11 @@ export class AttendanceRegisterComponent implements OnInit {
       return;
     }
 
-    this.filteredTrainees = this.trainees.filter(trainee => {
+    this.filteredTrainees = this.trainees.filter((trainee) => {
       const nameMatch = trainee.name.toLowerCase().includes(normalizedSearch);
-      const nicknameMatch = (trainee.nickname || '').toLowerCase().includes(normalizedSearch);
+      const nicknameMatch = (trainee.nickname || '')
+        .toLowerCase()
+        .includes(normalizedSearch);
       return nameMatch || nicknameMatch;
     });
   }

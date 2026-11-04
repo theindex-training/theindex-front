@@ -20,11 +20,11 @@ import { UserBlockComponent } from '../user-block/user-block.component';
     BrandComponent,
     LanguageSwitchComponent,
     ThemeSwitchComponent,
-    UserBlockComponent
+    UserBlockComponent,
   ],
   templateUrl: './sidebar.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './sidebar.component.scss'
+  styleUrl: './sidebar.component.scss',
 })
 export class SidebarComponent {
   @Input({ required: true }) mainItems: NavItem[] = [];

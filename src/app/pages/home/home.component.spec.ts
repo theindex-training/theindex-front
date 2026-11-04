@@ -1,5 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import en from '../../../../public/i18n/en.json';
@@ -13,14 +16,16 @@ const copy = en.home.reports;
 const INACTIVE = '/api/attendance/reports/inactive-trainees';
 const WITHOUT = '/api/attendance/reports/without-active-subscription';
 
-const report = (overrides: Partial<AttendanceSubscriptionReport> = {}): AttendanceSubscriptionReport => ({
+const report = (
+  overrides: Partial<AttendanceSubscriptionReport> = {},
+): AttendanceSubscriptionReport => ({
   planName: '10 visits',
   type: 'PUNCH',
   startDate: '2026-10-01',
   endDate: null,
   remainingTrainings: 4,
   remainingDays: null,
-  ...overrides
+  ...overrides,
 });
 
 describe('HomeComponent', () => {
@@ -31,7 +36,11 @@ describe('HomeComponent', () => {
   beforeEach(() => {
     localStorage.clear();
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
   });
@@ -42,7 +51,10 @@ describe('HomeComponent', () => {
     signInAs(role);
     const fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;
-    page = driver(() => fixture.nativeElement, () => fixture.whenStable());
+    page = driver(
+      () => fixture.nativeElement,
+      () => fixture.whenStable(),
+    );
     await page.settle();
   }
 
@@ -51,18 +63,27 @@ describe('HomeComponent', () => {
     await page.select('select', select.options[index].value);
   }
 
-  it.each(['ADMIN', 'TRAINER'] as const)('loads both reports for a %s, inactive for the last 7 days', async role => {
-    await render(role);
+  it.each(['ADMIN', 'TRAINER'] as const)(
+    'loads both reports for a %s, inactive for the last 7 days',
+    async (role) => {
+      await render(role);
 
-    http.expectOne(`${INACTIVE}?skipDays=7`).flush([
-      { traineeId: 't1', name: 'Ivan Petrov', nickname: 'Vanko', lastTrainingDate: '2026-10-20T16:30:00Z', activeSubscription: report() }
-    ]);
-    http.expectOne(WITHOUT).flush([]);
-    await page.settle();
+      http.expectOne(`${INACTIVE}?skipDays=7`).flush([
+        {
+          traineeId: 't1',
+          name: 'Ivan Petrov',
+          nickname: 'Vanko',
+          lastTrainingDate: '2026-10-20T16:30:00Z',
+          activeSubscription: report(),
+        },
+      ]);
+      http.expectOne(WITHOUT).flush([]);
+      await page.settle();
 
-    expect(page.text()).toContain('Ivan Petrov (Vanko)');
-    expect(page.text()).toContain(copy.noWithout);
-  });
+      expect(page.text()).toContain('Ivan Petrov (Vanko)');
+      expect(page.text()).toContain(copy.noWithout);
+    },
+  );
 
   it('loads no reports for any other role', async () => {
     await render('TRAINEE');
@@ -93,8 +114,12 @@ describe('HomeComponent', () => {
     await chooseDays(2); // 90 days
     const thirty = http.expectOne(`${INACTIVE}?skipDays=30`);
     const ninety = http.expectOne(`${INACTIVE}?skipDays=90`);
-    ninety.flush([{ name: 'Ninety', lastTrainingDate: null, activeSubscription: null }]);
-    thirty.flush([{ name: 'Thirty', lastTrainingDate: null, activeSubscription: null }]);
+    ninety.flush([
+      { name: 'Ninety', lastTrainingDate: null, activeSubscription: null },
+    ]);
+    thirty.flush([
+      { name: 'Thirty', lastTrainingDate: null, activeSubscription: null },
+    ]);
     await page.settle();
 
     // CHARACTERIZATION: possibly unintended — earlier requests aren't cancelled, so a slow answer for
@@ -103,7 +128,7 @@ describe('HomeComponent', () => {
     expect(page.text()).not.toContain('Ninety');
   });
 
-  it('shows each report\'s own error', async () => {
+  it("shows each report's own error", async () => {
     await render();
     const error = apiError('Report failed', 500);
     http.expectOne(`${INACTIVE}?skipDays=7`).flush(error.body, error.options);
@@ -111,7 +136,9 @@ describe('HomeComponent', () => {
     http.expectOne(WITHOUT).flush(fallback.body, fallback.options);
     await page.settle();
 
-    const alerts = page.queryAll('[role="alert"]').map(alert => alert.textContent?.trim());
+    const alerts = page
+      .queryAll('[role="alert"]')
+      .map((alert) => alert.textContent?.trim());
     expect(alerts).toEqual(['Report failed', copy.withoutError]);
   });
 
@@ -123,8 +150,12 @@ describe('HomeComponent', () => {
     });
 
     it('names the trainee, with the nickname, or "Unknown"', () => {
-      expect(component.traineeDisplayName({ name: ' Ivan ', nickname: 'Vanko' })).toBe('Ivan (Vanko)');
-      expect(component.traineeDisplayName({ name: 'Ivan', nickname: '  ' })).toBe('Ivan');
+      expect(
+        component.traineeDisplayName({ name: ' Ivan ', nickname: 'Vanko' }),
+      ).toBe('Ivan (Vanko)');
+      expect(
+        component.traineeDisplayName({ name: 'Ivan', nickname: '  ' }),
+      ).toBe('Ivan');
       expect(component.traineeDisplayName({})).toBe(copy.unknown);
     });
 
@@ -133,27 +164,50 @@ describe('HomeComponent', () => {
 
       expect(component.formatSubscriptionSummary(null)).toBe('—');
       expect(component.formatSubscriptionSummary(report())).toBe(
-        `Plan: 10 visits • Type: ${en.enums.planType.PUNCH} • Start: ${format.date('2026-10-01')} • Remaining trainings: 4`
+        `Plan: 10 visits • Type: ${en.enums.planType.PUNCH} • Start: ${format.date('2026-10-01')} • Remaining trainings: 4`,
       );
       expect(
         component.formatSubscriptionSummary(
-          report({ planName: null, type: 'TIME', startDate: null, endDate: '2026-11-30', remainingTrainings: null, remainingDays: 0 })
-        )
-      ).toBe(`Type: ${en.enums.planType.TIME} • End: ${format.date('2026-11-30')} • Remaining days: 0`);
-      expect(component.formatSubscriptionSummary(report({ type: 'FAMILY', planName: null, startDate: null, remainingTrainings: null }))).toBe(
-        'Type: FAMILY'
+          report({
+            planName: null,
+            type: 'TIME',
+            startDate: null,
+            endDate: '2026-11-30',
+            remainingTrainings: null,
+            remainingDays: 0,
+          }),
+        ),
+      ).toBe(
+        `Type: ${en.enums.planType.TIME} • End: ${format.date('2026-11-30')} • Remaining days: 0`,
       );
       expect(
         component.formatSubscriptionSummary(
-          report({ planName: null, type: null, startDate: null, remainingTrainings: null })
-        )
+          report({
+            type: 'FAMILY',
+            planName: null,
+            startDate: null,
+            remainingTrainings: null,
+          }),
+        ),
+      ).toBe('Type: FAMILY');
+      expect(
+        component.formatSubscriptionSummary(
+          report({
+            planName: null,
+            type: null,
+            startDate: null,
+            remainingTrainings: null,
+          }),
+        ),
       ).toBe('—');
     });
 
     it('shows the last training date, or a dash', () => {
       const format = TestBed.inject(LocaleFormatService);
 
-      expect(component.formatDateOrFallback('2026-10-20T16:30:00Z')).toBe(format.dateTime('2026-10-20T16:30:00Z'));
+      expect(component.formatDateOrFallback('2026-10-20T16:30:00Z')).toBe(
+        format.dateTime('2026-10-20T16:30:00Z'),
+      );
       expect(component.formatDateOrFallback(null)).toBe('—');
     });
   });

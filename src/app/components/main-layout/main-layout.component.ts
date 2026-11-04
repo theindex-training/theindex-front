@@ -1,4 +1,11 @@
-import { Component, DestroyRef, ElementRef, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  ViewChild,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -16,24 +23,34 @@ const DESKTOP_QUERY = '(min-width: 1024px)';
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, TranslocoPipe, BrandComponent, SidebarComponent, TabBarComponent, NavSheetComponent],
+  imports: [
+    RouterOutlet,
+    TranslocoPipe,
+    BrandComponent,
+    SidebarComponent,
+    TabBarComponent,
+    NavSheetComponent,
+  ],
   templateUrl: './main-layout.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './main-layout.component.scss'
+  styleUrl: './main-layout.component.scss',
 })
 export class MainLayoutComponent {
   private readonly router = inject(Router);
 
   readonly navigation = buildNavigation(inject(AuthService).getUserRole());
-  readonly sheetItems = [...this.navigation.moreMain, ...this.navigation.moreManage];
+  readonly sheetItems = [
+    ...this.navigation.moreMain,
+    ...this.navigation.moreManage,
+  ];
   isSheetOpen = false;
 
   private readonly url = toSignal(
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd),
-      map(() => this.router.url)
+      filter((event) => event instanceof NavigationEnd),
+      map(() => this.router.url),
     ),
-    { initialValue: this.router.url }
+    { initialValue: this.router.url },
   );
 
   @ViewChild(NavSheetComponent) private readonly sheet?: NavSheetComponent;
@@ -44,16 +61,19 @@ export class MainLayoutComponent {
 
     this.router.events
       .pipe(
-        filter(event => event instanceof NavigationEnd),
-        takeUntilDestroyed(destroyRef)
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(destroyRef),
       )
       .subscribe(() => this.sheet?.close());
 
     // The sheet is mobile-only; close it if the window grows into the desktop layout.
     const desktop = window.matchMedia?.(DESKTOP_QUERY);
-    const closeOnDesktop = (event: MediaQueryListEvent) => event.matches && this.sheet?.close();
+    const closeOnDesktop = (event: MediaQueryListEvent) =>
+      event.matches && this.sheet?.close();
     desktop?.addEventListener('change', closeOnDesktop);
-    destroyRef.onDestroy(() => desktop?.removeEventListener('change', closeOnDesktop));
+    destroyRef.onDestroy(() =>
+      desktop?.removeEventListener('change', closeOnDesktop),
+    );
   }
 
   /** Highlights the More/Account tab when the current page is one of the sheet's items. */

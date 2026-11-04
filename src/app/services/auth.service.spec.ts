@@ -1,5 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { base64UrlEncode, makeToken } from '../../testing/jwt';
 import { AuthService } from './auth.service';
@@ -11,7 +14,7 @@ describe('AuthService', () => {
   beforeEach(() => {
     localStorage.clear();
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()]
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     });
     service = TestBed.inject(AuthService);
     http = TestBed.inject(HttpTestingController);
@@ -24,11 +27,16 @@ describe('AuthService', () => {
       const token = makeToken({ sub: 'a1', role: 'ADMIN' });
       let response: unknown;
 
-      service.login(' Admin@Gym.test ', 'secret').subscribe(value => (response = value));
+      service
+        .login(' Admin@Gym.test ', 'secret')
+        .subscribe((value) => (response = value));
 
       const req = http.expectOne('/api/auth/login');
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ email: ' Admin@Gym.test ', password: 'secret' });
+      expect(req.request.body).toEqual({
+        email: ' Admin@Gym.test ',
+        password: 'secret',
+      });
       req.flush({ accessToken: token, account: { id: 'a1' } });
 
       expect(localStorage.getItem('accessToken')).toBe(token);
@@ -38,10 +46,15 @@ describe('AuthService', () => {
     it('stores nothing and passes the error on when the request fails', () => {
       let status: number | undefined;
 
-      service.login('admin', 'wrong').subscribe({ error: error => (status = error.status) });
+      service
+        .login('admin', 'wrong')
+        .subscribe({ error: (error) => (status = error.status) });
       http
         .expectOne('/api/auth/login')
-        .flush({ message: 'Invalid credentials' }, { status: 401, statusText: 'Unauthorized' });
+        .flush(
+          { message: 'Invalid credentials' },
+          { status: 401, statusText: 'Unauthorized' },
+        );
 
       expect(status).toBe(401);
       expect(localStorage.getItem('accessToken')).toBeNull();
@@ -73,7 +86,11 @@ describe('AuthService', () => {
     });
 
     it('accepts an expired token', () => {
-      const expired = makeToken({ sub: 'a1', role: 'ADMIN', exp: 1_000_000_000 }); // 2001
+      const expired = makeToken({
+        sub: 'a1',
+        role: 'ADMIN',
+        exp: 1_000_000_000,
+      }); // 2001
       localStorage.setItem('accessToken', expired);
 
       // CHARACTERIZATION: possibly unintended — `exp` is never checked; see TEST_NOTES.md S6.
@@ -91,8 +108,8 @@ describe('AuthService', () => {
           email: 'coach@gym.test',
           role: 'TRAINER',
           trainerProfileId: 'trainer-7',
-          traineeProfileId: 'trainee-7'
-        })
+          traineeProfileId: 'trainee-7',
+        }),
       );
 
       expect(service.getAccountId()).toBe('account-7');
@@ -113,7 +130,11 @@ describe('AuthService', () => {
     it('returns null for missing or null claims', () => {
       localStorage.setItem(
         'accessToken',
-        makeToken({ sub: 'a1', trainerProfileId: null, traineeProfileId: null })
+        makeToken({
+          sub: 'a1',
+          trainerProfileId: null,
+          traineeProfileId: null,
+        }),
       );
 
       expect(service.getUserRole()).toBeNull();
@@ -132,7 +153,10 @@ describe('AuthService', () => {
     it.each([
       ['no payload segment', 'header-only'],
       ['invalid base64', 'header.%%%.signature'],
-      ['a payload that is not JSON', `header.${base64UrlEncode('not json')}.signature`]
+      [
+        'a payload that is not JSON',
+        `header.${base64UrlEncode('not json')}.signature`,
+      ],
     ])('returns null instead of throwing for a token with %s', (_, token) => {
       localStorage.setItem('accessToken', token);
 

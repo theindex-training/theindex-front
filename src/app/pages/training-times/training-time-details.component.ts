@@ -1,7 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
+import {
+  TrainingTime,
+  TrainingTimesService,
+} from '../../services/training-times.service';
 import { formatTimeWithoutSeconds } from '../../utils/time-display';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -11,9 +19,15 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-training-time-details',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, RouterLink, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    RouterLink,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './training-time-details.component.html'
+  templateUrl: './training-time-details.component.html',
 })
 export class TrainingTimeDetailsComponent implements OnInit {
   trainingTime: TrainingTime | null = null;
@@ -23,7 +37,7 @@ export class TrainingTimeDetailsComponent implements OnInit {
   constructor(
     private readonly trainingTimesService: TrainingTimesService,
     private readonly route: ActivatedRoute,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -44,7 +58,7 @@ export class TrainingTimeDetailsComponent implements OnInit {
         this.errorMessage = apiErrorMessage(error, 'trainingTimes.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 

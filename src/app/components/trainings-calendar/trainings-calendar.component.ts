@@ -5,7 +5,7 @@ import {
   Injector,
   Input,
   afterNextRender,
-  inject
+  inject,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -26,7 +26,7 @@ import {
   localDayKey,
   monthOf,
   monthWeeks,
-  sameMonth
+  sameMonth,
 } from '../../utils/calendar.util';
 import { displayValue } from '../../utils/display.util';
 import { ChipComponent } from '../chip/chip.component';
@@ -58,11 +58,11 @@ const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
     UiMessagePipe,
     ChipComponent,
     IconComponent,
-    SkeletonListComponent
+    SkeletonListComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainings-calendar.component.html',
-  styleUrl: './trainings-calendar.component.scss'
+  styleUrl: './trainings-calendar.component.scss',
 })
 export class TrainingsCalendarComponent {
   readonly format = inject(LocaleFormatService);
@@ -95,7 +95,9 @@ export class TrainingsCalendarComponent {
   }
 
   get monthTitle(): string {
-    return this.format.monthYear(new Date(this.month.year, this.month.month, 1));
+    return this.format.monthYear(
+      new Date(this.month.year, this.month.month, 1),
+    );
   }
 
   /** Days of the shown month that have trainings, in date order. */
@@ -103,13 +105,15 @@ export class TrainingsCalendarComponent {
     return this.weeks
       .flat()
       .filter((day): day is CalendarDay => day !== null)
-      .map(day => ({ day, trainings: this.trainingsOn(day.key) }))
-      .filter(entry => entry.trainings.length > 0);
+      .map((day) => ({ day, trainings: this.trainingsOn(day.key) }))
+      .filter((entry) => entry.trainings.length > 0);
   }
 
   get monthTotals(): { count: number; paid: number; unpaid: number } {
-    const trainings = this.monthAgenda.flatMap(entry => entry.trainings);
-    const unpaid = trainings.filter(training => training.paymentStatus === 'UNPAID').length;
+    const trainings = this.monthAgenda.flatMap((entry) => entry.trainings);
+    const unpaid = trainings.filter(
+      (training) => training.paymentStatus === 'UNPAID',
+    ).length;
     return { count: trainings.length, paid: trainings.length - unpaid, unpaid };
   }
 
@@ -126,7 +130,8 @@ export class TrainingsCalendarComponent {
   }
 
   unpaidCount(trainings: Training[]): number {
-    return trainings.filter(training => training.paymentStatus === 'UNPAID').length;
+    return trainings.filter((training) => training.paymentStatus === 'UNPAID')
+      .length;
   }
 
   dayLabel(day: CalendarDay): string {
@@ -134,7 +139,7 @@ export class TrainingsCalendarComponent {
     return this.language.t('trainings.calendar.dayLabel', {
       date: this.format.custom(day.date, 'fullDate'),
       count: trainings.length,
-      unpaid: this.unpaidCount(trainings)
+      unpaid: this.unpaidCount(trainings),
     });
   }
 
@@ -183,7 +188,7 @@ export class TrainingsCalendarComponent {
       Home: () => addDays(key, -weekdayIndex),
       End: () => addDays(key, 6 - weekdayIndex),
       PageUp: () => shiftMonth(key, -1),
-      PageDown: () => shiftMonth(key, 1)
+      PageDown: () => shiftMonth(key, 1),
     };
     const move = moves[event.key];
     if (!move) {
@@ -197,8 +202,11 @@ export class TrainingsCalendarComponent {
     }
     this.focusKey = target;
     afterNextRender(
-      () => this.host.nativeElement.querySelector<HTMLElement>(`[data-day="${target}"]`)?.focus(),
-      { injector: this.injector }
+      () =>
+        this.host.nativeElement
+          .querySelector<HTMLElement>(`[data-day="${target}"]`)
+          ?.focus(),
+      { injector: this.injector },
     );
   }
 
@@ -218,7 +226,8 @@ export class TrainingsCalendarComponent {
   private indexTrainings(): void {
     const byDay = new Map<string, Training[]>();
     const sorted = [...this.trainings].sort(
-      (a, b) => new Date(a.trainedAt).getTime() - new Date(b.trainedAt).getTime()
+      (a, b) =>
+        new Date(a.trainedAt).getTime() - new Date(b.trainedAt).getTime(),
     );
     for (const training of sorted) {
       const key = localDayKey(training.trainedAt);
@@ -236,5 +245,7 @@ function shiftMonth(key: string, delta: number): string {
   const date = dayKeyToDate(key);
   const target = addMonths(monthOf(date), delta);
   const lastDay = new Date(target.year, target.month + 1, 0).getDate();
-  return localDayKey(new Date(target.year, target.month, Math.min(date.getDate(), lastDay)))!;
+  return localDayKey(
+    new Date(target.year, target.month, Math.min(date.getDate(), lastDay)),
+  )!;
 }

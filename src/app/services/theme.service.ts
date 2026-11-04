@@ -9,13 +9,17 @@ export const THEME_STORAGE_KEY = 'theme';
 const THEME_MODES: readonly ThemeMode[] = ['light', 'dark', 'system'];
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ThemeService {
   private readonly document = inject(DOCUMENT);
-  private readonly mediaQuery = this.document.defaultView?.matchMedia?.('(prefers-color-scheme: dark)');
+  private readonly mediaQuery = this.document.defaultView?.matchMedia?.(
+    '(prefers-color-scheme: dark)',
+  );
 
-  private readonly systemPrefersDark = signal(this.mediaQuery?.matches ?? false);
+  private readonly systemPrefersDark = signal(
+    this.mediaQuery?.matches ?? false,
+  );
   private readonly modeSignal = signal<ThemeMode>(this.readStoredMode());
 
   /** The user's choice: an explicit theme, or follow the OS. */
@@ -31,7 +35,9 @@ export class ThemeService {
   });
 
   constructor() {
-    this.mediaQuery?.addEventListener('change', event => this.systemPrefersDark.set(event.matches));
+    this.mediaQuery?.addEventListener('change', (event) =>
+      this.systemPrefersDark.set(event.matches),
+    );
 
     effect(() => {
       const theme = this.resolvedTheme();
@@ -57,7 +63,10 @@ export class ThemeService {
 
   /** Cycles light -> dark -> system. */
   cycleMode(): void {
-    const next = THEME_MODES[(THEME_MODES.indexOf(this.modeSignal()) + 1) % THEME_MODES.length];
+    const next =
+      THEME_MODES[
+        (THEME_MODES.indexOf(this.modeSignal()) + 1) % THEME_MODES.length
+      ];
     this.setMode(next);
   }
 

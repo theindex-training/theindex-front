@@ -1,5 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -22,9 +27,15 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-gym-edit',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './gym-edit.component.html'
+  templateUrl: './gym-edit.component.html',
 })
 export class GymEditComponent implements OnInit {
   readonly form: FormGroup<{
@@ -49,7 +60,9 @@ export class GymEditComponent implements OnInit {
         Validators.required,
         trimmedLength(2, 120),
       ]),
-      address: this.formBuilder.control<string | null>(null, [trimmedLength(2, 250)]),
+      address: this.formBuilder.control<string | null>(null, [
+        trimmedLength(2, 250),
+      ]),
     });
   }
 

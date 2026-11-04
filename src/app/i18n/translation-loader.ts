@@ -15,9 +15,13 @@ export class BundledTranslationLoader implements TranslocoLoader {
   getTranslation(lang: string): Promise<Translation> {
     switch (lang) {
       case 'en':
-        return import('../../../public/i18n/en.json').then(module => module.default);
+        return import('../../../public/i18n/en.json').then(
+          (module) => module.default,
+        );
       default:
-        return import('../../../public/i18n/bg.json').then(module => module.default);
+        return import('../../../public/i18n/bg.json').then(
+          (module) => module.default,
+        );
     }
   }
 }

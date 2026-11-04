@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -8,10 +14,16 @@ import {
   Settlement,
   SettlementAllocation,
   SettlementLine,
-  SettlementsService
+  SettlementsService,
 } from '../../services/settlements.service';
-import { TraineeProfile, TraineesService } from '../../services/trainees.service';
-import { TrainerProfile, TrainersService } from '../../services/trainers.service';
+import {
+  TraineeProfile,
+  TraineesService,
+} from '../../services/trainees.service';
+import {
+  TrainerProfile,
+  TrainersService,
+} from '../../services/trainers.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 import { ChipComponent } from '../../components/chip/chip.component';
@@ -25,10 +37,21 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 @Component({
   selector: 'app-settlement-details',
   standalone: true,
-  imports: [EnumLabelPipe, UiMessagePipe, TranslocoPipe, CommonModule, FormsModule, RouterLink, PageHeaderComponent, SkeletonListComponent, ChipComponent, AvatarComponent],
+  imports: [
+    EnumLabelPipe,
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    PageHeaderComponent,
+    SkeletonListComponent,
+    ChipComponent,
+    AvatarComponent,
+  ],
   templateUrl: './settlement-details.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './settlement-details.component.scss'
+  styleUrl: './settlement-details.component.scss',
 })
 export class SettlementDetailsComponent implements OnInit {
   readonly format = inject(LocaleFormatService);
@@ -61,7 +84,7 @@ export class SettlementDetailsComponent implements OnInit {
     private readonly traineesService: TraineesService,
     private readonly gymLocationsService: GymLocationsService,
     private readonly route: ActivatedRoute,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -84,17 +107,20 @@ export class SettlementDetailsComponent implements OnInit {
     this.errorMessage = null;
 
     this.settlementsService.getById(this.settlementId).subscribe({
-      next: response => {
+      next: (response) => {
         this.settlement = response.settlement;
         this.lines = response.lines;
         this.loading = false;
         this.changeDetector.detectChanges();
       },
-      error: error => {
-        this.errorMessage = apiErrorMessage(error, 'settlements.details.loadError');
+      error: (error) => {
+        this.errorMessage = apiErrorMessage(
+          error,
+          'settlements.details.loadError',
+        );
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -106,41 +132,51 @@ export class SettlementDetailsComponent implements OnInit {
       .allocations(this.settlementId, {
         trainerId: this.selectedTrainerId || undefined,
         offset: 0,
-        limit: 500
+        limit: 500,
       })
       .subscribe({
-        next: response => {
+        next: (response) => {
           this.allocations = response.rows;
           this.allocationsTotal = response.total;
           this.loadingAllocations = false;
           this.changeDetector.detectChanges();
         },
-        error: error => {
-          this.allocationError = apiErrorMessage(error, 'settlements.details.loadAllocationsError');
+        error: (error) => {
+          this.allocationError = apiErrorMessage(
+            error,
+            'settlements.details.loadAllocationsError',
+          );
           this.loadingAllocations = false;
           this.changeDetector.detectChanges();
-        }
+        },
       });
   }
 
   finalizeSettlement(): void {
-    if (!this.isAdmin || !this.settlement || this.settlement.status !== 'DRAFT') {
+    if (
+      !this.isAdmin ||
+      !this.settlement ||
+      this.settlement.status !== 'DRAFT'
+    ) {
       return;
     }
 
     this.finalizing = true;
 
     this.settlementsService.finalize(this.settlement.id).subscribe({
-      next: settlement => {
+      next: (settlement) => {
         this.settlement = settlement;
         this.finalizing = false;
         this.changeDetector.detectChanges();
       },
-      error: error => {
-        this.errorMessage = apiErrorMessage(error, 'settlements.details.finalizeError');
+      error: (error) => {
+        this.errorMessage = apiErrorMessage(
+          error,
+          'settlements.details.finalizeError',
+        );
         this.finalizing = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -186,40 +222,48 @@ export class SettlementDetailsComponent implements OnInit {
     this.loadingEntities = true;
 
     this.trainersService.list().subscribe({
-      next: trainers => {
+      next: (trainers) => {
         this.trainers = trainers;
         this.trainerLabelById = new Map(
-          trainers.map(trainer => [trainer.id, trainer.nickname?.trim() || trainer.name])
+          trainers.map((trainer) => [
+            trainer.id,
+            trainer.nickname?.trim() || trainer.name,
+          ]),
         );
         this.changeDetector.detectChanges();
       },
       error: () => {
         this.changeDetector.detectChanges();
-      }
+      },
     });
 
     this.traineesService.list().subscribe({
       next: (trainees: TraineeProfile[]) => {
         this.traineeLabelById = new Map(
-          trainees.map(trainee => [trainee.id, this.formatTraineeLabel(trainee)])
+          trainees.map((trainee) => [
+            trainee.id,
+            this.formatTraineeLabel(trainee),
+          ]),
         );
         this.changeDetector.detectChanges();
       },
       error: () => {
         this.changeDetector.detectChanges();
-      }
+      },
     });
 
     this.gymLocationsService.list(true).subscribe({
-      next: locations => {
-        this.locationNameById = new Map(locations.map(location => [location.id, location.name]));
+      next: (locations) => {
+        this.locationNameById = new Map(
+          locations.map((location) => [location.id, location.name]),
+        );
         this.loadingEntities = false;
         this.changeDetector.detectChanges();
       },
       error: () => {
         this.loadingEntities = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 }

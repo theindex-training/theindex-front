@@ -1,5 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -7,14 +12,14 @@ import {
   FormGroup,
   ReactiveFormsModule,
   ValidatorFn,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   Plan,
   PlanType,
   PlansService,
-  UpdatePlanPayload
+  UpdatePlanPayload,
 } from '../../services/plans.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -48,9 +53,15 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
 @Component({
   selector: 'app-plan-edit',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './plan-edit.component.html'
+  templateUrl: './plan-edit.component.html',
 })
 export class PlanEditComponent implements OnInit {
   readonly form: FormGroup<{
@@ -72,18 +83,20 @@ export class PlanEditComponent implements OnInit {
     private readonly plansService: PlansService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
-      type: this.formBuilder.nonNullable.control<PlanType>('PUNCH', [Validators.required]),
+      type: this.formBuilder.nonNullable.control<PlanType>('PUNCH', [
+        Validators.required,
+      ]),
       title: this.formBuilder.nonNullable.control('', [Validators.required]),
       price: this.formBuilder.nonNullable.control(0, [
         Validators.required,
-        currencyValidator
+        currencyValidator,
       ]),
       credits: this.formBuilder.control<number | null>(null),
       durationDays: this.formBuilder.control<number | null>(null),
-      isActive: this.formBuilder.nonNullable.control(true)
+      isActive: this.formBuilder.nonNullable.control(true),
     });
   }
 
@@ -108,18 +121,17 @@ export class PlanEditComponent implements OnInit {
           price: this.toEuros(plan.priceCents),
           credits: plan.credits,
           durationDays: plan.durationDays,
-          isActive: plan.isActive
+          isActive: plan.isActive,
         });
         this.syncTypeValidators(plan.type);
         this.loading = false;
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'plans.errors.load');
+        this.errorMessage = apiErrorMessage(error, 'plans.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -139,7 +151,7 @@ export class PlanEditComponent implements OnInit {
       priceCents: this.toCents(raw.price),
       isActive: raw.isActive,
       credits: raw.type === 'PUNCH' ? Number(raw.credits) : null,
-      durationDays: raw.type === 'TIME' ? Number(raw.durationDays) : null
+      durationDays: raw.type === 'TIME' ? Number(raw.durationDays) : null,
     };
 
     this.submitting = true;
@@ -151,11 +163,10 @@ export class PlanEditComponent implements OnInit {
         this.router.navigate(['/plans']);
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'plans.edit.error');
+        this.errorMessage = apiErrorMessage(error, 'plans.edit.error');
         this.submitting = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -167,7 +178,7 @@ export class PlanEditComponent implements OnInit {
       creditsControl.setValidators([
         Validators.required,
         Validators.min(1),
-        integerValidator
+        integerValidator,
       ]);
       durationControl.clearValidators();
       durationControl.setValue(null);
@@ -175,7 +186,7 @@ export class PlanEditComponent implements OnInit {
       durationControl.setValidators([
         Validators.required,
         Validators.min(1),
-        integerValidator
+        integerValidator,
       ]);
       creditsControl.clearValidators();
       creditsControl.setValue(null);

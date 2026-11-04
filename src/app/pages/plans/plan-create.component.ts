@@ -1,5 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -7,10 +12,14 @@ import {
   FormGroup,
   ReactiveFormsModule,
   ValidatorFn,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CreatePlanPayload, PlanType, PlansService } from '../../services/plans.service';
+import {
+  CreatePlanPayload,
+  PlanType,
+  PlansService,
+} from '../../services/plans.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
@@ -43,9 +52,15 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
 @Component({
   selector: 'app-plan-create',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './plan-create.component.html'
+  templateUrl: './plan-create.component.html',
 })
 export class PlanCreateComponent implements OnInit {
   readonly form: FormGroup<{
@@ -64,18 +79,20 @@ export class PlanCreateComponent implements OnInit {
     private readonly formBuilder: FormBuilder,
     private readonly plansService: PlansService,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
-      type: this.formBuilder.nonNullable.control<PlanType>('PUNCH', [Validators.required]),
+      type: this.formBuilder.nonNullable.control<PlanType>('PUNCH', [
+        Validators.required,
+      ]),
       title: this.formBuilder.nonNullable.control('', [Validators.required]),
       price: this.formBuilder.nonNullable.control(0, [
         Validators.required,
-        currencyValidator
+        currencyValidator,
       ]),
       credits: this.formBuilder.control<number | null>(null),
       durationDays: this.formBuilder.control<number | null>(null),
-      isActive: this.formBuilder.nonNullable.control(true)
+      isActive: this.formBuilder.nonNullable.control(true),
     });
   }
 
@@ -97,7 +114,7 @@ export class PlanCreateComponent implements OnInit {
       type: raw.type,
       title: raw.title.trim(),
       priceCents: this.toCents(raw.price),
-      isActive: raw.isActive
+      isActive: raw.isActive,
     };
 
     if (raw.type === 'PUNCH') {
@@ -115,11 +132,10 @@ export class PlanCreateComponent implements OnInit {
         this.router.navigate(['/plans']);
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'plans.create.error');
+        this.errorMessage = apiErrorMessage(error, 'plans.create.error');
         this.submitting = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -131,7 +147,7 @@ export class PlanCreateComponent implements OnInit {
       creditsControl.setValidators([
         Validators.required,
         Validators.min(1),
-        integerValidator
+        integerValidator,
       ]);
       durationControl.clearValidators();
       durationControl.setValue(null);
@@ -139,7 +155,7 @@ export class PlanCreateComponent implements OnInit {
       durationControl.setValidators([
         Validators.required,
         Validators.min(1),
-        integerValidator
+        integerValidator,
       ]);
       creditsControl.clearValidators();
       creditsControl.setValue(null);

@@ -1,14 +1,25 @@
 <section class="page-stack">
-  <app-page-header [title]="'traineeDashboard.title' | transloco" [subtitle]="'traineeDashboard.subtitle' | transloco" />
+  <app-page-header
+    [title]="'traineeDashboard.title' | transloco"
+    [subtitle]="'traineeDashboard.subtitle' | transloco"
+  />
 
   @if (errorMessage && loading) {
-    <app-empty-state tone="danger" [title]="'traineeDashboard.loadErrorTitle' | transloco" [message]="errorMessage | uiMessage" />
+    <app-empty-state
+      tone="danger"
+      [title]="'traineeDashboard.loadErrorTitle' | transloco"
+      [message]="errorMessage | uiMessage"
+    />
   } @else {
     <section class="page-stack" aria-labelledby="my-subscriptions-title">
       <div class="section-header">
         <div>
-          <h2 class="panel__title" id="my-subscriptions-title">{{ 'traineeDashboard.subscriptions' | transloco }}</h2>
-          <p class="text-muted section-header__sub">{{ 'traineeDashboard.subscriptionsSub' | transloco }}</p>
+          <h2 class="panel__title" id="my-subscriptions-title">
+            {{ 'traineeDashboard.subscriptions' | transloco }}
+          </h2>
+          <p class="text-muted section-header__sub">
+            {{ 'traineeDashboard.subscriptionsSub' | transloco }}
+          </p>
         </div>
         <app-segmented-control
           [label]="'traineeDashboard.subscriptionFilter' | transloco"

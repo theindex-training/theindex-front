@@ -9,21 +9,26 @@ type Tree = { [key: string]: string | Tree };
 
 /** Flattens { a: { b: 'x' } } to { 'a.b': 'x' }. */
 function flatten(tree: Tree, prefix = ''): Record<string, string> {
-  return Object.entries(tree).reduce<Record<string, string>>((flat, [key, value]) => {
-    const path = prefix + key;
-    return typeof value === 'string'
-      ? { ...flat, [path]: value }
-      : { ...flat, ...flatten(value, `${path}.`) };
-  }, {});
+  return Object.entries(tree).reduce<Record<string, string>>(
+    (flat, [key, value]) => {
+      const path = prefix + key;
+      return typeof value === 'string'
+        ? { ...flat, [path]: value }
+        : { ...flat, ...flatten(value, `${path}.`) };
+    },
+    {},
+  );
 }
 
 function sourceFiles(dir: string): string[] {
-  return readdirSync(dir).flatMap(name => {
+  return readdirSync(dir).flatMap((name) => {
     const path = join(dir, name);
     if (statSync(path).isDirectory()) {
       return sourceFiles(path);
     }
-    return /\.(ts|html)$/.test(name) && !name.endsWith('.spec.ts') ? [path] : [];
+    return /\.(ts|html)$/.test(name) && !name.endsWith('.spec.ts')
+      ? [path]
+      : [];
   });
 }
 
@@ -38,7 +43,10 @@ const namespaces = Object.keys(en);
  * the ENUM_VALUES test below.
  */
 function keysUsedInSource(): Map<string, string[]> {
-  const pattern = new RegExp(`['"\`]((?:${namespaces.join('|')})\\.[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)*)['"\`]`, 'g');
+  const pattern = new RegExp(
+    `['"\`]((?:${namespaces.join('|')})\\.[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)*)['"\`]`,
+    'g',
+  );
   const used = new Map<string, string[]>();
   for (const file of sourceFiles('src/app')) {
     for (const match of readFileSync(file, 'utf8').matchAll(pattern)) {
@@ -50,8 +58,8 @@ function keysUsedInSource(): Map<string, string[]> {
 
 describe('translation files', () => {
   it('bg.json and en.json have exactly the same keys', () => {
-    const onlyInEn = Object.keys(enKeys).filter(key => !(key in bgKeys));
-    const onlyInBg = Object.keys(bgKeys).filter(key => !(key in enKeys));
+    const onlyInEn = Object.keys(enKeys).filter((key) => !(key in bgKeys));
+    const onlyInBg = Object.keys(bgKeys).filter((key) => !(key in enKeys));
 
     expect(onlyInEn, 'keys missing from bg.json').toEqual([]);
     expect(onlyInBg, 'keys missing from en.json').toEqual([]);
@@ -69,17 +77,23 @@ describe('translation files', () => {
     const used = keysUsedInSource();
     const missing = [...used.entries()]
       .filter(([key]) => !(key in enKeys) || !(key in bgKeys))
-      .map(([key, files]) => `${key} (${files.map(file => file.replace('src/app/', '')).join(', ')})`);
+      .map(
+        ([key, files]) =>
+          `${key} (${files.map((file) => file.replace('src/app/', '')).join(', ')})`,
+      );
 
     expect(used.size).toBeGreaterThan(300);
-    expect(missing, 'keys used in src/app but missing from the language files').toEqual([]);
+    expect(
+      missing,
+      'keys used in src/app but missing from the language files',
+    ).toEqual([]);
   });
 
   it('labels every API enum value in both languages', () => {
     const missing = Object.entries(ENUM_VALUES).flatMap(([group, values]) =>
       values
-        .map(value => enumLabelKey(group as keyof typeof ENUM_VALUES, value))
-        .filter(key => !(key in enKeys) || !(key in bgKeys))
+        .map((value) => enumLabelKey(group as keyof typeof ENUM_VALUES, value))
+        .filter((key) => !(key in enKeys) || !(key in bgKeys)),
     );
 
     expect(missing).toEqual([]);
@@ -87,7 +101,10 @@ describe('translation files', () => {
 
   it('contains only valid ICU messages', () => {
     const invalid: string[] = [];
-    for (const [lang, keys] of [['en', enKeys], ['bg', bgKeys]] as const) {
+    for (const [lang, keys] of [
+      ['en', enKeys],
+      ['bg', bgKeys],
+    ] as const) {
       const messageFormat = new MessageFormat(lang);
       for (const [key, value] of Object.entries(keys)) {
         try {
@@ -104,12 +121,18 @@ describe('translation files', () => {
   it('uses the same placeholders in both languages', () => {
     const placeholders = (value: string) =>
       // {name} or {count, plural, …}, but not plural branches such as "one {selected}".
-      [...value.matchAll(/(?<!(?:zero|one|two|few|many|other|=\d+)\s)\{(\w+)[,}]/g)]
-        .map(match => match[1])
+      [
+        ...value.matchAll(
+          /(?<!(?:zero|one|two|few|many|other|=\d+)\s)\{(\w+)[,}]/g,
+        ),
+      ]
+        .map((match) => match[1])
         .sort()
         .join(',');
     const mismatched = Object.keys(enKeys).filter(
-      key => key in bgKeys && placeholders(enKeys[key]) !== placeholders(bgKeys[key])
+      (key) =>
+        key in bgKeys &&
+        placeholders(enKeys[key]) !== placeholders(bgKeys[key]),
     );
 
     expect(mismatched).toEqual([]);

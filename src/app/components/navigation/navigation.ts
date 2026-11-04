@@ -30,32 +30,74 @@ export interface Navigation {
 }
 
 const STAFF_MAIN: NavItem[] = [
-  { label: 'nav.dashboard', tabLabel: 'nav.home', route: '/home', icon: 'home' },
+  {
+    label: 'nav.dashboard',
+    tabLabel: 'nav.home',
+    route: '/home',
+    icon: 'home',
+  },
   { label: 'nav.trainees', route: '/trainees', icon: 'users' },
-  { label: 'nav.registerAttendance', tabLabel: 'nav.register', route: '/attendance/new', icon: 'check', primary: true },
-  { label: 'nav.attendanceHistory', route: '/attendance', icon: 'history', exact: true },
-  { label: 'nav.settlements', tabLabel: 'nav.settle', route: '/settlements', icon: 'wallet' },
-  { label: 'nav.cashRegister', route: '/cash-register', icon: 'banknote', roles: ['ADMIN'] }
+  {
+    label: 'nav.registerAttendance',
+    tabLabel: 'nav.register',
+    route: '/attendance/new',
+    icon: 'check',
+    primary: true,
+  },
+  {
+    label: 'nav.attendanceHistory',
+    route: '/attendance',
+    icon: 'history',
+    exact: true,
+  },
+  {
+    label: 'nav.settlements',
+    tabLabel: 'nav.settle',
+    route: '/settlements',
+    icon: 'wallet',
+  },
+  {
+    label: 'nav.cashRegister',
+    route: '/cash-register',
+    icon: 'banknote',
+    roles: ['ADMIN'],
+  },
 ];
 
 const STAFF_MANAGE: NavItem[] = [
   { label: 'nav.plans', route: '/plans', icon: 'clipboard' },
   { label: 'nav.gyms', route: '/gyms', icon: 'dumbbell' },
-  { label: 'nav.gymSubscriptions', route: '/gym-subscriptions', icon: 'ticket' },
-  { label: 'nav.trainers', route: '/trainers', icon: 'trainer', roles: ['ADMIN'] },
-  { label: 'nav.trainingTimes', route: '/training-times', icon: 'clock' }
+  {
+    label: 'nav.gymSubscriptions',
+    route: '/gym-subscriptions',
+    icon: 'ticket',
+  },
+  {
+    label: 'nav.trainers',
+    route: '/trainers',
+    icon: 'trainer',
+    roles: ['ADMIN'],
+  },
+  { label: 'nav.trainingTimes', route: '/training-times', icon: 'clock' },
 ];
 
-const STAFF_TAB_ROUTES = ['/home', '/trainees', '/attendance/new', '/settlements'];
+const STAFF_TAB_ROUTES = [
+  '/home',
+  '/trainees',
+  '/attendance/new',
+  '/settlements',
+];
 
 const TRAINEE_MAIN: NavItem[] = [
   { label: 'nav.profile', route: '/my-profile', icon: 'user' },
   { label: 'nav.stats', route: '/stats', icon: 'chart' },
-  { label: 'nav.records', route: '/records', icon: 'trophy' }
+  { label: 'nav.records', route: '/records', icon: 'trophy' },
 ];
 
 function visibleTo(items: NavItem[], role: string | null): NavItem[] {
-  return items.filter(item => !item.roles || (!!role && item.roles.includes(role)));
+  return items.filter(
+    (item) => !item.roles || (!!role && item.roles.includes(role)),
+  );
 }
 
 /** Navigation for a role. Role checks here only shape the UI; routes are still guarded by roleGuard. */
@@ -68,7 +110,7 @@ export function buildNavigation(role: string | null): Navigation {
       tabs: TRAINEE_MAIN,
       moreMain: [],
       moreManage: [],
-      sheetLabel: 'nav.account'
+      sheetLabel: 'nav.account',
     };
   }
 
@@ -80,16 +122,18 @@ export function buildNavigation(role: string | null): Navigation {
     main,
     manage,
     tabs: main.filter(isTab),
-    moreMain: main.filter(item => !isTab(item)),
+    moreMain: main.filter((item) => !isTab(item)),
     moreManage: manage,
-    sheetLabel: 'nav.more'
+    sheetLabel: 'nav.more',
   };
 }
 
 /** Whether the URL belongs to one of the items (used to highlight the "More" tab). */
 export function isUrlInItems(url: string, items: NavItem[]): boolean {
   const path = url.split(/[?#]/)[0];
-  return items.some(item =>
-    item.exact ? path === item.route : path === item.route || path.startsWith(`${item.route}/`)
+  return items.some((item) =>
+    item.exact
+      ? path === item.route
+      : path === item.route || path.startsWith(`${item.route}/`),
   );
 }

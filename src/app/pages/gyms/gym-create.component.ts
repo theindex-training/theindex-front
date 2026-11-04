@@ -1,5 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -21,9 +25,15 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-gym-create',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './gym-create.component.html'
+  templateUrl: './gym-create.component.html',
 })
 export class GymCreateComponent {
   readonly form: FormGroup<{
@@ -45,7 +55,9 @@ export class GymCreateComponent {
         Validators.required,
         trimmedLength(2, 120),
       ]),
-      address: this.formBuilder.control<string | null>(null, [trimmedLength(2, 250)]),
+      address: this.formBuilder.control<string | null>(null, [
+        trimmedLength(2, 250),
+      ]),
     });
   }
 

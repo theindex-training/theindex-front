@@ -1,6 +1,9 @@
 import { Type } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -33,11 +36,31 @@ import { TrainingTimeEditComponent } from './training-times/training-time-edit.c
  * (Selling a subscription, the 19th handler, is covered in trainee-details.component.spec.ts.)
  */
 
-const PLAN = { id: 'p1', type: 'PUNCH', title: '10 visits', priceCents: 4550, credits: 10, durationDays: null, isActive: true };
-const GYM = { id: 'g1', name: 'Center', address: null, notes: null, isActive: true };
+const PLAN = {
+  id: 'p1',
+  type: 'PUNCH',
+  title: '10 visits',
+  priceCents: 4550,
+  credits: 10,
+  durationDays: null,
+  isActive: true,
+};
+const GYM = {
+  id: 'g1',
+  name: 'Center',
+  address: null,
+  notes: null,
+  isActive: true,
+};
 const GYM_SUBSCRIPTION = { id: 'gs1', name: 'Sports card', isActive: true };
 const TRAINING_TIME = { id: 'tt1', startTime: '18:00:00', endTime: '19:00:00' };
-const TRAINER = { id: 'tr1', name: 'Petar', nickname: null, accountId: null, isActive: true };
+const TRAINER = {
+  id: 'tr1',
+  name: 'Petar',
+  nickname: null,
+  accountId: null,
+  isActive: true,
+};
 const TRAINEE = {
   id: 't1',
   name: 'Ivan Petrov',
@@ -45,7 +68,7 @@ const TRAINEE = {
   phone: null,
   accountId: null,
   gymSubscriptionId: null,
-  isActive: true
+  isActive: true,
 };
 
 interface Case {
@@ -69,7 +92,7 @@ const cases: Case[] = [
     url: '/plans/new',
     fill: { '#plan-title': 'Plan', '#plan-credits': '10', '#plan-price': '10' },
     request: { method: 'POST', url: '/api/plans' },
-    busyLabel: en.common.saving
+    busyLabel: en.common.saving,
   },
   {
     page: 'plan edit',
@@ -77,7 +100,7 @@ const cases: Case[] = [
     url: '/plans/p1/edit',
     loads: { '/api/plans/p1': PLAN },
     request: { method: 'PATCH', url: '/api/plans/p1' },
-    busyLabel: en.common.saving
+    busyLabel: en.common.saving,
   },
   {
     page: 'plan deactivate',
@@ -86,7 +109,7 @@ const cases: Case[] = [
     loads: { '/api/plans/p1': PLAN },
     confirmLabel: en.plans.delete.submit,
     request: { method: 'DELETE', url: '/api/plans/p1' },
-    busyLabel: en.common.deactivating
+    busyLabel: en.common.deactivating,
   },
   {
     page: 'gym create',
@@ -94,7 +117,7 @@ const cases: Case[] = [
     url: '/gyms/new',
     fill: { '#gym-name': 'Center' },
     request: { method: 'POST', url: '/api/gym-locations' },
-    busyLabel: en.common.saving
+    busyLabel: en.common.saving,
   },
   {
     page: 'gym edit',
@@ -102,7 +125,7 @@ const cases: Case[] = [
     url: '/gyms/g1/edit',
     loads: { '/api/gym-locations/g1': GYM },
     request: { method: 'PATCH', url: '/api/gym-locations/g1' },
-    busyLabel: en.common.saving
+    busyLabel: en.common.saving,
   },
   {
     page: 'gym deactivate',
@@ -111,7 +134,7 @@ const cases: Case[] = [
     loads: { '/api/gym-locations/g1': GYM },
     confirmLabel: en.gyms.delete.submit,
     request: { method: 'DELETE', url: '/api/gym-locations/g1' },
-    busyLabel: en.common.deactivating
+    busyLabel: en.common.deactivating,
   },
   {
     page: 'gym subscription create',
@@ -119,7 +142,7 @@ const cases: Case[] = [
     url: '/gym-subscriptions/new',
     fill: { '#gym-subscription-name': 'Sports card' },
     request: { method: 'POST', url: '/api/gym-subscriptions' },
-    busyLabel: en.common.saving
+    busyLabel: en.common.saving,
   },
   {
     page: 'gym subscription edit',
@@ -127,7 +150,7 @@ const cases: Case[] = [
     url: '/gym-subscriptions/gs1/edit',
     loads: { '/api/gym-subscriptions/gs1': GYM_SUBSCRIPTION },
     request: { method: 'PATCH', url: '/api/gym-subscriptions/gs1' },
-    busyLabel: en.common.saving
+    busyLabel: en.common.saving,
   },
   {
     page: 'gym subscription deactivate',
@@ -136,15 +159,18 @@ const cases: Case[] = [
     loads: { '/api/gym-subscriptions/gs1': GYM_SUBSCRIPTION },
     confirmLabel: en.gymSubscriptions.delete.submit,
     request: { method: 'DELETE', url: '/api/gym-subscriptions/gs1' },
-    busyLabel: en.common.deactivating
+    busyLabel: en.common.deactivating,
   },
   {
     page: 'training time create',
     component: TrainingTimeCreateComponent,
     url: '/training-times/new',
-    fill: { '#training-time-start-time': '18:00', '#training-time-end-time': '19:00' },
+    fill: {
+      '#training-time-start-time': '18:00',
+      '#training-time-end-time': '19:00',
+    },
     request: { method: 'POST', url: '/api/training-times' },
-    busyLabel: en.common.saving
+    busyLabel: en.common.saving,
   },
   {
     page: 'training time edit',
@@ -152,7 +178,7 @@ const cases: Case[] = [
     url: '/training-times/tt1/edit',
     loads: { '/api/training-times/tt1': TRAINING_TIME },
     request: { method: 'PATCH', url: '/api/training-times/tt1' },
-    busyLabel: en.common.saving
+    busyLabel: en.common.saving,
   },
   {
     page: 'training time delete',
@@ -161,7 +187,7 @@ const cases: Case[] = [
     loads: { '/api/training-times/tt1': TRAINING_TIME },
     confirmLabel: en.trainingTimes.delete.submit,
     request: { method: 'DELETE', url: '/api/training-times/tt1' },
-    busyLabel: en.trainingTimes.delete.deleting
+    busyLabel: en.trainingTimes.delete.deleting,
   },
   {
     page: 'trainer create',
@@ -169,7 +195,7 @@ const cases: Case[] = [
     url: '/trainers/new',
     fill: { '#trainer-name': 'Petar' },
     request: { method: 'POST', url: '/api/trainers' },
-    busyLabel: en.common.saving
+    busyLabel: en.common.saving,
   },
   {
     page: 'trainer edit',
@@ -177,7 +203,7 @@ const cases: Case[] = [
     url: '/trainers/tr1/edit',
     loads: { '/api/trainers/tr1': TRAINER },
     request: { method: 'PATCH', url: '/api/trainers/tr1' },
-    busyLabel: en.common.saving
+    busyLabel: en.common.saving,
   },
   {
     page: 'trainer deactivate',
@@ -186,7 +212,7 @@ const cases: Case[] = [
     loads: { '/api/trainers/tr1': TRAINER },
     confirmLabel: en.trainers.delete.submit,
     request: { method: 'DELETE', url: '/api/trainers/tr1' },
-    busyLabel: en.common.deactivating
+    busyLabel: en.common.deactivating,
   },
   {
     page: 'trainee create',
@@ -195,15 +221,18 @@ const cases: Case[] = [
     loads: { '/api/gym-subscriptions': [] },
     fill: { '#trainee-name': 'Ivan Petrov' },
     request: { method: 'POST', url: '/api/trainees' },
-    busyLabel: en.common.saving
+    busyLabel: en.common.saving,
   },
   {
     page: 'trainee edit',
     component: TraineeEditComponent,
     url: '/trainees/t1/edit',
-    loads: { '/api/gym-subscriptions?includeInactive=true': [], '/api/trainees/t1': TRAINEE },
+    loads: {
+      '/api/gym-subscriptions?includeInactive=true': [],
+      '/api/trainees/t1': TRAINEE,
+    },
     request: { method: 'PATCH', url: '/api/trainees/t1' },
-    busyLabel: en.common.saving
+    busyLabel: en.common.saving,
   },
   {
     page: 'trainee deactivate',
@@ -212,8 +241,8 @@ const cases: Case[] = [
     loads: { '/api/trainees/t1': TRAINEE },
     confirmLabel: en.trainees.delete.submit,
     request: { method: 'DELETE', url: '/api/trainees/t1' },
-    busyLabel: en.common.deactivating
-  }
+    busyLabel: en.common.deactivating,
+  },
 ];
 
 /** '/plans/p1/edit' → 'plans/:id/edit', so the page reads its id from the route as in the app. */
@@ -221,7 +250,9 @@ function routePath(url: string): string {
   return url
     .slice(1)
     .split('/')
-    .map((segment, index) => (index === 1 && segment !== 'new' ? ':id' : segment))
+    .map((segment, index) =>
+      index === 1 && segment !== 'new' ? ':id' : segment,
+    )
     .join('/');
 }
 
@@ -238,10 +269,13 @@ describe('a failed save shows the error and gives the button back', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([
-          ...cases.map(({ url, component }) => ({ path: routePath(url), component })),
-          { path: '**', children: [] }
-        ])
-      ]
+          ...cases.map(({ url, component }) => ({
+            path: routePath(url),
+            component,
+          })),
+          { path: '**', children: [] },
+        ]),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
     harness = await RouterTestingHarness.create();
@@ -250,38 +284,51 @@ describe('a failed save shows the error and gives the button back', () => {
   afterEach(() => http.verify());
 
   const busyButton = (label: string) =>
-    page.queryAll<HTMLButtonElement>('button').find(button => button.textContent?.trim() === label);
+    page
+      .queryAll<HTMLButtonElement>('button')
+      .find((button) => button.textContent?.trim() === label);
 
-  it.each(cases.map(testCase => [testCase.page, testCase] as const))('%s', async (_, testCase) => {
-    await harness.navigateByUrl(testCase.url, testCase.component);
-    page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
-    for (const [url, body] of Object.entries(testCase.loads ?? {})) {
-      http.expectOne(url).flush(body);
-    }
-    await page.settle();
-
-    for (const [selector, value] of Object.entries(testCase.fill ?? {})) {
-      await page.type(selector, value);
-    }
-    if (testCase.confirmLabel) {
-      page.queryAll('button').find(button => button.textContent?.trim() === testCase.confirmLabel)!.click();
+  it.each(cases.map((testCase) => [testCase.page, testCase] as const))(
+    '%s',
+    async (_, testCase) => {
+      await harness.navigateByUrl(testCase.url, testCase.component);
+      page = driver(
+        () => harness.routeNativeElement!,
+        () => harness.fixture.whenStable(),
+      );
+      for (const [url, body] of Object.entries(testCase.loads ?? {})) {
+        http.expectOne(url).flush(body);
+      }
       await page.settle();
-    } else {
-      await page.submit();
-    }
 
-    const button = busyButton(testCase.busyLabel);
-    expect(button?.disabled, 'button is busy while saving').toBe(true);
+      for (const [selector, value] of Object.entries(testCase.fill ?? {})) {
+        await page.type(selector, value);
+      }
+      if (testCase.confirmLabel) {
+        page
+          .queryAll('button')
+          .find(
+            (button) => button.textContent?.trim() === testCase.confirmLabel,
+          )!
+          .click();
+        await page.settle();
+      } else {
+        await page.submit();
+      }
 
-    const req = http.expectOne(testCase.request.url);
-    expect(req.request.method).toBe(testCase.request.method);
-    const error = apiError('Something went wrong on the server', 409);
-    req.flush(error.body, error.options);
-    await page.settle();
+      const button = busyButton(testCase.busyLabel);
+      expect(button?.disabled, 'button is busy while saving').toBe(true);
 
-    expect(page.alert()).toBe('Something went wrong on the server');
-    expect(button!.disabled).toBe(false);
-    expect(button!.textContent?.trim()).not.toBe(testCase.busyLabel);
-    expect(harness.routeNativeElement).toBeTruthy();
-  });
+      const req = http.expectOne(testCase.request.url);
+      expect(req.request.method).toBe(testCase.request.method);
+      const error = apiError('Something went wrong on the server', 409);
+      req.flush(error.body, error.options);
+      await page.settle();
+
+      expect(page.alert()).toBe('Something went wrong on the server');
+      expect(button!.disabled).toBe(false);
+      expect(button!.textContent?.trim()).not.toBe(testCase.busyLabel);
+      expect(harness.routeNativeElement).toBeTruthy();
+    },
+  );
 });

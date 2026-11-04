@@ -8,7 +8,9 @@
   @if (loading) {
     <p class="notice" role="status">{{ 'trainees.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !trainee) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
   } @else if (trainee) {
     <div class="panel">
       <dl class="detail-list">
@@ -35,12 +37,23 @@
       </p>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
       }
 
       <div class="form-actions">
-        <button class="btn btn--danger-solid" type="button" (click)="confirmDeactivate()" [disabled]="submitting">
-          {{ submitting ? ('common.deactivating' | transloco) : ('trainees.delete.submit' | transloco) }}
+        <button
+          class="btn btn--danger-solid"
+          type="button"
+          (click)="confirmDeactivate()"
+          [disabled]="submitting"
+        >
+          {{
+            submitting
+              ? ('common.deactivating' | transloco)
+              : ('trainees.delete.submit' | transloco)
+          }}
         </button>
       </div>
     </div>

@@ -10,21 +10,20 @@ import { ThemeService } from './services/theme.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: true
+  standalone: true,
 })
 export class AppComponent implements OnInit {
-
   // ThemeService is injected here so it tracks OS theme changes on every route, including login.
   constructor(
     private apiService: ApiService,
-    private themeService: ThemeService
+    private themeService: ThemeService,
   ) {
     console.log(environment.production);
   }
 
   ngOnInit(): void {
     this.apiService.health().subscribe({
-      next: (r) => console.log(r)
+      next: (r) => console.log(r),
     });
   }
 }

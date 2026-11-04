@@ -11,7 +11,9 @@
           [routerLinkActiveOptions]="{ exact: !!tab.exact }"
         >
           <span class="tab__icon"><app-icon [name]="tab.icon" /></span>
-          <span class="tab__label">{{ tab.tabLabel ?? tab.label | transloco }}</span>
+          <span class="tab__label">{{
+            tab.tabLabel ?? tab.label | transloco
+          }}</span>
         </a>
       </li>
     }
@@ -25,7 +27,9 @@
         [class.is-active]="sheetActive || sheetOpen"
         (click)="openSheet.emit(sheetButton)"
       >
-        <span class="tab__icon"><app-icon [name]="sheetLabel === 'nav.more' ? 'more' : 'settings'" /></span>
+        <span class="tab__icon"
+          ><app-icon [name]="sheetLabel === 'nav.more' ? 'more' : 'settings'"
+        /></span>
         <span class="tab__label">{{ sheetLabel | transloco }}</span>
       </button>
     </li>

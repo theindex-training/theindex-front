@@ -13,15 +13,27 @@
       (valueChange)="activeFilter = $event; loadPlans()"
     />
     @if (!loading && !errorMessage && plans.length) {
-      <p class="list-toolbar__count" data-testid="list-count" aria-live="polite">{{ 'plans.list.count' | transloco: { count: plans.length } }}</p>
+      <p
+        class="list-toolbar__count"
+        data-testid="list-count"
+        aria-live="polite"
+      >
+        {{ 'plans.list.count' | transloco: { count: plans.length } }}
+      </p>
     }
   </div>
 
   @if (loading) {
     <app-skeleton-list [label]="'plans.list.loading' | transloco" [rows]="4" />
   } @else if (errorMessage) {
-    <app-empty-state tone="danger" [title]="'plans.list.loadError' | transloco" [message]="errorMessage | uiMessage">
-      <button class="btn btn--secondary" type="button" (click)="loadPlans()">{{ 'common.tryAgain' | transloco }}</button>
+    <app-empty-state
+      tone="danger"
+      [title]="'plans.list.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="loadPlans()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
     </app-empty-state>
   } @else if (!plans.length) {
     @if (activeFilter === 'all') {
@@ -30,23 +42,42 @@
         [title]="'plans.list.emptyTitle' | transloco"
         [message]="'plans.list.emptyMessage' | transloco"
       >
-        <a class="btn btn--primary" routerLink="/plans/new">{{ 'plans.list.new' | transloco }}</a>
+        <a class="btn btn--primary" routerLink="/plans/new">{{
+          'plans.list.new' | transloco
+        }}</a>
       </app-empty-state>
     } @else {
       <app-empty-state
         icon="clipboard"
-        [title]="activeFilter === 'active' ? ('plans.list.noActive' | transloco) : ('plans.list.noInactive' | transloco)"
+        [title]="
+          activeFilter === 'active'
+            ? ('plans.list.noActive' | transloco)
+            : ('plans.list.noInactive' | transloco)
+        "
         [message]="'plans.list.tryOtherFilter' | transloco"
       >
-        <button class="btn btn--secondary" type="button" (click)="activeFilter = 'all'; loadPlans()">
+        <button
+          class="btn btn--secondary"
+          type="button"
+          (click)="activeFilter = 'all'; loadPlans()"
+        >
           {{ 'plans.list.showAll' | transloco }}
         </button>
       </app-empty-state>
     }
   } @else {
-    <div class="data-table-wrap responsive-table" tabindex="0" role="region" [attr.aria-label]="'plans.list.tableLabel' | transloco">
+    <div
+      class="data-table-wrap responsive-table"
+      tabindex="0"
+      role="region"
+      [attr.aria-label]="'plans.list.tableLabel' | transloco"
+    >
       <table class="data-table">
-        <caption class="visually-hidden">{{ 'nav.plans' | transloco }}</caption>
+        <caption class="visually-hidden">
+          {{
+            'nav.plans' | transloco
+          }}
+        </caption>
         <thead>
           <tr>
             <th scope="col">{{ 'plans.fields.plan' | transloco }}</th>
@@ -54,23 +85,42 @@
             <th scope="col">{{ 'plans.fields.price' | transloco }}</th>
             <th scope="col">{{ 'plans.list.includes' | transloco }}</th>
             <th scope="col">{{ 'common.status' | transloco }}</th>
-            <th scope="col" class="cell-fit"><span class="visually-hidden">{{ 'plans.list.detailsColumn' | transloco }}</span></th>
+            <th scope="col" class="cell-fit">
+              <span class="visually-hidden">{{
+                'plans.list.detailsColumn' | transloco
+              }}</span>
+            </th>
           </tr>
         </thead>
         <tbody>
           @for (plan of plans; track plan.id) {
             <tr>
-              <td><a class="cell-link" [routerLink]="['/plans', plan.id]">{{ plan.title }}</a></td>
-              <td><app-chip>{{ plan.type | enumLabel: 'planType' }}</app-chip></td>
+              <td>
+                <a class="cell-link" [routerLink]="['/plans', plan.id]">{{
+                  plan.title
+                }}</a>
+              </td>
+              <td>
+                <app-chip>{{ plan.type | enumLabel: 'planType' }}</app-chip>
+              </td>
               <td class="num">{{ formatPrice(plan.priceCents) }}</td>
               <td>{{ formatPlanDetails(plan) }}</td>
               <td>
                 <app-status-dot [tone]="plan.isActive ? 'success' : 'neutral'">
-                  {{ plan.isActive ? ('plans.status.active' | transloco) : ('plans.status.inactive' | transloco) }}
+                  {{
+                    plan.isActive
+                      ? ('plans.status.active' | transloco)
+                      : ('plans.status.inactive' | transloco)
+                  }}
                 </app-status-dot>
               </td>
               <td class="cell-fit">
-                <a class="row-chevron" [routerLink]="['/plans', plan.id]" tabindex="-1" aria-hidden="true">
+                <a
+                  class="row-chevron"
+                  [routerLink]="['/plans', plan.id]"
+                  tabindex="-1"
+                  aria-hidden="true"
+                >
                   <app-icon name="chevron-right" />
                 </a>
               </td>
@@ -80,13 +130,26 @@
       </table>
     </div>
 
-    <ul class="list-card responsive-list" [attr.aria-label]="'nav.plans' | transloco">
+    <ul
+      class="list-card responsive-list"
+      [attr.aria-label]="'nav.plans' | transloco"
+    >
       @for (plan of plans; track plan.id) {
         <li>
-          <app-list-row [link]="['/plans', plan.id]" [title]="plan.title" [dimmed]="!plan.isActive">
-            <span listRowMeta class="num">{{ formatPrice(plan.priceCents) }}</span>
+          <app-list-row
+            [link]="['/plans', plan.id]"
+            [title]="plan.title"
+            [dimmed]="!plan.isActive"
+          >
+            <span listRowMeta class="num">{{
+              formatPrice(plan.priceCents)
+            }}</span>
             <span listRowMeta>{{ formatPlanDetails(plan) }}</span>
-            <app-chip listRowTrailing>{{ plan.isActive ? (plan.type | enumLabel: 'planType') : ('plans.status.inactive' | transloco) }}</app-chip>
+            <app-chip listRowTrailing>{{
+              plan.isActive
+                ? (plan.type | enumLabel: 'planType')
+                : ('plans.status.inactive' | transloco)
+            }}</app-chip>
           </app-list-row>
         </li>
       }

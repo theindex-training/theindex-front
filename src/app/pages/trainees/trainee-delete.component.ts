@@ -1,7 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TraineeProfile, TraineesService } from '../../services/trainees.service';
+import {
+  TraineeProfile,
+  TraineesService,
+} from '../../services/trainees.service';
 
 import { displayValue } from '../../utils/display.util';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -15,7 +24,7 @@ import { LanguageService } from '../../i18n/language.service';
   standalone: true,
   imports: [UiMessagePipe, TranslocoPipe, CommonModule, PageHeaderComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './trainee-delete.component.html'
+  templateUrl: './trainee-delete.component.html',
 })
 export class TraineeDeleteComponent implements OnInit {
   private readonly i18n = inject(LanguageService);
@@ -28,7 +37,7 @@ export class TraineeDeleteComponent implements OnInit {
     private readonly traineesService: TraineesService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -46,11 +55,10 @@ export class TraineeDeleteComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'trainees.errors.load');
+        this.errorMessage = apiErrorMessage(error, 'trainees.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -68,11 +76,10 @@ export class TraineeDeleteComponent implements OnInit {
         this.router.navigate(['/trainees']);
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'trainees.delete.error');
+        this.errorMessage = apiErrorMessage(error, 'trainees.delete.error');
         this.submitting = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -85,6 +92,8 @@ export class TraineeDeleteComponent implements OnInit {
   }
 
   formatAccount(): string {
-    return this.i18n.t(this.trainee?.accountId ? 'common.linked' : 'common.notLinked');
+    return this.i18n.t(
+      this.trainee?.accountId ? 'common.linked' : 'common.notLinked',
+    );
   }
 }

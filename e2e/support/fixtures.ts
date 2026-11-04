@@ -1,5 +1,10 @@
 import { expect, test as base } from '@playwright/test';
-import { TestClaims, TestRole, claimsFor, makeToken } from '../../src/testing/jwt';
+import {
+  TestClaims,
+  TestRole,
+  claimsFor,
+  makeToken,
+} from '../../src/testing/jwt';
 import { ApiMock } from './api-mock';
 
 export { expect };
@@ -39,8 +44,8 @@ export const test = base.extend<Fixtures>({
     await use(page);
   },
   seedToken: async ({ page }, use) => {
-    await use(async token => {
-      await page.addInitScript(value => {
+    await use(async (token) => {
+      await page.addInitScript((value) => {
         if (!sessionStorage.getItem('e2e-seeded-token')) {
           localStorage.setItem('accessToken', value);
           sessionStorage.setItem('e2e-seeded-token', '1');
@@ -50,10 +55,12 @@ export const test = base.extend<Fixtures>({
   },
   signInAs: async ({ seedToken }, use) => {
     await use((role, claims) => seedToken(tokenFor(role, claims)));
-  }
+  },
 });
 
 /** The token the app currently holds, or null. */
-export async function storedToken(page: import('@playwright/test').Page): Promise<string | null> {
+export async function storedToken(
+  page: import('@playwright/test').Page,
+): Promise<string | null> {
   return page.evaluate(() => localStorage.getItem('accessToken'));
 }

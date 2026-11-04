@@ -1,5 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -21,12 +24,28 @@ const TRAINEE: TraineeProfile = {
   phone: null,
   accountId: null,
   gymSubscriptionId: null,
-  isActive: true
+  isActive: true,
 };
 
 const PLANS: Plan[] = [
-  { id: 'p1', type: 'PUNCH', title: '10 visits', priceCents: 4550, credits: 10, durationDays: null, isActive: true },
-  { id: 'p2', type: 'TIME', title: 'Monthly', priceCents: 6000, credits: null, durationDays: 30, isActive: true }
+  {
+    id: 'p1',
+    type: 'PUNCH',
+    title: '10 visits',
+    priceCents: 4550,
+    credits: 10,
+    durationDays: null,
+    isActive: true,
+  },
+  {
+    id: 'p2',
+    type: 'TIME',
+    title: 'Monthly',
+    priceCents: 6000,
+    credits: null,
+    durationDays: 30,
+    isActive: true,
+  },
 ];
 
 function subscription(overrides: Partial<Subscription> = {}): Subscription {
@@ -41,7 +60,7 @@ function subscription(overrides: Partial<Subscription> = {}): Subscription {
     endsAt: null,
     initialCredits: 10,
     remainingCredits: 7,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -53,7 +72,10 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
 
   beforeEach(async () => {
     // 00:30 on 2 Nov in Sofia is still 1 Nov in UTC. Only Date is faked; timers stay real.
-    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-11-01T22:30:00Z') });
+    vi.useFakeTimers({
+      toFake: ['Date'],
+      now: new Date('2026-11-01T22:30:00Z'),
+    });
     localStorage.clear();
     signInAs('TRAINER');
     TestBed.configureTestingModule({
@@ -62,9 +84,9 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
         provideHttpClientTesting(),
         provideRouter([
           { path: 'trainees/:id', component: TraineeDetailsComponent },
-          { path: '**', children: [] }
-        ])
-      ]
+          { path: '**', children: [] },
+        ]),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
     harness = await RouterTestingHarness.create();
@@ -76,18 +98,34 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
   });
 
   async function open(
-    options: { plans?: Plan[]; subscriptions?: Subscription[]; trainee?: TraineeProfile; trainings?: object[] } = {}
+    options: {
+      plans?: Plan[];
+      subscriptions?: Subscription[];
+      trainee?: TraineeProfile;
+      trainings?: object[];
+    } = {},
   ) {
-    component = await harness.navigateByUrl('/trainees/tr1', TraineeDetailsComponent);
-    page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
+    component = await harness.navigateByUrl(
+      '/trainees/tr1',
+      TraineeDetailsComponent,
+    );
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
     http.expectOne('/api/trainees/tr1').flush(options.trainee ?? TRAINEE);
-    http.expectOne('/api/trainees/tr1/subscriptions').flush(options.subscriptions ?? []);
-    http.expectOne('/api/attendance/trainees/tr1').flush(options.trainings ?? []);
+    http
+      .expectOne('/api/trainees/tr1/subscriptions')
+      .flush(options.subscriptions ?? []);
+    http
+      .expectOne('/api/attendance/trainees/tr1')
+      .flush(options.trainings ?? []);
     http.expectOne('/api/plans?active=true').flush(options.plans ?? PLANS);
     await page.settle();
   }
 
-  const value = (selector: string) => page.query<HTMLInputElement | HTMLSelectElement>(selector)!.value;
+  const value = (selector: string) =>
+    page.query<HTMLInputElement | HTMLSelectElement>(selector)!.value;
 
   function expectSale() {
     const req = http.expectOne('/api/trainees/tr1/subscriptions');
@@ -99,9 +137,13 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     await open();
 
     expect(page.text()).toContain('Ivan Petrov');
-    expect(page.queryAll('#buy-plan option').map(option => option.textContent?.trim())).toEqual([
+    expect(
+      page
+        .queryAll('#buy-plan option')
+        .map((option) => option.textContent?.trim()),
+    ).toEqual([
       component.formatPlanOption(PLANS[0]),
-      component.formatPlanOption(PLANS[1])
+      component.formatPlanOption(PLANS[1]),
     ]);
   });
 
@@ -119,39 +161,64 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
           subscriptionId: null,
           gymSubscriptionId: null,
           paymentStatus: 'UNPAID',
-          createdAt: '2026-11-01T16:30:00Z'
-        }
-      ]
+          createdAt: '2026-11-01T16:30:00Z',
+        },
+      ],
     });
 
     const section = page.query('section[aria-labelledby="trainings-title"]')!;
-    expect(section.querySelector('#trainings-title')!.textContent.trim()).toBe(copy.trainings);
-    expect(section.querySelector('[data-testid="calendar-month"]')!.textContent.trim()).toBe('November 2026');
-    expect(section.querySelector('[data-testid="calendar-day-2026-11-01"]')!.getAttribute('aria-label')).toBe(
-      'Sunday, 1 November 2026, 1 training, 1 unpaid'
+    expect(section.querySelector('#trainings-title')!.textContent.trim()).toBe(
+      copy.trainings,
     );
+    expect(
+      section
+        .querySelector('[data-testid="calendar-month"]')!
+        .textContent.trim(),
+    ).toBe('November 2026');
+    expect(
+      section
+        .querySelector('[data-testid="calendar-day-2026-11-01"]')!
+        .getAttribute('aria-label'),
+    ).toBe('Sunday, 1 November 2026, 1 training, 1 unpaid');
 
-    await page.click('section[aria-labelledby="trainings-title"] input[type="radio"][value="list"]');
-    expect(section.querySelector('table caption')!.textContent.trim()).toBe('Trainings');
+    await page.click(
+      'section[aria-labelledby="trainings-title"] input[type="radio"][value="list"]',
+    );
+    expect(section.querySelector('table caption')!.textContent.trim()).toBe(
+      'Trainings',
+    );
     expect(section.querySelector('tbody')!.textContent).toContain('Pepi');
   });
 
   it('says there are no trainings yet in the calendar', async () => {
     await open();
 
-    expect(page.query('[data-testid="calendar-summary"]')!.textContent.trim()).toBe(copy.noTrainings);
+    expect(
+      page.query('[data-testid="calendar-summary"]')!.textContent.trim(),
+    ).toBe(copy.noTrainings);
   });
 
   it('also loads the linked account', async () => {
-    component = await harness.navigateByUrl('/trainees/tr1', TraineeDetailsComponent);
-    page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
-    http.expectOne('/api/trainees/tr1').flush({ ...TRAINEE, accountId: 'acc-9' });
+    component = await harness.navigateByUrl(
+      '/trainees/tr1',
+      TraineeDetailsComponent,
+    );
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
+    http
+      .expectOne('/api/trainees/tr1')
+      .flush({ ...TRAINEE, accountId: 'acc-9' });
     http.expectOne('/api/trainees/tr1/subscriptions').flush([]);
     http.expectOne('/api/attendance/trainees/tr1').flush([]);
     http.expectOne('/api/plans?active=true').flush(PLANS);
-    http
-      .expectOne('/api/accounts/acc-9')
-      .flush({ id: 'acc-9', email: 'ivan@gym.test', role: 'TRAINEE', status: 'ACTIVE' });
+    http.expectOne('/api/accounts/acc-9').flush({
+      id: 'acc-9',
+      email: 'ivan@gym.test',
+      role: 'TRAINEE',
+      status: 'ACTIVE',
+    });
     await page.settle();
 
     expect(page.text()).toContain('ivan@gym.test');
@@ -187,13 +254,24 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     await page.submit('form');
 
     const req = expectSale();
-    expect(req.request.body).toEqual({ planId: 'p2', startsAt: '2026-11-03', paidCents: 4050 });
+    expect(req.request.body).toEqual({
+      planId: 'p2',
+      startsAt: '2026-11-03',
+      paidCents: 4050,
+    });
     req.flush(subscription({ id: 's9', planId: 'p2', type: 'TIME' }));
     await page.settle();
 
     const reload = http.expectOne('/api/trainees/tr1/subscriptions');
     expect(reload.request.method).toBe('GET');
-    reload.flush([subscription({ id: 's9', planId: 'p2', type: 'TIME', endsAt: '2026-12-03' })]);
+    reload.flush([
+      subscription({
+        id: 's9',
+        planId: 'p2',
+        type: 'TIME',
+        endsAt: '2026-12-03',
+      }),
+    ]);
     await page.settle();
 
     expect(page.text()).toContain('Monthly');
@@ -213,13 +291,13 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
   it.each([
     ['empty', ''],
     ['negative', '-1'],
-    ['more than two decimals', '45.555']
+    ['more than two decimals', '45.555'],
   ])('rejects an %s paid amount', async (_, paid) => {
     await open();
     await page.type('#buy-paid', paid);
     await page.submit('form');
 
-    http.expectNone(req => req.method === 'POST');
+    http.expectNone((req) => req.method === 'POST');
     expect(page.text()).toContain(copy.paidError);
   });
 
@@ -247,7 +325,9 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
   });
 
   it('names a subscription on a deactivated plan by its raw plan id', async () => {
-    await open({ subscriptions: [subscription({ planId: 'retired-plan-id' })] });
+    await open({
+      subscriptions: [subscription({ planId: 'retired-plan-id' })],
+    });
 
     // CHARACTERIZATION: possibly unintended — only active plans are loaded (?active=true), so a
     // subscription on a deactivated plan shows the plan's id instead of its title. TEST_NOTES.md S3.
@@ -263,8 +343,20 @@ describe('TraineeDetailsComponent: subscriptions list', () => {
 
   const SUBSCRIPTIONS = [
     subscription({ id: 's-active', status: 'ACTIVE', startsAt: '2026-10-01' }),
-    subscription({ id: 's-used', status: 'exhausted', remainingCredits: 0, startsAt: '2026-09-01' }),
-    subscription({ id: 's-old', planId: 'p2', type: 'TIME', status: 'EXPIRED', endsAt: '2026-08-31', startsAt: '2026-08-01' })
+    subscription({
+      id: 's-used',
+      status: 'exhausted',
+      remainingCredits: 0,
+      startsAt: '2026-09-01',
+    }),
+    subscription({
+      id: 's-old',
+      planId: 'p2',
+      type: 'TIME',
+      status: 'EXPIRED',
+      endsAt: '2026-08-31',
+      startsAt: '2026-08-01',
+    }),
   ];
 
   beforeEach(async () => {
@@ -275,9 +367,9 @@ describe('TraineeDetailsComponent: subscriptions list', () => {
         provideHttpClientTesting(),
         provideRouter([
           { path: 'trainees/:id', component: TraineeDetailsComponent },
-          { path: '**', children: [] }
-        ])
-      ]
+          { path: '**', children: [] },
+        ]),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
     harness = await RouterTestingHarness.create();
@@ -288,12 +380,26 @@ describe('TraineeDetailsComponent: subscriptions list', () => {
     vi.restoreAllMocks();
   });
 
-  async function open(options: { role?: 'ADMIN' | 'TRAINER'; subscriptions?: Subscription[]; plans?: 'ok' | 'error' } = {}) {
+  async function open(
+    options: {
+      role?: 'ADMIN' | 'TRAINER';
+      subscriptions?: Subscription[];
+      plans?: 'ok' | 'error';
+    } = {},
+  ) {
     signInAs(options.role ?? 'TRAINER');
-    component = await harness.navigateByUrl('/trainees/tr1', TraineeDetailsComponent);
-    page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
+    component = await harness.navigateByUrl(
+      '/trainees/tr1',
+      TraineeDetailsComponent,
+    );
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
     http.expectOne('/api/trainees/tr1').flush(TRAINEE);
-    http.expectOne('/api/trainees/tr1/subscriptions').flush(options.subscriptions ?? SUBSCRIPTIONS);
+    http
+      .expectOne('/api/trainees/tr1/subscriptions')
+      .flush(options.subscriptions ?? SUBSCRIPTIONS);
     http.expectOne('/api/attendance/trainees/tr1').flush([]);
     const plans = http.expectOne('/api/plans?active=true');
     if (options.plans === 'error') {
@@ -305,7 +411,10 @@ describe('TraineeDetailsComponent: subscriptions list', () => {
     await page.settle();
   }
 
-  const deleteButtons = () => page.queryAll<HTMLButtonElement>('button[aria-label^="Delete subscription"]');
+  const deleteButtons = () =>
+    page.queryAll<HTMLButtonElement>(
+      'button[aria-label^="Delete subscription"]',
+    );
 
   async function showFilter(value: 'ACTIVE' | 'EXHAUSTED' | 'ALL') {
     await page.click(`input[type="radio"][value="${value}"]`);
@@ -313,19 +422,27 @@ describe('TraineeDetailsComponent: subscriptions list', () => {
 
   it('shows active subscriptions first, and filters by status (any case)', async () => {
     await open();
-    expect(component.filteredSubscriptions.map(item => item.id)).toEqual(['s-active']);
+    expect(component.filteredSubscriptions.map((item) => item.id)).toEqual([
+      's-active',
+    ]);
 
     await showFilter('EXHAUSTED');
-    expect(component.filteredSubscriptions.map(item => item.id)).toEqual(['s-used']);
+    expect(component.filteredSubscriptions.map((item) => item.id)).toEqual([
+      's-used',
+    ]);
 
     await showFilter('ALL');
-    expect(component.filteredSubscriptions.map(item => item.id)).toEqual(['s-active', 's-used', 's-old']);
+    expect(component.filteredSubscriptions.map((item) => item.id)).toEqual([
+      's-active',
+      's-used',
+      's-old',
+    ]);
   });
 
   it.each([
     ['ACTIVE', copy.noActiveSubscriptions],
     ['EXHAUSTED', copy.noExhaustedSubscriptions],
-    ['ALL', copy.noSubscriptions]
+    ['ALL', copy.noSubscriptions],
   ] as const)('explains an empty %s list', async (filter, message) => {
     await open({ subscriptions: [] });
     await showFilter(filter);
@@ -333,12 +450,15 @@ describe('TraineeDetailsComponent: subscriptions list', () => {
     expect(page.text()).toContain(message);
   });
 
-  it.each(['ADMIN', 'TRAINER'] as const)('lets a %s delete subscriptions', async role => {
-    await open({ role });
+  it.each(['ADMIN', 'TRAINER'] as const)(
+    'lets a %s delete subscriptions',
+    async (role) => {
+      await open({ role });
 
-    expect(component.canDeleteSubscriptions).toBe(true);
-    expect(deleteButtons().length).toBeGreaterThan(0);
-  });
+      expect(component.canDeleteSubscriptions).toBe(true);
+      expect(deleteButtons().length).toBeGreaterThan(0);
+    },
+  );
 
   it('asks before deleting, and does nothing when cancelled', async () => {
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
@@ -348,7 +468,9 @@ describe('TraineeDetailsComponent: subscriptions list', () => {
     deleteButtons()[0].click();
     await page.settle();
 
-    expect(confirm).toHaveBeenCalledWith(`Delete the 10 visits subscription from ${format.date('2026-10-01')}?`);
+    expect(confirm).toHaveBeenCalledWith(
+      `Delete the 10 visits subscription from ${format.date('2026-10-01')}?`,
+    );
     http.expectNone('/api/subscriptions/s-active');
   });
 
@@ -363,7 +485,10 @@ describe('TraineeDetailsComponent: subscriptions list', () => {
     req.flush({ deleted: true });
     await page.settle();
 
-    expect(component.subscriptions.map(item => item.id)).toEqual(['s-used', 's-old']);
+    expect(component.subscriptions.map((item) => item.id)).toEqual([
+      's-used',
+      's-old',
+    ]);
     expect(page.text()).toContain(copy.noActiveSubscriptions);
   });
 
@@ -386,7 +511,9 @@ describe('TraineeDetailsComponent: subscriptions list', () => {
     deleteButtons()[0].click();
     await page.settle();
     const error = apiError('Subscription has attendance', 409);
-    http.expectOne('/api/subscriptions/s-active').flush(error.body, error.options);
+    http
+      .expectOne('/api/subscriptions/s-active')
+      .flush(error.body, error.options);
     await page.settle();
 
     expect(page.alert()).toBe('Subscription has attendance');
@@ -396,7 +523,9 @@ describe('TraineeDetailsComponent: subscriptions list', () => {
   it('reports a plans load error in the subscriptions area', async () => {
     await open({ plans: 'error' });
 
-    expect(component.subscriptionErrorMessage).toEqual({ text: 'Plans are unavailable' });
+    expect(component.subscriptionErrorMessage).toEqual({
+      text: 'Plans are unavailable',
+    });
     expect(page.alert()).toBe('Plans are unavailable');
     expect(page.queryAll('#buy-plan option').length).toBe(0);
   });
@@ -405,6 +534,8 @@ describe('TraineeDetailsComponent: subscriptions list', () => {
     await open();
     const format = TestBed.inject(LocaleFormatService);
 
-    expect(component.formatPlanOption(PLANS[1])).toBe(`Monthly · ${en.enums.planType.TIME} · ${format.money(6000)}`);
+    expect(component.formatPlanOption(PLANS[1])).toBe(
+      `Monthly · ${en.enums.planType.TIME} · ${format.money(6000)}`,
+    );
   });
 });

@@ -6,7 +6,7 @@ import {
   localDayKey,
   monthOf,
   monthWeeks,
-  sameMonth
+  sameMonth,
 } from './calendar.util';
 
 // Specs run in Europe/Sofia (UTC+3 in summer, UTC+2 from 25 Oct 2026).
@@ -27,7 +27,12 @@ describe('calendar utils', () => {
 
   it('turns a key back into local midnight', () => {
     const date = dayKeyToDate('2026-03-09');
-    expect([date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()]).toEqual([2026, 2, 9, 0]);
+    expect([
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getHours(),
+    ]).toEqual([2026, 2, 9, 0]);
   });
 
   it('adds days across month, year and DST changes', () => {
@@ -40,24 +45,40 @@ describe('calendar utils', () => {
   });
 
   it('adds months across year ends in both directions', () => {
-    expect(addMonths({ year: 2026, month: 11 }, 1)).toEqual({ year: 2027, month: 0 });
-    expect(addMonths({ year: 2026, month: 0 }, -1)).toEqual({ year: 2025, month: 11 });
-    expect(addMonths({ year: 2026, month: 5 }, -13)).toEqual({ year: 2025, month: 4 });
-    expect(addMonths({ year: 2026, month: 5 }, 0)).toEqual({ year: 2026, month: 5 });
+    expect(addMonths({ year: 2026, month: 11 }, 1)).toEqual({
+      year: 2027,
+      month: 0,
+    });
+    expect(addMonths({ year: 2026, month: 0 }, -1)).toEqual({
+      year: 2025,
+      month: 11,
+    });
+    expect(addMonths({ year: 2026, month: 5 }, -13)).toEqual({
+      year: 2025,
+      month: 4,
+    });
+    expect(addMonths({ year: 2026, month: 5 }, 0)).toEqual({
+      year: 2026,
+      month: 5,
+    });
   });
 
   it('compares months and tells whether a day is in one', () => {
     expect(monthOf('2026-10-07')).toEqual({ year: 2026, month: 9 });
     expect(monthOf(new Date(2027, 1, 28))).toEqual({ year: 2027, month: 1 });
-    expect(sameMonth({ year: 2026, month: 9 }, { year: 2026, month: 9 })).toBe(true);
-    expect(sameMonth({ year: 2026, month: 9 }, { year: 2025, month: 9 })).toBe(false);
+    expect(sameMonth({ year: 2026, month: 9 }, { year: 2026, month: 9 })).toBe(
+      true,
+    );
+    expect(sameMonth({ year: 2026, month: 9 }, { year: 2025, month: 9 })).toBe(
+      false,
+    );
     expect(inMonth('2026-10-31', { year: 2026, month: 9 })).toBe(true);
     expect(inMonth('2026-11-01', { year: 2026, month: 9 })).toBe(false);
   });
 
   describe('monthWeeks', () => {
     const keys = (month: { year: number; month: number }) =>
-      monthWeeks(month).map(week => week.map(day => day?.day ?? null));
+      monthWeeks(month).map((week) => week.map((day) => day?.day ?? null));
 
     it('starts weeks on Monday and pads days outside the month with null', () => {
       // 1 Nov 2026 is a Sunday, 30 Nov a Monday.
@@ -67,7 +88,7 @@ describe('calendar utils', () => {
         [9, 10, 11, 12, 13, 14, 15],
         [16, 17, 18, 19, 20, 21, 22],
         [23, 24, 25, 26, 27, 28, 29],
-        [30, null, null, null, null, null, null]
+        [30, null, null, null, null, null, null],
       ]);
     });
 
@@ -76,24 +97,35 @@ describe('calendar utils', () => {
         [1, 2, 3, 4, 5, 6, 7],
         [8, 9, 10, 11, 12, 13, 14],
         [15, 16, 17, 18, 19, 20, 21],
-        [22, 23, 24, 25, 26, 27, 28]
+        [22, 23, 24, 25, 26, 27, 28],
       ]);
     });
 
     it('includes 29 February in a leap year', () => {
-      const days = monthWeeks({ year: 2028, month: 1 }).flat().filter(day => day !== null);
+      const days = monthWeeks({ year: 2028, month: 1 })
+        .flat()
+        .filter((day) => day !== null);
       expect(days).toHaveLength(29);
       expect(days.at(-1)?.key).toBe('2028-02-29');
     });
 
     it('gives every day its local key and local-midnight date', () => {
-      const days = monthWeeks({ year: 2026, month: 9 }).flat().filter(day => day !== null);
-      expect(days.map(day => day.key)).toEqual(
-        Array.from({ length: 31 }, (_, index) => `2026-10-${String(index + 1).padStart(2, '0')}`)
+      const days = monthWeeks({ year: 2026, month: 9 })
+        .flat()
+        .filter((day) => day !== null);
+      expect(days.map((day) => day.key)).toEqual(
+        Array.from(
+          { length: 31 },
+          (_, index) => `2026-10-${String(index + 1).padStart(2, '0')}`,
+        ),
       );
       // 25 Oct 2026 is the DST change; its cell still starts at local midnight.
       const dstDay = days[24];
-      expect([dstDay.key, dstDay.date.getDate(), dstDay.date.getHours()]).toEqual(['2026-10-25', 25, 0]);
+      expect([
+        dstDay.key,
+        dstDay.date.getDate(),
+        dstDay.date.getHours(),
+      ]).toEqual(['2026-10-25', 25, 0]);
     });
   });
 });

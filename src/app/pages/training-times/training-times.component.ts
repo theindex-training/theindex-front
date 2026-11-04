@@ -1,11 +1,19 @@
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { ListRowComponent } from '../../components/list-row/list-row.component';
 import { IconComponent } from '../../components/icon/icon.component';
-import { TrainingTime, TrainingTimesService } from '../../services/training-times.service';
+import {
+  TrainingTime,
+  TrainingTimesService,
+} from '../../services/training-times.service';
 import { formatTimeWithoutSeconds } from '../../utils/time-display';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
@@ -15,17 +23,17 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-training-times',
   standalone: true,
   imports: [
-    UiMessagePipe, 
-    TranslocoPipe, 
+    UiMessagePipe,
+    TranslocoPipe,
     RouterLink,
     PageHeaderComponent,
     SkeletonListComponent,
     EmptyStateComponent,
     ListRowComponent,
-    IconComponent
+    IconComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './training-times.component.html'
+  templateUrl: './training-times.component.html',
 })
 export class TrainingTimesComponent implements OnInit {
   trainingTimes: TrainingTime[] = [];
@@ -34,7 +42,7 @@ export class TrainingTimesComponent implements OnInit {
 
   constructor(
     private readonly trainingTimesService: TrainingTimesService,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -52,10 +60,13 @@ export class TrainingTimesComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'trainingTimes.list.loadErrorMessage');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'trainingTimes.list.loadErrorMessage',
+        );
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 

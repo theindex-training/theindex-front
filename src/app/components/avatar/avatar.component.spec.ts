@@ -1,7 +1,8 @@
 import { AvatarComponent } from './avatar.component';
 
 describe('AvatarComponent initials', () => {
-  const initials = (name: string) => Object.assign(new AvatarComponent(), { name }).initials;
+  const initials = (name: string) =>
+    Object.assign(new AvatarComponent(), { name }).initials;
 
   it('uses the first letters of the first and last word', () => {
     expect(initials('Georgi Ivanov')).toBe('GI');

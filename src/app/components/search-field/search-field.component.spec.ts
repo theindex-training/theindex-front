@@ -9,13 +9,18 @@ describe('SearchFieldComponent', () => {
     fixture.componentRef.setInput('value', value);
     await fixture.whenStable();
     const emitted: string[] = [];
-    fixture.componentInstance.valueChange.subscribe(next => emitted.push(next));
+    fixture.componentInstance.valueChange.subscribe((next) =>
+      emitted.push(next),
+    );
     const el: HTMLElement = fixture.nativeElement;
     return {
       fixture,
       emitted,
       input: el.querySelector<HTMLInputElement>('input')!,
-      clear: () => el.querySelector<HTMLButtonElement>(`button[aria-label="${en.common.clearSearch}"]`)
+      clear: () =>
+        el.querySelector<HTMLButtonElement>(
+          `button[aria-label="${en.common.clearSearch}"]`,
+        ),
     };
   }
 
@@ -47,7 +52,9 @@ describe('SearchFieldComponent', () => {
     const second = await render();
 
     expect(first.input.id).not.toBe(second.input.id);
-    const label = first.fixture.nativeElement.querySelector(`label[for="${first.input.id}"]`);
+    const label = first.fixture.nativeElement.querySelector(
+      `label[for="${first.input.id}"]`,
+    );
     expect(label?.textContent?.trim()).toBe('Search trainees');
   });
 });

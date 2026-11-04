@@ -22,9 +22,13 @@ describe('MainLayoutComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([
-          { path: '', component: MainLayoutComponent, children: [{ path: '**', component: PageComponent }] }
-        ])
-      ]
+          {
+            path: '',
+            component: MainLayoutComponent,
+            children: [{ path: '**', component: PageComponent }],
+          },
+        ]),
+      ],
     });
     harness = await RouterTestingHarness.create();
     layout = await harness.navigateByUrl('/home', MainLayoutComponent);
@@ -39,13 +43,15 @@ describe('MainLayoutComponent', () => {
     await start('TRAINER');
 
     expect(layout.navigation.sheetLabel).toBe('nav.more');
-    expect(layout.navigation.tabs.map(item => item.route)).toEqual([
+    expect(layout.navigation.tabs.map((item) => item.route)).toEqual([
       '/home',
       '/trainees',
       '/attendance/new',
-      '/settlements'
+      '/settlements',
     ]);
-    expect(layout.sheetItems.map(item => item.route)).not.toContain('/trainers');
+    expect(layout.sheetItems.map((item) => item.route)).not.toContain(
+      '/trainers',
+    );
   });
 
   it('marks the More tab as current on pages that live in the sheet', async () => {

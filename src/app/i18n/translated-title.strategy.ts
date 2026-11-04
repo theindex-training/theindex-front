@@ -21,7 +21,9 @@ export class TranslatedTitleStrategy extends TitleStrategy {
       this.language.lang();
       const key = this.titleKey();
       const appName = this.transloco.translate('common.appName');
-      this.title.setTitle(key ? `${this.transloco.translate(key)} · ${appName}` : appName);
+      this.title.setTitle(
+        key ? `${this.transloco.translate(key)} · ${appName}` : appName,
+      );
     });
   }
 

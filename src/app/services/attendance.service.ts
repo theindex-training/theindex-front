@@ -137,11 +137,18 @@ export class AttendanceService {
 
   constructor(private readonly http: HttpClient) {}
 
-  createBatch(payload: CreateAttendanceBatchPayload): Observable<AttendanceBatchResponse> {
-    return this.http.post<AttendanceBatchResponse>(`${this.baseUrl}/batch`, payload);
+  createBatch(
+    payload: CreateAttendanceBatchPayload,
+  ): Observable<AttendanceBatchResponse> {
+    return this.http.post<AttendanceBatchResponse>(
+      `${this.baseUrl}/batch`,
+      payload,
+    );
   }
 
-  sessions(query: AttendanceSessionsQuery): Observable<AttendanceSessionsResponse> {
+  sessions(
+    query: AttendanceSessionsQuery,
+  ): Observable<AttendanceSessionsResponse> {
     const params = buildHttpParams({
       startDate: query.startDate,
       endDate: query.endDate,
@@ -150,24 +157,35 @@ export class AttendanceService {
       trainerId: query.trainerId,
     });
 
-    return this.http.get<AttendanceSessionsResponse>(`${this.baseUrl}/sessions`, { params });
+    return this.http.get<AttendanceSessionsResponse>(
+      `${this.baseUrl}/sessions`,
+      { params },
+    );
   }
 
   deleteById(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  listPaidForTrainee(traineeId: string): Observable<AttendanceTraineeTrainingItem[]> {
+  listPaidForTrainee(
+    traineeId: string,
+  ): Observable<AttendanceTraineeTrainingItem[]> {
     return this.http.get<AttendanceTraineeTrainingItem[]>(
       `${this.baseUrl}/trainees/${traineeId}/paid`,
     );
   }
 
-  listForTrainee(traineeId: string): Observable<AttendanceTraineeTrainingItem[]> {
-    return this.http.get<AttendanceTraineeTrainingItem[]>(`${this.baseUrl}/trainees/${traineeId}`);
+  listForTrainee(
+    traineeId: string,
+  ): Observable<AttendanceTraineeTrainingItem[]> {
+    return this.http.get<AttendanceTraineeTrainingItem[]>(
+      `${this.baseUrl}/trainees/${traineeId}`,
+    );
   }
 
-  listUnpaidForTrainee(traineeId: string): Observable<AttendanceTraineeTrainingItem[]> {
+  listUnpaidForTrainee(
+    traineeId: string,
+  ): Observable<AttendanceTraineeTrainingItem[]> {
     return this.http.get<AttendanceTraineeTrainingItem[]>(
       `${this.baseUrl}/trainees/${traineeId}/unpaid`,
     );
@@ -180,9 +198,12 @@ export class AttendanceService {
       skipDays: query.skipDays,
     });
 
-    return this.http.get<InactiveTraineeReportItem[]>(`${this.baseUrl}/reports/inactive-trainees`, {
-      params,
-    });
+    return this.http.get<InactiveTraineeReportItem[]>(
+      `${this.baseUrl}/reports/inactive-trainees`,
+      {
+        params,
+      },
+    );
   }
 
   getTraineesWithoutActiveSubscriptionReport(): Observable<

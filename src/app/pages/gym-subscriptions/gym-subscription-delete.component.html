@@ -2,13 +2,20 @@
   <app-page-header
     [title]="'gymSubscriptions.delete.title' | transloco"
     [subtitle]="'gymSubscriptions.delete.subtitle' | transloco"
-    [back]="{ label: ('gymSubscriptions.backToList' | transloco), link: '/gym-subscriptions' }"
+    [back]="{
+      label: ('gymSubscriptions.backToList' | transloco),
+      link: '/gym-subscriptions',
+    }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">{{ 'gymSubscriptions.loadingOne' | transloco }}</p>
+    <p class="notice" role="status">
+      {{ 'gymSubscriptions.loadingOne' | transloco }}
+    </p>
   } @else if (errorMessage && !gymSubscription) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
   } @else if (gymSubscription) {
     <div class="panel">
       <dl class="detail-list">
@@ -19,8 +26,14 @@
         <div>
           <dt>{{ 'common.status' | transloco }}</dt>
           <dd>
-            <app-status-dot [tone]="gymSubscription.isActive ? 'success' : 'neutral'">
-              {{ gymSubscription.isActive ? ('gymSubscriptions.status.active' | transloco) : ('gymSubscriptions.status.inactive' | transloco) }}
+            <app-status-dot
+              [tone]="gymSubscription.isActive ? 'success' : 'neutral'"
+            >
+              {{
+                gymSubscription.isActive
+                  ? ('gymSubscriptions.status.active' | transloco)
+                  : ('gymSubscriptions.status.inactive' | transloco)
+              }}
             </app-status-dot>
           </dd>
         </div>
@@ -31,7 +44,9 @@
       </p>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
       }
 
       <div class="form-actions">
@@ -43,7 +58,9 @@
         >
           {{
             gymSubscription.isActive
-              ? (submitting ? ('common.deactivating' | transloco) : ('gymSubscriptions.delete.submit' | transloco))
+              ? submitting
+                ? ('common.deactivating' | transloco)
+                : ('gymSubscriptions.delete.submit' | transloco)
               : ('gymSubscriptions.delete.inactive' | transloco)
           }}
         </button>

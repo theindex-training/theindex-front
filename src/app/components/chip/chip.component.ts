@@ -8,7 +8,7 @@ export type ChipTone = 'accent' | 'neutral' | 'success' | 'warning' | 'danger';
   standalone: true,
   templateUrl: './chip.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './chip.component.scss'
+  styleUrl: './chip.component.scss',
 })
 export class ChipComponent {
   @Input() tone: ChipTone = 'neutral';

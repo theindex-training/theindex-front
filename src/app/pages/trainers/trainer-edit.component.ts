@@ -1,17 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TrainerProfile,
   TrainersService,
-  UpdateTrainerPayload
+  UpdateTrainerPayload,
 } from '../../services/trainers.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { trimmedLength } from '../../utils/form-validators.util';
@@ -22,9 +27,15 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-trainer-edit',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './trainer-edit.component.html'
+  templateUrl: './trainer-edit.component.html',
 })
 export class TrainerEditComponent implements OnInit {
   readonly form: FormGroup<{
@@ -42,14 +53,16 @@ export class TrainerEditComponent implements OnInit {
     private readonly trainersService: TrainersService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        trimmedLength(2, 100)
+        trimmedLength(2, 100),
       ]),
-      nickname: this.formBuilder.control<string | null>(null, [trimmedLength(1, 50)])
+      nickname: this.formBuilder.control<string | null>(null, [
+        trimmedLength(1, 50),
+      ]),
     });
   }
 
@@ -66,17 +79,16 @@ export class TrainerEditComponent implements OnInit {
         this.trainer = trainer;
         this.form.patchValue({
           name: trainer.name,
-          nickname: trainer.nickname
+          nickname: trainer.nickname,
         });
         this.loading = false;
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'trainers.errors.load');
+        this.errorMessage = apiErrorMessage(error, 'trainers.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -92,7 +104,7 @@ export class TrainerEditComponent implements OnInit {
     const raw = this.form.getRawValue();
     const payload: UpdateTrainerPayload = {
       name: raw.name.trim(),
-      nickname: this.normalizeOptional(raw.nickname)
+      nickname: this.normalizeOptional(raw.nickname),
     };
 
     this.submitting = true;
@@ -104,11 +116,10 @@ export class TrainerEditComponent implements OnInit {
         this.router.navigate(['/trainers']);
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'trainers.edit.error');
+        this.errorMessage = apiErrorMessage(error, 'trainers.edit.error');
         this.submitting = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 

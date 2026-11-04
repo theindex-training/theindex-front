@@ -9,7 +9,7 @@ describe('RankedListComponent', () => {
     fixture.componentRef.setInput('countKey', 'stats.trainingsCount');
     fixture.componentRef.setInput('items', [
       { label: 'Monday', value: 12 },
-      { label: 'Thursday', value: 3 }
+      { label: 'Thursday', value: 3 },
     ]);
     await fixture.whenStable();
 
@@ -31,7 +31,7 @@ describe('RankedListComponent', () => {
     fixture.componentRef.setInput('countKey', 'stats.trainingsCount');
     fixture.componentRef.setInput('items', [
       { label: 'West', value: 1 },
-      { label: 'East', value: 5 }
+      { label: 'East', value: 5 },
     ]);
     await fixture.whenStable();
 
@@ -47,7 +47,9 @@ describe('RankedListComponent', () => {
     fixture.componentRef.setInput('items', []);
     await fixture.whenStable();
 
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('No data available.');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'No data available.',
+    );
     expect(fixture.componentInstance.barWidth(0)).toBe(0);
   });
 });

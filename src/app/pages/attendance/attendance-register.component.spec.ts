@@ -1,5 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import en from '../../../../public/i18n/en.json';
@@ -13,41 +16,58 @@ import { AttendanceRegisterComponent } from './attendance-register.component';
 
 const copy = en.attendance.register;
 
-const trainer = (id: string, name: string, isActive = true): TrainerProfile => ({
+const trainer = (
+  id: string,
+  name: string,
+  isActive = true,
+): TrainerProfile => ({
   id,
   name,
   nickname: null,
   accountId: null,
-  isActive
+  isActive,
 });
 const gym = (id: string, name: string, isActive = true): GymLocation => ({
   id,
   name,
   address: null,
   notes: null,
-  isActive
+  isActive,
 });
-const trainee = (id: string, name: string, nickname: string | null, isActive = true): TraineeProfile => ({
+const trainee = (
+  id: string,
+  name: string,
+  nickname: string | null,
+  isActive = true,
+): TraineeProfile => ({
   id,
   name,
   nickname,
   phone: null,
   accountId: null,
   gymSubscriptionId: null,
-  isActive
+  isActive,
 });
 
-const TRAINERS = [trainer('trainer-other', 'Maria'), trainer('trainer-1', 'Petar'), trainer('trainer-old', 'Old', false)];
-const GYMS = [gym('gym-closed', 'Closed', false), gym('gym-1', 'Center'), gym('gym-2', 'South')];
+const TRAINERS = [
+  trainer('trainer-other', 'Maria'),
+  trainer('trainer-1', 'Petar'),
+  trainer('trainer-old', 'Old', false),
+];
+const GYMS = [
+  gym('gym-closed', 'Closed', false),
+  gym('gym-1', 'Center'),
+  gym('gym-2', 'South'),
+];
 const TIMES: TrainingTime[] = [
   { id: 'tt-evening', startTime: '18:30:00', endTime: '19:30:00' },
-  { id: 'tt-morning', startTime: '8:00:00', endTime: '9:00:00' }
+  { id: 'tt-morning', startTime: '8:00:00', endTime: '9:00:00' },
 ];
 const TRAINEES = [
   trainee('t-ivan', 'Ivan Petrov', 'Vanko'),
   trainee('t-ivelina', 'Ivelina Koleva', null),
   trainee('t-georgi', 'Georgi Dimitrov', 'Gosho'),
-  trainee('t-gone', 'Ivo Gone', null, false)
+  trainee('t-gone', 'Ivo Gone', null, false),
 ];
 
 describe('AttendanceRegisterComponent', () => {
@@ -58,15 +78,18 @@ describe('AttendanceRegisterComponent', () => {
 
   beforeEach(async () => {
     // 00:30 on 2 Nov in Sofia (still 1 Nov in UTC). Only Date is faked.
-    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-11-01T22:30:00Z') });
+    vi.useFakeTimers({
+      toFake: ['Date'],
+      now: new Date('2026-11-01T22:30:00Z'),
+    });
     localStorage.clear();
     TestBed.configureTestingModule({
       imports: [AttendanceRegisterComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideRouter([{ path: '**', children: [] }])
-      ]
+        provideRouter([{ path: '**', children: [] }]),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
@@ -80,31 +103,39 @@ describe('AttendanceRegisterComponent', () => {
 
   async function render(load: 'ok' | 'error' = 'ok', trainers = TRAINERS) {
     fixture = TestBed.createComponent(AttendanceRegisterComponent);
-    page = driver(() => fixture.nativeElement, () => fixture.whenStable());
+    page = driver(
+      () => fixture.nativeElement,
+      () => fixture.whenStable(),
+    );
     await page.settle();
     const requests = [
       http.expectOne('/api/trainers?active=true'),
       http.expectOne('/api/gym-locations?includeInactive=false'),
       http.expectOne('/api/training-times'),
-      http.expectOne('/api/trainees?active=true')
+      http.expectOne('/api/trainees?active=true'),
     ];
     if (load === 'error') {
       const error = apiError(undefined, 500);
       requests[0].flush(error.body, error.options);
     } else {
-      [trainers, GYMS, TIMES, TRAINEES].forEach((body, index) => requests[index].flush(body));
+      [trainers, GYMS, TIMES, TRAINEES].forEach((body, index) =>
+        requests[index].flush(body),
+      );
     }
     await page.settle();
   }
 
-  const select = (name: string) => page.query<HTMLSelectElement>(`select[formcontrolname="${name}"]`)!;
+  const select = (name: string) =>
+    page.query<HTMLSelectElement>(`select[formcontrolname="${name}"]`)!;
   const shownTrainees = () =>
-    page.queryAll('label').filter(label => label.querySelector('input[type="checkbox"]'))
-      .map(label => label.textContent.replace(/\s+/g, ' ').trim());
+    page
+      .queryAll('label')
+      .filter((label) => label.querySelector('input[type="checkbox"]'))
+      .map((label) => label.textContent.replace(/\s+/g, ' ').trim());
   const checkbox = (name: string) =>
     page
       .queryAll('label')
-      .find(label => label.textContent?.includes(name))!
+      .find((label) => label.textContent?.includes(name))!
       .querySelector<HTMLInputElement>('input[type="checkbox"]')!;
 
   async function tick(name: string) {
@@ -117,7 +148,10 @@ describe('AttendanceRegisterComponent', () => {
   }
 
   async function clickButton(label: string) {
-    page.queryAll('button').find(button => button.textContent?.trim() === label)!.click();
+    page
+      .queryAll('button')
+      .find((button) => button.textContent?.trim() === label)!
+      .click();
     await page.settle();
   }
 
@@ -136,24 +170,27 @@ describe('AttendanceRegisterComponent', () => {
     it('preselects the signed-in trainer, the first active gym and the local date', () => {
       expect(select('trainerId').value).toBe('trainer-1');
       expect(select('locationId').value).toBe('gym-1');
-      expect(page.query<HTMLInputElement>('input[type="date"]')!.value).toBe('2026-11-02');
+      expect(page.query<HTMLInputElement>('input[type="date"]')!.value).toBe(
+        '2026-11-02',
+      );
     });
 
     it('lists only active trainers, gyms and trainees, and training times by start time', () => {
-      const options = (name: string) => Array.from(select(name).options).map(option => option.value);
+      const options = (name: string) =>
+        Array.from(select(name).options).map((option) => option.value);
 
       expect(options('trainerId')).toEqual(['', 'trainer-other', 'trainer-1']);
       expect(options('locationId')).toEqual(['', 'gym-1', 'gym-2']);
       expect(options('trainedTime')).toEqual(['', '08:00', '18:30']);
-      expect(Array.from(select('trainedTime').options).map(option => option.textContent?.trim())).toEqual([
-        copy.notSpecified,
-        '08:00 - 09:00',
-        '18:30 - 19:30'
-      ]);
+      expect(
+        Array.from(select('trainedTime').options).map((option) =>
+          option.textContent?.trim(),
+        ),
+      ).toEqual([copy.notSpecified, '08:00 - 09:00', '18:30 - 19:30']);
       const shown = shownTrainees();
       expect(shown.length).toBe(3);
-      ['Ivan Petrov', 'Ivelina Koleva', 'Georgi Dimitrov'].forEach((name, index) =>
-        expect(shown[index]).toContain(name)
+      ['Ivan Petrov', 'Ivelina Koleva', 'Georgi Dimitrov'].forEach(
+        (name, index) => expect(shown[index]).toContain(name),
       );
     });
 
@@ -209,9 +246,14 @@ describe('AttendanceRegisterComponent', () => {
         locationId: 'gym-2',
         traineeIds: ['t-ivan', 't-georgi'],
         trainedDate: '2026-11-02',
-        trainedTime: '08:00'
+        trainedTime: '08:00',
       });
-      req.flush({ trainerId: 'trainer-1', trainedAt: '2026-11-02T06:00:00Z', count: 2, results: [] });
+      req.flush({
+        trainerId: 'trainer-1',
+        trainedAt: '2026-11-02T06:00:00Z',
+        count: 2,
+        results: [],
+      });
       await page.settle();
 
       expect(router.url).toBe('/attendance');
@@ -226,7 +268,7 @@ describe('AttendanceRegisterComponent', () => {
         trainerId: 'trainer-1',
         locationId: 'gym-1',
         traineeIds: ['t-ivelina'],
-        trainedDate: '2026-11-02'
+        trainedDate: '2026-11-02',
       });
       expect('trainedTime' in body).toBe(false);
     });
@@ -243,11 +285,16 @@ describe('AttendanceRegisterComponent', () => {
     it('shows the API error and keeps the selection', async () => {
       await tick('Ivan Petrov');
       await page.submit();
-      const error = apiError(['trainedDate must not be in the future', 'trainee t-ivan is inactive']);
+      const error = apiError([
+        'trainedDate must not be in the future',
+        'trainee t-ivan is inactive',
+      ]);
       expectBatch().flush(error.body, error.options);
       await page.settle();
 
-      expect(page.alert()).toBe('trainedDate must not be in the future, trainee t-ivan is inactive');
+      expect(page.alert()).toBe(
+        'trainedDate must not be in the future, trainee t-ivan is inactive',
+      );
       expect(checkbox('Ivan Petrov').checked).toBe(true);
       expect(router.url).toBe('/attendance/new');
     });

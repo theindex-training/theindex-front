@@ -1,11 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   AccountProvisioningService,
-  ProvisionedAccount
+  ProvisionedAccount,
 } from '../../services/account-provisioning.service';
-import { TrainerProfile, TrainersService } from '../../services/trainers.service';
+import {
+  TrainerProfile,
+  TrainersService,
+} from '../../services/trainers.service';
 
 import { displayValue } from '../../utils/display.util';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -18,9 +26,17 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 @Component({
   selector: 'app-trainer-details',
   standalone: true,
-  imports: [EnumLabelPipe, UiMessagePipe, TranslocoPipe, CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  imports: [
+    EnumLabelPipe,
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    RouterLink,
+    PageHeaderComponent,
+    StatusDotComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './trainer-details.component.html'
+  templateUrl: './trainer-details.component.html',
 })
 export class TrainerDetailsComponent implements OnInit {
   trainer: TrainerProfile | null = null;
@@ -32,7 +48,7 @@ export class TrainerDetailsComponent implements OnInit {
     private readonly trainersService: TrainersService,
     private readonly accountsService: AccountProvisioningService,
     private readonly route: ActivatedRoute,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -55,11 +71,10 @@ export class TrainerDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'trainers.errors.load');
+        this.errorMessage = apiErrorMessage(error, 'trainers.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -80,7 +95,7 @@ export class TrainerDetailsComponent implements OnInit {
       error: () => {
         this.account = null;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 }

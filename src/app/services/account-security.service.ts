@@ -21,7 +21,7 @@ interface ChangePasswordResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AccountSecurityService {
   private readonly baseUrl = `${environment.apiUrl}/accounts`;
@@ -30,14 +30,19 @@ export class AccountSecurityService {
 
   hasChangedPassword(accountId: string): Observable<boolean> {
     return this.http
-      .get<PasswordStatusResponse>(`${this.baseUrl}/${accountId}/password-status`)
-      .pipe(map(response => response.hasUpdatedInitialPassword));
+      .get<PasswordStatusResponse>(
+        `${this.baseUrl}/${accountId}/password-status`,
+      )
+      .pipe(map((response) => response.hasUpdatedInitialPassword));
   }
 
   changePassword(
     accountId: string,
-    payload: ChangePasswordPayload
+    payload: ChangePasswordPayload,
   ): Observable<ChangePasswordResponse> {
-    return this.http.post<ChangePasswordResponse>(`${this.baseUrl}/${accountId}/change-password`, payload);
+    return this.http.post<ChangePasswordResponse>(
+      `${this.baseUrl}/${accountId}/change-password`,
+      payload,
+    );
   }
 }

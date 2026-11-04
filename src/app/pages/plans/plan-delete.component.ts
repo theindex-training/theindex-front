@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Plan, PlansService } from '../../services/plans.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -13,9 +19,16 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 @Component({
   selector: 'app-plan-delete',
   standalone: true,
-  imports: [EnumLabelPipe, UiMessagePipe, TranslocoPipe, CommonModule, PageHeaderComponent, StatusDotComponent],
+  imports: [
+    EnumLabelPipe,
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    PageHeaderComponent,
+    StatusDotComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './plan-delete.component.html'
+  templateUrl: './plan-delete.component.html',
 })
 export class PlanDeleteComponent implements OnInit {
   readonly format = inject(LocaleFormatService);
@@ -28,7 +41,7 @@ export class PlanDeleteComponent implements OnInit {
     private readonly plansService: PlansService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -46,11 +59,10 @@ export class PlanDeleteComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'plans.errors.load');
+        this.errorMessage = apiErrorMessage(error, 'plans.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -68,11 +80,10 @@ export class PlanDeleteComponent implements OnInit {
         this.router.navigate(['/plans']);
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'plans.delete.error');
+        this.errorMessage = apiErrorMessage(error, 'plans.delete.error');
         this.submitting = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 

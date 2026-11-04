@@ -2,49 +2,83 @@
   <app-page-header
     [title]="'attendance.sessions.title' | transloco"
     [subtitle]="'attendance.sessions.subtitle' | transloco"
-    [action]="{ label: ('nav.registerAttendance' | transloco), link: '/attendance/new' }"
+    [action]="{
+      label: ('nav.registerAttendance' | transloco),
+      link: '/attendance/new',
+    }"
   />
 
-  <section class="panel" [attr.aria-label]="'attendance.sessions.filters' | transloco">
+  <section
+    class="panel"
+    [attr.aria-label]="'attendance.sessions.filters' | transloco"
+  >
     <div class="filters">
       <label class="form-field">
-        <span class="form-field__label">{{ 'attendance.sessions.from' | transloco }}</span>
+        <span class="form-field__label">{{
+          'attendance.sessions.from' | transloco
+        }}</span>
         <input type="date" [(ngModel)]="selectedStartDate" />
       </label>
       <label class="form-field">
-        <span class="form-field__label">{{ 'attendance.sessions.to' | transloco }}</span>
+        <span class="form-field__label">{{
+          'attendance.sessions.to' | transloco
+        }}</span>
         <input type="date" [(ngModel)]="selectedEndDate" />
       </label>
       <label class="form-field">
-        <span class="form-field__label">{{ 'attendance.sessions.startTime' | transloco }}</span>
+        <span class="form-field__label">{{
+          'attendance.sessions.startTime' | transloco
+        }}</span>
         <input type="time" [(ngModel)]="selectedStartTime" />
       </label>
       <label class="form-field">
-        <span class="form-field__label">{{ 'attendance.sessions.endTime' | transloco }}</span>
+        <span class="form-field__label">{{
+          'attendance.sessions.endTime' | transloco
+        }}</span>
         <input type="time" [(ngModel)]="selectedEndTime" />
       </label>
       @if (isAdmin) {
         <label class="form-field filters__trainer">
-          <span class="form-field__label">{{ 'attendance.register.trainer' | transloco }}</span>
+          <span class="form-field__label">{{
+            'attendance.register.trainer' | transloco
+          }}</span>
           <select [(ngModel)]="selectedTrainerId" [disabled]="loadingTrainers">
-            <option value="">{{ 'attendance.sessions.allTrainers' | transloco }}</option>
+            <option value="">
+              {{ 'attendance.sessions.allTrainers' | transloco }}
+            </option>
             @for (trainer of trainers; track trainer.id) {
               <option [value]="trainer.id">
-                {{ trainer.name }}{{ trainer.nickname ? ' (' + trainer.nickname + ')' : '' }}
+                {{ trainer.name
+                }}{{ trainer.nickname ? ' (' + trainer.nickname + ')' : '' }}
               </option>
             }
           </select>
         </label>
       }
-      <button class="btn btn--secondary filters__apply" type="button" (click)="loadSessions()">{{ 'attendance.sessions.apply' | transloco }}</button>
+      <button
+        class="btn btn--secondary filters__apply"
+        type="button"
+        (click)="loadSessions()"
+      >
+        {{ 'attendance.sessions.apply' | transloco }}
+      </button>
     </div>
   </section>
 
   @if (loading) {
-    <app-skeleton-list [label]="'attendance.sessions.loading' | transloco" [rows]="4" />
+    <app-skeleton-list
+      [label]="'attendance.sessions.loading' | transloco"
+      [rows]="4"
+    />
   } @else if (errorMessage && !sessions.length) {
-    <app-empty-state tone="danger" [title]="'attendance.sessions.loadError' | transloco" [message]="errorMessage | uiMessage">
-      <button class="btn btn--secondary" type="button" (click)="loadSessions()">{{ 'common.tryAgain' | transloco }}</button>
+    <app-empty-state
+      tone="danger"
+      [title]="'attendance.sessions.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="loadSessions()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
     </app-empty-state>
   } @else if (!sessions.length) {
     <app-empty-state
@@ -54,11 +88,18 @@
     />
   } @else {
     @if (errorMessage) {
-      <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+      <p class="notice notice--danger" role="alert">
+        {{ errorMessage | uiMessage }}
+      </p>
     }
 
     <section class="session-picker" aria-labelledby="sessions-label">
-      <h2 class="form-field__label" id="sessions-label">{{ 'attendance.sessions.sessionsCount' | transloco: { count: sessions.length } }}</h2>
+      <h2 class="form-field__label" id="sessions-label">
+        {{
+          'attendance.sessions.sessionsCount'
+            | transloco: { count: sessions.length }
+        }}
+      </h2>
       <div class="session-picker__chips">
         @for (session of sessions; track trackBySession($index, session)) {
           <button
@@ -77,45 +118,125 @@
     </section>
 
     @if (selectedSessions.length) {
-      <dl class="stats" [attr.aria-label]="'attendance.sessions.summaryLabel' | transloco">
-        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.sessions' | transloco }}</dt><dd class="stat__value" data-testid="attendance-summary-sessions">{{ selectedSessionsSummary.sessions }}</dd></div>
-        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.attendance' | transloco }}</dt><dd class="stat__value" data-testid="attendance-summary-attendance">{{ selectedSessionsSummary.attendance }}</dd></div>
-        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.paid' | transloco }}</dt><dd class="stat__value" data-testid="attendance-summary-paid">{{ selectedSessionsSummary.paid }}</dd></div>
-        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.unpaid' | transloco }}</dt><dd class="stat__value" data-testid="attendance-summary-unpaid" [class.text-danger]="selectedSessionsSummary.unpaid > 0">{{ selectedSessionsSummary.unpaid }}</dd></div>
-        <div class="stat"><dt class="stat__label">{{ 'attendance.sessions.finalTotal' | transloco }}</dt><dd class="stat__value" data-testid="attendance-summary-total">{{ formatPrice(selectedSessionsSummary.finalPriceCents) }}</dd></div>
+      <dl
+        class="stats"
+        [attr.aria-label]="'attendance.sessions.summaryLabel' | transloco"
+      >
+        <div class="stat">
+          <dt class="stat__label">
+            {{ 'attendance.sessions.sessions' | transloco }}
+          </dt>
+          <dd class="stat__value" data-testid="attendance-summary-sessions">
+            {{ selectedSessionsSummary.sessions }}
+          </dd>
+        </div>
+        <div class="stat">
+          <dt class="stat__label">
+            {{ 'attendance.sessions.attendance' | transloco }}
+          </dt>
+          <dd class="stat__value" data-testid="attendance-summary-attendance">
+            {{ selectedSessionsSummary.attendance }}
+          </dd>
+        </div>
+        <div class="stat">
+          <dt class="stat__label">
+            {{ 'attendance.sessions.paid' | transloco }}
+          </dt>
+          <dd class="stat__value" data-testid="attendance-summary-paid">
+            {{ selectedSessionsSummary.paid }}
+          </dd>
+        </div>
+        <div class="stat">
+          <dt class="stat__label">
+            {{ 'attendance.sessions.unpaid' | transloco }}
+          </dt>
+          <dd
+            class="stat__value"
+            data-testid="attendance-summary-unpaid"
+            [class.text-danger]="selectedSessionsSummary.unpaid > 0"
+          >
+            {{ selectedSessionsSummary.unpaid }}
+          </dd>
+        </div>
+        <div class="stat">
+          <dt class="stat__label">
+            {{ 'attendance.sessions.finalTotal' | transloco }}
+          </dt>
+          <dd class="stat__value" data-testid="attendance-summary-total">
+            {{ formatPrice(selectedSessionsSummary.finalPriceCents) }}
+          </dd>
+        </div>
       </dl>
     } @else {
       <p class="notice">{{ 'attendance.sessions.selectHint' | transloco }}</p>
     }
 
     @for (session of selectedSessions; track trackBySession($index, session)) {
-      <article class="panel session" [attr.aria-label]="sessionTabTitle(session)">
+      <article
+        class="panel session"
+        [attr.aria-label]="sessionTabTitle(session)"
+      >
         <header class="session__header">
           <h2 class="panel__title num">
-            {{ format.date(session.start) }} · {{ format.clock(session.start) }} – {{ format.clock(session.end) }}
+            {{ format.date(session.start) }} ·
+            {{ format.clock(session.start) }} – {{ format.clock(session.end) }}
           </h2>
           <p class="session__meta">
-            <span>{{ 'attendance.register.trainer' | transloco }} <strong>{{ formatTrainer(session) }}</strong></span>
-            <span>{{ 'attendance.register.gym' | transloco }} <strong>{{ locationName(session.locationId) }}</strong></span>
+            <span
+              >{{ 'attendance.register.trainer' | transloco }}
+              <strong>{{ formatTrainer(session) }}</strong></span
+            >
+            <span
+              >{{ 'attendance.register.gym' | transloco }}
+              <strong>{{ locationName(session.locationId) }}</strong></span
+            >
           </p>
           <p class="session__meta">
-            <span>{{ 'attendance.sessions.total' | transloco }} <strong>{{ session.totals.count }}</strong></span>
-            <span>{{ 'attendance.sessions.paid' | transloco }} <strong>{{ session.totals.paid }}</strong></span>
-            <span>{{ 'attendance.sessions.unpaid' | transloco }} <strong>{{ session.totals.unpaid }}</strong></span>
-            <span>{{ 'attendance.sessions.priceTotal' | transloco }} <strong class="num">{{ sessionTotalPrice(session) }}</strong></span>
+            <span
+              >{{ 'attendance.sessions.total' | transloco }}
+              <strong>{{ session.totals.count }}</strong></span
+            >
+            <span
+              >{{ 'attendance.sessions.paid' | transloco }}
+              <strong>{{ session.totals.paid }}</strong></span
+            >
+            <span
+              >{{ 'attendance.sessions.unpaid' | transloco }}
+              <strong>{{ session.totals.unpaid }}</strong></span
+            >
+            <span
+              >{{ 'attendance.sessions.priceTotal' | transloco }}
+              <strong class="num">{{
+                sessionTotalPrice(session)
+              }}</strong></span
+            >
           </p>
         </header>
 
         <div class="responsive-table session__table">
           <table class="data-table">
-            <caption class="visually-hidden">{{ 'attendance.sessions.attendees' | transloco }}</caption>
+            <caption class="visually-hidden">
+              {{
+                'attendance.sessions.attendees' | transloco
+              }}
+            </caption>
             <thead>
               <tr>
-                <th scope="col">{{ 'attendance.sessions.trainee' | transloco }}</th>
-                <th scope="col">{{ 'attendance.sessions.payment' | transloco }}</th>
-                <th scope="col" class="cell-right">{{ 'attendance.sessions.price' | transloco }}</th>
+                <th scope="col">
+                  {{ 'attendance.sessions.trainee' | transloco }}
+                </th>
+                <th scope="col">
+                  {{ 'attendance.sessions.payment' | transloco }}
+                </th>
+                <th scope="col" class="cell-right">
+                  {{ 'attendance.sessions.price' | transloco }}
+                </th>
                 @if (canDeleteSessionAttendance(session)) {
-                  <th scope="col" class="cell-fit"><span class="visually-hidden">{{ 'attendance.sessions.actions' | transloco }}</span></th>
+                  <th scope="col" class="cell-fit">
+                    <span class="visually-hidden">{{
+                      'attendance.sessions.actions' | transloco
+                    }}</span>
+                  </th>
                 }
               </tr>
             </thead>
@@ -126,13 +247,26 @@
                     <div class="person-cell">
                       <app-avatar [name]="traineeName(item.traineeId)" />
                       <div class="person-cell__text">
-                        <a class="cell-link" [routerLink]="['/trainees', item.traineeId]">{{ traineeName(item.traineeId) }}</a>
-                        <span class="person-cell__sub">{{ traineeNickname(item.traineeId) }}</span>
+                        <a
+                          class="cell-link"
+                          [routerLink]="['/trainees', item.traineeId]"
+                          >{{ traineeName(item.traineeId) }}</a
+                        >
+                        <span class="person-cell__sub">{{
+                          traineeNickname(item.traineeId)
+                        }}</span>
                       </div>
                     </div>
                   </td>
                   <td>
-                    <app-chip [tone]="item.paymentStatus === 'UNPAID' ? 'danger' : 'success'">{{ item.paymentStatus | enumLabel: 'paymentStatus' }}</app-chip>
+                    <app-chip
+                      [tone]="
+                        item.paymentStatus === 'UNPAID' ? 'danger' : 'success'
+                      "
+                      >{{
+                        item.paymentStatus | enumLabel: 'paymentStatus'
+                      }}</app-chip
+                    >
                   </td>
                   <td class="num cell-right">{{ attendancePrice(item) }}</td>
                   @if (canDeleteSessionAttendance(session)) {
@@ -140,7 +274,10 @@
                       <button
                         class="icon-btn icon-btn--danger"
                         type="button"
-                        [attr.aria-label]="'attendance.sessions.deleteLabel' | transloco: { name: traineeName(item.traineeId) }"
+                        [attr.aria-label]="
+                          'attendance.sessions.deleteLabel'
+                            | transloco: { name: traineeName(item.traineeId) }
+                        "
                         [disabled]="deletingAttendanceId === item.id"
                         [attr.aria-busy]="deletingAttendanceId === item.id"
                         (click)="deleteAttendance(session, item)"
@@ -155,23 +292,44 @@
           </table>
         </div>
 
-        <ul class="list-card responsive-list" [attr.aria-label]="'attendance.sessions.attendees' | transloco">
+        <ul
+          class="list-card responsive-list"
+          [attr.aria-label]="'attendance.sessions.attendees' | transloco"
+        >
           @for (item of session.attendance; track item.id) {
             <li class="record">
               <app-avatar [name]="traineeName(item.traineeId)" />
               <div class="record__main">
-                <a class="record__title" [routerLink]="['/trainees', item.traineeId]">{{ traineeName(item.traineeId) }}</a>
-                <span class="record__meta">{{ traineeNickname(item.traineeId) }}</span>
+                <a
+                  class="record__title"
+                  [routerLink]="['/trainees', item.traineeId]"
+                  >{{ traineeName(item.traineeId) }}</a
+                >
+                <span class="record__meta">{{
+                  traineeNickname(item.traineeId)
+                }}</span>
               </div>
               <div class="record__aside">
-                <app-chip [tone]="item.paymentStatus === 'UNPAID' ? 'danger' : 'success'">{{ item.paymentStatus | enumLabel: 'paymentStatus' }}</app-chip>
-                <span class="record__meta num">{{ attendancePrice(item) }}</span>
+                <app-chip
+                  [tone]="
+                    item.paymentStatus === 'UNPAID' ? 'danger' : 'success'
+                  "
+                  >{{
+                    item.paymentStatus | enumLabel: 'paymentStatus'
+                  }}</app-chip
+                >
+                <span class="record__meta num">{{
+                  attendancePrice(item)
+                }}</span>
               </div>
               @if (canDeleteSessionAttendance(session)) {
                 <button
                   class="icon-btn icon-btn--danger"
                   type="button"
-                  [attr.aria-label]="'attendance.sessions.deleteLabel' | transloco: { name: traineeName(item.traineeId) }"
+                  [attr.aria-label]="
+                    'attendance.sessions.deleteLabel'
+                      | transloco: { name: traineeName(item.traineeId) }
+                  "
                   [disabled]="deletingAttendanceId === item.id"
                   [attr.aria-busy]="deletingAttendanceId === item.id"
                   (click)="deleteAttendance(session, item)"

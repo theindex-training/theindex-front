@@ -36,7 +36,7 @@ export interface UpdatePlanPayload {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PlansService {
   private readonly baseUrl = `${environment.apiUrl}/plans`;

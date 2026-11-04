@@ -9,12 +9,12 @@ import { TranslocoPipe } from '@jsverse/transloco';
   standalone: true,
   imports: [TranslocoPipe, BrandComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './unauthorized.component.html'
+  templateUrl: './unauthorized.component.html',
 })
 export class UnauthorizedComponent {
   constructor(
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
   ) {}
 
   handleLogout(): void {

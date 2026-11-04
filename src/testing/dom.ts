@@ -21,7 +21,10 @@ export interface PageDriver {
   submit(selector?: string): Promise<void>;
 }
 
-export function driver(root: () => HTMLElement, whenStable: () => Promise<unknown>): PageDriver {
+export function driver(
+  root: () => HTMLElement,
+  whenStable: () => Promise<unknown>,
+): PageDriver {
   const must = <T extends Element>(selector: string): T => {
     const element = root().querySelector<T>(selector);
     if (!element) {
@@ -32,17 +35,21 @@ export function driver(root: () => HTMLElement, whenStable: () => Promise<unknow
 
   const settle = async () => {
     await whenStable();
-    await new Promise(resolve => setTimeout(resolve));
+    await new Promise((resolve) => setTimeout(resolve));
     await whenStable();
   };
 
   return {
     root,
     settle,
-    query: selector => root().querySelector(selector),
-    queryAll: selector => Array.from(root().querySelectorAll(selector)),
+    query: (selector) => root().querySelector(selector),
+    queryAll: (selector) => Array.from(root().querySelectorAll(selector)),
     text: () => (root().textContent ?? '').replace(/\s+/g, ' ').trim(),
-    alert: () => root().querySelector('[role="alert"]')?.textContent?.replace(/\s+/g, ' ').trim(),
+    alert: () =>
+      root()
+        .querySelector('[role="alert"]')
+        ?.textContent?.replace(/\s+/g, ' ')
+        .trim(),
     async type(selector, value) {
       const input = must<HTMLInputElement | HTMLTextAreaElement>(selector);
       input.value = value;
@@ -68,9 +75,11 @@ export function driver(root: () => HTMLElement, whenStable: () => Promise<unknow
       await settle();
     },
     async submit(selector = 'form') {
-      must<HTMLFormElement>(selector).dispatchEvent(new Event('submit', { cancelable: true }));
+      must<HTMLFormElement>(selector).dispatchEvent(
+        new Event('submit', { cancelable: true }),
+      );
       await settle();
-    }
+    },
   };
 }
 
@@ -78,6 +87,6 @@ export function driver(root: () => HTMLElement, whenStable: () => Promise<unknow
 export function apiError(message?: string | string[], status = 400) {
   return {
     body: message === undefined ? null : { statusCode: status, message },
-    options: { status, statusText: 'Error' }
+    options: { status, statusText: 'Error' },
   };
 }

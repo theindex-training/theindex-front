@@ -1,7 +1,10 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { UiMessage } from '../../i18n/ui-message';
 import { AttendanceTraineeTrainingItem } from '../../services/attendance.service';
-import { SegmentedControlComponent, SegmentedOption } from '../segmented-control/segmented-control.component';
+import {
+  SegmentedControlComponent,
+  SegmentedOption,
+} from '../segmented-control/segmented-control.component';
 import { TraineeTrainingsTableComponent } from '../trainee-trainings-table/trainee-trainings-table.component';
 import { TrainingsCalendarComponent } from '../trainings-calendar/trainings-calendar.component';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -18,10 +21,15 @@ export const TRAININGS_VIEW_STORAGE_KEY = 'trainingsView';
 @Component({
   selector: 'app-trainee-trainings',
   standalone: true,
-  imports: [TranslocoPipe, SegmentedControlComponent, TraineeTrainingsTableComponent, TrainingsCalendarComponent],
+  imports: [
+    TranslocoPipe,
+    SegmentedControlComponent,
+    TraineeTrainingsTableComponent,
+    TrainingsCalendarComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainee-trainings.component.html',
-  host: { class: 'page-stack' }
+  host: { class: 'page-stack' },
 })
 export class TraineeTrainingsComponent {
   /** Section heading and the line under it, already translated. */
@@ -37,7 +45,7 @@ export class TraineeTrainingsComponent {
 
   readonly viewOptions: SegmentedOption<TrainingsView>[] = [
     { value: 'calendar', label: 'trainings.view.calendar' },
-    { value: 'list', label: 'trainings.view.list' }
+    { value: 'list', label: 'trainings.view.list' },
   ];
 
   view: TrainingsView = readStoredView();
@@ -54,7 +62,9 @@ export class TraineeTrainingsComponent {
 
 function readStoredView(): TrainingsView {
   try {
-    return localStorage.getItem(TRAININGS_VIEW_STORAGE_KEY) === 'list' ? 'list' : 'calendar';
+    return localStorage.getItem(TRAININGS_VIEW_STORAGE_KEY) === 'list'
+      ? 'list'
+      : 'calendar';
   } catch {
     return 'calendar';
   }

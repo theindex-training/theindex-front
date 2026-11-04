@@ -5,10 +5,12 @@ import en from '../../public/i18n/en.json';
 type Tree = { [key: string]: string | Tree };
 
 function lookup(tree: Tree, key: string): string {
-  const value = key.split('.').reduce<string | Tree | undefined>(
-    (node, part) => (typeof node === 'object' ? node[part] : undefined),
-    tree
-  );
+  const value = key
+    .split('.')
+    .reduce<string | Tree | undefined>(
+      (node, part) => (typeof node === 'object' ? node[part] : undefined),
+      tree,
+    );
   if (typeof value !== 'string') {
     throw new Error(`Missing translation key: ${key}`);
   }

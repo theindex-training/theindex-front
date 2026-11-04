@@ -8,7 +8,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
   imports: [TranslocoPipe],
   templateUrl: './skeleton-list.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './skeleton-list.component.scss'
+  styleUrl: './skeleton-list.component.scss',
 })
 export class SkeletonListComponent {
   @Input() rows = 6;

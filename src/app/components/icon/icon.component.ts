@@ -39,7 +39,7 @@ export type IconName =
   standalone: true,
   templateUrl: './icon.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './icon.component.scss'
+  styleUrl: './icon.component.scss',
 })
 export class IconComponent {
   @Input({ required: true }) name!: IconName;

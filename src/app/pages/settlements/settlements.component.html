@@ -2,52 +2,99 @@
   <app-page-header
     [title]="'nav.settlements' | transloco"
     [subtitle]="'settlements.list.subtitle' | transloco"
-    [action]="canManageSettlements ? { label: ('settlements.list.generate' | transloco), link: '/settlements/new' } : undefined"
+    [action]="
+      canManageSettlements
+        ? {
+            label: ('settlements.list.generate' | transloco),
+            link: '/settlements/new',
+          }
+        : undefined
+    "
   />
 
   @if (loading) {
-    <app-skeleton-list [label]="'settlements.list.loading' | transloco" [rows]="4" />
+    <app-skeleton-list
+      [label]="'settlements.list.loading' | transloco"
+      [rows]="4"
+    />
   } @else if (errorMessage && !settlements.length) {
-    <app-empty-state tone="danger" [title]="'settlements.list.loadError' | transloco" [message]="errorMessage | uiMessage">
-      <button class="btn btn--secondary" type="button" (click)="loadSettlements()">{{ 'common.tryAgain' | transloco }}</button>
+    <app-empty-state
+      tone="danger"
+      [title]="'settlements.list.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button
+        class="btn btn--secondary"
+        type="button"
+        (click)="loadSettlements()"
+      >
+        {{ 'common.tryAgain' | transloco }}
+      </button>
     </app-empty-state>
   } @else if (!settlements.length) {
     <app-empty-state
       icon="wallet"
       [title]="'settlements.list.emptyTitle' | transloco"
-      [message]="canManageSettlements ? ('settlements.list.emptyAdmin' | transloco) : ('settlements.list.emptyTrainer' | transloco)"
+      [message]="
+        canManageSettlements
+          ? ('settlements.list.emptyAdmin' | transloco)
+          : ('settlements.list.emptyTrainer' | transloco)
+      "
     >
       @if (canManageSettlements) {
-        <a class="btn btn--primary" routerLink="/settlements/new">{{ 'settlements.list.generate' | transloco }}</a>
+        <a class="btn btn--primary" routerLink="/settlements/new">{{
+          'settlements.list.generate' | transloco
+        }}</a>
       }
     </app-empty-state>
   } @else {
     @if (errorMessage) {
-      <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+      <p class="notice notice--danger" role="alert">
+        {{ errorMessage | uiMessage }}
+      </p>
     }
 
-    <div class="data-table-wrap responsive-table" tabindex="0" role="region" [attr.aria-label]="'settlements.list.tableLabel' | transloco">
+    <div
+      class="data-table-wrap responsive-table"
+      tabindex="0"
+      role="region"
+      [attr.aria-label]="'settlements.list.tableLabel' | transloco"
+    >
       <table class="data-table">
-        <caption class="visually-hidden">{{ 'nav.settlements' | transloco }}</caption>
+        <caption class="visually-hidden">
+          {{
+            'nav.settlements' | transloco
+          }}
+        </caption>
         <thead>
           <tr>
             <th scope="col">{{ 'settlements.list.period' | transloco }}</th>
             <th scope="col">{{ 'settlements.list.generated' | transloco }}</th>
             <th scope="col">{{ 'common.status' | transloco }}</th>
-            <th scope="col" class="cell-fit"><span class="visually-hidden">{{ 'settlements.list.actions' | transloco }}</span></th>
+            <th scope="col" class="cell-fit">
+              <span class="visually-hidden">{{
+                'settlements.list.actions' | transloco
+              }}</span>
+            </th>
           </tr>
         </thead>
         <tbody>
           @for (settlement of settlements; track settlement.id) {
             <tr>
               <td>
-                <a class="cell-link num" [routerLink]="['/settlements', settlement.id]">
-                  {{ format.date(settlement.periodStart) }} → {{ format.date(settlement.periodEnd) }}
+                <a
+                  class="cell-link num"
+                  [routerLink]="['/settlements', settlement.id]"
+                >
+                  {{ format.date(settlement.periodStart) }} →
+                  {{ format.date(settlement.periodEnd) }}
                 </a>
               </td>
               <td class="num">{{ formatDate(settlement.generatedAt) }}</td>
               <td>
-                <app-chip [tone]="settlement.status === 'FINAL' ? 'success' : 'warning'">
+                <app-chip
+                  [tone]="settlement.status === 'FINAL' ? 'success' : 'warning'"
+                >
                   {{ settlement.status | enumLabel: 'settlementStatus' }}
                 </app-chip>
               </td>
@@ -58,9 +105,13 @@
                       class="icon-btn icon-btn--danger"
                       type="button"
                       [attr.aria-label]="
-                'settlements.list.deleteLabel'
-                  | transloco: { start: format.date(settlement.periodStart), end: format.date(settlement.periodEnd) }
-              "
+                        'settlements.list.deleteLabel'
+                          | transloco
+                            : {
+                                start: format.date(settlement.periodStart),
+                                end: format.date(settlement.periodEnd),
+                              }
+                      "
                       [disabled]="deletingSettlementId === settlement.id"
                       [attr.aria-busy]="deletingSettlementId === settlement.id"
                       (click)="deleteSettlement(settlement)"
@@ -84,15 +135,28 @@
       </table>
     </div>
 
-    <ul class="list-card responsive-list" [attr.aria-label]="'nav.settlements' | transloco">
+    <ul
+      class="list-card responsive-list"
+      [attr.aria-label]="'nav.settlements' | transloco"
+    >
       @for (settlement of settlements; track settlement.id) {
         <li class="row-with-action">
           <app-list-row
             [link]="['/settlements', settlement.id]"
-            [title]="format.date(settlement.periodStart) + ' → ' + format.date(settlement.periodEnd)"
+            [title]="
+              format.date(settlement.periodStart) +
+              ' → ' +
+              format.date(settlement.periodEnd)
+            "
           >
-            <span listRowMeta>{{ 'settlements.list.generatedOn' | transloco: { date: formatDate(settlement.generatedAt) } }}</span>
-            <app-chip listRowTrailing [tone]="settlement.status === 'FINAL' ? 'success' : 'warning'">
+            <span listRowMeta>{{
+              'settlements.list.generatedOn'
+                | transloco: { date: formatDate(settlement.generatedAt) }
+            }}</span>
+            <app-chip
+              listRowTrailing
+              [tone]="settlement.status === 'FINAL' ? 'success' : 'warning'"
+            >
               {{ settlement.status | enumLabel: 'settlementStatus' }}
             </app-chip>
           </app-list-row>
@@ -102,7 +166,11 @@
               type="button"
               [attr.aria-label]="
                 'settlements.list.deleteLabel'
-                  | transloco: { start: format.date(settlement.periodStart), end: format.date(settlement.periodEnd) }
+                  | transloco
+                    : {
+                        start: format.date(settlement.periodStart),
+                        end: format.date(settlement.periodEnd),
+                      }
               "
               [disabled]="deletingSettlementId === settlement.id"
               [attr.aria-busy]="deletingSettlementId === settlement.id"

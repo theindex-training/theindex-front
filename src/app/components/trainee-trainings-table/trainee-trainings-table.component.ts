@@ -1,4 +1,9 @@
-import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  Input,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
@@ -12,9 +17,15 @@ import { displayValue } from '../../utils/display.util';
 @Component({
   selector: 'app-trainee-trainings-table',
   standalone: true,
-  imports: [TranslocoPipe, EnumLabelPipe, UiMessagePipe, ChipComponent, SkeletonListComponent],
+  imports: [
+    TranslocoPipe,
+    EnumLabelPipe,
+    UiMessagePipe,
+    ChipComponent,
+    SkeletonListComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './trainee-trainings-table.component.html'
+  templateUrl: './trainee-trainings-table.component.html',
 })
 export class TraineeTrainingsTableComponent {
   readonly format = inject(LocaleFormatService);

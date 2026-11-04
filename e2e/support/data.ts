@@ -13,14 +13,22 @@ export const inactiveTrainee = {
     startDate: '2026-10-01',
     endDate: null,
     remainingTrainings: 4,
-    remainingDays: null
-  }
+    remainingDays: null,
+  },
 };
 
 /** The two reports the staff dashboard (/home) loads. */
-export function mockStaffHome(api: ApiMock, inactive: object[] = [inactiveTrainee], withoutSubscription: object[] = []): void {
-  api.on('GET', '/api/attendance/reports/inactive-trainees', { body: inactive });
-  api.on('GET', '/api/attendance/reports/without-active-subscription', { body: withoutSubscription });
+export function mockStaffHome(
+  api: ApiMock,
+  inactive: object[] = [inactiveTrainee],
+  withoutSubscription: object[] = [],
+): void {
+  api.on('GET', '/api/attendance/reports/inactive-trainees', {
+    body: inactive,
+  });
+  api.on('GET', '/api/attendance/reports/without-active-subscription', {
+    body: withoutSubscription,
+  });
 }
 
 /** The three lists the trainee dashboard (/my-profile) loads for profile `traineeId`. */
@@ -30,17 +38,33 @@ export function mockTraineeHome(api: ApiMock, traineeId = 'trainee-1'): void {
   api.on('GET', '/api/plans', { body: [] });
 }
 
-export const trainer = (id: string, name: string, nickname: string | null = null, isActive = true) => ({
+export const trainer = (
+  id: string,
+  name: string,
+  nickname: string | null = null,
+  isActive = true,
+) => ({
   id,
   name,
   nickname,
   accountId: null,
-  isActive
+  isActive,
 });
 
-export const gym = (id: string, name: string, isActive = true) => ({ id, name, address: null, notes: null, isActive });
+export const gym = (id: string, name: string, isActive = true) => ({
+  id,
+  name,
+  address: null,
+  notes: null,
+  isActive,
+});
 
-export const trainee = (id: string, name: string, nickname: string | null = null, overrides: object = {}) => ({
+export const trainee = (
+  id: string,
+  name: string,
+  nickname: string | null = null,
+  overrides: object = {},
+) => ({
   id,
   name,
   nickname,
@@ -49,7 +73,7 @@ export const trainee = (id: string, name: string, nickname: string | null = null
   accountId: null as string | null,
   gymSubscriptionId: null as string | null,
   isActive: true,
-  ...overrides
+  ...overrides,
 });
 
 export const plan = (id: string, title: string, overrides: object = {}) => ({
@@ -60,19 +84,28 @@ export const plan = (id: string, title: string, overrides: object = {}) => ({
   credits: 10,
   durationDays: null,
   isActive: true,
-  ...overrides
+  ...overrides,
 });
 
 /** An attendance-sessions response (GET /api/attendance/sessions). */
-export function sessionsResponse(sessions: object[], entities: { trainees?: object[]; trainers?: object[] } = {}) {
+export function sessionsResponse(
+  sessions: object[],
+  entities: { trainees?: object[]; trainers?: object[] } = {},
+) {
   return {
-    filters: { startDate: '', endDate: '', startTime: '', endTime: '', trainerId: null },
+    filters: {
+      startDate: '',
+      endDate: '',
+      startTime: '',
+      endTime: '',
+      trainerId: null,
+    },
     sessions,
     entities: {
       trainees: entities.trainees ?? [],
       trainers: entities.trainers ?? [],
-      locations: [{ id: 'gym-1', name: 'Center' }]
-    }
+      locations: [{ id: 'gym-1', name: 'Center' }],
+    },
   };
 }
 
@@ -80,7 +113,12 @@ export function sessionsResponse(sessions: object[], entities: { trainees?: obje
 export const trainingItem = (
   id: string,
   trainedAt: string,
-  overrides: { paymentStatus?: 'PAID' | 'UNPAID'; trainer?: [string, string | null]; gym?: string; traineeId?: string } = {}
+  overrides: {
+    paymentStatus?: 'PAID' | 'UNPAID';
+    trainer?: [string, string | null];
+    gym?: string;
+    traineeId?: string;
+  } = {},
 ) => {
   const [name, nickname] = overrides.trainer ?? ['Petar Petrov', 'Pepi'];
   return {
@@ -89,11 +127,14 @@ export const trainingItem = (
     trainerId: `trainer-${name}`,
     trainer: { id: `trainer-${name}`, name, nickname },
     locationId: `gym-${overrides.gym ?? 'Center'}`,
-    location: { id: `gym-${overrides.gym ?? 'Center'}`, name: overrides.gym ?? 'Center' },
+    location: {
+      id: `gym-${overrides.gym ?? 'Center'}`,
+      name: overrides.gym ?? 'Center',
+    },
     trainedAt,
     subscriptionId: null,
     gymSubscriptionId: null,
     paymentStatus: overrides.paymentStatus ?? 'PAID',
-    createdAt: trainedAt
+    createdAt: trainedAt,
   };
 };

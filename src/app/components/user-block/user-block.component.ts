@@ -12,7 +12,7 @@ import { IconComponent } from '../icon/icon.component';
   imports: [RouterLink, TranslocoPipe, EnumLabelPipe, IconComponent],
   templateUrl: './user-block.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './user-block.component.scss'
+  styleUrl: './user-block.component.scss',
 })
 export class UserBlockComponent {
   /** `inline`: compact links (desktop sidebar). `list`: full-width rows (mobile sheet). */
@@ -24,11 +24,15 @@ export class UserBlockComponent {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
   ) {
     this.email = this.authService.getUserEmail();
     this.role = this.authService.getUserRole();
-    this.initials = (this.email ?? '').replace(/[^a-z0-9]/gi, '').slice(0, 2).toUpperCase() || 'U';
+    this.initials =
+      (this.email ?? '')
+        .replace(/[^a-z0-9]/gi, '')
+        .slice(0, 2)
+        .toUpperCase() || 'U';
   }
 
   logout(): void {

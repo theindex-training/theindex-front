@@ -23,22 +23,16 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
-            "allowedCommonJsDependencies": [
-              "@messageformat/core"
-            ],
+            "allowedCommonJsDependencies": ["@messageformat/core"],
             "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
                 "input": "public",
-                "ignore": [
-                  "i18n/**"
-                ]
+                "ignore": ["i18n/**"]
               }
             ],
-            "styles": [
-              "src/styles.scss"
-            ]
+            "styles": ["src/styles.scss"]
           },
           "configurations": {
             "production": {

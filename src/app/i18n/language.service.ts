@@ -15,7 +15,7 @@ export const LANGUAGES: readonly Language[] = ['bg', 'en'];
 /** Angular locale ids (registered in i18n.providers.ts) used for dates, numbers and money. */
 export const LOCALE_IDS: Record<Language, string> = {
   bg: 'bg',
-  en: 'en-GB'
+  en: 'en-GB',
 };
 
 export function isLanguage(value: unknown): value is Language {
@@ -28,14 +28,14 @@ export function isLanguage(value: unknown): value is Language {
  * flips the language in one go, so the page never shows raw keys or a half-translated mix.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LanguageService {
   private readonly document = inject(DOCUMENT);
   private readonly transloco = inject(TranslocoService);
 
   private readonly langSignal = signal<Language>(
-    inject(INITIAL_LANGUAGE, { optional: true }) ?? readStoredLanguage()
+    inject(INITIAL_LANGUAGE, { optional: true }) ?? readStoredLanguage(),
   );
 
   /** The active language. Read it in templates/computeds to re-render when it changes. */
@@ -82,7 +82,7 @@ export class LanguageService {
         this.langSignal.set(lang);
         this.document.documentElement.lang = lang;
       }),
-      map(() => undefined)
+      map(() => undefined),
     );
   }
 }

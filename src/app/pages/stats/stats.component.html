@@ -1,10 +1,17 @@
 <section class="page-stack">
-  <app-page-header [title]="'nav.stats' | transloco" [subtitle]="'stats.subtitle' | transloco" />
+  <app-page-header
+    [title]="'nav.stats' | transloco"
+    [subtitle]="'stats.subtitle' | transloco"
+  />
 
   @if (loading) {
     <app-skeleton-list [label]="'stats.loading' | transloco" [rows]="4" />
   } @else if (errorMessage) {
-    <app-empty-state tone="danger" [title]="'stats.loadError' | transloco" [message]="errorMessage | uiMessage" />
+    <app-empty-state
+      tone="danger"
+      [title]="'stats.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    />
   } @else if (insights) {
     <div class="stats-grid">
       <app-ranked-list

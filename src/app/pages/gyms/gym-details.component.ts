@@ -1,7 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
+import {
+  GymLocation,
+  GymLocationsService,
+} from '../../services/gym-locations.service';
 
 import { displayValue } from '../../utils/display.util';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -13,9 +21,16 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-gym-details',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    RouterLink,
+    PageHeaderComponent,
+    StatusDotComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './gym-details.component.html'
+  templateUrl: './gym-details.component.html',
 })
 export class GymDetailsComponent implements OnInit {
   gym: GymLocation | null = null;
@@ -25,7 +40,7 @@ export class GymDetailsComponent implements OnInit {
   constructor(
     private readonly gymsService: GymLocationsService,
     private readonly route: ActivatedRoute,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -43,11 +58,10 @@ export class GymDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'gyms.errors.load');
+        this.errorMessage = apiErrorMessage(error, 'gyms.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 

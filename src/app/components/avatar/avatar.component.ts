@@ -6,7 +6,7 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
   standalone: true,
   templateUrl: './avatar.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './avatar.component.scss'
+  styleUrl: './avatar.component.scss',
 })
 export class AvatarComponent {
   @Input({ required: true }) name = '';

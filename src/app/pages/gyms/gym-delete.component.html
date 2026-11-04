@@ -8,7 +8,9 @@
   @if (loading) {
     <p class="notice" role="status">{{ 'gyms.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !gym) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
   } @else if (gym) {
     <div class="panel">
       <dl class="detail-list">
@@ -28,7 +30,11 @@
           <dt>{{ 'common.status' | transloco }}</dt>
           <dd>
             <app-status-dot [tone]="gym.isActive ? 'success' : 'neutral'">
-              {{ gym.isActive ? ('gyms.status.active' | transloco) : ('gyms.status.inactive' | transloco) }}
+              {{
+                gym.isActive
+                  ? ('gyms.status.active' | transloco)
+                  : ('gyms.status.inactive' | transloco)
+              }}
             </app-status-dot>
           </dd>
         </div>
@@ -39,7 +45,9 @@
       </p>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
       }
 
       <div class="form-actions">
@@ -49,7 +57,13 @@
           (click)="confirmDeactivate()"
           [disabled]="submitting || !gym.isActive"
         >
-          {{ gym.isActive ? (submitting ? ('common.deactivating' | transloco) : ('gyms.delete.submit' | transloco)) : ('gyms.delete.inactive' | transloco) }}
+          {{
+            gym.isActive
+              ? submitting
+                ? ('common.deactivating' | transloco)
+                : ('gyms.delete.submit' | transloco)
+              : ('gyms.delete.inactive' | transloco)
+          }}
         </button>
       </div>
     </div>

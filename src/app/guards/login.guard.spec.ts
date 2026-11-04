@@ -1,12 +1,17 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+  UrlTree,
+  provideRouter,
+} from '@angular/router';
 import { makeToken, signInAs } from '../../testing/jwt';
 import { loginGuard } from './login.guard';
 
 describe('loginGuard', () => {
   const run = () =>
     TestBed.runInInjectionContext(() =>
-      loginGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
+      loginGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
     );
   const redirect = () => {
     const result = run();
@@ -27,13 +32,19 @@ describe('loginGuard', () => {
     expect(redirect()).toBe('/my-profile');
   });
 
-  it.each(['ADMIN', 'TRAINER'] as const)('sends a signed-in %s to /home', role => {
-    signInAs(role);
-    expect(redirect()).toBe('/home');
-  });
+  it.each(['ADMIN', 'TRAINER'] as const)(
+    'sends a signed-in %s to /home',
+    (role) => {
+      signInAs(role);
+      expect(redirect()).toBe('/home');
+    },
+  );
 
   it('sends an unknown role or an undecodable token to /home', () => {
-    localStorage.setItem('accessToken', makeToken({ sub: 'a1', role: 'OWNER' }));
+    localStorage.setItem(
+      'accessToken',
+      makeToken({ sub: 'a1', role: 'OWNER' }),
+    );
     expect(redirect()).toBe('/home');
 
     localStorage.setItem('accessToken', 'garbage');

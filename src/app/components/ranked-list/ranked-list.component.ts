@@ -13,7 +13,7 @@ export interface RankedItem {
   imports: [TranslocoPipe],
   templateUrl: './ranked-list.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './ranked-list.component.scss'
+  styleUrl: './ranked-list.component.scss',
 })
 export class RankedListComponent {
   @Input({ required: true }) title = '';
@@ -28,7 +28,7 @@ export class RankedListComponent {
   @Input() emptyMessage = '';
 
   barWidth(value: number): number {
-    const max = Math.max(...this.items.map(item => item.value), 1);
+    const max = Math.max(...this.items.map((item) => item.value), 1);
     return Math.round((value / max) * 100);
   }
 }

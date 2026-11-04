@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -12,10 +18,13 @@ import {
   AttendanceSession,
   AttendanceSessionAttendanceItem,
   AttendanceSessionsQuery,
-  AttendanceSessionsResponse
+  AttendanceSessionsResponse,
 } from '../../services/attendance.service';
 import { AuthService } from '../../services/auth.service';
-import { TrainerProfile, TrainersService } from '../../services/trainers.service';
+import {
+  TrainerProfile,
+  TrainersService,
+} from '../../services/trainers.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
@@ -27,9 +36,9 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
   selector: 'app-attendance-sessions',
   standalone: true,
   imports: [
-    EnumLabelPipe, 
-    UiMessagePipe, 
-    TranslocoPipe, 
+    EnumLabelPipe,
+    UiMessagePipe,
+    TranslocoPipe,
     FormsModule,
     RouterLink,
     PageHeaderComponent,
@@ -37,11 +46,11 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
     EmptyStateComponent,
     ChipComponent,
     IconComponent,
-    AvatarComponent
+    AvatarComponent,
   ],
   templateUrl: './attendance-sessions.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './attendance-sessions.component.scss'
+  styleUrl: './attendance-sessions.component.scss',
 })
 export class AttendanceSessionsComponent implements OnInit {
   private readonly i18n = inject(LanguageService);
@@ -75,7 +84,7 @@ export class AttendanceSessionsComponent implements OnInit {
     private readonly attendanceService: AttendanceService,
     private readonly trainersService: TrainersService,
     private readonly authService: AuthService,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     const userRole = this.authService.getUserRole();
     this.isAdmin = userRole === 'ADMIN';
@@ -102,7 +111,9 @@ export class AttendanceSessionsComponent implements OnInit {
       return [];
     }
 
-    return this.sessions.filter(session => this.selectedSessionKeys.includes(session.sessionKey));
+    return this.sessions.filter((session) =>
+      this.selectedSessionKeys.includes(session.sessionKey),
+    );
   }
 
   get selectedSessionsSummary(): {
@@ -133,8 +144,8 @@ export class AttendanceSessionsComponent implements OnInit {
         attendance: 0,
         paid: 0,
         unpaid: 0,
-        finalPriceCents: 0
-      }
+        finalPriceCents: 0,
+      },
     );
   }
 
@@ -144,7 +155,7 @@ export class AttendanceSessionsComponent implements OnInit {
 
     const query: AttendanceSessionsQuery = {
       startDate: this.selectedStartDate,
-      endDate: this.selectedEndDate
+      endDate: this.selectedEndDate,
     };
 
     if (this.selectedStartTime) {
@@ -155,7 +166,9 @@ export class AttendanceSessionsComponent implements OnInit {
       query.endTime = this.selectedEndTime;
     }
 
-    const trainerId = this.isAdmin ? this.selectedTrainerId : this.currentTrainerId;
+    const trainerId = this.isAdmin
+      ? this.selectedTrainerId
+      : this.currentTrainerId;
     if (trainerId) {
       query.trainerId = trainerId;
     }
@@ -169,10 +182,13 @@ export class AttendanceSessionsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'attendance.sessions.loadErrorMessage');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'attendance.sessions.loadErrorMessage',
+        );
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -183,7 +199,9 @@ export class AttendanceSessionsComponent implements OnInit {
   toggleSession(sessionKey: string): void {
     const isSelected = this.selectedSessionKeys.includes(sessionKey);
     if (isSelected) {
-      this.selectedSessionKeys = this.selectedSessionKeys.filter(key => key !== sessionKey);
+      this.selectedSessionKeys = this.selectedSessionKeys.filter(
+        (key) => key !== sessionKey,
+      );
       return;
     }
 
@@ -251,11 +269,19 @@ export class AttendanceSessionsComponent implements OnInit {
       return true;
     }
 
-    return Boolean(this.currentTrainerId && this.currentTrainerId === session.trainerId);
+    return Boolean(
+      this.currentTrainerId && this.currentTrainerId === session.trainerId,
+    );
   }
 
-  deleteAttendance(session: AttendanceSession, item: AttendanceSessionAttendanceItem): void {
-    if (!this.canDeleteSessionAttendance(session) || this.deletingAttendanceId) {
+  deleteAttendance(
+    session: AttendanceSession,
+    item: AttendanceSessionAttendanceItem,
+  ): void {
+    if (
+      !this.canDeleteSessionAttendance(session) ||
+      this.deletingAttendanceId
+    ) {
       return;
     }
 
@@ -263,8 +289,8 @@ export class AttendanceSessionsComponent implements OnInit {
       this.i18n.t('attendance.sessions.confirmDelete', {
         name: this.traineeName(item.traineeId),
         date: this.format.date(item.trainedAt),
-        time: this.format.clock(item.trainedAt)
-      })
+        time: this.format.clock(item.trainedAt),
+      }),
     );
 
     if (!confirmed) {
@@ -276,33 +302,54 @@ export class AttendanceSessionsComponent implements OnInit {
 
     this.attendanceService.deleteById(item.id).subscribe({
       next: () => {
-        session.attendance = session.attendance.filter(attendance => attendance.id !== item.id);
+        session.attendance = session.attendance.filter(
+          (attendance) => attendance.id !== item.id,
+        );
         session.totals = {
           count: session.attendance.length,
-          paid: session.attendance.filter(attendance => attendance.paymentStatus === 'PAID').length,
-          unpaid: session.attendance.filter(attendance => attendance.paymentStatus === 'UNPAID').length
+          paid: session.attendance.filter(
+            (attendance) => attendance.paymentStatus === 'PAID',
+          ).length,
+          unpaid: session.attendance.filter(
+            (attendance) => attendance.paymentStatus === 'UNPAID',
+          ).length,
         };
         this.deletingAttendanceId = null;
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'attendance.sessions.deleteError');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'attendance.sessions.deleteError',
+        );
         this.deletingAttendanceId = null;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
   private applyEntities(response: AttendanceSessionsResponse): void {
-    this.traineeNameById = new Map(response.entities.trainees.map(item => [item.id, item.name]));
+    this.traineeNameById = new Map(
+      response.entities.trainees.map((item) => [item.id, item.name]),
+    );
     this.traineeNicknameById = new Map(
-      response.entities.trainees.map(item => [item.id, item.nickname ?? null])
+      response.entities.trainees.map((item) => [
+        item.id,
+        item.nickname ?? null,
+      ]),
     );
-    this.trainerNameById = new Map(response.entities.trainers.map(item => [item.id, item.name]));
+    this.trainerNameById = new Map(
+      response.entities.trainers.map((item) => [item.id, item.name]),
+    );
     this.trainerNicknameById = new Map(
-      response.entities.trainers.map(item => [item.id, item.nickname ?? null])
+      response.entities.trainers.map((item) => [
+        item.id,
+        item.nickname ?? null,
+      ]),
     );
-    this.locationNameById = new Map(response.entities.locations.map(item => [item.id, item.name]));
+    this.locationNameById = new Map(
+      response.entities.locations.map((item) => [item.id, item.name]),
+    );
   }
 
   private ensureSelectedSession(): void {
@@ -311,11 +358,17 @@ export class AttendanceSessionsComponent implements OnInit {
       return;
     }
 
-    const availableSessionKeys = new Set(this.sessions.map(session => session.sessionKey));
-    this.selectedSessionKeys = this.selectedSessionKeys.filter(key => availableSessionKeys.has(key));
+    const availableSessionKeys = new Set(
+      this.sessions.map((session) => session.sessionKey),
+    );
+    this.selectedSessionKeys = this.selectedSessionKeys.filter((key) =>
+      availableSessionKeys.has(key),
+    );
 
     if (!this.selectedSessionKeys.length) {
-      this.selectedSessionKeys = this.sessions.map(session => session.sessionKey);
+      this.selectedSessionKeys = this.sessions.map(
+        (session) => session.sessionKey,
+      );
     }
   }
 
@@ -327,7 +380,9 @@ export class AttendanceSessionsComponent implements OnInit {
       return '—';
     }
 
-    return trainerNickname ? `${trainerName} (${trainerNickname})` : trainerName;
+    return trainerNickname
+      ? `${trainerName} (${trainerNickname})`
+      : trainerName;
   }
 
   private loadTrainers(): void {
@@ -335,14 +390,14 @@ export class AttendanceSessionsComponent implements OnInit {
 
     this.trainersService.list(true).subscribe({
       next: (trainers) => {
-        this.trainers = trainers.filter(item => item.isActive);
+        this.trainers = trainers.filter((item) => item.isActive);
         this.loadingTrainers = false;
         this.changeDetector.detectChanges();
       },
       error: () => {
         this.loadingTrainers = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 

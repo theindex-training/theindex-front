@@ -35,17 +35,24 @@ export class SubscriptionsService {
   constructor(private readonly http: HttpClient) {}
 
   listForTrainee(traineeId: string): Observable<Subscription[]> {
-    return this.http.get<Subscription[]>(`${this.baseUrl}/${traineeId}/subscriptions`);
+    return this.http.get<Subscription[]>(
+      `${this.baseUrl}/${traineeId}/subscriptions`,
+    );
   }
 
   createForTrainee(
     traineeId: string,
     payload: CreateSubscriptionPayload,
   ): Observable<Subscription> {
-    return this.http.post<Subscription>(`${this.baseUrl}/${traineeId}/subscriptions`, payload);
+    return this.http.post<Subscription>(
+      `${this.baseUrl}/${traineeId}/subscriptions`,
+      payload,
+    );
   }
 
   delete(subscriptionId: string): Observable<{ deleted: boolean }> {
-    return this.http.delete<{ deleted: boolean }>(`${this.subscriptionsUrl}/${subscriptionId}`);
+    return this.http.delete<{ deleted: boolean }>(
+      `${this.subscriptionsUrl}/${subscriptionId}`,
+    );
   }
 }

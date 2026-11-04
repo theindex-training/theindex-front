@@ -5,32 +5,62 @@
   />
 
   @if (loading) {
-    <app-skeleton-list [label]="'cashRegister.loading' | transloco" [rows]="4" />
+    <app-skeleton-list
+      [label]="'cashRegister.loading' | transloco"
+      [rows]="4"
+    />
   } @else if (errorMessage) {
-    <app-empty-state tone="danger" [title]="'cashRegister.loadError' | transloco" [message]="errorMessage | uiMessage">
-      <button class="btn btn--secondary" type="button" (click)="loadState()">{{ 'common.tryAgain' | transloco }}</button>
+    <app-empty-state
+      tone="danger"
+      [title]="'cashRegister.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="loadState()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
     </app-empty-state>
   } @else {
     <div class="cash-top">
       <div class="stat balance">
-        <span class="stat__label">{{ 'cashRegister.balance' | transloco }}</span>
-        <span class="stat__value" data-testid="cash-register-balance" [class.text-danger]="balanceCents < 0">{{ formatCurrency(balanceCents) }}</span>
+        <span class="stat__label">{{
+          'cashRegister.balance' | transloco
+        }}</span>
+        <span
+          class="stat__value"
+          data-testid="cash-register-balance"
+          [class.text-danger]="balanceCents < 0"
+          >{{ formatCurrency(balanceCents) }}</span
+        >
       </div>
 
       <section class="panel" aria-labelledby="manual-transaction-title">
-        <h2 class="panel__title" id="manual-transaction-title">{{ 'cashRegister.manualTitle' | transloco }}</h2>
-        <form class="form-grid" [formGroup]="form" (ngSubmit)="createManualTransaction()">
+        <h2 class="panel__title" id="manual-transaction-title">
+          {{ 'cashRegister.manualTitle' | transloco }}
+        </h2>
+        <form
+          class="form-grid"
+          [formGroup]="form"
+          (ngSubmit)="createManualTransaction()"
+        >
           <div class="form-row">
             <div class="form-field">
-              <label class="form-field__label" for="cash-direction">{{ 'cashRegister.direction' | transloco }}</label>
+              <label class="form-field__label" for="cash-direction">{{
+                'cashRegister.direction' | transloco
+              }}</label>
               <select id="cash-direction" formControlName="direction">
-                <option value="IN">{{ 'cashRegister.directionIn' | transloco }}</option>
-                <option value="OUT">{{ 'cashRegister.directionOut' | transloco }}</option>
+                <option value="IN">
+                  {{ 'cashRegister.directionIn' | transloco }}
+                </option>
+                <option value="OUT">
+                  {{ 'cashRegister.directionOut' | transloco }}
+                </option>
               </select>
             </div>
 
             <div class="form-field">
-              <label class="form-field__label" for="cash-amount">{{ 'cashRegister.amount' | transloco }}</label>
+              <label class="form-field__label" for="cash-amount">{{
+                'cashRegister.amount' | transloco
+              }}</label>
               <input
                 id="cash-amount"
                 type="number"
@@ -38,34 +68,61 @@
                 min="0.01"
                 step="0.01"
                 formControlName="amount"
-                [attr.aria-invalid]="form.controls.amount.touched && form.controls.amount.invalid"
+                [attr.aria-invalid]="
+                  form.controls.amount.touched && form.controls.amount.invalid
+                "
                 aria-describedby="cash-amount-help"
               />
-              @if (form.controls.amount.touched && form.controls.amount.invalid) {
-                <span class="form-field__error" id="cash-amount-help">{{ 'cashRegister.amountError' | transloco }}</span>
+              @if (
+                form.controls.amount.touched && form.controls.amount.invalid
+              ) {
+                <span class="form-field__error" id="cash-amount-help">{{
+                  'cashRegister.amountError' | transloco
+                }}</span>
               } @else {
-                <span class="form-field__hint" id="cash-amount-help">{{ 'cashRegister.amountHint' | transloco }}</span>
+                <span class="form-field__hint" id="cash-amount-help">{{
+                  'cashRegister.amountHint' | transloco
+                }}</span>
               }
             </div>
           </div>
 
           <div class="form-field">
             <label class="form-field__label" for="cash-notes">
-              {{ 'cashRegister.notes' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span>
+              {{ 'cashRegister.notes' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
             </label>
-            <textarea id="cash-notes" formControlName="notes" rows="2"></textarea>
+            <textarea
+              id="cash-notes"
+              formControlName="notes"
+              rows="2"
+            ></textarea>
           </div>
 
           @if (formErrorMessage) {
-            <p class="notice notice--danger" role="alert">{{ formErrorMessage | uiMessage }}</p>
+            <p class="notice notice--danger" role="alert">
+              {{ formErrorMessage | uiMessage }}
+            </p>
           }
           @if (formSuccessMessage) {
-            <p class="notice notice--success" role="status">{{ formSuccessMessage | uiMessage }}</p>
+            <p class="notice notice--success" role="status">
+              {{ formSuccessMessage | uiMessage }}
+            </p>
           }
 
           <div class="form-actions">
-            <button type="submit" class="btn btn--primary" [disabled]="creatingTransaction">
-              {{ creatingTransaction ? ('cashRegister.saving' | transloco) : ('cashRegister.add' | transloco) }}
+            <button
+              type="submit"
+              class="btn btn--primary"
+              [disabled]="creatingTransaction"
+            >
+              {{
+                creatingTransaction
+                  ? ('cashRegister.saving' | transloco)
+                  : ('cashRegister.add' | transloco)
+              }}
             </button>
           </div>
         </form>
@@ -73,7 +130,9 @@
     </div>
 
     <section class="page-stack" aria-labelledby="transactions-title">
-      <h2 class="panel__title" id="transactions-title">{{ 'cashRegister.transactions' | transloco }}</h2>
+      <h2 class="panel__title" id="transactions-title">
+        {{ 'cashRegister.transactions' | transloco }}
+      </h2>
 
       @if (!transactions.length) {
         <app-empty-state
@@ -82,16 +141,29 @@
           [message]="'cashRegister.emptyMessage' | transloco"
         />
       } @else {
-        <div class="data-table-wrap responsive-table" tabindex="0" role="region" [attr.aria-label]="'cashRegister.tableLabel' | transloco">
+        <div
+          class="data-table-wrap responsive-table"
+          tabindex="0"
+          role="region"
+          [attr.aria-label]="'cashRegister.tableLabel' | transloco"
+        >
           <table class="data-table">
-            <caption class="visually-hidden">{{ 'cashRegister.transactions' | transloco }}</caption>
+            <caption class="visually-hidden">
+              {{
+                'cashRegister.transactions' | transloco
+              }}
+            </caption>
             <thead>
               <tr>
                 <th scope="col">{{ 'cashRegister.date' | transloco }}</th>
                 <th scope="col">{{ 'cashRegister.type' | transloco }}</th>
                 <th scope="col">{{ 'cashRegister.details' | transloco }}</th>
-                <th scope="col" class="cell-right">{{ 'cashRegister.amountColumn' | transloco }}</th>
-                <th scope="col" class="cell-right">{{ 'cashRegister.balanceAfter' | transloco }}</th>
+                <th scope="col" class="cell-right">
+                  {{ 'cashRegister.amountColumn' | transloco }}
+                </th>
+                <th scope="col" class="cell-right">
+                  {{ 'cashRegister.balanceAfter' | transloco }}
+                </th>
                 <th scope="col">{{ 'cashRegister.notes' | transloco }}</th>
               </tr>
             </thead>
@@ -99,9 +171,18 @@
               @for (transaction of transactions; track transaction.id) {
                 <tr>
                   <td class="num">{{ formatDate(transaction.createdAt) }}</td>
-                  <td><app-chip>{{ formatTransactionType(transaction.type) }}</app-chip></td>
+                  <td>
+                    <app-chip>{{
+                      formatTransactionType(transaction.type)
+                    }}</app-chip>
+                  </td>
                   <td class="details-cell">
-                    <ng-container *ngTemplateOutlet="details; context: { $implicit: transaction }" />
+                    <ng-container
+                      *ngTemplateOutlet="
+                        details;
+                        context: { $implicit: transaction }
+                      "
+                    />
                   </td>
                   <td
                     class="num cell-right amount"
@@ -110,23 +191,39 @@
                   >
                     {{ formatCurrency(transaction.amountCents) }}
                   </td>
-                  <td class="num cell-right">{{ formatCurrency(transaction.balanceAfterCents) }}</td>
-                  <td class="text-muted notes-cell">{{ transaction.notes || '—' }}</td>
+                  <td class="num cell-right">
+                    {{ formatCurrency(transaction.balanceAfterCents) }}
+                  </td>
+                  <td class="text-muted notes-cell">
+                    {{ transaction.notes || '—' }}
+                  </td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
 
-        <ul class="list-card responsive-list" [attr.aria-label]="'cashRegister.transactions' | transloco">
+        <ul
+          class="list-card responsive-list"
+          [attr.aria-label]="'cashRegister.transactions' | transloco"
+        >
           @for (transaction of transactions; track transaction.id) {
             <li class="record">
               <div class="record__main">
-                <span class="record__title">{{ formatTransactionType(transaction.type) }}</span>
+                <span class="record__title">{{
+                  formatTransactionType(transaction.type)
+                }}</span>
                 <span class="record__meta">
-                  <ng-container *ngTemplateOutlet="details; context: { $implicit: transaction }" />
+                  <ng-container
+                    *ngTemplateOutlet="
+                      details;
+                      context: { $implicit: transaction }
+                    "
+                  />
                 </span>
-                <span class="record__meta num">{{ formatDate(transaction.createdAt) }}</span>
+                <span class="record__meta num">{{
+                  formatDate(transaction.createdAt)
+                }}</span>
                 @if (transaction.notes) {
                   <span class="record__meta">{{ transaction.notes }}</span>
                 }
@@ -139,7 +236,13 @@
                 >
                   {{ formatCurrency(transaction.amountCents) }}
                 </span>
-                <span class="record__meta num">{{ 'cashRegister.balanceShort' | transloco: { amount: formatCurrency(transaction.balanceAfterCents) } }}</span>
+                <span class="record__meta num">{{
+                  'cashRegister.balanceShort'
+                    | transloco
+                      : {
+                          amount: formatCurrency(transaction.balanceAfterCents),
+                        }
+                }}</span>
               </div>
             </li>
           }
@@ -150,9 +253,14 @@
 </section>
 
 <ng-template #details let-transaction>
-  @if (isSubscriptionTransaction(transaction) && transaction.sourceDetails?.boughtBy?.traineeId) {
+  @if (
+    isSubscriptionTransaction(transaction) &&
+    transaction.sourceDetails?.boughtBy?.traineeId
+  ) {
     {{ 'cashRegister.boughtByPrefix' | transloco }}
-    <a [routerLink]="formatSubscriptionBuyerPath(transaction)">{{ formatSubscriptionBuyerLabel(transaction) }}</a
+    <a [routerLink]="formatSubscriptionBuyerPath(transaction)">{{
+      formatSubscriptionBuyerLabel(transaction)
+    }}</a
     >{{ formatSubscriptionDetailSuffix(transaction) }}
   } @else {
     {{ formatTransactionDetails(transaction) }}

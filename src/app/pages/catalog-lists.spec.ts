@@ -1,6 +1,9 @@
 import { Type } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import en from '../../../public/i18n/en.json';
@@ -22,7 +25,11 @@ describe('catalog lists', () => {
     localStorage.clear();
     signInAs('ADMIN');
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
   });
@@ -31,7 +38,10 @@ describe('catalog lists', () => {
 
   async function render<T>(component: Type<T>) {
     const fixture = TestBed.createComponent(component);
-    page = driver(() => fixture.nativeElement, () => fixture.whenStable());
+    page = driver(
+      () => fixture.nativeElement,
+      () => fixture.whenStable(),
+    );
     await page.settle();
     return fixture.componentInstance;
   }
@@ -47,12 +57,32 @@ describe('catalog lists', () => {
     await page.click(`input[type="radio"][value="${value}"]`);
   }
 
-  const count = () => page.query('[aria-live="polite"]')?.textContent?.replace(/\s+/g, ' ').trim();
+  const count = () =>
+    page
+      .query('[aria-live="polite"]')
+      ?.textContent?.replace(/\s+/g, ' ')
+      .trim();
 
   describe('plans', () => {
     const plans = [
-      { id: 'p1', type: 'PUNCH', title: '10 visits', priceCents: 4550, credits: 10, durationDays: null, isActive: true },
-      { id: 'p2', type: 'TIME', title: 'Monthly', priceCents: 6000, credits: null, durationDays: 1, isActive: false }
+      {
+        id: 'p1',
+        type: 'PUNCH',
+        title: '10 visits',
+        priceCents: 4550,
+        credits: 10,
+        durationDays: null,
+        isActive: true,
+      },
+      {
+        id: 'p2',
+        type: 'TIME',
+        title: 'Monthly',
+        priceCents: 6000,
+        credits: null,
+        durationDays: 1,
+        isActive: false,
+      },
     ];
 
     it('maps the status filter to the active param', async () => {
@@ -76,7 +106,9 @@ describe('catalog lists', () => {
 
       expect(component.formatPlanDetails(plans[0] as never)).toBe('10 credits');
       expect(component.formatPlanDetails(plans[1] as never)).toBe('1 day');
-      expect(component.formatPlanDetails({ ...plans[0], credits: null } as never)).toBe('0 credits');
+      expect(
+        component.formatPlanDetails({ ...plans[0], credits: null } as never),
+      ).toBe('0 credits');
       expect(page.text()).toContain(format.money(4550));
     });
 
@@ -96,11 +128,23 @@ describe('catalog lists', () => {
 
   describe.each([
     ['gyms', GymsComponent, '/api/gym-locations', 'Center', 'Old gym'],
-    ['gym subscriptions', GymSubscriptionsComponent, '/api/gym-subscriptions', 'Sports card', 'Old card']
+    [
+      'gym subscriptions',
+      GymSubscriptionsComponent,
+      '/api/gym-subscriptions',
+      'Sports card',
+      'Old card',
+    ],
   ])('%s', (_, component, url, activeName, inactiveName) => {
     const items = [
       { id: 'a', name: activeName, address: null, notes: null, isActive: true },
-      { id: 'b', name: inactiveName, address: 'Side St', notes: null, isActive: false }
+      {
+        id: 'b',
+        name: inactiveName,
+        address: 'Side St',
+        notes: null,
+        isActive: false,
+      },
     ];
 
     it('loads everything for "All", and only active ones for "Active"', async () => {
@@ -129,12 +173,22 @@ describe('catalog lists', () => {
     const component = await render(GymsComponent);
     await flush('/api/gym-locations?includeInactive=true', []);
 
-    expect(component.formatAddress({ id: 'g', name: 'G', address: '  ', notes: null, isActive: true })).toBe('—');
+    expect(
+      component.formatAddress({
+        id: 'g',
+        name: 'G',
+        address: '  ',
+        notes: null,
+        isActive: true,
+      }),
+    ).toBe('—');
   });
 
   it('training times are listed as HH:mm', async () => {
     await render(TrainingTimesComponent);
-    await flush('/api/training-times', [{ id: 'tt1', startTime: '8:00:00', endTime: '09:30:00' }]);
+    await flush('/api/training-times', [
+      { id: 'tt1', startTime: '8:00:00', endTime: '09:30:00' },
+    ]);
 
     expect(page.text()).toContain('08:00');
     expect(page.text()).toContain('09:30');
@@ -143,8 +197,20 @@ describe('catalog lists', () => {
 
   describe('trainers', () => {
     const trainers = [
-      { id: 'tr1', name: 'Petar Petrov', nickname: 'Pepi', accountId: 'acc1', isActive: true },
-      { id: 'tr2', name: 'Maria Koleva', nickname: null, accountId: null, isActive: true }
+      {
+        id: 'tr1',
+        name: 'Petar Petrov',
+        nickname: 'Pepi',
+        accountId: 'acc1',
+        isActive: true,
+      },
+      {
+        id: 'tr2',
+        name: 'Maria Koleva',
+        nickname: null,
+        accountId: null,
+        isActive: true,
+      },
     ];
 
     it('maps the status filter to the active param', async () => {

@@ -33,6 +33,11 @@ describe('UiMessagePipe', () => {
   });
 
   it('fills in params', () => {
-    expect(pipe.transform({ key: 'cashRegister.boughtBy', params: { name: 'Ivan' } })).toBe('Bought by Ivan');
+    expect(
+      pipe.transform({
+        key: 'cashRegister.boughtBy',
+        params: { name: 'Ivan' },
+      }),
+    ).toBe('Bought by Ivan');
   });
 });

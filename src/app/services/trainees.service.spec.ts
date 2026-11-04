@@ -1,5 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { TraineesService } from './trainees.service';
 
@@ -8,7 +11,9 @@ describe('TraineesService', () => {
   let http: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
     service = TestBed.inject(TraineesService);
     http = TestBed.inject(HttpTestingController);
   });
@@ -21,11 +26,13 @@ describe('TraineesService', () => {
     service.list(true, 'ivan').subscribe();
     service.list(undefined, '').subscribe();
 
-    expect(http.match(() => true).map(req => req.request.urlWithParams)).toEqual([
+    expect(
+      http.match(() => true).map((req) => req.request.urlWithParams),
+    ).toEqual([
       '/api/trainees',
       '/api/trainees?active=false',
       '/api/trainees?active=true&search=ivan',
-      '/api/trainees'
+      '/api/trainees',
     ]);
   });
 
@@ -35,11 +42,15 @@ describe('TraineesService', () => {
     service.update('t1', { phone: null }).subscribe();
     service.deactivate('t1').subscribe();
 
-    expect(http.match(() => true).map(req => [req.request.method, req.request.url, req.request.body])).toEqual([
+    expect(
+      http
+        .match(() => true)
+        .map((req) => [req.request.method, req.request.url, req.request.body]),
+    ).toEqual([
       ['GET', '/api/trainees/t1', null],
       ['POST', '/api/trainees', { name: 'Ivan', isActive: true }],
       ['PATCH', '/api/trainees/t1', { phone: null }],
-      ['DELETE', '/api/trainees/t1', null]
+      ['DELETE', '/api/trainees/t1', null],
     ]);
   });
 

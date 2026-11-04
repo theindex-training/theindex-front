@@ -6,7 +6,12 @@ import { UiInputComponent } from './ui-input.component';
 
 @Component({
   imports: [ReactiveFormsModule, UiInputComponent],
-  template: `<app-ui-input id="pw" label="Password" [type]="type" [formControl]="control" />`
+  template: `<app-ui-input
+    id="pw"
+    label="Password"
+    [type]="type"
+    [formControl]="control"
+  />`,
 })
 class HostComponent {
   type: 'text' | 'password' = 'password';
@@ -24,7 +29,7 @@ describe('UiInputComponent', () => {
       host: fixture.componentInstance,
       input: el.querySelector<HTMLInputElement>('input')!,
       toggle: () => el.querySelector<HTMLButtonElement>('button'),
-      el
+      el,
     };
   }
 

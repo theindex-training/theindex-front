@@ -2,20 +2,30 @@
   <app-page-header
     [title]="'settlements.details.title' | transloco"
     [subtitle]="'settlements.details.subtitle' | transloco"
-    [back]="{ label: ('settlements.backToList' | transloco), link: '/settlements' }"
+    [back]="{
+      label: ('settlements.backToList' | transloco),
+      link: '/settlements',
+    }"
   />
 
   @if (loading) {
-    <app-skeleton-list [label]="'settlements.details.loading' | transloco" [rows]="3" />
+    <app-skeleton-list
+      [label]="'settlements.details.loading' | transloco"
+      [rows]="3"
+    />
   } @else if (errorMessage && !settlement) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
   } @else if (settlement) {
     <article class="panel">
       <dl class="detail-list">
         <div>
           <dt>{{ 'common.status' | transloco }}</dt>
           <dd data-testid="settlement-status">
-            <app-chip [tone]="settlement.status === 'FINAL' ? 'success' : 'warning'">
+            <app-chip
+              [tone]="settlement.status === 'FINAL' ? 'success' : 'warning'"
+            >
               {{ settlement.status | enumLabel: 'settlementStatus' }}
             </app-chip>
           </dd>
@@ -35,34 +45,72 @@
       </dl>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
       }
 
       @if (isAdmin && settlement.status === 'DRAFT') {
         <div class="form-actions">
-          <button class="btn btn--primary" type="button" (click)="finalizeSettlement()" [disabled]="finalizing">
-            {{ finalizing ? ('settlements.details.finalizing' | transloco) : ('settlements.details.finalize' | transloco) }}
+          <button
+            class="btn btn--primary"
+            type="button"
+            (click)="finalizeSettlement()"
+            [disabled]="finalizing"
+          >
+            {{
+              finalizing
+                ? ('settlements.details.finalizing' | transloco)
+                : ('settlements.details.finalize' | transloco)
+            }}
           </button>
         </div>
       }
     </article>
 
     <section class="page-stack" aria-labelledby="lines-title">
-      <h2 class="panel__title" id="lines-title">{{ 'settlements.details.trainerTotals' | transloco }}</h2>
+      <h2 class="panel__title" id="lines-title">
+        {{ 'settlements.details.trainerTotals' | transloco }}
+      </h2>
       @if (!lines.length) {
-        <p class="notice" role="status">{{ 'settlements.details.noTotals' | transloco }}</p>
+        <p class="notice" role="status">
+          {{ 'settlements.details.noTotals' | transloco }}
+        </p>
       } @else {
-        <div class="data-table-wrap responsive-table" tabindex="0" role="region" [attr.aria-label]="'settlements.details.trainerTotalsTable' | transloco">
+        <div
+          class="data-table-wrap responsive-table"
+          tabindex="0"
+          role="region"
+          [attr.aria-label]="
+            'settlements.details.trainerTotalsTable' | transloco
+          "
+        >
           <table class="data-table">
-            <caption class="visually-hidden">{{ 'settlements.details.trainerTotals' | transloco }}</caption>
+            <caption class="visually-hidden">
+              {{
+                'settlements.details.trainerTotals' | transloco
+              }}
+            </caption>
             <thead>
               <tr>
-                <th scope="col">{{ 'settlements.details.trainer' | transloco }}</th>
-                <th scope="col" class="cell-right">{{ 'settlements.details.total' | transloco }}</th>
-                <th scope="col" class="cell-right">{{ 'settlements.details.trainings' | transloco }}</th>
-                <th scope="col" class="cell-right">{{ 'settlements.details.unpaid' | transloco }}</th>
-                <th scope="col" class="cell-right">{{ 'settlements.details.punch' | transloco }}</th>
-                <th scope="col" class="cell-right">{{ 'settlements.details.time' | transloco }}</th>
+                <th scope="col">
+                  {{ 'settlements.details.trainer' | transloco }}
+                </th>
+                <th scope="col" class="cell-right">
+                  {{ 'settlements.details.total' | transloco }}
+                </th>
+                <th scope="col" class="cell-right">
+                  {{ 'settlements.details.trainings' | transloco }}
+                </th>
+                <th scope="col" class="cell-right">
+                  {{ 'settlements.details.unpaid' | transloco }}
+                </th>
+                <th scope="col" class="cell-right">
+                  {{ 'settlements.details.punch' | transloco }}
+                </th>
+                <th scope="col" class="cell-right">
+                  {{ 'settlements.details.time' | transloco }}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -74,38 +122,63 @@
                       <strong>{{ formatTrainer(line.trainerId) }}</strong>
                     </div>
                   </td>
-                  <td class="num cell-right total">{{ formatCurrency(line.amountCents) }}</td>
+                  <td class="num cell-right total">
+                    {{ formatCurrency(line.amountCents) }}
+                  </td>
                   <td class="num cell-right">{{ line.attendanceCount }}</td>
-                  <td class="num cell-right" [class.text-danger]="line.unpaidAttendanceCount > 0">
+                  <td
+                    class="num cell-right"
+                    [class.text-danger]="line.unpaidAttendanceCount > 0"
+                  >
                     {{ line.unpaidAttendanceCount }}
                   </td>
-                  <td class="num cell-right">{{ formatCurrency(line.details.punchCents) }}</td>
-                  <td class="num cell-right">{{ formatCurrency(line.details.timeCents) }}</td>
+                  <td class="num cell-right">
+                    {{ formatCurrency(line.details.punchCents) }}
+                  </td>
+                  <td class="num cell-right">
+                    {{ formatCurrency(line.details.timeCents) }}
+                  </td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
 
-        <ul class="list-card responsive-list" [attr.aria-label]="'settlements.details.trainerTotals' | transloco">
+        <ul
+          class="list-card responsive-list"
+          [attr.aria-label]="'settlements.details.trainerTotals' | transloco"
+        >
           @for (line of lines; track line.id) {
             <li class="record">
               <app-avatar [name]="formatTrainer(line.trainerId)" />
               <div class="record__main">
-                <span class="record__title">{{ formatTrainer(line.trainerId) }}</span>
+                <span class="record__title">{{
+                  formatTrainer(line.trainerId)
+                }}</span>
                 <span class="record__meta">
-                  {{ 'settlements.details.trainingsCount' | transloco: { count: line.attendanceCount } }} ·
+                  {{
+                    'settlements.details.trainingsCount'
+                      | transloco: { count: line.attendanceCount }
+                  }}
+                  ·
                   <span [class.text-danger]="line.unpaidAttendanceCount > 0">{{
-                    'settlements.details.unpaidCount' | transloco: { count: line.unpaidAttendanceCount }
+                    'settlements.details.unpaidCount'
+                      | transloco: { count: line.unpaidAttendanceCount }
                   }}</span>
                 </span>
               </div>
               <div class="record__aside">
-                <span class="num total">{{ formatCurrency(line.amountCents) }}</span>
+                <span class="num total">{{
+                  formatCurrency(line.amountCents)
+                }}</span>
                 <span class="record__meta num">
                   {{
                     'settlements.details.punchTime'
-                      | transloco: { punch: formatCurrency(line.details.punchCents), time: formatCurrency(line.details.timeCents) }
+                      | transloco
+                        : {
+                            punch: formatCurrency(line.details.punchCents),
+                            time: formatCurrency(line.details.timeCents),
+                          }
                   }}
                 </span>
               </div>
@@ -116,88 +189,169 @@
     </section>
 
     <section class="page-stack" aria-labelledby="allocations-title">
-      <h2 class="panel__title" id="allocations-title">{{ 'settlements.details.allocations' | transloco }}</h2>
+      <h2 class="panel__title" id="allocations-title">
+        {{ 'settlements.details.allocations' | transloco }}
+      </h2>
 
       @if (isAdmin) {
         <div class="list-toolbar">
           <label class="form-field allocation-filter">
-            <span class="form-field__label">{{ 'settlements.details.trainer' | transloco }}</span>
-            <select [(ngModel)]="selectedTrainerId" (change)="loadAllocations()">
-              <option value="">{{ 'settlements.details.allTrainers' | transloco }}</option>
+            <span class="form-field__label">{{
+              'settlements.details.trainer' | transloco
+            }}</span>
+            <select
+              [(ngModel)]="selectedTrainerId"
+              (change)="loadAllocations()"
+            >
+              <option value="">
+                {{ 'settlements.details.allTrainers' | transloco }}
+              </option>
               @for (trainer of trainers; track trainer.id) {
-                <option [value]="trainer.id">{{ trainer.nickname || trainer.name }}</option>
+                <option [value]="trainer.id">
+                  {{ trainer.nickname || trainer.name }}
+                </option>
               }
             </select>
           </label>
           @if (!loadingAllocations && !allocationError && allocations.length) {
-            <p class="list-toolbar__count" data-testid="list-count" aria-live="polite">
-              {{ 'settlements.details.showing' | transloco: { shown: allocations.length, total: allocationsTotal } }}
+            <p
+              class="list-toolbar__count"
+              data-testid="list-count"
+              aria-live="polite"
+            >
+              {{
+                'settlements.details.showing'
+                  | transloco
+                    : { shown: allocations.length, total: allocationsTotal }
+              }}
             </p>
           }
         </div>
-      } @else if (!loadingAllocations && !allocationError && allocations.length) {
-        <p class="list-toolbar__count" data-testid="list-count" aria-live="polite">{{ 'settlements.details.showing' | transloco: { shown: allocations.length, total: allocationsTotal } }}</p>
+      } @else if (
+        !loadingAllocations && !allocationError && allocations.length
+      ) {
+        <p
+          class="list-toolbar__count"
+          data-testid="list-count"
+          aria-live="polite"
+        >
+          {{
+            'settlements.details.showing'
+              | transloco
+                : { shown: allocations.length, total: allocationsTotal }
+          }}
+        </p>
       }
 
       @if (loadingAllocations) {
-        <app-skeleton-list [label]="'settlements.details.loadingAllocations' | transloco" [rows]="4" />
+        <app-skeleton-list
+          [label]="'settlements.details.loadingAllocations' | transloco"
+          [rows]="4"
+        />
       } @else if (allocationError) {
-        <p class="notice notice--danger" role="alert">{{ allocationError | uiMessage }}</p>
+        <p class="notice notice--danger" role="alert">
+          {{ allocationError | uiMessage }}
+        </p>
       } @else if (!allocations.length) {
-        <p class="notice" role="status">{{ 'settlements.details.noAllocations' | transloco }}</p>
+        <p class="notice" role="status">
+          {{ 'settlements.details.noAllocations' | transloco }}
+        </p>
       } @else {
-        <div class="data-table-wrap responsive-table" tabindex="0" role="region" [attr.aria-label]="'settlements.details.allocationsTable' | transloco">
+        <div
+          class="data-table-wrap responsive-table"
+          tabindex="0"
+          role="region"
+          [attr.aria-label]="'settlements.details.allocationsTable' | transloco"
+        >
           <table class="data-table">
-            <caption class="visually-hidden">{{ 'settlements.details.allocations' | transloco }}</caption>
+            <caption class="visually-hidden">
+              {{
+                'settlements.details.allocations' | transloco
+              }}
+            </caption>
             <thead>
               <tr>
-                <th scope="col">{{ 'settlements.details.trainedAt' | transloco }}</th>
-                <th scope="col">{{ 'settlements.details.trainee' | transloco }}</th>
-                <th scope="col">{{ 'settlements.details.trainer' | transloco }}</th>
-                <th scope="col">{{ 'settlements.details.subscription' | transloco }}</th>
+                <th scope="col">
+                  {{ 'settlements.details.trainedAt' | transloco }}
+                </th>
+                <th scope="col">
+                  {{ 'settlements.details.trainee' | transloco }}
+                </th>
+                <th scope="col">
+                  {{ 'settlements.details.trainer' | transloco }}
+                </th>
+                <th scope="col">
+                  {{ 'settlements.details.subscription' | transloco }}
+                </th>
                 <th scope="col">{{ 'settlements.details.gym' | transloco }}</th>
-                <th scope="col" class="cell-right">{{ 'settlements.details.value' | transloco }}</th>
+                <th scope="col" class="cell-right">
+                  {{ 'settlements.details.value' | transloco }}
+                </th>
               </tr>
             </thead>
             <tbody>
               @for (row of allocations; track row.id) {
                 <tr>
-                  <td class="num">{{ formatOptionalDate(row.attendance?.trainedAt) }}</td>
+                  <td class="num">
+                    {{ formatOptionalDate(row.attendance?.trainedAt) }}
+                  </td>
                   <td>
-                    <a class="cell-link" [routerLink]="['/trainees', row.attendance?.traineeId]">
+                    <a
+                      class="cell-link"
+                      [routerLink]="['/trainees', row.attendance?.traineeId]"
+                    >
                       {{ formatTrainee(row.attendance?.traineeId) }}
                     </a>
                   </td>
                   <td>{{ formatTrainer(row.trainerId) }}</td>
                   <td>
                     @if (row.subscriptionType) {
-                      <app-chip>{{ row.subscriptionType | enumLabel: 'planType' }}</app-chip>
+                      <app-chip>{{
+                        row.subscriptionType | enumLabel: 'planType'
+                      }}</app-chip>
                     } @else {
                       <span class="text-muted">—</span>
                     }
                   </td>
                   <td>{{ formatGym(row.attendance?.locationId) }}</td>
-                  <td class="num cell-right">{{ formatCurrency(row.valueCents) }}</td>
+                  <td class="num cell-right">
+                    {{ formatCurrency(row.valueCents) }}
+                  </td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
 
-        <ul class="list-card responsive-list" [attr.aria-label]="'settlements.details.allocations' | transloco">
+        <ul
+          class="list-card responsive-list"
+          [attr.aria-label]="'settlements.details.allocations' | transloco"
+        >
           @for (row of allocations; track row.id) {
             <li class="record">
               <div class="record__main">
-                <a class="record__title" [routerLink]="['/trainees', row.attendance?.traineeId]">
+                <a
+                  class="record__title"
+                  [routerLink]="['/trainees', row.attendance?.traineeId]"
+                >
                   {{ formatTrainee(row.attendance?.traineeId) }}
                 </a>
-                <span class="record__meta num">{{ formatOptionalDate(row.attendance?.trainedAt) }}</span>
-                <span class="record__meta">{{ formatTrainer(row.trainerId) }} · {{ formatGym(row.attendance?.locationId) }}</span>
+                <span class="record__meta num">{{
+                  formatOptionalDate(row.attendance?.trainedAt)
+                }}</span>
+                <span class="record__meta"
+                  >{{ formatTrainer(row.trainerId) }} ·
+                  {{ formatGym(row.attendance?.locationId) }}</span
+                >
               </div>
               <div class="record__aside">
-                <span class="num total">{{ formatCurrency(row.valueCents) }}</span>
+                <span class="num total">{{
+                  formatCurrency(row.valueCents)
+                }}</span>
                 @if (row.subscriptionType) {
-                  <app-chip>{{ row.subscriptionType | enumLabel: 'planType' }}</app-chip>
+                  <app-chip>{{
+                    row.subscriptionType | enumLabel: 'planType'
+                  }}</app-chip>
                 }
               </div>
             </li>

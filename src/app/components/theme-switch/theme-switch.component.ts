@@ -11,7 +11,7 @@ let nextId = 0;
   imports: [TranslocoPipe],
   templateUrl: './theme-switch.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './theme-switch.component.scss'
+  styleUrl: './theme-switch.component.scss',
 })
 export class ThemeSwitchComponent {
   readonly themeService = inject(ThemeService);
@@ -21,6 +21,6 @@ export class ThemeSwitchComponent {
   readonly options: { value: ThemeMode; label: string }[] = [
     { value: 'light', label: 'common.theme.light' },
     { value: 'dark', label: 'common.theme.dark' },
-    { value: 'system', label: 'common.theme.system' }
+    { value: 'system', label: 'common.theme.system' },
   ];
 }

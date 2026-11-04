@@ -1,14 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CreateTrainingTimePayload, TrainingTimesService } from '../../services/training-times.service';
+import {
+  CreateTrainingTimePayload,
+  TrainingTimesService,
+} from '../../services/training-times.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
@@ -17,9 +24,15 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-training-time-create',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './training-time-create.component.html'
+  templateUrl: './training-time-create.component.html',
 })
 export class TrainingTimeCreateComponent {
   readonly form: FormGroup<{
@@ -34,11 +47,13 @@ export class TrainingTimeCreateComponent {
     private readonly formBuilder: FormBuilder,
     private readonly trainingTimesService: TrainingTimesService,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
-      startTime: this.formBuilder.nonNullable.control('', [Validators.required]),
-      endTime: this.formBuilder.nonNullable.control('', [Validators.required])
+      startTime: this.formBuilder.nonNullable.control('', [
+        Validators.required,
+      ]),
+      endTime: this.formBuilder.nonNullable.control('', [Validators.required]),
     });
   }
 
@@ -51,7 +66,7 @@ export class TrainingTimeCreateComponent {
     const raw = this.form.getRawValue();
     const payload: CreateTrainingTimePayload = {
       startTime: raw.startTime,
-      endTime: raw.endTime
+      endTime: raw.endTime,
     };
 
     this.submitting = true;
@@ -63,10 +78,13 @@ export class TrainingTimeCreateComponent {
         this.router.navigate(['/training-times']);
       },
       error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'trainingTimes.create.error');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'trainingTimes.create.error',
+        );
         this.submitting = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 }

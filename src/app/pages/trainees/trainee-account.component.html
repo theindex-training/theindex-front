@@ -1,14 +1,24 @@
 <section class="page-stack">
   <app-page-header
-    [title]="isEditMode ? ('trainees.account.manageTitle' | transloco) : ('trainees.account.createTitle' | transloco)"
-    [subtitle]="isEditMode ? ('trainees.account.manageSubtitle' | transloco) : ('trainees.account.createSubtitle' | transloco)"
+    [title]="
+      isEditMode
+        ? ('trainees.account.manageTitle' | transloco)
+        : ('trainees.account.createTitle' | transloco)
+    "
+    [subtitle]="
+      isEditMode
+        ? ('trainees.account.manageSubtitle' | transloco)
+        : ('trainees.account.createSubtitle' | transloco)
+    "
     [back]="{ label: ('trainees.backToList' | transloco), link: '/trainees' }"
   />
 
   @if (loading) {
     <p class="notice" role="status">{{ 'trainees.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !trainee) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
   } @else if (trainee) {
     <div class="panel">
       <dl class="detail-list">
@@ -28,24 +38,36 @@
           <dt>{{ 'trainees.fields.profileStatus' | transloco }}</dt>
           <dd>
             <app-status-dot [tone]="trainee.isActive ? 'success' : 'neutral'">
-              {{ trainee.isActive ? ('trainees.status.active' | transloco) : ('trainees.status.inactive' | transloco) }}
+              {{
+                trainee.isActive
+                  ? ('trainees.status.active' | transloco)
+                  : ('trainees.status.inactive' | transloco)
+              }}
             </app-status-dot>
           </dd>
         </div>
       </dl>
 
-      <form class="form-stack panel-section" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <form
+        class="form-stack panel-section"
+        [formGroup]="form"
+        (ngSubmit)="handleSubmit()"
+      >
         <div class="form-grid">
           <div class="form-row">
             <div class="form-field">
-              <label class="form-field__label" for="trainee-account-email">{{ 'accounts.email' | transloco }}</label>
+              <label class="form-field__label" for="trainee-account-email">{{
+                'accounts.email' | transloco
+              }}</label>
               <input
                 id="trainee-account-email"
                 type="email"
                 autocomplete="off"
                 formControlName="email"
                 aria-describedby="trainee-account-email-help"
-                [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
+                [attr.aria-invalid]="
+                  form.controls.email.touched && form.controls.email.invalid
+                "
               />
               @if (form.controls.email.touched && form.controls.email.invalid) {
                 <span class="form-field__error" id="trainee-account-email-help">
@@ -67,7 +89,10 @@
             <div class="form-field">
               <label class="form-field__label" for="trainee-account-password">
                 @if (isEditMode) {
-                  {{ 'accounts.newPassword' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span>
+                  {{ 'accounts.newPassword' | transloco }}
+                  <span class="form-field__optional">{{
+                    'common.optional' | transloco
+                  }}</span>
                 } @else {
                   {{ 'accounts.password' | transloco }}
                 }
@@ -84,25 +109,54 @@
                 <button
                   type="button"
                   class="password-toggle"
-                  [attr.aria-label]="(showPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
-                  [title]="(showPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
+                  [attr.aria-label]="
+                    (showPassword
+                      ? 'common.hidePassword'
+                      : 'common.showPassword'
+                    ) | transloco
+                  "
+                  [title]="
+                    (showPassword
+                      ? 'common.hidePassword'
+                      : 'common.showPassword'
+                    ) | transloco
+                  "
                   (click)="togglePasswordVisibility()"
                 >
                   <app-icon [name]="showPassword ? 'eye-off' : 'eye'" />
                 </button>
               </div>
               @if (passwordError) {
-                <span class="form-field__error" id="trainee-account-password-help">{{ passwordError | transloco }}</span>
+                <span
+                  class="form-field__error"
+                  id="trainee-account-password-help"
+                  >{{ passwordError | transloco }}</span
+                >
               } @else {
-                <span class="form-field__hint" id="trainee-account-password-help">
-                  {{ (isEditMode ? 'accounts.passwordHintEdit' : 'accounts.passwordHint') | transloco }}
+                <span
+                  class="form-field__hint"
+                  id="trainee-account-password-help"
+                >
+                  {{
+                    (isEditMode
+                      ? 'accounts.passwordHintEdit'
+                      : 'accounts.passwordHint'
+                    ) | transloco
+                  }}
                 </span>
               }
             </div>
 
             <div class="form-field">
-              <label class="form-field__label" for="trainee-account-confirm-password">
-                {{ isEditMode ? ('accounts.confirmNewPassword' | transloco) : ('accounts.confirmPassword' | transloco) }}
+              <label
+                class="form-field__label"
+                for="trainee-account-confirm-password"
+              >
+                {{
+                  isEditMode
+                    ? ('accounts.confirmNewPassword' | transloco)
+                    : ('accounts.confirmPassword' | transloco)
+                }}
               </label>
               <div class="password-field">
                 <input
@@ -116,18 +170,40 @@
                 <button
                   type="button"
                   class="password-toggle"
-                  [attr.aria-label]="(showConfirmPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
-                  [title]="(showConfirmPassword ? 'common.hidePassword' : 'common.showPassword') | transloco"
+                  [attr.aria-label]="
+                    (showConfirmPassword
+                      ? 'common.hidePassword'
+                      : 'common.showPassword'
+                    ) | transloco
+                  "
+                  [title]="
+                    (showConfirmPassword
+                      ? 'common.hidePassword'
+                      : 'common.showPassword'
+                    ) | transloco
+                  "
                   (click)="toggleConfirmPasswordVisibility()"
                 >
                   <app-icon [name]="showConfirmPassword ? 'eye-off' : 'eye'" />
                 </button>
               </div>
               @if (confirmPasswordError) {
-                <span class="form-field__error" id="trainee-account-confirm-password-help">{{ confirmPasswordError | transloco }}</span>
+                <span
+                  class="form-field__error"
+                  id="trainee-account-confirm-password-help"
+                  >{{ confirmPasswordError | transloco }}</span
+                >
               } @else {
-                <span class="form-field__hint" id="trainee-account-confirm-password-help">
-                  {{ (isEditMode ? 'accounts.mustMatchNew' : 'accounts.mustMatch') | transloco }}
+                <span
+                  class="form-field__hint"
+                  id="trainee-account-confirm-password-help"
+                >
+                  {{
+                    (isEditMode
+                      ? 'accounts.mustMatchNew'
+                      : 'accounts.mustMatch'
+                    ) | transloco
+                  }}
                 </span>
               }
             </div>
@@ -135,7 +211,9 @@
         </div>
 
         @if (errorMessage) {
-          <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+          <p class="notice notice--danger" role="alert">
+            {{ errorMessage | uiMessage }}
+          </p>
         }
 
         <div class="form-actions">
@@ -146,11 +224,25 @@
               [disabled]="deactivating"
               (click)="deactivateAccount()"
             >
-              {{ deactivating ? ('common.deactivating' | transloco) : ('accounts.deactivate' | transloco) }}
+              {{
+                deactivating
+                  ? ('common.deactivating' | transloco)
+                  : ('accounts.deactivate' | transloco)
+              }}
             </button>
           }
-          <button class="btn btn--primary" type="submit" [disabled]="submitting">
-            {{ submitting ? ('common.saving' | transloco) : isEditMode ? ('accounts.saveChanges' | transloco) : ('accounts.create' | transloco) }}
+          <button
+            class="btn btn--primary"
+            type="submit"
+            [disabled]="submitting"
+          >
+            {{
+              submitting
+                ? ('common.saving' | transloco)
+                : isEditMode
+                  ? ('accounts.saveChanges' | transloco)
+                  : ('accounts.create' | transloco)
+            }}
           </button>
         </div>
       </form>

@@ -1,7 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
+import {
+  GymLocation,
+  GymLocationsService,
+} from '../../services/gym-locations.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -11,9 +19,15 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-gym-delete',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, PageHeaderComponent, StatusDotComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    PageHeaderComponent,
+    StatusDotComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './gym-delete.component.html'
+  templateUrl: './gym-delete.component.html',
 })
 export class GymDeleteComponent implements OnInit {
   gym: GymLocation | null = null;
@@ -25,7 +39,7 @@ export class GymDeleteComponent implements OnInit {
     private readonly gymsService: GymLocationsService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -43,11 +57,10 @@ export class GymDeleteComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'gyms.errors.load');
+        this.errorMessage = apiErrorMessage(error, 'gyms.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -65,11 +78,10 @@ export class GymDeleteComponent implements OnInit {
         this.router.navigate(['/gyms']);
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'gyms.delete.error');
+        this.errorMessage = apiErrorMessage(error, 'gyms.delete.error');
         this.submitting = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 }

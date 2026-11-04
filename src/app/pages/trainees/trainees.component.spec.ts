@@ -1,5 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import en from '../../../../public/i18n/en.json';
@@ -16,7 +19,7 @@ const trainee = (overrides: Partial<TraineeProfile> = {}): TraineeProfile => ({
   accountId: null,
   gymSubscriptionId: null,
   isActive: true,
-  ...overrides
+  ...overrides,
 });
 
 describe('TraineesComponent display helpers', () => {
@@ -24,31 +27,49 @@ describe('TraineesComponent display helpers', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()]
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     });
     component = TestBed.createComponent(TraineesComponent).componentInstance;
-    component.gymSubscriptions = [{ id: 'gs1', name: 'Multisport', isActive: true }];
+    component.gymSubscriptions = [
+      { id: 'gs1', name: 'Multisport', isActive: true },
+    ];
   });
 
   it('formats nicknames in quotes, with a fallback', () => {
     expect(component.nicknameLabel(trainee())).toBe('“Gosho”');
-    expect(component.nicknameLabel(trainee({ nickname: '  ' }))).toBe('No nickname');
+    expect(component.nicknameLabel(trainee({ nickname: '  ' }))).toBe(
+      'No nickname',
+    );
   });
 
   it('resolves the gym card name, or null when missing/unknown', () => {
-    expect(component.gymCardName(trainee({ gymSubscriptionId: 'gs1' }))).toBe('Multisport');
-    expect(component.gymCardName(trainee({ gymSubscriptionId: 'unknown' }))).toBeNull();
+    expect(component.gymCardName(trainee({ gymSubscriptionId: 'gs1' }))).toBe(
+      'Multisport',
+    );
+    expect(
+      component.gymCardName(trainee({ gymSubscriptionId: 'unknown' })),
+    ).toBeNull();
     expect(component.gymCardName(trainee())).toBeNull();
   });
 
   it('shows "Inactive" before the gym card on mobile rows', () => {
-    expect(component.trailingChip(trainee({ isActive: false, gymSubscriptionId: 'gs1' }))).toEqual({
+    expect(
+      component.trailingChip(
+        trainee({ isActive: false, gymSubscriptionId: 'gs1' }),
+      ),
+    ).toEqual({
       label: 'Inactive',
-      tone: 'neutral'
+      tone: 'neutral',
     });
-    expect(component.trailingChip(trainee({ gymSubscriptionId: 'gs1' }))).toEqual({
+    expect(
+      component.trailingChip(trainee({ gymSubscriptionId: 'gs1' })),
+    ).toEqual({
       label: 'Multisport',
-      tone: 'accent'
+      tone: 'accent',
     });
     expect(component.trailingChip(trainee())).toBeNull();
   });
@@ -60,15 +81,30 @@ describe('TraineesComponent list', () => {
 
   const trainees = [
     trainee(),
-    trainee({ id: 't2', name: 'Ivan Petrov', nickname: null, gymSubscriptionId: 'gs1', accountId: 'acc2' }),
-    trainee({ id: 't3', name: 'Maria Koleva', nickname: 'Mimi', isActive: false })
+    trainee({
+      id: 't2',
+      name: 'Ivan Petrov',
+      nickname: null,
+      gymSubscriptionId: 'gs1',
+      accountId: 'acc2',
+    }),
+    trainee({
+      id: 't3',
+      name: 'Maria Koleva',
+      nickname: 'Mimi',
+      isActive: false,
+    }),
   ];
 
   beforeEach(() => {
     localStorage.clear();
     signInAs('TRAINER');
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()]
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
   });
@@ -77,7 +113,10 @@ describe('TraineesComponent list', () => {
 
   async function render(gymCards: 'ok' | 'error' = 'ok') {
     const fixture = TestBed.createComponent(TraineesComponent);
-    page = driver(() => fixture.nativeElement, () => fixture.whenStable());
+    page = driver(
+      () => fixture.nativeElement,
+      () => fixture.whenStable(),
+    );
     await page.settle();
     const cards = http.expectOne('/api/gym-subscriptions?includeInactive=true');
     if (gymCards === 'error') {
@@ -91,11 +130,17 @@ describe('TraineesComponent list', () => {
   }
 
   async function flush(url: string, body: TraineeProfile[]) {
-    http.expectOne(req => req.method === 'GET' && req.urlWithParams === url).flush(body);
+    http
+      .expectOne((req) => req.method === 'GET' && req.urlWithParams === url)
+      .flush(body);
     await page.settle();
   }
 
-  const count = () => page.query('[aria-live="polite"]')?.textContent?.replace(/\s+/g, ' ').trim();
+  const count = () =>
+    page
+      .query('[aria-live="polite"]')
+      ?.textContent?.replace(/\s+/g, ' ')
+      .trim();
 
   it('loads every trainee and the gym cards, inactive ones included', async () => {
     await render();
@@ -152,7 +197,10 @@ describe('TraineesComponent list', () => {
 
   it('shows the error state and reloads on "Try again"', async () => {
     const fixture = TestBed.createComponent(TraineesComponent);
-    page = driver(() => fixture.nativeElement, () => fixture.whenStable());
+    page = driver(
+      () => fixture.nativeElement,
+      () => fixture.whenStable(),
+    );
     await page.settle();
     http.expectOne('/api/gym-subscriptions?includeInactive=true').flush([]);
     const error = apiError('Database unavailable', 503);
