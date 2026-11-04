@@ -46,13 +46,23 @@ ng test
 
 ## Running end-to-end tests
 
-For end-to-end (e2e) testing, run:
+The E2E journeys use [Playwright](https://playwright.dev/); the API is mocked, so only the dev server runs (Playwright starts it):
 
 ```bash
-ng e2e
+npm run e2e
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Linting and formatting
+
+ESLint (with angular-eslint) and Prettier are set up like theindex-api's. CI runs the three checks below and fails on any error or warning:
+
+```bash
+npm run lint:check
+npm run format:check
+npm run typecheck:e2e
+```
+
+`npm run lint` and `npm run format` fix what they can and rewrite files.
 
 ## Additional Resources
 
