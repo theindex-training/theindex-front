@@ -281,6 +281,27 @@
       "trainer": "Trainer",
       "location": "Location",
       "payment": "Payment"
+    },
+    "view": {
+      "label": "Trainings view",
+      "calendar": "Calendar",
+      "list": "List"
+    },
+    "calendar": {
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "today": "Today",
+      "caption": "Trainings calendar, {month}",
+      "summary": "{count, plural, one {# training} other {# trainings}} · {paid} paid · {unpaid} unpaid",
+      "noneThisMonth": "No trainings in this month.",
+      "noneThisDay": "No trainings on this day.",
+      "dayLabel": "{date}, {count, plural, =0 {no trainings} one {# training} other {# trainings}}{unpaid, plural, =0 {} other {, # unpaid}}",
+      "more": "+{count} more",
+      "legend": "Legend",
+      "legendPaid": "Paid training",
+      "legendUnpaid": "Unpaid training",
+      "clearSelection": "Clear selection",
+      "monthList": "Trainings in {month}"
     }
   },
   "traineeDashboard": {

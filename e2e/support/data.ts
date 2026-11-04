@@ -74,3 +74,25 @@ export function sessionsResponse(sessions: object[], entities: { trainees?: obje
     }
   };
 }
+
+/** One of a trainee's trainings, as GET /api/attendance/trainees/:id returns it. */
+export const trainingItem = (
+  id: string,
+  trainedAt: string,
+  overrides: { paymentStatus?: 'PAID' | 'UNPAID'; trainer?: [string, string | null]; gym?: string; traineeId?: string } = {}
+) => {
+  const [name, nickname] = overrides.trainer ?? ['Petar Petrov', 'Pepi'];
+  return {
+    id,
+    traineeId: overrides.traineeId ?? 'trainee-1',
+    trainerId: `trainer-${name}`,
+    trainer: { id: `trainer-${name}`, name, nickname },
+    locationId: `gym-${overrides.gym ?? 'Center'}`,
+    location: { id: `gym-${overrides.gym ?? 'Center'}`, name: overrides.gym ?? 'Center' },
+    trainedAt,
+    subscriptionId: null,
+    gymSubscriptionId: null,
+    paymentStatus: overrides.paymentStatus ?? 'PAID',
+    createdAt: trainedAt
+  };
+};

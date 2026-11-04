@@ -281,6 +281,27 @@
       "trainer": "Треньор",
       "location": "Зала",
       "payment": "Плащане"
+    },
+    "view": {
+      "label": "Изглед на тренировките",
+      "calendar": "Календар",
+      "list": "Списък"
+    },
+    "calendar": {
+      "previousMonth": "Предишен месец",
+      "nextMonth": "Следващ месец",
+      "today": "Днес",
+      "caption": "Календар на тренировките, {month}",
+      "summary": "{count, plural, one {# тренировка} other {# тренировки}} · {paid, plural, one {# платена} other {# платени}} · {unpaid, plural, one {# неплатена} other {# неплатени}}",
+      "noneThisMonth": "Няма тренировки през този месец.",
+      "noneThisDay": "Няма тренировки на този ден.",
+      "dayLabel": "{date}, {count, plural, =0 {без тренировки} one {# тренировка} other {# тренировки}}{unpaid, plural, =0 {} one {, # неплатена} other {, # неплатени}}",
+      "more": "+{count} още",
+      "legend": "Легенда",
+      "legendPaid": "Платена тренировка",
+      "legendUnpaid": "Неплатена тренировка",
+      "clearSelection": "Изчисти избора",
+      "monthList": "Тренировки през {month}"
     }
   },
   "traineeDashboard": {

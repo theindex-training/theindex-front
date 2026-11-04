@@ -15,6 +15,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - PR 3 fixed S1 and S2. It added `pages/save-errors.spec.ts`, the error-handling row of §7's table for every catalog and trainee form, and brought the suite to 28 spec files and 267 tests.
 - PR 4 covered §5–§12 (62 spec files, 547 tests; 17 more breaks in production code, all caught). It pinned S4, S8, S10, S11 and S12, and found S15 and S16.
 - PR 5 set up E2E (Playwright, API mock, CI job) and added all nine journeys: 37 E2E tests over the desktop and mobile projects. It found S17.
+- The trainings calendar (a feature, not a test PR) came with its own specs: 65 spec files, 587 unit tests, plus journey J10 (39 E2E tests). Three deliberate breaks (UTC day keys, list as the default view, no unpaid marker) were each caught.
 
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
 - **P0:** access control, sessions, money, and anything that writes attendance, subscriptions, settlements or cash. A bug here loses money or data, or exposes screens to the wrong role.
@@ -340,6 +341,7 @@ One table-driven spec per page type (`crud-details.spec.ts`, `crud-forms.spec.ts
 - [x] Three parallel GETs: `/api/attendance/trainees/<id>`, `/api/trainees/<id>/subscriptions`, `/api/plans` (no `active` param, unlike trainee details).
 - [x] If any of the three fails, every section shows the same error.
 - [x] The filter defaults to ACTIVE. Each filter's empty key and the case-insensitive match are checked.
+- [x] Trainings show in the calendar on the current month by default, and in the list after switching (the page passes its trainings and empty key through). Same check on trainee details (§5's page).
 
 **`pages/stats/stats.component.ts`**
 - [x] `GET /api/trainees/me/training-insights` maps into the five ranked lists.
@@ -409,6 +411,17 @@ One spec per service, each method asserting method, URL, query and body. These p
   - `statusTone` ACTIVE → success, EXHAUSTED → danger, otherwise neutral, case-insensitive;
   - the delete button renders only when both `showActionsColumn` and `canDeleteSubscriptions` are set, is disabled while that row is deleting, and emits the subscription.
 - [x] `TraineeTrainingsTableComponent`: trainer is nickname or name, or '—'; location name or '—'.
+- [x] `utils/calendar.util.ts`: local day keys (a 22:30 UTC training on 31 Oct is 1 Nov in Sofia), Monday-first month weeks padded with `null` (28-day February, leap year), adding days across DST and month ends, adding months across year ends.
+- [x] `TrainingsCalendarComponent` (fake `Date` at 00:30 local on 1 Nov, still 31 Oct in UTC):
+  - opens on the current local month; today has `aria-current="date"`; Today is disabled there;
+  - each training lands on its local day; cells list time, trainer and gym, earliest first, at most two then "+N more"; unpaid trainings get the diamond marker;
+  - each day button's name gives the date and the training and unpaid counts;
+  - the summary counts only the shown month; "no trainings at all" uses the page's empty key;
+  - previous/next across year ends, Today; selecting a day lists it below the grid, again or "Clear selection" clears it, and so does changing month; with nothing selected the month is listed by day;
+  - one tab stop; arrows, Home/End, PageUp/PageDown (clamped to a shorter month) move focus across months, and leaving the month clears the selection;
+  - loading and error replace the grid; Bulgarian month, weekdays and plurals.
+- [x] `TraineeTrainingsComponent`: Calendar by default; List on request, stored in `localStorage.trainingsView` and restored; an unknown stored value or blocked storage falls back to the calendar.
+- [x] `LocaleFormatService.weekdayShort` / `monthYear` in both languages (in §10's spec).
 - [x] `UiInputComponent` (it is a form control, so it has logic):
   - `writeValue(null)` → '';
   - input calls `onChange`; blur calls `onTouched`;
@@ -584,6 +597,7 @@ Role access to this page is checked in J2 only.
 
 ### J8. Trainee self-service, navigation shell and preferences (P1) [mobile, plus a desktop smoke run]
 ✅ Done in PR 5: `e2e/journeys/j8-trainee-self-service.e2e.ts`, 4 tests. The More tab's "current" state is CSS-only and can't be asserted (S17).
+Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so its October training is in the month the calendar opens on.
 1. TRAINEE token with `traineeProfileId=P1`, landing on `/my-profile`. The page calls:
    - `GET /api/attendance/trainees/P1`
    - `GET /api/trainees/P1/subscriptions`
@@ -617,6 +631,16 @@ Role access to this page is checked in J2 only.
    - set 30 days and save → `PATCH /api/plans/<id> {type:'TIME', title, priceCents, isActive, credits:null, durationDays:30}`.
 4. Deactivate → `DELETE /api/plans/<id>` → `/plans`.
 5. Variant: the POST → 400. The API message shows in an alert, and the save button is enabled again (S1, fixed in PR 3).
+
+### J10. Trainings calendar (P1) [desktop, mobile]
+✅ Added with the calendar: `e2e/journeys/j10-trainings-calendar.e2e.ts`, 2 tests. The clock is fixed to 3 Nov 2026 (`page.clock.setFixedTime`).
+1. Desktop, TRAINEE on `/my-profile`: Calendar is checked, the month is November 2026, today is `aria-current="date"`, Today is disabled, and the legend names unpaid trainings.
+2. Previous month → October: the summary counts the month; a cell shows time, trainer and gym of each training.
+3. Opening a day lists its trainings with their payment status; "Clear selection" clears it.
+4. Keyboard: ArrowDown and PageDown move focus between days and months.
+5. Next month is allowed and empty; Today comes back.
+6. List shows every training in the table and is still chosen after a reload; switching back shows the calendar.
+7. Phone: cells show markers only (no trainer text); the month is listed below the grid by day; tapping a day narrows the list to it.
 
 ---
 

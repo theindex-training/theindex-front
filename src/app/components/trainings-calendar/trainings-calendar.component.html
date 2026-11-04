@@ -1,0 +1,154 @@
+@if (loading) {
+  <app-skeleton-list [label]="'trainings.loading' | transloco" [rows]="3" />
+} @else if (errorMessage) {
+  <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+} @else {
+  <div class="cal-toolbar">
+    <div class="cal-nav">
+      <button
+        type="button"
+        class="icon-btn"
+        data-testid="calendar-previous"
+        [attr.aria-label]="'trainings.calendar.previousMonth' | transloco"
+        (click)="previousMonth()"
+      >
+        <app-icon name="chevron-left" />
+      </button>
+      <h3 class="cal-nav__title" aria-live="polite" data-testid="calendar-month">{{ monthTitle }}</h3>
+      <button
+        type="button"
+        class="icon-btn"
+        data-testid="calendar-next"
+        [attr.aria-label]="'trainings.calendar.nextMonth' | transloco"
+        (click)="nextMonth()"
+      >
+        <app-icon name="chevron-right" />
+      </button>
+    </div>
+    <button type="button" class="btn btn--secondary" [disabled]="isCurrentMonth" (click)="goToToday()">
+      {{ 'trainings.calendar.today' | transloco }}
+    </button>
+    <p class="cal-summary" data-testid="calendar-summary">
+      @if (!trainings.length) {
+        {{ emptyKey | transloco }}
+      } @else if (monthTotals.count) {
+        {{ 'trainings.calendar.summary' | transloco: monthTotals }}
+      } @else {
+        {{ 'trainings.calendar.noneThisMonth' | transloco }}
+      }
+    </p>
+  </div>
+
+  <div class="cal">
+    <table class="cal-grid" (keydown)="onGridKeydown($event)">
+      <caption class="visually-hidden">{{ 'trainings.calendar.caption' | transloco: { month: monthTitle } }}</caption>
+      <thead>
+        <tr>
+          @for (weekday of weekdays; track weekday) {
+            <th scope="col">
+              <span aria-hidden="true">{{ format.weekdayShort(weekday) }}</span>
+              <span class="visually-hidden">{{ format.weekday(weekday) }}</span>
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (week of weeks; track $index) {
+          <tr>
+            @for (day of week; track $index) {
+              <td>
+                @if (day) {
+                  @let dayTrainings = trainingsOn(day.key);
+                  <button
+                    type="button"
+                    class="cal-day"
+                    [class.is-today]="day.key === todayKey"
+                    [class.is-selected]="day.key === selectedKey"
+                    [attr.data-day]="day.key"
+                    [attr.data-testid]="'calendar-day-' + day.key"
+                    [attr.tabindex]="day.key === focusKey ? 0 : -1"
+                    [attr.aria-pressed]="day.key === selectedKey"
+                    [attr.aria-current]="day.key === todayKey ? 'date' : null"
+                    [attr.aria-label]="dayLabel(day)"
+                    (click)="selectDay(day.key)"
+                  >
+                    <span class="cal-day__num" aria-hidden="true">{{ day.day }}</span>
+                    @if (dayTrainings.length) {
+                      <span class="cal-marks" aria-hidden="true">
+                        @for (training of dayTrainings; track training.id) {
+                          <span class="mark" [class.mark--unpaid]="training.paymentStatus === 'UNPAID'"></span>
+                        }
+                      </span>
+                      <span class="cal-events" aria-hidden="true">
+                        @for (training of dayTrainings.slice(0, maxPerCell); track training.id) {
+                          <span class="cal-event" [class.cal-event--unpaid]="training.paymentStatus === 'UNPAID'">
+                            <span class="cal-event__line">
+                              <span class="mark" [class.mark--unpaid]="training.paymentStatus === 'UNPAID'"></span>
+                              <span class="num">{{ format.time(training.trainedAt) }}</span> {{ trainer(training) }}
+                            </span>
+                            <span class="cal-event__line cal-event__gym">{{ location(training) }}</span>
+                          </span>
+                        }
+                        @if (dayTrainings.length > maxPerCell) {
+                          <span class="cal-more">
+                            {{ 'trainings.calendar.more' | transloco: { count: dayTrainings.length - maxPerCell } }}
+                          </span>
+                        }
+                      </span>
+                    }
+                  </button>
+                }
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="cal-legend" [attr.aria-label]="'trainings.calendar.legend' | transloco">
+    <li><span class="mark" aria-hidden="true"></span>{{ 'trainings.calendar.legendPaid' | transloco }}</li>
+    <li><span class="mark mark--unpaid" aria-hidden="true"></span>{{ 'trainings.calendar.legendUnpaid' | transloco }}</li>
+    <li><span class="cal-legend__today" aria-hidden="true"></span>{{ 'trainings.calendar.today' | transloco }}</li>
+  </ul>
+
+  <div class="cal-panel" [class.cal-panel--month]="!selectedKey" data-testid="calendar-panel">
+    @if (selectedKey) {
+      <div class="cal-panel__header">
+        <h4 class="cal-panel__title">{{ fullDate(selectedKey) }}</h4>
+        <button type="button" class="btn btn--ghost" (click)="clearSelection()">
+          {{ 'trainings.calendar.clearSelection' | transloco }}
+        </button>
+      </div>
+      @if (selectedTrainings.length) {
+        <ng-container [ngTemplateOutlet]="list" [ngTemplateOutletContext]="{ $implicit: selectedTrainings }" />
+      } @else {
+        <p class="text-muted cal-panel__empty">{{ 'trainings.calendar.noneThisDay' | transloco }}</p>
+      }
+    } @else if (monthAgenda.length) {
+      <h4 class="cal-panel__title">{{ 'trainings.calendar.monthList' | transloco: { month: monthTitle } }}</h4>
+      @for (entry of monthAgenda; track entry.day.key) {
+        <h5 class="cal-panel__day">{{ fullDate(entry.day.key) }}</h5>
+        <ng-container [ngTemplateOutlet]="list" [ngTemplateOutletContext]="{ $implicit: entry.trainings }" />
+      }
+    }
+  </div>
+}
+
+<ng-template #list let-trainings>
+  <ul class="list-card" [attr.aria-label]="'trainings.title' | transloco">
+    @for (training of trainings; track training.id) {
+      <li class="record">
+        <div class="record__main">
+          <span class="record__title num">{{ format.time(training.trainedAt) }}</span>
+          <span class="record__meta">{{ trainer(training) }} · {{ location(training) }}</span>
+        </div>
+        <div class="record__aside">
+          <app-chip [tone]="training.paymentStatus === 'UNPAID' ? 'danger' : 'success'">
+            {{ training.paymentStatus | enumLabel: 'paymentStatus' }}
+          </app-chip>
+        </div>
+      </li>
+    }
+  </ul>
+</ng-template>

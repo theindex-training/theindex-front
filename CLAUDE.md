@@ -257,6 +257,8 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
 | `app-empty-state` | Icon, title, message, and actions in the default slot. `tone="danger"` uses the alert icon and `role="alert"`. |
 | `app-ranked-list` | Top-N card (Stats): `title`, `subtitle`, `items: { label, value }[]`, `unit`. It shows rank, label and count, plus a proportional bar that is `aria-hidden`. |
 | `app-skeleton-list` | Loading placeholder rows (`rows`, `label`). Announces `label` through `role="status"`; the blocks are `aria-hidden`. |
+| `app-trainee-trainings` | A trainee's trainings section (My profile and trainee details): heading (`heading`, `subheading`, `headingId`), a Calendar / List switch and the chosen view. Calendar is the default; an explicit choice is stored in `localStorage` under `trainingsView`. |
+| `app-trainings-calendar` | Home-made month grid of trainings (no calendar library): weeks Monday first, days keyed by local date (`utils/calendar.util.ts`). From 768px a cell lists time, trainer and gym; below that, a marker per training. Paid = green dot (`--success`), unpaid = red diamond (`--danger`), explained in a legend. Selecting a day lists it below the grid; with none selected, phones list the whole month there. The day buttons are one tab stop with arrow/Home/End/PageUp/PageDown keys. |
 
 **Global classes** (in `styles.scss`, shared without per-component budget):
 - **Page layout:** `.page-stack` stacks a page vertically. `.list-toolbar` and its `__search`/`__count` children form the toolbar row.
@@ -300,7 +302,7 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
 - **`.skeleton`:** pulsing placeholder block.
 - **`.btn`** + `.btn--primary` / `.btn--secondary` / `.btn--ghost` (low emphasis) / `.btn--danger` (soft) / `.btn--danger-solid` (confirming a destructive action): link or button actions in page content. `ui-button` stays the full-width form button.
 
-**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-right, plus, alert, trash, arrow-left, eye, eye-off.
+**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-left, chevron-right, plus, alert, trash, arrow-left, eye, eye-off.
 
 ### Form and detail page pattern (reference: `pages/plans/plan-*.component.html`)
 Create, edit, details and delete pages share one structure. They need no page SCSS. Create/edit pages drop `page-narrow` and use the full width:
