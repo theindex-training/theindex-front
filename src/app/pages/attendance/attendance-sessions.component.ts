@@ -176,7 +176,7 @@ export class AttendanceSessionsComponent implements OnInit {
     this.attendanceService.sessions(query).subscribe({
       next: (response) => {
         this.applyEntities(response);
-        this.sessions = response.sessions;
+        this.sessions = this.newestFirst(response.sessions);
         this.ensureSelectedSession();
         this.loading = false;
         this.changeDetector.detectChanges();
@@ -349,6 +349,15 @@ export class AttendanceSessionsComponent implements OnInit {
     );
     this.locationNameById = new Map(
       response.entities.locations.map((item) => [item.id, item.name]),
+    );
+  }
+
+  // The API returns sessions oldest first; the page lists the newest first.
+  // Sessions that start at the same time keep the API's order (stable sort),
+  // and the attendees inside each session keep theirs.
+  private newestFirst(sessions: AttendanceSession[]): AttendanceSession[] {
+    return [...sessions].sort(
+      (a, b) => Date.parse(b.start) - Date.parse(a.start),
     );
   }
 

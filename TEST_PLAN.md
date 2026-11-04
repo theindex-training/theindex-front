@@ -203,6 +203,7 @@ The review below turned up a few traps. Every spec should follow these.
 
 **`pages/attendance/attendance-sessions.component.ts`**
 - [x] Default range: from 7 days ago to today, local dates (fake clock).
+- [x] Sessions are listed newest first by start time (chips and session panels), whatever order the API sends; ties keep the API order, and attendees keep their order.
 - [x] ADMIN:
   - loads `/api/trainers?active=true`;
   - `trainerId` is sent only when a trainer is picked;
@@ -530,7 +531,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 ### J4. Review and correct attendance history (P0) [desktop, plus a mobile list check]
 ✅ Done in PR 5: `e2e/journeys/j4-attendance-history.e2e.ts`, 3 tests.
 1. ADMIN token, `/attendance` → `GET /api/trainers?active=true` and `GET /api/attendance/sessions?startDate=…&endDate=…`, with no `trainerId`.
-2. Every session chip is pressed (`aria-pressed=true`). The summary testids show the totals over all sessions; the price total counts final prices only.
+2. Every session chip is pressed (`aria-pressed=true`), newest session first (the fixture is oldest first, like the API). The summary testids show the totals over all sessions; the price total counts final prices only.
 3. Unpress one session: the summary updates. Unpress all, then press "Apply": the page reloads, and all sessions are selected again.
 4. Pick a trainer and press "Apply" → the same request plus `&trainerId=…`.
 5. Delete an attendee:

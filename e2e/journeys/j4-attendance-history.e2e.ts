@@ -45,8 +45,16 @@ const session = (
   },
 });
 
+// Oldest first, as the API sends them; the page shows the newest first.
 const SESSIONS = sessionsResponse(
   [
+    session(
+      'other',
+      'trainer-other',
+      '2026-10-30T06:00:00Z',
+      '2026-10-30T07:00:00Z',
+      [attendee('a3', 'ivan', 'PAID', 600, true)],
+    ),
     session(
       'mine',
       'trainer-1',
@@ -56,13 +64,6 @@ const SESSIONS = sessionsResponse(
         attendee('a1', 'ivan', 'PAID', 450, true),
         attendee('a2', 'georgi', 'UNPAID', 999, false),
       ],
-    ),
-    session(
-      'other',
-      'trainer-other',
-      '2026-10-30T06:00:00Z',
-      '2026-10-30T07:00:00Z',
-      [attendee('a3', 'ivan', 'PAID', 600, true)],
     ),
   ],
   {
@@ -119,6 +120,11 @@ test.describe('J4 attendance history', () => {
           endDate: '2026-11-02',
         });
       await expect(page.getByRole('button', { pressed: true })).toHaveCount(2);
+      // Newest first: 1 Nov (Pepi) before 30 Oct (Maria).
+      await expect(page.getByRole('button', { pressed: true })).toHaveText([
+        /, Pepi$/,
+        /, Maria$/,
+      ]);
       await expect
         .poll(() => summary(page))
         .toEqual(['2', '3', '2', '1', '€10.50']);

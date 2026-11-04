@@ -209,6 +209,49 @@ describe('AttendanceSessionsComponent', () => {
       ).toBe(format.money(450));
     });
 
+    it('lists sessions newest first, whatever order the API sends, keeping attendee order', async () => {
+      // The API sends sessions oldest first.
+      const body = response();
+      body.sessions = [
+        session('oct-30-early', 'trainer-other', '2026-10-30T06:00:00Z', [
+          attendee('a3', 'ivan', 'PAID', 600, true),
+        ]),
+        session('nov-01', 'trainer-1', '2026-11-01T16:30:00Z', [
+          attendee('a1', 'ivan', 'PAID', 450, true),
+          attendee('a2', 'georgi', 'UNPAID', 999, false),
+        ]),
+        session('oct-30-late', 'trainer-1', '2026-10-30T15:00:00Z', []),
+        session('oct-30-late-2', 'trainer-other', '2026-10-30T15:00:00Z', []),
+      ];
+      apply().click();
+      await page.settle();
+      await flushSessions(DEFAULT_RANGE, body);
+
+      expect(component.sessions.map((item) => item.sessionKey)).toEqual([
+        'nov-01',
+        'oct-30-late',
+        'oct-30-late-2',
+        'oct-30-early',
+      ]);
+      const title = (start: string, end: string, trainer: string) =>
+        `${format.shortDate(start)} · ${format.clock(start)}–${format.clock(end)}, ${trainer}`;
+      const titles = [
+        title('2026-11-01T16:30:00Z', '2026-11-01T17:30:00Z', 'Pepi'),
+        title('2026-10-30T15:00:00Z', '2026-10-30T16:00:00Z', 'Pepi'),
+        title('2026-10-30T15:00:00Z', '2026-10-30T16:00:00Z', 'Maria'),
+        title('2026-10-30T06:00:00Z', '2026-10-30T07:00:00Z', 'Maria'),
+      ];
+      expect(chips().map((chip) => chip.textContent?.trim())).toEqual(titles);
+      expect(
+        page
+          .queryAll('article')
+          .map((article) => article.getAttribute('aria-label')),
+      ).toEqual(titles);
+      expect(
+        component.sessions[0].attendance.map((item) => item.traineeId),
+      ).toEqual(['ivan', 'georgi']);
+    });
+
     it('offers only active trainers in the filter', () => {
       const options = page
         .queryAll<HTMLOptionElement>('select option')
