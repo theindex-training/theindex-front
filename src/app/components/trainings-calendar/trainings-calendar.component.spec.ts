@@ -200,12 +200,12 @@ describe('TrainingsCalendarComponent', () => {
     expect(page.query('.cal-panel__title')!.textContent!.trim()).toBe('Trainings in October 2026');
   });
 
-  it('says when a selected day has no trainings, and "Show whole month" clears the selection', async () => {
+  it('says when a selected day has no trainings, and "Clear selection" clears it', async () => {
     await render(october);
     await goToOctober();
 
     await page.click('[data-testid="calendar-day-2026-10-02"]');
-    expect(text('calendar-panel')).toBe('Friday, 2 October 2026 Show whole month No trainings on this day.');
+    expect(text('calendar-panel')).toBe('Friday, 2 October 2026 Clear selection No trainings on this day.');
 
     await page.click('.cal-panel__header button');
     expect(day('2026-10-02').getAttribute('aria-pressed')).toBe('false');

@@ -300,7 +300,7 @@
       "legend": "Legend",
       "legendPaid": "Paid training",
       "legendUnpaid": "Unpaid training",
-      "showMonth": "Show whole month",
+      "clearSelection": "Clear selection",
       "monthList": "Trainings in {month}"
     }
   },

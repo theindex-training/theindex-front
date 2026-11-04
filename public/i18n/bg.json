@@ -300,7 +300,7 @@
       "legend": "Легенда",
       "legendPaid": "Платена тренировка",
       "legendUnpaid": "Неплатена тренировка",
-      "showMonth": "Покажи целия месец",
+      "clearSelection": "Изчисти избора",
       "monthList": "Тренировки през {month}"
     }
   },

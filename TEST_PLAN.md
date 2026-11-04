@@ -417,7 +417,7 @@ One spec per service, each method asserting method, URL, query and body. These p
   - each training lands on its local day; cells list time, trainer and gym, earliest first, at most two then "+N more"; unpaid trainings get the diamond marker;
   - each day button's name gives the date and the training and unpaid counts;
   - the summary counts only the shown month; "no trainings at all" uses the page's empty key;
-  - previous/next across year ends, Today; selecting a day lists it below the grid, again or "Show whole month" clears it, and so does changing month; with nothing selected the month is listed by day;
+  - previous/next across year ends, Today; selecting a day lists it below the grid, again or "Clear selection" clears it, and so does changing month; with nothing selected the month is listed by day;
   - one tab stop; arrows, Home/End, PageUp/PageDown (clamped to a shorter month) move focus across months, and leaving the month clears the selection;
   - loading and error replace the grid; Bulgarian month, weekdays and plurals.
 - [x] `TraineeTrainingsComponent`: Calendar by default; List on request, stored in `localStorage.trainingsView` and restored; an unknown stored value or blocked storage falls back to the calendar.
@@ -636,7 +636,7 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 ✅ Added with the calendar: `e2e/journeys/j10-trainings-calendar.e2e.ts`, 2 tests. The clock is fixed to 3 Nov 2026 (`page.clock.setFixedTime`).
 1. Desktop, TRAINEE on `/my-profile`: Calendar is checked, the month is November 2026, today is `aria-current="date"`, Today is disabled, and the legend names unpaid trainings.
 2. Previous month → October: the summary counts the month; a cell shows time, trainer and gym of each training.
-3. Opening a day lists its trainings with their payment status; "Show whole month" clears it.
+3. Opening a day lists its trainings with their payment status; "Clear selection" clears it.
 4. Keyboard: ArrowDown and PageDown move focus between days and months.
 5. Next month is allowed and empty; Today comes back.
 6. List shows every training in the table and is still chosen after a reload; switching back shows the calendar.

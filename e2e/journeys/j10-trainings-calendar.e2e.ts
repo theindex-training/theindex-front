@@ -67,7 +67,7 @@ test.describe('J10 trainings calendar', () => {
     await expect(panel.getByRole('heading', { name: 'Wednesday, 7 October 2026' })).toBeVisible();
     await expect(panel.getByRole('listitem')).toHaveCount(2);
     await expect(panel.getByRole('listitem').nth(1)).toContainText(t('enums.paymentStatus.UNPAID'));
-    await panel.getByRole('button', { name: t('trainings.calendar.showMonth') }).click();
+    await panel.getByRole('button', { name: t('trainings.calendar.clearSelection') }).click();
     await expect(busyDay).toHaveAttribute('aria-pressed', 'false');
 
     // 4. Keyboard: the grid is one tab stop; arrows move between days, across months.
