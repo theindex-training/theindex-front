@@ -119,7 +119,7 @@ describe('AttendanceSessionsComponent', () => {
   const summary = () =>
     page
       .queryAll(`dl[aria-label="${copy.summaryLabel}"] dd`)
-      .map(dd => dd.textContent!.trim());
+      .map(dd => dd.textContent.trim());
   const deleteButtons = (name: string) =>
     page.queryAll<HTMLButtonElement>(`button[aria-label="Delete attendance for ${name}"]`);
   const apply = () => page.queryAll('button').find(button => button.textContent?.trim() === copy.apply)!;

@@ -1,0 +1,9 @@
+/* Type-checks the Playwright E2E journeys and config (`npm run typecheck:e2e`); nothing is emitted. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["e2e/**/*.ts", "playwright.config.ts"]
+}

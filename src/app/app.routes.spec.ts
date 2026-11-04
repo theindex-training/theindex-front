@@ -107,7 +107,7 @@ describe('route table', () => {
       key.split('.').reduce<unknown>((node, part) => (node as Record<string, unknown>)?.[part], en);
 
     for (const route of titled) {
-      expect(typeof lookup(route.title as string), `${route.path} → ${route.title}`).toBe('string');
+      expect(typeof lookup(route.title as string), `${route.path} → ${String(route.title)}`).toBe('string');
     }
   });
 });
@@ -116,7 +116,7 @@ describe('routing (real routes)', () => {
   let harness: RouterTestingHarness | undefined;
   let router: Router;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     harness = undefined;
     localStorage.clear();
     TestBed.configureTestingModule({

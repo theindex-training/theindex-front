@@ -86,9 +86,9 @@ describe('TraineeDashboardComponent', () => {
       http.expectOne(req => req.urlWithParams === '/api/plans').flush([]);
       await page.settle();
 
-      expect(page.query('#my-trainings-title')!.textContent!.trim()).toBe(copy.trainings);
-      expect(page.query('[data-testid="calendar-month"]')!.textContent!.trim()).toBe('October 2026');
-      expect(page.query('[data-testid="calendar-summary"]')!.textContent!.trim()).toBe('1 training · 1 paid · 0 unpaid');
+      expect(page.query('#my-trainings-title')!.textContent.trim()).toBe(copy.trainings);
+      expect(page.query('[data-testid="calendar-month"]')!.textContent.trim()).toBe('October 2026');
+      expect(page.query('[data-testid="calendar-summary"]')!.textContent.trim()).toBe('1 training · 1 paid · 0 unpaid');
       expect(page.query('[data-testid="calendar-day-2026-10-30"]')!.textContent).toContain('Pepi');
 
       await page.click('input[type="radio"][value="list"]');

@@ -22,7 +22,6 @@ describe('PlanEditComponent', () => {
   let http: HttpTestingController;
   let router: Router;
   let harness: RouterTestingHarness;
-  let component: PlanEditComponent;
   let page: PageDriver;
 
   beforeEach(async () => {
@@ -45,7 +44,7 @@ describe('PlanEditComponent', () => {
   afterEach(() => http.verify());
 
   async function open(url = '/plans/p1/edit', plan: Plan | 'error' = PUNCH_PLAN) {
-    component = await harness.navigateByUrl(url, PlanEditComponent);
+    await harness.navigateByUrl(url, PlanEditComponent);
     page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
     const req = http.expectOne(`/api/plans/${url.split('/')[2]}`);
     expect(req.request.method).toBe('GET');
@@ -131,7 +130,7 @@ describe('PlanEditComponent', () => {
   });
 
   it('reports a missing id without calling the API', async () => {
-    component = await harness.navigateByUrl('/plans/edit', PlanEditComponent);
+    await harness.navigateByUrl('/plans/edit', PlanEditComponent);
     page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
     await page.settle();
 

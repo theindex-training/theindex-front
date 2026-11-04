@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UiButtonComponent } from '../../components/ui-button/ui-button.component';
 import { UiInputComponent } from '../../components/ui-input/ui-input.component';
@@ -19,7 +19,7 @@ const passwordMatchValidator: ValidatorFn = control => {
     return null;
   }
 
-  return newPassword === confirmPassword ? null : ({ passwordMismatch: true } as ValidationErrors);
+  return newPassword === confirmPassword ? null : ({ passwordMismatch: true });
 };
 
 @Component({

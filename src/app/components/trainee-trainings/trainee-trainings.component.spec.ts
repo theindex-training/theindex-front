@@ -40,7 +40,7 @@ describe('TraineeTrainingsComponent', () => {
   }
 
   const radio = (label: string) =>
-    page.queryAll<HTMLLabelElement>('label.segmented__option').find(item => item.textContent!.trim() === label)!
+    page.queryAll<HTMLLabelElement>('label.segmented__option').find(item => item.textContent.trim() === label)!
       .querySelector('input')!;
   const showsCalendar = () => page.query('app-trainings-calendar') !== null;
   const showsList = () => page.query('app-trainee-trainings-table') !== null;
@@ -49,10 +49,10 @@ describe('TraineeTrainingsComponent', () => {
     await render();
 
     expect(page.query('h2')!.id).toBe('my-trainings-title');
-    expect(page.query('h2')!.textContent!.trim()).toBe('Trainings');
+    expect(page.query('h2')!.textContent.trim()).toBe('Trainings');
     expect(page.text()).toContain('Your completed trainings.');
-    expect(page.query('legend')!.textContent!.trim()).toBe('Trainings view');
-    expect(page.queryAll('label.segmented__option').map(item => item.textContent!.trim())).toEqual(['Calendar', 'List']);
+    expect(page.query('legend')!.textContent.trim()).toBe('Trainings view');
+    expect(page.queryAll('label.segmented__option').map(item => item.textContent.trim())).toEqual(['Calendar', 'List']);
   });
 
   it('shows the calendar by default, on the current month, with the trainings in it', async () => {
@@ -61,7 +61,7 @@ describe('TraineeTrainingsComponent', () => {
     expect(radio('Calendar').checked).toBe(true);
     expect(showsCalendar()).toBe(true);
     expect(showsList()).toBe(false);
-    expect(page.query('[data-testid="calendar-month"]')!.textContent!.trim()).toBe('October 2026');
+    expect(page.query('[data-testid="calendar-month"]')!.textContent.trim()).toBe('October 2026');
     expect(page.query('[data-testid="calendar-day-2026-10-30"]')!.textContent).toContain('Pepi');
   });
 
@@ -72,7 +72,7 @@ describe('TraineeTrainingsComponent', () => {
     expect(radio('List').checked).toBe(true);
     expect(showsList()).toBe(true);
     expect(showsCalendar()).toBe(false);
-    expect(page.query('table caption')!.textContent!.trim()).toBe('Trainings');
+    expect(page.query('table caption')!.textContent.trim()).toBe('Trainings');
     expect(localStorage.getItem(TRAININGS_VIEW_STORAGE_KEY)).toBe('list');
 
     await page.click('label.segmented__option:nth-of-type(1) input');
@@ -112,9 +112,9 @@ describe('TraineeTrainingsComponent', () => {
 
   it('passes the empty message to both views', async () => {
     await render([]);
-    expect(page.query('[data-testid="calendar-summary"]')!.textContent!.trim()).toBe('No trainings yet.');
+    expect(page.query('[data-testid="calendar-summary"]')!.textContent.trim()).toBe('No trainings yet.');
 
     await page.click('label.segmented__option:nth-of-type(2) input');
-    expect(page.query('p.notice')!.textContent!.trim()).toBe('No trainings yet.');
+    expect(page.query('p.notice')!.textContent.trim()).toBe('No trainings yet.');
   });
 });

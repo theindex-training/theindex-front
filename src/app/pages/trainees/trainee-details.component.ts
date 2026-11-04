@@ -28,7 +28,7 @@ import {
 type SubscriptionFilter = 'ACTIVE' | 'EXHAUSTED' | 'ALL';
 
 const currencyValidator: ValidatorFn = (control: AbstractControl) => {
-  const value = control.value;
+  const value: unknown = control.value;
   if (value === null || value === undefined || value === '') {
     return null;
   }

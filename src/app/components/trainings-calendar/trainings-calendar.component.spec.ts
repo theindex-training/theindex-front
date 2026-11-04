@@ -70,7 +70,7 @@ describe('TrainingsCalendarComponent', () => {
       .queryAll('[data-testid="calendar-panel"] li.record')
       .map(row => parts(row, '.record__title, .record__meta, app-chip'));
   const button = (label: string) =>
-    page.queryAll<HTMLButtonElement>('button').find(item => item.textContent!.trim() === label)!;
+    page.queryAll<HTMLButtonElement>('button').find(item => item.textContent.trim() === label)!;
   const goToOctober = () => page.click('[data-testid="calendar-previous"]');
 
   it("opens on the current local month, with today marked and the Today button disabled", async () => {
@@ -138,7 +138,7 @@ describe('TrainingsCalendarComponent', () => {
 
     const legend = page.query('ul.cal-legend')!;
     expect(legend.getAttribute('aria-label')).toBe('Legend');
-    expect(Array.from(legend.querySelectorAll('li')).map(item => item.textContent!.trim())).toEqual([
+    expect(Array.from(legend.querySelectorAll('li')).map(item => item.textContent.trim())).toEqual([
       'Paid training',
       'Unpaid training',
       'Today'
@@ -188,7 +188,7 @@ describe('TrainingsCalendarComponent', () => {
     await page.click('[data-testid="calendar-day-2026-10-07"]');
     expect(day('2026-10-07').getAttribute('aria-pressed')).toBe('true');
     expect(day('2026-10-07').classList).toContain('is-selected');
-    expect(page.query('.cal-panel__title')!.textContent!.trim()).toBe('Wednesday, 7 October 2026');
+    expect(page.query('.cal-panel__title')!.textContent.trim()).toBe('Wednesday, 7 October 2026');
     expect(panelRecords()).toEqual([
       '07:00 | Pepi · Center | Paid',
       '18:30 | Maria Koleva · Lozenets | Unpaid',
@@ -197,7 +197,7 @@ describe('TrainingsCalendarComponent', () => {
 
     await page.click('[data-testid="calendar-day-2026-10-07"]');
     expect(day('2026-10-07').getAttribute('aria-pressed')).toBe('false');
-    expect(page.query('.cal-panel__title')!.textContent!.trim()).toBe('Trainings in October 2026');
+    expect(page.query('.cal-panel__title')!.textContent.trim()).toBe('Trainings in October 2026');
   });
 
   it('says when a selected day has no trainings, and "Clear selection" clears it', async () => {
@@ -218,7 +218,7 @@ describe('TrainingsCalendarComponent', () => {
 
     const panel = page.query('[data-testid="calendar-panel"]')!;
     expect(panel.classList).toContain('cal-panel--month');
-    expect(page.queryAll('.cal-panel__day').map(heading => heading.textContent!.trim())).toEqual([
+    expect(page.queryAll('.cal-panel__day').map(heading => heading.textContent.trim())).toEqual([
       'Thursday, 1 October 2026',
       'Wednesday, 7 October 2026',
       'Tuesday, 20 October 2026'

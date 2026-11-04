@@ -13,7 +13,7 @@ describe('LocaleFormatService', () => {
   });
 
   // Intl uses narrow no-break spaces in some locales; compare with plain spaces.
-  const plain = (value: string) => value.replace(/[  ]/g, ' ');
+  const plain = (value: string) => value.replace(/[\u00A0\u202F]/g, ' ');
 
   it('formats EUR money from cents in the active language', () => {
     language.use('bg').subscribe();

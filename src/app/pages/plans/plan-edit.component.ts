@@ -22,7 +22,7 @@ import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 const integerValidator: ValidatorFn = (control: AbstractControl) => {
-  const value = control.value;
+  const value: unknown = control.value;
   if (value === null || value === undefined || value === '') {
     return null;
   }
@@ -30,7 +30,7 @@ const integerValidator: ValidatorFn = (control: AbstractControl) => {
 };
 
 const currencyValidator: ValidatorFn = (control: AbstractControl) => {
-  const value = control.value;
+  const value: unknown = control.value;
   if (value === null || value === undefined || value === '') {
     return null;
   }

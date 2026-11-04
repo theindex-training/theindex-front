@@ -100,7 +100,7 @@ describe('AttendanceRegisterComponent', () => {
   const select = (name: string) => page.query<HTMLSelectElement>(`select[formcontrolname="${name}"]`)!;
   const shownTrainees = () =>
     page.queryAll('label').filter(label => label.querySelector('input[type="checkbox"]'))
-      .map(label => label.textContent!.replace(/\s+/g, ' ').trim());
+      .map(label => label.textContent.replace(/\s+/g, ' ').trim());
   const checkbox = (name: string) =>
     page
       .queryAll('label')

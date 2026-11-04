@@ -40,6 +40,7 @@
   </div>
 
   <div class="cal">
+    <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -- delegated arrow keys for the day buttons, which hold the focus (one tab stop) -->
     <table class="cal-grid" (keydown)="onGridKeydown($event)">
       <caption class="visually-hidden">{{ 'trainings.calendar.caption' | transloco: { month: monthTitle } }}</caption>
       <thead>

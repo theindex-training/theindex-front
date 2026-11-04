@@ -27,8 +27,8 @@ function sourceFiles(dir: string): string[] {
   });
 }
 
-const enKeys = flatten(en as Tree);
-const bgKeys = flatten(bg as Tree);
+const enKeys = flatten(en);
+const bgKeys = flatten(bg);
 const namespaces = Object.keys(en);
 
 /**

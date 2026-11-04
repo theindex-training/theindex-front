@@ -88,7 +88,7 @@ function matches(path: string | RegExp, actual: string): boolean {
 
 function record(request: Request): RecordedRequest {
   const url = new URL(request.url());
-  let body: unknown = null;
+  let body: unknown;
   try {
     body = request.postDataJSON();
   } catch {

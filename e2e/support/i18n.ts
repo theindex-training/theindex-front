@@ -22,10 +22,10 @@ const formatters = { en: new MessageFormat('en'), bg: new MessageFormat('bg') };
  * Selectors use it instead of literal copy: a reworded label doesn't break a test, a missing one does.
  */
 export function t(key: string, params: Record<string, unknown> = {}): string {
-  return formatters.en.compile(lookup(en as Tree, key))(params) as string;
+  return formatters.en.compile(lookup(en, key))(params);
 }
 
 /** Same as t(), in Bulgarian. */
 export function tBg(key: string, params: Record<string, unknown> = {}): string {
-  return formatters.bg.compile(lookup(bg as Tree, key))(params) as string;
+  return formatters.bg.compile(lookup(bg, key))(params);
 }

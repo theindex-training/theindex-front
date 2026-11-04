@@ -44,9 +44,10 @@ export const trainee = (id: string, name: string, nickname: string | null = null
   id,
   name,
   nickname,
-  phone: null,
-  accountId: null,
-  gymSubscriptionId: null,
+  // Nullable strings in the API's DTO; typed as such so a journey can fill them in.
+  phone: null as string | null,
+  accountId: null as string | null,
+  gymSubscriptionId: null as string | null,
   isActive: true,
   ...overrides
 });

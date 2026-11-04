@@ -6,10 +6,7 @@ import en from '../../../../public/i18n/en.json';
 import { PageDriver, apiError, driver } from '../../../testing/dom';
 import { signInAs } from '../../../testing/jwt';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
-import {
-  AttendanceSubscriptionReport,
-  InactiveTraineeReportItem
-} from '../../services/attendance.service';
+import { AttendanceSubscriptionReport } from '../../services/attendance.service';
 import { HomeComponent } from './home.component';
 
 const copy = en.home.reports;
@@ -128,7 +125,7 @@ describe('HomeComponent', () => {
     it('names the trainee, with the nickname, or "Unknown"', () => {
       expect(component.traineeDisplayName({ name: ' Ivan ', nickname: 'Vanko' })).toBe('Ivan (Vanko)');
       expect(component.traineeDisplayName({ name: 'Ivan', nickname: '  ' })).toBe('Ivan');
-      expect(component.traineeDisplayName({} as InactiveTraineeReportItem)).toBe(copy.unknown);
+      expect(component.traineeDisplayName({})).toBe(copy.unknown);
     });
 
     it('summarizes a subscription, skipping empty parts', () => {

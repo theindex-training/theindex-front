@@ -125,21 +125,21 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     });
 
     const section = page.query('section[aria-labelledby="trainings-title"]')!;
-    expect(section.querySelector('#trainings-title')!.textContent!.trim()).toBe(copy.trainings);
-    expect(section.querySelector('[data-testid="calendar-month"]')!.textContent!.trim()).toBe('November 2026');
+    expect(section.querySelector('#trainings-title')!.textContent.trim()).toBe(copy.trainings);
+    expect(section.querySelector('[data-testid="calendar-month"]')!.textContent.trim()).toBe('November 2026');
     expect(section.querySelector('[data-testid="calendar-day-2026-11-01"]')!.getAttribute('aria-label')).toBe(
       'Sunday, 1 November 2026, 1 training, 1 unpaid'
     );
 
     await page.click('section[aria-labelledby="trainings-title"] input[type="radio"][value="list"]');
-    expect(section.querySelector('table caption')!.textContent!.trim()).toBe('Trainings');
+    expect(section.querySelector('table caption')!.textContent.trim()).toBe('Trainings');
     expect(section.querySelector('tbody')!.textContent).toContain('Pepi');
   });
 
   it('says there are no trainings yet in the calendar', async () => {
     await open();
 
-    expect(page.query('[data-testid="calendar-summary"]')!.textContent!.trim()).toBe(copy.noTrainings);
+    expect(page.query('[data-testid="calendar-summary"]')!.textContent.trim()).toBe(copy.noTrainings);
   });
 
   it('also loads the linked account', async () => {
