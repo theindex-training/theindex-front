@@ -1,9 +1,15 @@
-import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import {
   SegmentedControlComponent,
-  SegmentedOption
+  SegmentedOption,
 } from '../../components/segmented-control/segmented-control.component';
 import { SearchFieldComponent } from '../../components/search-field/search-field.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
@@ -13,19 +19,21 @@ import { StatusDotComponent } from '../../components/status-dot/status-dot.compo
 import { ListRowComponent } from '../../components/list-row/list-row.component';
 import { IconComponent } from '../../components/icon/icon.component';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
-import { TrainerProfile, TrainersService } from '../../services/trainers.service';
+import {
+  TrainerProfile,
+  TrainersService,
+} from '../../services/trainers.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 import { LanguageService } from '../../i18n/language.service';
 
-
 @Component({
   selector: 'app-trainers',
   standalone: true,
   imports: [
-    UiMessagePipe, 
-    TranslocoPipe, 
+    UiMessagePipe,
+    TranslocoPipe,
     RouterLink,
     PageHeaderComponent,
     SegmentedControlComponent,
@@ -36,10 +44,10 @@ import { LanguageService } from '../../i18n/language.service';
     StatusDotComponent,
     ListRowComponent,
     IconComponent,
-    AvatarComponent
+    AvatarComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './trainers.component.html'
+  templateUrl: './trainers.component.html',
 })
 export class TrainersComponent implements OnInit {
   private readonly i18n = inject(LanguageService);
@@ -49,7 +57,7 @@ export class TrainersComponent implements OnInit {
   readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
     { value: 'all', label: 'common.all' },
     { value: 'active', label: 'common.active' },
-    { value: 'inactive', label: 'common.inactive' }
+    { value: 'inactive', label: 'common.inactive' },
   ];
   searchTerm = '';
   loading = true;
@@ -69,7 +77,11 @@ export class TrainersComponent implements OnInit {
     this.errorMessage = null;
 
     const active =
-      this.activeFilter === 'all' ? undefined : this.activeFilter === 'active' ? true : false;
+      this.activeFilter === 'all'
+        ? undefined
+        : this.activeFilter === 'active'
+          ? true
+          : false;
 
     this.trainersService.list(active).subscribe({
       next: (trainers) => {
@@ -79,7 +91,10 @@ export class TrainersComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'trainers.list.loadErrorMessage');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'trainers.list.loadErrorMessage',
+        );
         this.loading = false;
         this.changeDetector.detectChanges();
       },
@@ -108,7 +123,9 @@ export class TrainersComponent implements OnInit {
 
   nicknameLabel(trainer: TrainerProfile): string {
     const nickname = trainer.nickname?.trim();
-    return nickname ? this.i18n.t('common.quoted', { text: nickname }) : this.i18n.t('common.noNickname');
+    return nickname
+      ? this.i18n.t('common.quoted', { text: nickname })
+      : this.i18n.t('common.noNickname');
   }
 
   hasLinkedAccount(trainer: TrainerProfile): boolean {

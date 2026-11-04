@@ -18,7 +18,7 @@ export interface PageHeaderAction {
   imports: [RouterLink, IconComponent],
   templateUrl: './page-header.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './page-header.component.scss'
+  styleUrl: './page-header.component.scss',
 })
 export class PageHeaderComponent {
   @Input({ required: true }) title = '';

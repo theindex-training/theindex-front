@@ -15,7 +15,7 @@ import { IconComponent } from '../icon/icon.component';
   imports: [RouterLink, AvatarComponent, IconComponent],
   templateUrl: './list-row.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './list-row.component.scss'
+  styleUrl: './list-row.component.scss',
 })
 export class ListRowComponent {
   @Input({ required: true }) link!: string | unknown[];

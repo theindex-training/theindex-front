@@ -1,5 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -21,26 +24,39 @@ describe('PlanCreateComponent', () => {
         // Routed as in the app, so navigating away after a save destroys the page.
         provideRouter([
           { path: 'plans/new', component: PlanCreateComponent },
-          { path: '**', children: [] }
-        ])
-      ]
+          { path: '**', children: [] },
+        ]),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
     const harness = await RouterTestingHarness.create();
     component = await harness.navigateByUrl('/plans/new', PlanCreateComponent);
-    page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
     await page.settle();
   });
 
   afterEach(() => http.verify());
 
-  async function fill(values: { title?: string; type?: string; credits?: string; days?: string; price?: string }) {
-    if (values.title !== undefined) await page.type('#plan-title', values.title);
+  async function fill(values: {
+    title?: string;
+    type?: string;
+    credits?: string;
+    days?: string;
+    price?: string;
+  }) {
+    if (values.title !== undefined)
+      await page.type('#plan-title', values.title);
     if (values.type !== undefined) await page.select('#plan-type', values.type);
-    if (values.credits !== undefined) await page.type('#plan-credits', values.credits);
-    if (values.days !== undefined) await page.type('#plan-duration', values.days);
-    if (values.price !== undefined) await page.type('#plan-price', values.price);
+    if (values.credits !== undefined)
+      await page.type('#plan-credits', values.credits);
+    if (values.days !== undefined)
+      await page.type('#plan-duration', values.days);
+    if (values.price !== undefined)
+      await page.type('#plan-price', values.price);
   }
 
   function expectPost() {
@@ -59,7 +75,7 @@ describe('PlanCreateComponent', () => {
       title: '10 visits',
       priceCents: 4550,
       isActive: true,
-      credits: 10
+      credits: 10,
     });
     expect('durationDays' in req.request.body).toBe(false);
     req.flush({ id: 'p1' });
@@ -78,7 +94,7 @@ describe('PlanCreateComponent', () => {
       title: 'Monthly',
       priceCents: 6000,
       isActive: true,
-      durationDays: 30
+      durationDays: 30,
     });
     expect('credits' in req.request.body).toBe(false);
     req.flush({ id: 'p2' });
@@ -109,33 +125,42 @@ describe('PlanCreateComponent', () => {
 
   it.each([
     ['negative', '-1'],
-    ['more than two decimals', '1.005']
+    ['more than two decimals', '1.005'],
   ])('rejects a %s price', async (_, price) => {
     await fill({ title: 'Plan', credits: '10', price });
     await page.submit();
 
     http.expectNone('/api/plans');
-    expect(page.query('#plan-price')!.getAttribute('aria-invalid')).toBe('true');
+    expect(page.query('#plan-price')!.getAttribute('aria-invalid')).toBe(
+      'true',
+    );
   });
 
   it.each([
     ['missing', ''],
     ['zero', '0'],
-    ['fractional', '2.5']
-  ])('a punch card needs whole credits of 1 or more (%s)', async (_, credits) => {
-    await fill({ title: 'Plan', credits, price: '10' });
-    await page.submit();
+    ['fractional', '2.5'],
+  ])(
+    'a punch card needs whole credits of 1 or more (%s)',
+    async (_, credits) => {
+      await fill({ title: 'Plan', credits, price: '10' });
+      await page.submit();
 
-    http.expectNone('/api/plans');
-    expect(page.query('#plan-credits')!.getAttribute('aria-invalid')).toBe('true');
-  });
+      http.expectNone('/api/plans');
+      expect(page.query('#plan-credits')!.getAttribute('aria-invalid')).toBe(
+        'true',
+      );
+    },
+  );
 
   it('a time-based plan needs a whole number of days of 1 or more', async () => {
     await fill({ title: 'Plan', type: 'TIME', days: '0', price: '10' });
     await page.submit();
 
     http.expectNone('/api/plans');
-    expect(page.query('#plan-duration')!.getAttribute('aria-invalid')).toBe('true');
+    expect(page.query('#plan-duration')!.getAttribute('aria-invalid')).toBe(
+      'true',
+    );
   });
 
   it('clears the credits when switching to time-based and back', async () => {
@@ -154,7 +179,9 @@ describe('PlanCreateComponent', () => {
     await page.submit();
 
     http.expectNone('/api/plans');
-    expect(page.query('#plan-title')!.getAttribute('aria-invalid')).toBe('true');
+    expect(page.query('#plan-title')!.getAttribute('aria-invalid')).toBe(
+      'true',
+    );
   });
 
   it('accepts a title of only spaces and sends it as an empty string', async () => {
@@ -178,7 +205,9 @@ describe('PlanCreateComponent', () => {
     // Fixed S1 (TEST_NOTES.md): the error used to stay invisible and the button stuck on "Saving...".
     expect(page.alert()).toBe('A plan with this title already exists');
     expect(page.text()).not.toContain(en.common.saving);
-    expect(page.query<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(false);
+    expect(
+      page.query<HTMLButtonElement>('button[type="submit"]')!.disabled,
+    ).toBe(false);
     expect(router.url).toBe('/plans/new');
   });
 });

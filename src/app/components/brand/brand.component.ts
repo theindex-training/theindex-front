@@ -9,6 +9,6 @@ import { TranslocoPipe } from '@jsverse/transloco';
   imports: [RouterLink, TranslocoPipe],
   templateUrl: './brand.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './brand.component.scss'
+  styleUrl: './brand.component.scss',
 })
 export class BrandComponent {}

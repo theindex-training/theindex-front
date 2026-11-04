@@ -27,7 +27,7 @@ export interface UpdateGymLocationPayload {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GymLocationsService {
   private readonly baseUrl = `${environment.apiUrl}/gym-locations`;
@@ -47,7 +47,10 @@ export class GymLocationsService {
     return this.http.post<GymLocation>(this.baseUrl, payload);
   }
 
-  update(id: string, payload: UpdateGymLocationPayload): Observable<GymLocation> {
+  update(
+    id: string,
+    payload: UpdateGymLocationPayload,
+  ): Observable<GymLocation> {
     return this.http.patch<GymLocation>(`${this.baseUrl}/${id}`, payload);
   }
 

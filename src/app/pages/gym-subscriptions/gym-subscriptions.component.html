@@ -2,7 +2,10 @@
   <app-page-header
     [title]="'nav.gymSubscriptions' | transloco"
     [subtitle]="'gymSubscriptions.list.subtitle' | transloco"
-    [action]="{ label: ('gymSubscriptions.list.new' | transloco), link: '/gym-subscriptions/new' }"
+    [action]="{
+      label: ('gymSubscriptions.list.new' | transloco),
+      link: '/gym-subscriptions/new',
+    }"
   />
 
   <div class="list-toolbar">
@@ -13,17 +16,37 @@
       (valueChange)="activeFilter = $event; loadGymSubscriptions()"
     />
     @if (!loading && !errorMessage && gymSubscriptions.length) {
-      <p class="list-toolbar__count" data-testid="list-count" aria-live="polite">
-        {{ 'gymSubscriptions.list.count' | transloco: { count: gymSubscriptions.length } }}
+      <p
+        class="list-toolbar__count"
+        data-testid="list-count"
+        aria-live="polite"
+      >
+        {{
+          'gymSubscriptions.list.count'
+            | transloco: { count: gymSubscriptions.length }
+        }}
       </p>
     }
   </div>
 
   @if (loading) {
-    <app-skeleton-list [label]="'gymSubscriptions.list.loading' | transloco" [rows]="3" />
+    <app-skeleton-list
+      [label]="'gymSubscriptions.list.loading' | transloco"
+      [rows]="3"
+    />
   } @else if (errorMessage) {
-    <app-empty-state tone="danger" [title]="'gymSubscriptions.list.loadError' | transloco" [message]="errorMessage | uiMessage">
-      <button class="btn btn--secondary" type="button" (click)="loadGymSubscriptions()">{{ 'common.tryAgain' | transloco }}</button>
+    <app-empty-state
+      tone="danger"
+      [title]="'gymSubscriptions.list.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button
+        class="btn btn--secondary"
+        type="button"
+        (click)="loadGymSubscriptions()"
+      >
+        {{ 'common.tryAgain' | transloco }}
+      </button>
     </app-empty-state>
   } @else if (!gymSubscriptions.length) {
     @if (activeFilter === 'all') {
@@ -32,12 +55,18 @@
         [title]="'gymSubscriptions.list.emptyTitle' | transloco"
         [message]="'gymSubscriptions.list.emptyMessage' | transloco"
       >
-        <a class="btn btn--primary" routerLink="/gym-subscriptions/new">{{ 'gymSubscriptions.list.new' | transloco }}</a>
+        <a class="btn btn--primary" routerLink="/gym-subscriptions/new">{{
+          'gymSubscriptions.list.new' | transloco
+        }}</a>
       </app-empty-state>
     } @else {
       <app-empty-state
         icon="ticket"
-        [title]="activeFilter === 'active' ? ('gymSubscriptions.list.noActive' | transloco) : ('gymSubscriptions.list.noInactive' | transloco)"
+        [title]="
+          activeFilter === 'active'
+            ? ('gymSubscriptions.list.noActive' | transloco)
+            : ('gymSubscriptions.list.noInactive' | transloco)
+        "
         [message]="'gymSubscriptions.list.tryOtherFilter' | transloco"
       >
         <button
@@ -57,25 +86,44 @@
       [attr.aria-label]="'gymSubscriptions.list.tableLabel' | transloco"
     >
       <table class="data-table">
-        <caption class="visually-hidden">{{ 'nav.gymSubscriptions' | transloco }}</caption>
+        <caption class="visually-hidden">
+          {{
+            'nav.gymSubscriptions' | transloco
+          }}
+        </caption>
         <thead>
           <tr>
-            <th scope="col">{{ 'gymSubscriptions.fields.gymSubscription' | transloco }}</th>
+            <th scope="col">
+              {{ 'gymSubscriptions.fields.gymSubscription' | transloco }}
+            </th>
             <th scope="col">{{ 'common.status' | transloco }}</th>
-            <th scope="col" class="cell-fit"><span class="visually-hidden">{{ 'gymSubscriptions.list.detailsColumn' | transloco }}</span></th>
+            <th scope="col" class="cell-fit">
+              <span class="visually-hidden">{{
+                'gymSubscriptions.list.detailsColumn' | transloco
+              }}</span>
+            </th>
           </tr>
         </thead>
         <tbody>
           @for (gymSubscription of gymSubscriptions; track gymSubscription.id) {
             <tr>
               <td>
-                <a class="cell-link" [routerLink]="['/gym-subscriptions', gymSubscription.id]">
+                <a
+                  class="cell-link"
+                  [routerLink]="['/gym-subscriptions', gymSubscription.id]"
+                >
                   {{ gymSubscription.name }}
                 </a>
               </td>
               <td>
-                <app-status-dot [tone]="gymSubscription.isActive ? 'success' : 'neutral'">
-                  {{ gymSubscription.isActive ? ('gymSubscriptions.status.active' | transloco) : ('gymSubscriptions.status.inactive' | transloco) }}
+                <app-status-dot
+                  [tone]="gymSubscription.isActive ? 'success' : 'neutral'"
+                >
+                  {{
+                    gymSubscription.isActive
+                      ? ('gymSubscriptions.status.active' | transloco)
+                      : ('gymSubscriptions.status.inactive' | transloco)
+                  }}
                 </app-status-dot>
               </td>
               <td class="cell-fit">
@@ -94,7 +142,10 @@
       </table>
     </div>
 
-    <ul class="list-card responsive-list" [attr.aria-label]="'nav.gymSubscriptions' | transloco">
+    <ul
+      class="list-card responsive-list"
+      [attr.aria-label]="'nav.gymSubscriptions' | transloco"
+    >
       @for (gymSubscription of gymSubscriptions; track gymSubscription.id) {
         <li>
           <app-list-row
@@ -103,7 +154,9 @@
             [dimmed]="!gymSubscription.isActive"
           >
             @if (!gymSubscription.isActive) {
-              <app-chip listRowTrailing>{{ 'gymSubscriptions.status.inactive' | transloco }}</app-chip>
+              <app-chip listRowTrailing>{{
+                'gymSubscriptions.status.inactive' | transloco
+              }}</app-chip>
             }
           </app-list-row>
         </li>

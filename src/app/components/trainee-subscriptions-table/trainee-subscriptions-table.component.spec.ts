@@ -6,7 +6,15 @@ import { Subscription } from '../../services/subscriptions.service';
 import { TraineeSubscriptionsTableComponent } from './trainee-subscriptions-table.component';
 
 const PLANS: Plan[] = [
-  { id: 'p1', type: 'PUNCH', title: '10 visits', priceCents: 4550, credits: 10, durationDays: null, isActive: true }
+  {
+    id: 'p1',
+    type: 'PUNCH',
+    title: '10 visits',
+    priceCents: 4550,
+    credits: 10,
+    durationDays: null,
+    isActive: true,
+  },
 ];
 
 function subscription(overrides: Partial<Subscription> = {}): Subscription {
@@ -21,7 +29,7 @@ function subscription(overrides: Partial<Subscription> = {}): Subscription {
     endsAt: null,
     initialCredits: 10,
     remainingCredits: 7,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -30,7 +38,9 @@ describe('TraineeSubscriptionsTableComponent', () => {
   let component: TraineeSubscriptionsTableComponent;
   let el: HTMLElement;
 
-  async function render(inputs: Partial<Record<keyof TraineeSubscriptionsTableComponent, unknown>>) {
+  async function render(
+    inputs: Partial<Record<keyof TraineeSubscriptionsTableComponent, unknown>>,
+  ) {
     fixture = TestBed.createComponent(TraineeSubscriptionsTableComponent);
     component = fixture.componentInstance;
     el = fixture.nativeElement;
@@ -41,13 +51,24 @@ describe('TraineeSubscriptionsTableComponent', () => {
   }
 
   const deleteButtons = () =>
-    Array.from(el.querySelectorAll<HTMLButtonElement>('button[aria-label^="Delete subscription"]'));
+    Array.from(
+      el.querySelectorAll<HTMLButtonElement>(
+        'button[aria-label^="Delete subscription"]',
+      ),
+    );
 
   it('names the plan by title, or by its id when the plan is unknown', async () => {
-    await render({ subscriptions: [subscription(), subscription({ id: 's2', planId: 'gone' })] });
+    await render({
+      subscriptions: [
+        subscription(),
+        subscription({ id: 's2', planId: 'gone' }),
+      ],
+    });
 
     expect(component.formatPlanLabel(subscription())).toBe('10 visits');
-    expect(component.formatPlanLabel(subscription({ planId: 'gone' }))).toBe('gone');
+    expect(component.formatPlanLabel(subscription({ planId: 'gone' }))).toBe(
+      'gone',
+    );
     expect(el.textContent).toContain('gone');
   });
 
@@ -55,20 +76,30 @@ describe('TraineeSubscriptionsTableComponent', () => {
     await render({ subscriptions: [] });
     const format = TestBed.inject(LocaleFormatService);
 
-    expect(component.formatEndsOrCredits(subscription())).toBe('3 / 10 trainings');
-    expect(component.formatEndsOrCredits(subscription({ initialCredits: 1, remainingCredits: 0 }))).toBe(
-      '1 / 1 training'
+    expect(component.formatEndsOrCredits(subscription())).toBe(
+      '3 / 10 trainings',
     );
-    expect(component.formatEndsOrCredits(subscription({ initialCredits: null, remainingCredits: null }))).toBe(
-      '0 / 0 trainings'
-    );
+    expect(
+      component.formatEndsOrCredits(
+        subscription({ initialCredits: 1, remainingCredits: 0 }),
+      ),
+    ).toBe('1 / 1 training');
+    expect(
+      component.formatEndsOrCredits(
+        subscription({ initialCredits: null, remainingCredits: null }),
+      ),
+    ).toBe('0 / 0 trainings');
     // More remaining than bought never shows a negative count.
-    expect(component.formatEndsOrCredits(subscription({ initialCredits: 5, remainingCredits: 8 }))).toBe(
-      '0 / 5 trainings'
-    );
-    expect(component.formatEndsOrCredits(subscription({ type: 'TIME', endsAt: '2026-11-30' }))).toBe(
-      format.date('2026-11-30')
-    );
+    expect(
+      component.formatEndsOrCredits(
+        subscription({ initialCredits: 5, remainingCredits: 8 }),
+      ),
+    ).toBe('0 / 5 trainings');
+    expect(
+      component.formatEndsOrCredits(
+        subscription({ type: 'TIME', endsAt: '2026-11-30' }),
+      ),
+    ).toBe(format.date('2026-11-30'));
   });
 
   it.each([
@@ -76,7 +107,7 @@ describe('TraineeSubscriptionsTableComponent', () => {
     ['active', 'success'],
     ['EXHAUSTED', 'danger'],
     ['EXPIRED', 'neutral'],
-    ['CANCELLED', 'neutral']
+    ['CANCELLED', 'neutral'],
   ])('status %s gets the %s tone', async (status, tone) => {
     await render({ subscriptions: [] });
 
@@ -85,17 +116,27 @@ describe('TraineeSubscriptionsTableComponent', () => {
 
   it('shows the loading, error and empty states', async () => {
     await render({ loading: true, subscriptions: [subscription()] });
-    expect(el.querySelector('[role="status"]')?.textContent).toContain(en.subscriptions.loading);
+    expect(el.querySelector('[role="status"]')?.textContent).toContain(
+      en.subscriptions.loading,
+    );
 
     await render({ errorMessage: { text: 'Server down' }, subscriptions: [] });
-    expect(el.querySelector('[role="alert"]')?.textContent?.trim()).toBe('Server down');
+    expect(el.querySelector('[role="alert"]')?.textContent?.trim()).toBe(
+      'Server down',
+    );
 
-    await render({ subscriptions: [], emptyKey: 'traineeDashboard.noActiveSubscriptions' });
+    await render({
+      subscriptions: [],
+      emptyKey: 'traineeDashboard.noActiveSubscriptions',
+    });
     expect(el.textContent).toContain(en.traineeDashboard.noActiveSubscriptions);
   });
 
   it('keeps showing loaded rows when an error arrives later', async () => {
-    await render({ errorMessage: { text: 'Delete failed' }, subscriptions: [subscription()] });
+    await render({
+      errorMessage: { text: 'Delete failed' },
+      subscriptions: [subscription()],
+    });
 
     expect(el.querySelector('[role="alert"]')).toBeNull();
     expect(el.textContent).toContain('10 visits');
@@ -105,24 +146,38 @@ describe('TraineeSubscriptionsTableComponent', () => {
     await render({ subscriptions: [subscription()] });
     expect(deleteButtons().length).toBe(0);
 
-    await render({ subscriptions: [subscription()], canDeleteSubscriptions: true, showActionsColumn: false });
+    await render({
+      subscriptions: [subscription()],
+      canDeleteSubscriptions: true,
+      showActionsColumn: false,
+    });
     expect(deleteButtons().length).toBe(0);
 
-    await render({ subscriptions: [subscription()], canDeleteSubscriptions: true });
+    await render({
+      subscriptions: [subscription()],
+      canDeleteSubscriptions: true,
+    });
     expect(deleteButtons().length).toBe(2); // table + phone list
-    expect(deleteButtons()[0].getAttribute('aria-label')).toBe('Delete subscription 10 visits');
+    expect(deleteButtons()[0].getAttribute('aria-label')).toBe(
+      'Delete subscription 10 visits',
+    );
   });
 
   it('emits the subscription to delete, and disables its button while deleting', async () => {
-    await render({ subscriptions: [subscription()], canDeleteSubscriptions: true });
+    await render({
+      subscriptions: [subscription()],
+      canDeleteSubscriptions: true,
+    });
     const requested: Subscription[] = [];
-    component.deleteSubscriptionRequested.subscribe(value => requested.push(value));
+    component.deleteSubscriptionRequested.subscribe((value) =>
+      requested.push(value),
+    );
 
     deleteButtons()[0].click();
-    expect(requested.map(item => item.id)).toEqual(['s1']);
+    expect(requested.map((item) => item.id)).toEqual(['s1']);
 
     fixture.componentRef.setInput('deletingSubscriptionId', 's1');
     await fixture.whenStable();
-    expect(deleteButtons().every(button => button.disabled)).toBe(true);
+    expect(deleteButtons().every((button) => button.disabled)).toBe(true);
   });
 });

@@ -19,10 +19,10 @@ describe('TranslatedTitleStrategy', () => {
       providers: [
         provideRouter([
           { path: 'plans', title: 'nav.plans', component: BlankComponent },
-          { path: 'untitled', component: BlankComponent }
+          { path: 'untitled', component: BlankComponent },
         ]),
-        { provide: TitleStrategy, useClass: TranslatedTitleStrategy }
-      ]
+        { provide: TitleStrategy, useClass: TranslatedTitleStrategy },
+      ],
     });
     router = TestBed.inject(Router);
     title = TestBed.inject(Title);

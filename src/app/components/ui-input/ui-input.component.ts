@@ -1,4 +1,9 @@
-import { Component, Input, forwardRef, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  Input,
+  forwardRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { IconComponent } from '../icon/icon.component';
@@ -16,9 +21,9 @@ import { IconComponent } from '../icon/icon.component';
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => UiInputComponent),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
 export class UiInputComponent implements ControlValueAccessor {
   @Input({ required: true }) id = '';

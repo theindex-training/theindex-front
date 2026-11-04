@@ -1,5 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import en from '../../../../public/i18n/en.json';
@@ -23,8 +26,8 @@ describe('ChangePasswordComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideRouter([{ path: '**', children: [] }])
-      ]
+        provideRouter([{ path: '**', children: [] }]),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
@@ -38,18 +41,23 @@ describe('ChangePasswordComponent', () => {
     el = fixture.nativeElement;
     await fixture.whenStable();
     if (passwordChanged === 'error') {
-      http.expectOne(STATUS_URL).flush(null, { status: 500, statusText: 'Server Error' });
+      http
+        .expectOne(STATUS_URL)
+        .flush(null, { status: 500, statusText: 'Server Error' });
     } else if (passwordChanged !== undefined) {
       const req = http.expectOne(STATUS_URL);
       expect(req.request.method).toBe('GET');
-      req.flush({ accountId: 'account-trainer', hasUpdatedInitialPassword: passwordChanged });
+      req.flush({
+        accountId: 'account-trainer',
+        hasUpdatedInitialPassword: passwordChanged,
+      });
     }
     await settle();
   }
 
   async function settle() {
     await fixture.whenStable();
-    await new Promise(resolve => setTimeout(resolve));
+    await new Promise((resolve) => setTimeout(resolve));
     await fixture.whenStable();
   }
 
@@ -61,7 +69,11 @@ describe('ChangePasswordComponent', () => {
     await fixture.whenStable();
   }
 
-  async function fillPasswords(current = 'old-password', next = 'new-password', confirm = next) {
+  async function fillPasswords(
+    current = 'old-password',
+    next = 'new-password',
+    confirm = next,
+  ) {
     await type('currentPassword', current);
     await type('newPassword', next);
     await type('confirmPassword', confirm);
@@ -116,9 +128,12 @@ describe('ChangePasswordComponent', () => {
         currentPassword: 'old-password',
         newPassword: 'new-password',
         confirmPassword: 'new-password',
-        phone: '+359 888 123 456'
+        phone: '+359 888 123 456',
       });
-      req.flush({ accountId: 'account-trainer', hasUpdatedInitialPassword: true });
+      req.flush({
+        accountId: 'account-trainer',
+        hasUpdatedInitialPassword: true,
+      });
       await settle();
 
       expect(router.url).toBe('/home');
@@ -140,7 +155,7 @@ describe('ChangePasswordComponent', () => {
       expect(http.expectOne(CHANGE_URL).request.body).toEqual({
         currentPassword: 'old-password',
         newPassword: 'new-password',
-        confirmPassword: 'new-password'
+        confirmPassword: 'new-password',
       });
     });
 
@@ -171,13 +186,18 @@ describe('ChangePasswordComponent', () => {
       http.expectNone(CHANGE_URL);
       const confirmHelp = el.querySelector('#confirmPassword-help')!;
       expect(confirmHelp.textContent?.trim()).toBe(copy.mismatch);
-      expect(el.querySelector('#newPassword-help')!.textContent?.trim()).toBe(copy.newHint);
+      expect(el.querySelector('#newPassword-help')!.textContent?.trim()).toBe(
+        copy.newHint,
+      );
     });
 
     it('resets the form and navigates away on success, so the success notice is never seen', async () => {
       await fillPasswords();
       await submit();
-      http.expectOne(CHANGE_URL).flush({ accountId: 'account-trainer', hasUpdatedInitialPassword: true });
+      http.expectOne(CHANGE_URL).flush({
+        accountId: 'account-trainer',
+        hasUpdatedInitialPassword: true,
+      });
       await settle();
 
       expect(router.url).toBe('/home');
@@ -185,11 +205,13 @@ describe('ChangePasswordComponent', () => {
         currentPassword: null,
         newPassword: null,
         confirmPassword: null,
-        phone: null
+        phone: null,
       });
       // CHARACTERIZATION: possibly unintended — the success message is set right before navigating
       // away; in the app this component is destroyed, so users never see it. TEST_NOTES.md S5.
-      expect(fixture.componentInstance.successMessage).toEqual({ key: 'auth.changePassword.success' });
+      expect(fixture.componentInstance.successMessage).toEqual({
+        key: 'auth.changePassword.success',
+      });
     });
 
     it('shows the API error and lets the user try again', async () => {
@@ -197,11 +219,14 @@ describe('ChangePasswordComponent', () => {
       await submit();
       http
         .expectOne(CHANGE_URL)
-        .flush({ message: 'Current password is incorrect' }, { status: 400, statusText: 'Bad Request' });
+        .flush(
+          { message: 'Current password is incorrect' },
+          { status: 400, statusText: 'Bad Request' },
+        );
       await settle();
 
       expect(el.querySelector('[role="alert"]')?.textContent?.trim()).toBe(
-        'Current password is incorrect'
+        'Current password is incorrect',
       );
       expect(text()).toContain(copy.save);
       expect(router.url).toBe('/change-password');
@@ -210,10 +235,14 @@ describe('ChangePasswordComponent', () => {
     it('falls back to a generic error when the API sends no message', async () => {
       await fillPasswords();
       await submit();
-      http.expectOne(CHANGE_URL).flush(null, { status: 500, statusText: 'Server Error' });
+      http
+        .expectOne(CHANGE_URL)
+        .flush(null, { status: 500, statusText: 'Server Error' });
       await settle();
 
-      expect(el.querySelector('[role="alert"]')?.textContent?.trim()).toBe(copy.error);
+      expect(el.querySelector('[role="alert"]')?.textContent?.trim()).toBe(
+        copy.error,
+      );
     });
   });
 
@@ -247,10 +276,12 @@ describe('ChangePasswordComponent', () => {
     localStorage.setItem('accessToken', makeToken({ role: 'TRAINER' }));
     await render();
 
-    http.expectNone(req => req.url.includes('/api/accounts/'));
+    http.expectNone((req) => req.url.includes('/api/accounts/'));
     await fillPasswords();
     await submit();
 
-    expect(el.querySelector('[role="alert"]')?.textContent?.trim()).toBe(copy.noAccount);
+    expect(el.querySelector('[role="alert"]')?.textContent?.trim()).toBe(
+      copy.noAccount,
+    );
   });
 });

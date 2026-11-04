@@ -1,5 +1,12 @@
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpClient,
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { makeToken } from '../../testing/jwt';
@@ -17,8 +24,8 @@ describe('authInterceptor', () => {
       providers: [
         provideHttpClient(withInterceptors([authInterceptor])),
         provideHttpClientTesting(),
-        provideRouter([{ path: '**', children: [] }])
-      ]
+        provideRouter([{ path: '**', children: [] }]),
+      ],
     });
     http = TestBed.inject(HttpClient);
     controller = TestBed.inject(HttpTestingController);
@@ -32,8 +39,8 @@ describe('authInterceptor', () => {
   function get(url = '/api/trainees') {
     const result: { status?: number; body?: unknown } = {};
     http.get(url).subscribe({
-      next: body => (result.body = body),
-      error: error => (result.status = error.status)
+      next: (body) => (result.body = body),
+      error: (error) => (result.status = error.status),
     });
     return result;
   }
@@ -64,7 +71,9 @@ describe('authInterceptor', () => {
     const auth = TestBed.inject(AuthService);
     const token = makeToken({ sub: 'a1', role: 'TRAINER' });
     auth.login('trainer', 'secret').subscribe();
-    controller.expectOne('/api/auth/login').flush({ accessToken: token, account: {} });
+    controller
+      .expectOne('/api/auth/login')
+      .flush({ accessToken: token, account: {} });
 
     get();
     const req = controller.expectOne('/api/trainees');
@@ -73,11 +82,16 @@ describe('authInterceptor', () => {
   });
 
   it('on a 401 with a token: logs out, goes to /login and still passes the error on', async () => {
-    localStorage.setItem('accessToken', makeToken({ sub: 'a1', role: 'ADMIN' }));
+    localStorage.setItem(
+      'accessToken',
+      makeToken({ sub: 'a1', role: 'ADMIN' }),
+    );
 
     const result = get();
-    controller.expectOne('/api/trainees').flush(null, { status: 401, statusText: 'Unauthorized' });
-    await new Promise(resolve => setTimeout(resolve));
+    controller
+      .expectOne('/api/trainees')
+      .flush(null, { status: 401, statusText: 'Unauthorized' });
+    await new Promise((resolve) => setTimeout(resolve));
 
     expect(localStorage.getItem('accessToken')).toBeNull();
     expect(router.url).toBe('/login');
@@ -88,20 +102,25 @@ describe('authInterceptor', () => {
     const result = get('/api/auth/login');
     controller
       .expectOne('/api/auth/login')
-      .flush({ message: 'Invalid credentials' }, { status: 401, statusText: 'Unauthorized' });
-    await new Promise(resolve => setTimeout(resolve));
+      .flush(
+        { message: 'Invalid credentials' },
+        { status: 401, statusText: 'Unauthorized' },
+      );
+    await new Promise((resolve) => setTimeout(resolve));
 
     expect(router.url).toBe('/trainees');
     expect(result.status).toBe(401);
   });
 
-  it.each([403, 500, 0])('keeps the session on a %s error', async status => {
+  it.each([403, 500, 0])('keeps the session on a %s error', async (status) => {
     const token = makeToken({ sub: 'a1', role: 'ADMIN' });
     localStorage.setItem('accessToken', token);
 
     const result = get();
-    controller.expectOne('/api/trainees').flush(null, { status, statusText: 'Error' });
-    await new Promise(resolve => setTimeout(resolve));
+    controller
+      .expectOne('/api/trainees')
+      .flush(null, { status, statusText: 'Error' });
+    await new Promise((resolve) => setTimeout(resolve));
 
     expect(localStorage.getItem('accessToken')).toBe(token);
     expect(router.url).toBe('/trainees');

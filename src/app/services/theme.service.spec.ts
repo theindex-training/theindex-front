@@ -7,7 +7,7 @@ describe('ThemeService', () => {
 
   function setOsDark(matches: boolean): void {
     osPrefersDark = matches;
-    listeners.forEach(listener => listener({ matches }));
+    listeners.forEach((listener) => listener({ matches }));
   }
 
   function createService(): ThemeService {
@@ -16,7 +16,8 @@ describe('ThemeService', () => {
     return service;
   }
 
-  const appliedTheme = () => document.documentElement.getAttribute('data-theme');
+  const appliedTheme = () =>
+    document.documentElement.getAttribute('data-theme');
 
   // Test files share one environment (the Angular runner sets isolate: false), so the matchMedia
   // stub must be complete and must be removed again; other specs (e.g. main-layout) rely on jsdom's
@@ -31,11 +32,16 @@ describe('ThemeService', () => {
     window.matchMedia = ((query: string) => ({
       matches: osPrefersDark,
       media: query,
-      addEventListener: (_: string, listener: (event: { matches: boolean }) => void) =>
-        listeners.push(listener),
-      removeEventListener: (_: string, listener: (event: { matches: boolean }) => void) => {
-        listeners = listeners.filter(registered => registered !== listener);
-      }
+      addEventListener: (
+        _: string,
+        listener: (event: { matches: boolean }) => void,
+      ) => listeners.push(listener),
+      removeEventListener: (
+        _: string,
+        listener: (event: { matches: boolean }) => void,
+      ) => {
+        listeners = listeners.filter((registered) => registered !== listener);
+      },
     })) as unknown as typeof window.matchMedia;
     TestBed.resetTestingModule();
   });

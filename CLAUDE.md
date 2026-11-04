@@ -12,7 +12,10 @@ Angular SPA for The Index, a CrossFit gym app (admin/trainer management screens 
 - Tests: Vitest 5 + jsdom through `ng test` (`@angular/build:unit-test`); `src/test-providers.ts` gives every spec Transloco with the real language files (English)
 - i18n: Transloco (`@jsverse/transloco`) + `@jsverse/transloco-messageformat` (ICU plurals), runtime switching between Bulgarian (default) and English. See "Internationalization".
 - Node 24 LTS (`.nvmrc`, Docker `node:24-alpine`; CI reads `.nvmrc`); production image is `nginx:alpine` serving `dist/theindex-front/browser`
-- No ESLint is configured. Prettier settings sit in `package.json` (printWidth 100, single quotes, angular parser for HTML), but prettier is not a dependency.
+- Lint and format, set up like theindex-api:
+  - ESLint 10 flat config (`eslint.config.mjs`): `@eslint/js`, type-checked typescript-eslint, angular-eslint (TS, templates, template accessibility) and eslint-plugin-prettier. The comments in the config say why each rule is relaxed; keep the API's relaxations in step with it.
+  - Prettier 3 (`.prettierrc`): the API's settings (single quotes, trailing commas, default printWidth 80) plus the `angular` parser for HTML. `.prettierignore` leaves Markdown, `docs/` and `.github/` alone.
+  - `e2e/` and `playwright.config.ts` are type-checked by `tsconfig.e2e.json` (referenced from `tsconfig.json`, so ESLint's project service finds them).
 
 ## Commands
 ```bash
@@ -22,10 +25,17 @@ npm run build                # production build -> dist/theindex-front/browser
 npm run watch                # dev build in watch mode
 npx ng test --watch=false    # run unit tests once (`npm test` starts watch mode)
 npm run e2e                  # Playwright E2E journeys (starts `ng serve` itself; API is mocked)
+npm run lint:check           # ESLint (TS + templates, Prettier included) without fixing; fails on any error or warning (CI gate)
+npm run lint                 # NOTE: runs eslint --fix and rewrites files
+npm run format:check         # Prettier check of everything it formats, SCSS and JSON included (CI gate)
+npm run format               # prettier --write .
+npm run typecheck:e2e        # tsc over e2e/ and playwright.config.ts (CI gate)
 ```
 For a working UI locally, also run theindex-api (`npm run start:dev` there, with Postgres) and log in as the seeded admin (`admin`/`admin` with the API's `.env.example`).
 
-Known baseline (as of Oct 2026): build passes with no warnings and all `ng test` specs pass. Keep it that way; a failing spec is a regression.
+Known baseline (as of Nov 2026): build passes with no warnings, all `ng test` specs and E2E journeys pass, and `npm run lint:check`, `npm run format:check` and `npm run typecheck:e2e` are clean (0 errors, 0 warnings). Keep it that way; a failing spec or a new lint warning is a regression.
+
+The whole repo was reformatted once in a reformat-only commit, listed in `.git-blame-ignore-revs` (`git config blame.ignoreRevsFile .git-blame-ignore-revs` to skip it locally; GitHub's blame skips it already).
 
 ## Testing (characterization tests)
 We are adding characterization tests to a production app. The plan and its progress live in `TEST_PLAN.md`; anything a test reveals that looks wrong goes in `TEST_NOTES.md`.
@@ -383,13 +393,13 @@ Bulgarian is the default language; English is the second. Users switch at runtim
 - **Tests:** `i18n/i18n-keys.spec.ts` fails if the two files' keys differ, a key used in `src/app` (any quoted `namespace.key` string) is missing, an enum label is missing, an ICU message doesn't compile, or placeholders differ between languages. Build keys with `${}` only where unavoidable (enums); those can't be checked statically.
 
 ## Rules
-- **Don't modify `.github/workflows/` (deploy pipeline), `Dockerfile` (nginx config) or `proxy.conf.json` without asking first.** `docker-ghcr.yml` runs the unit tests, the production build and the E2E journeys on every PR and push to `main`. On `main` only, once both test jobs pass, it builds the image, pushes it to GHCR and redeploys the production VPS over SSH (same layout as theindex-api).
+- **Don't modify `.github/workflows/` (deploy pipeline), `Dockerfile` (nginx config) or `proxy.conf.json` without asking first.** `docker-ghcr.yml` runs, on every PR and push to `main`, a `lint` job (`lint:check`, `format:check`, `typecheck:e2e`), a `test-and-build` job (unit tests and the production build) and an `e2e` job (the journeys). On `main` only, once all three pass, it builds the image, pushes it to GHCR and redeploys the production VPS over SSH (same layout as theindex-api, whose `lint` job gates its deploy the same way).
 - Don't push to `main`; work on a branch and open a PR.
 - Follow the existing patterns: standalone components, lazy routes in `app.routes.ts` with `roleGuard` + `data.roles`, one service per resource, `@if`/`@for` in templates, SCSS per component.
 - Stay within the production budgets in `angular.json` (initial 500kB warn / 1MB error; component styles 4kB warn / 8kB error).
 - Never hardcode API hosts. Always go through `environment.apiUrl`.
 - Never hardcode colors. Use the design tokens (see "Design system").
 - Never hardcode user-facing text. Use translation keys in both language files (see "Internationalization").
-- Run `npm run build` and `npx ng test --watch=false` before pushing.
+- Run `npm run build`, `npm run lint:check`, `npm run format:check` and `npx ng test --watch=false` before pushing (plus `npm run typecheck:e2e` when `e2e/` changed). Keep reformat-only changes out of unrelated PRs.
 - Tests follow "Testing (characterization tests)" above: current behavior is the spec, and production code changes only for `data-testid`s.
 - Use the new control flow (`@if`, `@for`) in templates, not `*ngIf` / `*ngFor`.

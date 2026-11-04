@@ -1,11 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import {
   SegmentedControlComponent,
-  SegmentedOption
+  SegmentedOption,
 } from '../../components/segmented-control/segmented-control.component';
 import { TraineeSubscriptionsTableComponent } from '../../components/trainee-subscriptions-table/trainee-subscriptions-table.component';
 import { TraineeTrainingsComponent } from '../../components/trainee-trainings/trainee-trainings.component';
@@ -15,7 +20,10 @@ import {
 } from '../../services/attendance.service';
 import { AuthService } from '../../services/auth.service';
 import { Plan, PlansService } from '../../services/plans.service';
-import { Subscription, SubscriptionsService } from '../../services/subscriptions.service';
+import {
+  Subscription,
+  SubscriptionsService,
+} from '../../services/subscriptions.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
@@ -25,7 +33,9 @@ type SubscriptionFilter = 'ACTIVE' | 'EXHAUSTED' | 'ALL';
 @Component({
   selector: 'app-trainee-dashboard',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, 
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
     CommonModule,
     EmptyStateComponent,
     PageHeaderComponent,
@@ -75,7 +85,8 @@ export class TraineeDashboardComponent implements OnInit {
     }
 
     return this.subscriptions.filter(
-      (subscription) => subscription.status.toUpperCase() === this.subscriptionFilter,
+      (subscription) =>
+        subscription.status.toUpperCase() === this.subscriptionFilter,
     );
   }
 

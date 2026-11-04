@@ -1,12 +1,21 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+  UrlTree,
+  provideRouter,
+} from '@angular/router';
 import { makeToken, signInAs } from '../../testing/jwt';
 import { roleGuard } from './role.guard';
 
 describe('roleGuard', () => {
   const run = (roles?: string[]) => {
-    const route = { data: roles === undefined ? {} : { roles } } as unknown as ActivatedRouteSnapshot;
-    const result = TestBed.runInInjectionContext(() => roleGuard(route, {} as RouterStateSnapshot));
+    const route = {
+      data: roles === undefined ? {} : { roles },
+    } as unknown as ActivatedRouteSnapshot;
+    const result = TestBed.runInInjectionContext(() =>
+      roleGuard(route, {} as RouterStateSnapshot),
+    );
     return result instanceof UrlTree ? result.toString() : result;
   };
 

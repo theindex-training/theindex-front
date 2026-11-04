@@ -1,5 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -15,14 +18,13 @@ const PUNCH_PLAN: Plan = {
   priceCents: 4550,
   credits: 10,
   durationDays: null,
-  isActive: true
+  isActive: true,
 };
 
 describe('PlanEditComponent', () => {
   let http: HttpTestingController;
   let router: Router;
   let harness: RouterTestingHarness;
-  let component: PlanEditComponent;
   let page: PageDriver;
 
   beforeEach(async () => {
@@ -33,9 +35,9 @@ describe('PlanEditComponent', () => {
         provideRouter([
           { path: 'plans/:id/edit', component: PlanEditComponent },
           { path: 'plans/edit', component: PlanEditComponent },
-          { path: '**', children: [] }
-        ])
-      ]
+          { path: '**', children: [] },
+        ]),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
@@ -44,9 +46,15 @@ describe('PlanEditComponent', () => {
 
   afterEach(() => http.verify());
 
-  async function open(url = '/plans/p1/edit', plan: Plan | 'error' = PUNCH_PLAN) {
-    component = await harness.navigateByUrl(url, PlanEditComponent);
-    page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
+  async function open(
+    url = '/plans/p1/edit',
+    plan: Plan | 'error' = PUNCH_PLAN,
+  ) {
+    await harness.navigateByUrl(url, PlanEditComponent);
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
     const req = http.expectOne(`/api/plans/${url.split('/')[2]}`);
     expect(req.request.method).toBe('GET');
     if (plan === 'error') {
@@ -67,7 +75,9 @@ describe('PlanEditComponent', () => {
   it('fills the form from the plan, with the price in euros', async () => {
     await open();
 
-    expect(page.query<HTMLInputElement>('#plan-title')!.value).toBe('10 visits');
+    expect(page.query<HTMLInputElement>('#plan-title')!.value).toBe(
+      '10 visits',
+    );
     expect(page.query<HTMLInputElement>('#plan-price')!.value).toBe('45.5');
     expect(page.query<HTMLInputElement>('#plan-credits')!.value).toBe('10');
     expect(page.query('#plan-duration')).toBeNull();
@@ -87,7 +97,7 @@ describe('PlanEditComponent', () => {
       priceCents: 5220,
       isActive: true,
       credits: 12,
-      durationDays: null
+      durationDays: null,
     });
     req.flush({ ...PUNCH_PLAN, title: '12 visits' });
     await page.settle();
@@ -100,7 +110,9 @@ describe('PlanEditComponent', () => {
     await page.select('#plan-type', 'TIME');
     await page.submit();
     http.expectNone('/api/plans/p1');
-    expect(page.query('#plan-duration')!.getAttribute('aria-invalid')).toBe('true');
+    expect(page.query('#plan-duration')!.getAttribute('aria-invalid')).toBe(
+      'true',
+    );
 
     await page.type('#plan-duration', '30');
     await page.submit();
@@ -111,7 +123,7 @@ describe('PlanEditComponent', () => {
       priceCents: 4550,
       isActive: true,
       credits: null,
-      durationDays: 30
+      durationDays: 30,
     });
   });
 
@@ -131,8 +143,11 @@ describe('PlanEditComponent', () => {
   });
 
   it('reports a missing id without calling the API', async () => {
-    component = await harness.navigateByUrl('/plans/edit', PlanEditComponent);
-    page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
+    await harness.navigateByUrl('/plans/edit', PlanEditComponent);
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
     await page.settle();
 
     http.expectNone(() => true);
@@ -149,6 +164,8 @@ describe('PlanEditComponent', () => {
     // Fixed S1 (TEST_NOTES.md).
     expect(page.alert()).toBe('Validation failed');
     expect(page.text()).not.toContain(en.common.saving);
-    expect(page.query<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(false);
+    expect(
+      page.query<HTMLButtonElement>('button[type="submit"]')!.disabled,
+    ).toBe(false);
   });
 });

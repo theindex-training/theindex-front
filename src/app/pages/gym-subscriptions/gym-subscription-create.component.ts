@@ -1,16 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   CreateGymSubscriptionPayload,
-  GymSubscriptionsService
+  GymSubscriptionsService,
 } from '../../services/gym-subscriptions.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { trimmedLength } from '../../utils/form-validators.util';
@@ -21,9 +25,15 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-gym-subscription-create',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './gym-subscription-create.component.html'
+  templateUrl: './gym-subscription-create.component.html',
 })
 export class GymSubscriptionCreateComponent {
   readonly form: FormGroup<{
@@ -37,13 +47,13 @@ export class GymSubscriptionCreateComponent {
     private readonly formBuilder: FormBuilder,
     private readonly gymSubscriptionsService: GymSubscriptionsService,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        trimmedLength(2, 120)
-      ])
+        trimmedLength(2, 120),
+      ]),
     });
   }
 
@@ -55,7 +65,7 @@ export class GymSubscriptionCreateComponent {
 
     const raw = this.form.getRawValue();
     const payload: CreateGymSubscriptionPayload = {
-      name: raw.name.trim()
+      name: raw.name.trim(),
     };
 
     this.submitting = true;
@@ -67,11 +77,13 @@ export class GymSubscriptionCreateComponent {
         this.router.navigate(['/gym-subscriptions']);
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'gymSubscriptions.create.error');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'gymSubscriptions.create.error',
+        );
         this.submitting = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 }

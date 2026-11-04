@@ -1,8 +1,17 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
-import { CanActivateFn, Route, Router, TitleStrategy, provideRouter } from '@angular/router';
+import {
+  CanActivateFn,
+  Route,
+  Router,
+  TitleStrategy,
+  provideRouter,
+} from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import en from '../../public/i18n/en.json';
 import { signInAs } from '../testing/jwt';
@@ -65,32 +74,36 @@ const SHELL_ACCESS: Record<string, string[] | null> = {
   'trainees/:id/delete': STAFF,
   'trainees/:id/account': STAFF,
   'trainees/:id': STAFF,
-  trainees: STAFF
+  trainees: STAFF,
 };
 
 const guardsOf = (route: Route) => (route.canActivate ?? []) as CanActivateFn[];
-const shell = routes.find(route => route.path === '' && route.children)!;
-const shellPages = shell.children!.filter(route => !route.redirectTo);
+const shell = routes.find((route) => route.path === '' && route.children)!;
+const shellPages = shell.children!.filter((route) => !route.redirectTo);
 
 describe('route table', () => {
   it('guards the app shell with authGuard and the login page with loginGuard', () => {
     expect(guardsOf(shell)).toEqual([authGuard]);
-    expect(guardsOf(routes.find(route => route.path === 'login')!)).toEqual([loginGuard]);
+    expect(guardsOf(routes.find((route) => route.path === 'login')!)).toEqual([
+      loginGuard,
+    ]);
   });
 
   it('leaves the error pages outside the shell and unguarded', () => {
     for (const path of ['unauthorized', '**']) {
-      const route = routes.find(entry => entry.path === path)!;
+      const route = routes.find((entry) => entry.path === path)!;
       expect(guardsOf(route)).toEqual([]);
     }
   });
 
   it('has an access rule for every page in the shell, and nothing more', () => {
-    expect(shellPages.map(route => route.path).sort()).toEqual(Object.keys(SHELL_ACCESS).sort());
+    expect(shellPages.map((route) => route.path).sort()).toEqual(
+      Object.keys(SHELL_ACCESS).sort(),
+    );
   });
 
   it.each(Object.entries(SHELL_ACCESS))('%s is open to %j', (path, roles) => {
-    const route = shellPages.find(entry => entry.path === path)!;
+    const route = shellPages.find((entry) => entry.path === path)!;
 
     if (roles === null) {
       expect(guardsOf(route)).toEqual([]);
@@ -102,12 +115,20 @@ describe('route table', () => {
   });
 
   it('gives every page a title key that exists in the language files', () => {
-    const titled = [...routes, ...shellPages].filter(route => route.title);
+    const titled = [...routes, ...shellPages].filter((route) => route.title);
     const lookup = (key: string) =>
-      key.split('.').reduce<unknown>((node, part) => (node as Record<string, unknown>)?.[part], en);
+      key
+        .split('.')
+        .reduce<unknown>(
+          (node, part) => (node as Record<string, unknown>)?.[part],
+          en,
+        );
 
     for (const route of titled) {
-      expect(typeof lookup(route.title as string), `${route.path} → ${route.title}`).toBe('string');
+      expect(
+        typeof lookup(route.title as string),
+        `${route.path} → ${String(route.title)}`,
+      ).toBe('string');
     }
   });
 });
@@ -116,7 +137,7 @@ describe('routing (real routes)', () => {
   let harness: RouterTestingHarness | undefined;
   let router: Router;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     harness = undefined;
     localStorage.clear();
     TestBed.configureTestingModule({
@@ -124,8 +145,8 @@ describe('routing (real routes)', () => {
         provideRouter(routes),
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: TitleStrategy, useClass: TranslatedTitleStrategy }
-      ]
+        { provide: TitleStrategy, useClass: TranslatedTitleStrategy },
+      ],
     });
     router = TestBed.inject(Router);
   });
@@ -204,6 +225,8 @@ describe('routing (real routes)', () => {
     signInAs('ADMIN');
     await open('/plans/new');
 
-    expect(TestBed.inject(Title).getTitle()).toBe(`${en.plans.create.title} · ${en.common.appName}`);
+    expect(TestBed.inject(Title).getTitle()).toBe(
+      `${en.plans.create.title} · ${en.common.appName}`,
+    );
   });
 });

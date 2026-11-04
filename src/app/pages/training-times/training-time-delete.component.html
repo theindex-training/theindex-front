@@ -2,13 +2,20 @@
   <app-page-header
     [title]="'trainingTimes.delete.title' | transloco"
     [subtitle]="'trainingTimes.delete.subtitle' | transloco"
-    [back]="{ label: ('trainingTimes.backToList' | transloco), link: '/training-times' }"
+    [back]="{
+      label: ('trainingTimes.backToList' | transloco),
+      link: '/training-times',
+    }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">{{ 'trainingTimes.loadingOne' | transloco }}</p>
+    <p class="notice" role="status">
+      {{ 'trainingTimes.loadingOne' | transloco }}
+    </p>
   } @else if (errorMessage && !trainingTime) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
   } @else if (trainingTime) {
     <div class="panel">
       <dl class="detail-list">
@@ -22,15 +29,28 @@
         </div>
       </dl>
 
-      <p class="notice notice--warning">{{ 'trainingTimes.delete.warning' | transloco }}</p>
+      <p class="notice notice--warning">
+        {{ 'trainingTimes.delete.warning' | transloco }}
+      </p>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
       }
 
       <div class="form-actions">
-        <button class="btn btn--danger-solid" type="button" (click)="confirmDelete()" [disabled]="submitting">
-          {{ submitting ? ('trainingTimes.delete.deleting' | transloco) : ('trainingTimes.delete.submit' | transloco) }}
+        <button
+          class="btn btn--danger-solid"
+          type="button"
+          (click)="confirmDelete()"
+          [disabled]="submitting"
+        >
+          {{
+            submitting
+              ? ('trainingTimes.delete.deleting' | transloco)
+              : ('trainingTimes.delete.submit' | transloco)
+          }}
         </button>
       </div>
     </div>

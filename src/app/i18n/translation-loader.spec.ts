@@ -9,7 +9,7 @@ describe('BundledTranslationLoader', () => {
     expect(await loader.getTranslation('en')).toEqual(en);
   });
 
-  it.each(['bg', 'de', ''])('loads Bulgarian for %j', async lang => {
+  it.each(['bg', 'de', ''])('loads Bulgarian for %j', async (lang) => {
     expect(await loader.getTranslation(lang)).toEqual(bg);
   });
 });

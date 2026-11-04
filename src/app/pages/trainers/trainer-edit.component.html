@@ -8,54 +8,81 @@
   @if (loading) {
     <p class="notice" role="status">{{ 'trainers.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !trainer) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
   } @else if (trainer) {
     <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <div class="form-grid">
         <div class="form-row">
           <div class="form-field">
-            <label class="form-field__label" for="trainer-name">{{ 'trainers.fields.name' | transloco }}</label>
+            <label class="form-field__label" for="trainer-name">{{
+              'trainers.fields.name' | transloco
+            }}</label>
             <input
               id="trainer-name"
               type="text"
               formControlName="name"
               aria-describedby="trainer-name-help"
-              [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+              [attr.aria-invalid]="
+                form.controls.name.touched && form.controls.name.invalid
+              "
             />
             @if (form.controls.name.touched && form.controls.name.invalid) {
-              <span class="form-field__error" id="trainer-name-help">{{ 'trainers.fields.nameError' | transloco }}</span>
+              <span class="form-field__error" id="trainer-name-help">{{
+                'trainers.fields.nameError' | transloco
+              }}</span>
             } @else {
-              <span class="form-field__hint" id="trainer-name-help">{{ 'trainers.fields.nameHint' | transloco }}</span>
+              <span class="form-field__hint" id="trainer-name-help">{{
+                'trainers.fields.nameHint' | transloco
+              }}</span>
             }
           </div>
 
           <div class="form-field">
             <label class="form-field__label" for="trainer-nickname">
-              {{ 'trainers.fields.nickname' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span>
+              {{ 'trainers.fields.nickname' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
             </label>
             <input
               id="trainer-nickname"
               type="text"
               formControlName="nickname"
               aria-describedby="trainer-nickname-help"
-              [attr.aria-invalid]="form.controls.nickname.touched && form.controls.nickname.invalid"
+              [attr.aria-invalid]="
+                form.controls.nickname.touched && form.controls.nickname.invalid
+              "
             />
-            @if (form.controls.nickname.touched && form.controls.nickname.invalid) {
-              <span class="form-field__error" id="trainer-nickname-help">{{ 'trainers.fields.nicknameError' | transloco }}</span>
+            @if (
+              form.controls.nickname.touched && form.controls.nickname.invalid
+            ) {
+              <span class="form-field__error" id="trainer-nickname-help">{{
+                'trainers.fields.nicknameError' | transloco
+              }}</span>
             } @else {
-              <span class="form-field__hint" id="trainer-nickname-help">{{ 'trainers.fields.nicknameHint' | transloco }}</span>
+              <span class="form-field__hint" id="trainer-nickname-help">{{
+                'trainers.fields.nicknameHint' | transloco
+              }}</span>
             }
           </div>
         </div>
       </div>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
       }
 
       <div class="form-actions">
         <button class="btn btn--primary" type="submit" [disabled]="submitting">
-          {{ submitting ? ('common.saving' | transloco) : ('common.saveChanges' | transloco) }}
+          {{
+            submitting
+              ? ('common.saving' | transloco)
+              : ('common.saveChanges' | transloco)
+          }}
         </button>
       </div>
     </form>

@@ -1,5 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import en from '../../../../public/i18n/en.json';
@@ -9,7 +12,7 @@ import { LocaleFormatService } from '../../i18n/locale-format.service';
 import {
   AttendanceSession,
   AttendanceSessionAttendanceItem,
-  AttendanceSessionsResponse
+  AttendanceSessionsResponse,
 } from '../../services/attendance.service';
 import { AttendanceSessionsComponent } from './attendance-sessions.component';
 
@@ -23,7 +26,7 @@ function attendee(
   traineeId: string,
   paymentStatus: 'PAID' | 'UNPAID',
   priceCents: number,
-  isFinal: boolean
+  isFinal: boolean,
 ): AttendanceSessionAttendanceItem {
   return {
     id,
@@ -31,48 +34,70 @@ function attendee(
     paymentStatus,
     traineeId,
     subscriptionId: null,
-    price: { priceCents, calculation: 'test', subscriptionType: 'PUNCH', isFinal }
+    price: {
+      priceCents,
+      calculation: 'test',
+      subscriptionType: 'PUNCH',
+      isFinal,
+    },
   };
 }
 
-function session(key: string, trainerId: string, start: string, attendance: AttendanceSessionAttendanceItem[]): AttendanceSession {
+function session(
+  key: string,
+  trainerId: string,
+  start: string,
+  attendance: AttendanceSessionAttendanceItem[],
+): AttendanceSession {
   return {
     sessionKey: key,
     date: start.slice(0, 10),
     start,
-    end: start.replace(/T(\d\d)/, (_, hour) => `T${String(Number(hour) + 1).padStart(2, '0')}`),
+    end: start.replace(
+      /T(\d\d)/,
+      (_, hour) => `T${String(Number(hour) + 1).padStart(2, '0')}`,
+    ),
     trainerId,
     locationId: 'gym-1',
     attendance,
     totals: {
       count: attendance.length,
-      paid: attendance.filter(item => item.paymentStatus === 'PAID').length,
-      unpaid: attendance.filter(item => item.paymentStatus === 'UNPAID').length
-    }
+      paid: attendance.filter((item) => item.paymentStatus === 'PAID').length,
+      unpaid: attendance.filter((item) => item.paymentStatus === 'UNPAID')
+        .length,
+    },
   };
 }
 
 function response(): AttendanceSessionsResponse {
   return {
-    filters: { startDate: '2026-10-26', endDate: '2026-11-02', startTime: '', endTime: '', trainerId: null },
+    filters: {
+      startDate: '2026-10-26',
+      endDate: '2026-11-02',
+      startTime: '',
+      endTime: '',
+      trainerId: null,
+    },
     sessions: [
       session('mine', 'trainer-1', '2026-11-01T16:30:00Z', [
         attendee('a1', 'ivan', 'PAID', 450, true),
-        attendee('a2', 'georgi', 'UNPAID', 999, false)
+        attendee('a2', 'georgi', 'UNPAID', 999, false),
       ]),
-      session('other', 'trainer-other', '2026-10-30T06:00:00Z', [attendee('a3', 'ivan', 'PAID', 600, true)])
+      session('other', 'trainer-other', '2026-10-30T06:00:00Z', [
+        attendee('a3', 'ivan', 'PAID', 600, true),
+      ]),
     ],
     entities: {
       trainees: [
         { id: 'ivan', name: 'Ivan Petrov', nickname: 'Vanko' },
-        { id: 'georgi', name: 'Georgi Dimitrov', nickname: null }
+        { id: 'georgi', name: 'Georgi Dimitrov', nickname: null },
       ],
       trainers: [
         { id: 'trainer-1', name: 'Petar', nickname: 'Pepi' },
-        { id: 'trainer-other', name: 'Maria', nickname: null }
+        { id: 'trainer-other', name: 'Maria', nickname: null },
       ],
-      locations: [{ id: 'gym-1', name: 'Center' }]
-    }
+      locations: [{ id: 'gym-1', name: 'Center' }],
+    },
   };
 }
 
@@ -88,7 +113,11 @@ describe('AttendanceSessionsComponent', () => {
     localStorage.clear();
     TestBed.configureTestingModule({
       imports: [AttendanceSessionsComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
     format = TestBed.inject(LocaleFormatService);
@@ -103,11 +132,17 @@ describe('AttendanceSessionsComponent', () => {
   async function render() {
     fixture = TestBed.createComponent(AttendanceSessionsComponent);
     component = fixture.componentInstance;
-    page = driver(() => fixture.nativeElement, () => fixture.whenStable());
+    page = driver(
+      () => fixture.nativeElement,
+      () => fixture.whenStable(),
+    );
     await page.settle();
   }
 
-  async function flushSessions(url: string, body: AttendanceSessionsResponse = response()) {
+  async function flushSessions(
+    url: string,
+    body: AttendanceSessionsResponse = response(),
+  ) {
     const req = http.expectOne(`/api/attendance/sessions?${url}`);
     expect(req.request.method).toBe('GET');
     req.flush(body);
@@ -115,14 +150,20 @@ describe('AttendanceSessionsComponent', () => {
   }
 
   const chips = () => page.queryAll('button[aria-pressed]');
-  const pressed = () => chips().map(chip => chip.getAttribute('aria-pressed'));
+  const pressed = () =>
+    chips().map((chip) => chip.getAttribute('aria-pressed'));
   const summary = () =>
     page
       .queryAll(`dl[aria-label="${copy.summaryLabel}"] dd`)
-      .map(dd => dd.textContent!.trim());
+      .map((dd) => dd.textContent.trim());
   const deleteButtons = (name: string) =>
-    page.queryAll<HTMLButtonElement>(`button[aria-label="Delete attendance for ${name}"]`);
-  const apply = () => page.queryAll('button').find(button => button.textContent?.trim() === copy.apply)!;
+    page.queryAll<HTMLButtonElement>(
+      `button[aria-label="Delete attendance for ${name}"]`,
+    );
+  const apply = () =>
+    page
+      .queryAll('button')
+      .find((button) => button.textContent?.trim() === copy.apply)!;
 
   async function toggle(index: number) {
     chips()[index].click();
@@ -133,12 +174,22 @@ describe('AttendanceSessionsComponent', () => {
     beforeEach(async () => {
       signInAs('ADMIN');
       await render();
-      http
-        .expectOne('/api/trainers?active=true')
-        .flush([
-          { id: 'trainer-1', name: 'Petar', nickname: 'Pepi', accountId: null, isActive: true },
-          { id: 'trainer-gone', name: 'Gone', nickname: null, accountId: null, isActive: false }
-        ]);
+      http.expectOne('/api/trainers?active=true').flush([
+        {
+          id: 'trainer-1',
+          name: 'Petar',
+          nickname: 'Pepi',
+          accountId: null,
+          isActive: true,
+        },
+        {
+          id: 'trainer-gone',
+          name: 'Gone',
+          nickname: null,
+          accountId: null,
+          isActive: false,
+        },
+      ]);
       await flushSessions(DEFAULT_RANGE);
     });
 
@@ -150,24 +201,35 @@ describe('AttendanceSessionsComponent', () => {
     it('prices each session from final prices only and shows "—" for a price not final yet', () => {
       expect(page.text()).toContain(`${copy.priceTotal} ${format.money(450)}`);
       expect(page.text()).toContain(`${copy.priceTotal} ${format.money(600)}`);
-      expect(component.attendancePrice(component.sessions[0].attendance[1])).toBe('—');
-      expect(component.attendancePrice(component.sessions[0].attendance[0])).toBe(format.money(450));
+      expect(
+        component.attendancePrice(component.sessions[0].attendance[1]),
+      ).toBe('—');
+      expect(
+        component.attendancePrice(component.sessions[0].attendance[0]),
+      ).toBe(format.money(450));
     });
 
     it('offers only active trainers in the filter', () => {
-      const options = page.queryAll<HTMLOptionElement>('select option').map(option => option.value);
+      const options = page
+        .queryAll<HTMLOptionElement>('select option')
+        .map((option) => option.value);
       expect(options).toEqual(['', 'trainer-1']);
     });
 
     it('labels sessions by date, time and trainer nickname (or name)', () => {
       expect(chips()[0].textContent).toContain(
-        `${format.shortDate('2026-11-01T16:30:00Z')} · ${format.clock('2026-11-01T16:30:00Z')}–${format.clock('2026-11-01T17:30:00Z')}, Pepi`
+        `${format.shortDate('2026-11-01T16:30:00Z')} · ${format.clock('2026-11-01T16:30:00Z')}–${format.clock('2026-11-01T17:30:00Z')}, Pepi`,
       );
       expect(chips()[1].textContent).toContain(', Maria');
       expect(page.text()).toContain('Petar (Pepi)');
       expect(component.formatTrainer(component.sessions[1])).toBe('Maria');
       expect(component.formatTrainerNickname('unknown')).toBe('—');
-      expect(component.formatTrainer({ ...component.sessions[1], trainerId: 'unknown' })).toBe('—');
+      expect(
+        component.formatTrainer({
+          ...component.sessions[1],
+          trainerId: 'unknown',
+        }),
+      ).toBe('—');
       expect(component.traineeName('unknown')).toBe('—');
       expect(component.traineeNickname('georgi')).toBe('—');
       expect(component.locationName('unknown')).toBe('—');
@@ -208,7 +270,9 @@ describe('AttendanceSessionsComponent', () => {
       apply().click();
       await page.settle();
 
-      await flushSessions('startDate=2026-10-01&endDate=2026-10-31&startTime=18:00&trainerId=trainer-1');
+      await flushSessions(
+        'startDate=2026-10-01&endDate=2026-10-31&startTime=18:00&trainerId=trainer-1',
+      );
     });
 
     it('can delete attendance in any session', () => {
@@ -223,9 +287,9 @@ describe('AttendanceSessionsComponent', () => {
       await page.settle();
 
       expect(confirm).toHaveBeenCalledWith(
-        `Delete attendance for Georgi Dimitrov at ${format.date('2026-11-01T16:30:00Z')} · ${format.clock('2026-11-01T16:30:00Z')}?`
+        `Delete attendance for Georgi Dimitrov at ${format.date('2026-11-01T16:30:00Z')} · ${format.clock('2026-11-01T16:30:00Z')}?`,
       );
-      http.expectNone(req => req.method === 'DELETE');
+      http.expectNone((req) => req.method === 'DELETE');
     });
 
     it('deletes the attendance, removes the row and recounts the session', async () => {
@@ -239,7 +303,11 @@ describe('AttendanceSessionsComponent', () => {
       await page.settle();
 
       expect(deleteButtons('Georgi Dimitrov').length).toBe(0);
-      expect(component.sessions[0].totals).toEqual({ count: 1, paid: 1, unpaid: 0 });
+      expect(component.sessions[0].totals).toEqual({
+        count: 1,
+        paid: 1,
+        unpaid: 0,
+      });
       expect(summary()).toEqual(['2', '2', '2', '0', format.money(1050)]);
     });
 
@@ -274,7 +342,7 @@ describe('AttendanceSessionsComponent', () => {
       signInAs('TRAINER', { trainerProfileId: 'trainer-1' });
       await render();
 
-      http.expectNone(req => req.url.startsWith('/api/trainers'));
+      http.expectNone((req) => req.url.startsWith('/api/trainers'));
       await flushSessions(`${DEFAULT_RANGE}&trainerId=trainer-1`);
       expect(page.query('select')).toBeNull();
     });
@@ -288,7 +356,7 @@ describe('AttendanceSessionsComponent', () => {
       expect(deleteButtons('Georgi Dimitrov').length).toBe(2);
     });
 
-    it('without a trainer profile, loads every trainer\'s sessions but can delete nothing', async () => {
+    it("without a trainer profile, loads every trainer's sessions but can delete nothing", async () => {
       signInAs('TRAINER', { trainerProfileId: null });
       await render();
 
@@ -304,13 +372,23 @@ describe('AttendanceSessionsComponent', () => {
     signInAs('TRAINER');
     await render();
     const error = apiError(undefined, 500);
-    http.expectOne(`/api/attendance/sessions?${DEFAULT_RANGE}&trainerId=trainer-1`).flush(error.body, error.options);
+    http
+      .expectOne(
+        `/api/attendance/sessions?${DEFAULT_RANGE}&trainerId=trainer-1`,
+      )
+      .flush(error.body, error.options);
     await page.settle();
 
     expect(page.text()).toContain(copy.loadError);
-    page.queryAll('button').find(button => button.textContent?.trim() === en.common.tryAgain)!.click();
+    page
+      .queryAll('button')
+      .find((button) => button.textContent?.trim() === en.common.tryAgain)!
+      .click();
     await page.settle();
-    await flushSessions(`${DEFAULT_RANGE}&trainerId=trainer-1`, { ...response(), sessions: [] });
+    await flushSessions(`${DEFAULT_RANGE}&trainerId=trainer-1`, {
+      ...response(),
+      sessions: [],
+    });
 
     expect(page.text()).toContain(copy.emptyTitle);
   });

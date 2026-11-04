@@ -8,7 +8,6 @@ import { TranslocoPipe } from '@jsverse/transloco';
   imports: [TranslocoPipe, RouterLink, BrandComponent],
   templateUrl: './not-found.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: true
+  standalone: true,
 })
-export class NotFoundComponent {
-}
+export class NotFoundComponent {}

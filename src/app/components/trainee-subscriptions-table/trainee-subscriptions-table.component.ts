@@ -1,5 +1,12 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, EventEmitter, Input, Output, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 import { LanguageService } from '../../i18n/language.service';
@@ -22,10 +29,10 @@ import { Subscription } from '../../services/subscriptions.service';
     UiMessagePipe,
     ChipComponent,
     IconComponent,
-    SkeletonListComponent
+    SkeletonListComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './trainee-subscriptions-table.component.html'
+  templateUrl: './trainee-subscriptions-table.component.html',
 })
 export class TraineeSubscriptionsTableComponent {
   readonly format = inject(LocaleFormatService);
@@ -44,7 +51,7 @@ export class TraineeSubscriptionsTableComponent {
   @Output() deleteSubscriptionRequested = new EventEmitter<Subscription>();
 
   formatPlanLabel(subscription: Subscription): string {
-    const plan = this.plans.find(entry => entry.id === subscription.planId);
+    const plan = this.plans.find((entry) => entry.id === subscription.planId);
     return plan ? plan.title : subscription.planId;
   }
 

@@ -2,31 +2,57 @@
   <app-page-header
     [title]="'settlements.generate.title' | transloco"
     [subtitle]="'settlements.generate.subtitle' | transloco"
-    [back]="{ label: ('settlements.backToList' | transloco), link: '/settlements' }"
+    [back]="{
+      label: ('settlements.backToList' | transloco),
+      link: '/settlements',
+    }"
   />
 
   <article class="panel">
     <div class="form-grid">
       <div class="form-row">
         <div class="form-field">
-          <label class="form-field__label" for="settlement-period-start">{{ 'settlements.generate.periodStart' | transloco }}</label>
-          <input id="settlement-period-start" type="date" [(ngModel)]="periodStart" />
+          <label class="form-field__label" for="settlement-period-start">{{
+            'settlements.generate.periodStart' | transloco
+          }}</label>
+          <input
+            id="settlement-period-start"
+            type="date"
+            [(ngModel)]="periodStart"
+          />
         </div>
 
         <div class="form-field">
-          <label class="form-field__label" for="settlement-period-end">{{ 'settlements.generate.periodEnd' | transloco }}</label>
-          <input id="settlement-period-end" type="date" [(ngModel)]="periodEnd" />
+          <label class="form-field__label" for="settlement-period-end">{{
+            'settlements.generate.periodEnd' | transloco
+          }}</label>
+          <input
+            id="settlement-period-end"
+            type="date"
+            [(ngModel)]="periodEnd"
+          />
         </div>
       </div>
     </div>
 
     @if (errorMessage) {
-      <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+      <p class="notice notice--danger" role="alert">
+        {{ errorMessage | uiMessage }}
+      </p>
     }
 
     <div class="form-actions">
-      <button class="btn btn--primary" type="button" (click)="generateSettlement()" [disabled]="generating">
-        {{ generating ? ('settlements.generate.generating' | transloco) : ('settlements.generate.submit' | transloco) }}
+      <button
+        class="btn btn--primary"
+        type="button"
+        (click)="generateSettlement()"
+        [disabled]="generating"
+      >
+        {{
+          generating
+            ? ('settlements.generate.generating' | transloco)
+            : ('settlements.generate.submit' | transloco)
+        }}
       </button>
     </div>
   </article>

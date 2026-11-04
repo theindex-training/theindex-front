@@ -10,6 +10,8 @@ export function trimmedLength(min: number, max: number): ValidatorFn {
     }
 
     const length = value.trim().length;
-    return length >= min && length <= max ? null : { length: { min, max, actual: length } };
+    return length >= min && length <= max
+      ? null
+      : { length: { min, max, actual: length } };
   };
 }

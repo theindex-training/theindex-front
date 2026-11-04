@@ -5,7 +5,7 @@ import {
   formatDate,
   formatNumber,
   getCurrencySymbol,
-  getLocaleDayNames
+  getLocaleDayNames,
 } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { LanguageService } from './language.service';
@@ -56,24 +56,40 @@ export class LocaleFormatService {
 
   /** Weekday name from an ISO weekday number (1 = Monday … 7 = Sunday): Понеделник / Monday. */
   weekday(isoWeekday: number): string {
-    const names = getLocaleDayNames(this.language.locale(), FormStyle.Standalone, TranslationWidth.Wide);
+    const names = getLocaleDayNames(
+      this.language.locale(),
+      FormStyle.Standalone,
+      TranslationWidth.Wide,
+    );
     const name = names[isoWeekday % 7] ?? '';
-    return name.charAt(0).toLocaleUpperCase(this.language.locale()) + name.slice(1);
+    return (
+      name.charAt(0).toLocaleUpperCase(this.language.locale()) + name.slice(1)
+    );
   }
 
   /** Short weekday name from an ISO weekday number (1 = Monday … 7 = Sunday): пн / Mo. */
   weekdayShort(isoWeekday: number): string {
-    const names = getLocaleDayNames(this.language.locale(), FormStyle.Standalone, TranslationWidth.Short);
+    const names = getLocaleDayNames(
+      this.language.locale(),
+      FormStyle.Standalone,
+      TranslationWidth.Short,
+    );
     return names[isoWeekday % 7] ?? '';
   }
 
   /** Month and year as a title: Октомври 2026 / October 2026. */
   monthYear(value: DateInput, fallback = '—'): string {
     const text = this.format(value, 'LLLL y', fallback);
-    return text.charAt(0).toLocaleUpperCase(this.language.locale()) + text.slice(1);
+    return (
+      text.charAt(0).toLocaleUpperCase(this.language.locale()) + text.slice(1)
+    );
   }
 
-  number(value: number | null | undefined, digitsInfo?: string, fallback = '—'): string {
+  number(
+    value: number | null | undefined,
+    digitsInfo?: string,
+    fallback = '—',
+  ): string {
     if (value === null || value === undefined || Number.isNaN(value)) {
       return fallback;
     }
@@ -86,14 +102,23 @@ export class LocaleFormatService {
       return fallback;
     }
     const locale = this.language.locale();
-    return formatCurrency(cents / 100, locale, getCurrencySymbol('EUR', 'narrow', locale), 'EUR');
+    return formatCurrency(
+      cents / 100,
+      locale,
+      getCurrencySymbol('EUR', 'narrow', locale),
+      'EUR',
+    );
   }
 
   private format(value: DateInput, format: string, fallback = '—'): string {
     if (!isValidDate(value)) {
       return fallback;
     }
-    return formatDate(value as string | number | Date, format, this.language.locale());
+    return formatDate(
+      value as string | number | Date,
+      format,
+      this.language.locale(),
+    );
   }
 }
 

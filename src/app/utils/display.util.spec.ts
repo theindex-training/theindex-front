@@ -5,7 +5,7 @@ describe('displayValue', () => {
     expect(displayValue('  Vanko ')).toBe('Vanko');
   });
 
-  it.each([null, undefined, '', '   '])('shows the dash for %j', value => {
+  it.each([null, undefined, '', '   '])('shows the dash for %j', (value) => {
     expect(displayValue(value)).toBe('—');
   });
 

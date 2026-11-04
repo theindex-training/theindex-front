@@ -1,4 +1,9 @@
-import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  Input,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { Language, LanguageService } from '../../i18n/language.service';
 
@@ -14,7 +19,7 @@ let nextId = 0;
   imports: [TranslocoPipe],
   templateUrl: './language-switch.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './language-switch.component.scss'
+  styleUrl: './language-switch.component.scss',
 })
 export class LanguageSwitchComponent {
   /** Content-width control (login page) instead of the full-width one in the sidebar and sheet. */
@@ -26,6 +31,6 @@ export class LanguageSwitchComponent {
 
   readonly options: { value: Language; short: string; name: string }[] = [
     { value: 'bg', short: 'БГ', name: 'Български' },
-    { value: 'en', short: 'EN', name: 'English' }
+    { value: 'en', short: 'EN', name: 'English' },
   ];
 }

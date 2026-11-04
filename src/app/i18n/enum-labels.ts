@@ -11,8 +11,13 @@ export const ENUM_VALUES = {
   subscriptionStatus: ['ACTIVE', 'EXHAUSTED', 'EXPIRED', 'CANCELLED'],
   settlementStatus: ['DRAFT', 'FINAL'],
   allocationReason: ['PUNCH_CREDIT', 'TIME_PRORATA', 'UNPAID'],
-  cashTransactionType: ['SUBSCRIPTION_IN', 'SETTLEMENT_OUT', 'MANUAL_IN', 'MANUAL_OUT'],
-  cashSourceType: ['SUBSCRIPTION', 'SETTLEMENT', 'MANUAL']
+  cashTransactionType: [
+    'SUBSCRIPTION_IN',
+    'SETTLEMENT_OUT',
+    'MANUAL_IN',
+    'MANUAL_OUT',
+  ],
+  cashSourceType: ['SUBSCRIPTION', 'SETTLEMENT', 'MANUAL'],
 } as const satisfies Record<string, readonly string[]>;
 
 export type EnumGroup = keyof typeof ENUM_VALUES;
@@ -22,5 +27,7 @@ export function enumLabelKey(group: EnumGroup, value: string): string {
 }
 
 export function isKnownEnum(group: EnumGroup, value: string): boolean {
-  return (ENUM_VALUES[group] as readonly string[]).includes(value.toUpperCase());
+  return (ENUM_VALUES[group] as readonly string[]).includes(
+    value.toUpperCase(),
+  );
 }

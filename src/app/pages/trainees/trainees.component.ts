@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
@@ -10,15 +16,21 @@ import { PageHeaderComponent } from '../../components/page-header/page-header.co
 import { SearchFieldComponent } from '../../components/search-field/search-field.component';
 import {
   SegmentedControlComponent,
-  SegmentedOption
+  SegmentedOption,
 } from '../../components/segmented-control/segmented-control.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
-import { GymSubscription, GymSubscriptionsService } from '../../services/gym-subscriptions.service';
+import {
+  GymSubscription,
+  GymSubscriptionsService,
+} from '../../services/gym-subscriptions.service';
 import { LanguageService } from '../../i18n/language.service';
 import { UiMessage, apiErrorMessage } from '../../i18n/ui-message';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
-import { TraineeProfile, TraineesService } from '../../services/trainees.service';
+import {
+  TraineeProfile,
+  TraineesService,
+} from '../../services/trainees.service';
 
 import { displayValue } from '../../utils/display.util';
 
@@ -87,7 +99,11 @@ export class TraineesComponent implements OnInit {
     this.errorMessage = null;
 
     const active =
-      this.activeFilter === 'all' ? undefined : this.activeFilter === 'active' ? true : false;
+      this.activeFilter === 'all'
+        ? undefined
+        : this.activeFilter === 'active'
+          ? true
+          : false;
 
     this.traineesService.list(active).subscribe({
       next: (trainees) => {
@@ -97,7 +113,10 @@ export class TraineesComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'trainees.list.loadErrorMessage');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'trainees.list.loadErrorMessage',
+        );
         this.loading = false;
         this.changeDetector.detectChanges();
       },
@@ -126,7 +145,9 @@ export class TraineesComponent implements OnInit {
 
   nicknameLabel(trainee: TraineeProfile): string {
     const nickname = trainee.nickname?.trim();
-    return nickname ? this.i18n.t('common.quoted', { text: nickname }) : this.i18n.t('common.noNickname');
+    return nickname
+      ? this.i18n.t('common.quoted', { text: nickname })
+      : this.i18n.t('common.noNickname');
   }
 
   formatPhone(trainee: TraineeProfile): string {
@@ -150,9 +171,14 @@ export class TraineesComponent implements OnInit {
   }
 
   /** Mobile rows show one chip: "Inactive" for inactive trainees, otherwise their gym card. */
-  trailingChip(trainee: TraineeProfile): { label: string; tone: ChipTone } | null {
+  trailingChip(
+    trainee: TraineeProfile,
+  ): { label: string; tone: ChipTone } | null {
     if (!trainee.isActive) {
-      return { label: this.i18n.t('trainees.status.inactive'), tone: 'neutral' };
+      return {
+        label: this.i18n.t('trainees.status.inactive'),
+        tone: 'neutral',
+      };
     }
 
     const gymCard = this.gymCardName(trainee);

@@ -28,9 +28,9 @@ export default [
     TranslocoTestingModule.forRoot({
       langs: { bg, en },
       translocoConfig: { availableLangs: ['bg', 'en'], defaultLang: 'en' },
-      preloadLangs: true
-    })
+      preloadLangs: true,
+    }),
   ),
   provideTranslocoMessageformat({ locales: 'en' }),
-  { provide: INITIAL_LANGUAGE, useValue: 'en' }
+  { provide: INITIAL_LANGUAGE, useValue: 'en' },
 ];

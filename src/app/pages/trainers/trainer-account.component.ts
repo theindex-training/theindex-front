@@ -1,5 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -8,16 +13,19 @@ import {
   ReactiveFormsModule,
   ValidationErrors,
   ValidatorFn,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   AccountProvisioningService,
   ProvisionAccountPayload,
   ProvisionedAccount,
-  UpdateAccountPayload
+  UpdateAccountPayload,
 } from '../../services/account-provisioning.service';
-import { TrainerProfile, TrainersService } from '../../services/trainers.service';
+import {
+  TrainerProfile,
+  TrainersService,
+} from '../../services/trainers.service';
 import { displayValue } from '../../utils/display.util';
 import { IconComponent } from '../../components/icon/icon.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -27,10 +35,11 @@ import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 const accountPasswordValidator: ValidatorFn = (
-  control: AbstractControl
+  control: AbstractControl,
 ): ValidationErrors | null => {
   const password = (control.get('password')?.value as string | null) ?? '';
-  const confirmPassword = (control.get('confirmPassword')?.value as string | null) ?? '';
+  const confirmPassword =
+    (control.get('confirmPassword')?.value as string | null) ?? '';
 
   if (!password && !confirmPassword) {
     return null;
@@ -46,9 +55,17 @@ const accountPasswordValidator: ValidatorFn = (
 @Component({
   selector: 'app-trainer-account',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent, IconComponent, StatusDotComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+    IconComponent,
+    StatusDotComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './trainer-account.component.html'
+  templateUrl: './trainer-account.component.html',
 })
 export class TrainerAccountComponent implements OnInit {
   readonly form: FormGroup<{
@@ -72,19 +89,23 @@ export class TrainerAccountComponent implements OnInit {
     private readonly trainersService: TrainersService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group(
       {
         email: this.formBuilder.nonNullable.control('', [
           Validators.required,
-          Validators.email
+          Validators.email,
         ]),
         // Required until an existing account loads; then a blank password keeps the current one.
-        password: this.formBuilder.nonNullable.control('', [Validators.required]),
-        confirmPassword: this.formBuilder.nonNullable.control('', [Validators.required])
+        password: this.formBuilder.nonNullable.control('', [
+          Validators.required,
+        ]),
+        confirmPassword: this.formBuilder.nonNullable.control('', [
+          Validators.required,
+        ]),
       },
-      { validators: accountPasswordValidator }
+      { validators: accountPasswordValidator },
     );
   }
 
@@ -108,11 +129,10 @@ export class TrainerAccountComponent implements OnInit {
         }
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'trainers.errors.load');
+        this.errorMessage = apiErrorMessage(error, 'trainers.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -131,7 +151,7 @@ export class TrainerAccountComponent implements OnInit {
 
     if (this.account) {
       const payload: UpdateAccountPayload = {
-        email: raw.email.trim()
+        email: raw.email.trim(),
       };
 
       if (raw.password) {
@@ -145,11 +165,13 @@ export class TrainerAccountComponent implements OnInit {
           this.router.navigate(['/trainers', this.trainer!.id]);
         },
         error: (error) => {
-          this.errorMessage =
-            apiErrorMessage(error, 'trainers.account.updateError');
+          this.errorMessage = apiErrorMessage(
+            error,
+            'trainers.account.updateError',
+          );
           this.submitting = false;
           this.changeDetector.detectChanges();
-        }
+        },
       });
       return;
     }
@@ -159,7 +181,7 @@ export class TrainerAccountComponent implements OnInit {
       role: 'TRAINER',
       status: 'ACTIVE',
       password: raw.password,
-      confirmPassword: raw.confirmPassword
+      confirmPassword: raw.confirmPassword,
     };
 
     this.provisioningService
@@ -170,11 +192,13 @@ export class TrainerAccountComponent implements OnInit {
           this.router.navigate(['/trainers', this.trainer!.id]);
         },
         error: (error) => {
-          this.errorMessage =
-            apiErrorMessage(error, 'trainers.account.createError');
+          this.errorMessage = apiErrorMessage(
+            error,
+            'trainers.account.createError',
+          );
           this.submitting = false;
           this.changeDetector.detectChanges();
-        }
+        },
       });
   }
 
@@ -192,11 +216,13 @@ export class TrainerAccountComponent implements OnInit {
         this.router.navigate(['/trainers', this.trainer!.id]);
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'trainers.account.deactivateError');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'trainers.account.deactivateError',
+        );
         this.deactivating = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -209,7 +235,9 @@ export class TrainerAccountComponent implements OnInit {
     if (control.hasError('required')) {
       return 'accounts.passwordRequired';
     }
-    return this.form.hasError('passwordLength') ? 'accounts.passwordLength' : '';
+    return this.form.hasError('passwordLength')
+      ? 'accounts.passwordLength'
+      : '';
   }
 
   /** Translation key of the confirmation error, or '' when there is none. */
@@ -221,7 +249,9 @@ export class TrainerAccountComponent implements OnInit {
     if (control.hasError('required')) {
       return 'accounts.repeatPassword';
     }
-    return this.form.hasError('passwordsMismatch') ? 'accounts.passwordsMismatch' : '';
+    return this.form.hasError('passwordsMismatch')
+      ? 'accounts.passwordsMismatch'
+      : '';
   }
 
   formatNickname(): string {
@@ -249,7 +279,7 @@ export class TrainerAccountComponent implements OnInit {
         this.form.patchValue({
           email: account?.email ?? '',
           password: '',
-          confirmPassword: ''
+          confirmPassword: '',
         });
         this.loading = false;
         this.changeDetector.detectChanges();
@@ -257,7 +287,7 @@ export class TrainerAccountComponent implements OnInit {
       error: () => {
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 }

@@ -6,7 +6,7 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
   standalone: true,
   templateUrl: './status-dot.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './status-dot.component.scss'
+  styleUrl: './status-dot.component.scss',
 })
 export class StatusDotComponent {
   @Input() tone: 'success' | 'warning' | 'danger' | 'neutral' = 'neutral';

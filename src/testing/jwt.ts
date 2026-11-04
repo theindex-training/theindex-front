@@ -22,7 +22,9 @@ export function base64UrlEncode(text: string): string {
 }
 
 /** An unsigned JWT-shaped token carrying the given payload. The app never verifies signatures. */
-export function makeToken(claims: TestClaims | Record<string, unknown>): string {
+export function makeToken(
+  claims: TestClaims | Record<string, unknown>,
+): string {
   const header = base64UrlEncode(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
   const payload = base64UrlEncode(JSON.stringify(claims));
   return `${header}.${payload}.test-signature`;
@@ -34,14 +36,14 @@ const DEFAULT_CLAIMS: Record<TestRole, TestClaims> = {
     sub: 'account-trainer',
     email: 'trainer@theindex.test',
     role: 'TRAINER',
-    trainerProfileId: 'trainer-1'
+    trainerProfileId: 'trainer-1',
   },
   TRAINEE: {
     sub: 'account-trainee',
     email: 'trainee@theindex.test',
     role: 'TRAINEE',
-    traineeProfileId: 'trainee-1'
-  }
+    traineeProfileId: 'trainee-1',
+  },
 };
 
 /** The claims of a test user with this role: the defaults above, overridden by `claims`. */

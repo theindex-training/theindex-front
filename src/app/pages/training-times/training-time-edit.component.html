@@ -2,52 +2,84 @@
   <app-page-header
     [title]="'trainingTimes.edit.title' | transloco"
     [subtitle]="'trainingTimes.edit.subtitle' | transloco"
-    [back]="{ label: ('trainingTimes.backToList' | transloco), link: '/training-times' }"
+    [back]="{
+      label: ('trainingTimes.backToList' | transloco),
+      link: '/training-times',
+    }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">{{ 'trainingTimes.loadingOne' | transloco }}</p>
+    <p class="notice" role="status">
+      {{ 'trainingTimes.loadingOne' | transloco }}
+    </p>
   } @else {
     <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <div class="form-grid">
         <div class="form-row">
           <div class="form-field">
-            <label class="form-field__label" for="training-time-start-time">{{ 'trainingTimes.fields.startTime' | transloco }}</label>
+            <label class="form-field__label" for="training-time-start-time">{{
+              'trainingTimes.fields.startTime' | transloco
+            }}</label>
             <input
               id="training-time-start-time"
               type="time"
               formControlName="startTime"
               aria-describedby="training-time-start-time-help"
-              [attr.aria-invalid]="form.controls.startTime.touched && form.controls.startTime.invalid"
+              [attr.aria-invalid]="
+                form.controls.startTime.touched &&
+                form.controls.startTime.invalid
+              "
             />
-            @if (form.controls.startTime.touched && form.controls.startTime.invalid) {
-              <span class="form-field__error" id="training-time-start-time-help">{{ 'trainingTimes.fields.startRequired' | transloco }}</span>
+            @if (
+              form.controls.startTime.touched && form.controls.startTime.invalid
+            ) {
+              <span
+                class="form-field__error"
+                id="training-time-start-time-help"
+                >{{ 'trainingTimes.fields.startRequired' | transloco }}</span
+              >
             }
           </div>
 
           <div class="form-field">
-            <label class="form-field__label" for="training-time-end-time">{{ 'trainingTimes.fields.endTime' | transloco }}</label>
+            <label class="form-field__label" for="training-time-end-time">{{
+              'trainingTimes.fields.endTime' | transloco
+            }}</label>
             <input
               id="training-time-end-time"
               type="time"
               formControlName="endTime"
               aria-describedby="training-time-end-time-help"
-              [attr.aria-invalid]="form.controls.endTime.touched && form.controls.endTime.invalid"
+              [attr.aria-invalid]="
+                form.controls.endTime.touched && form.controls.endTime.invalid
+              "
             />
-            @if (form.controls.endTime.touched && form.controls.endTime.invalid) {
-              <span class="form-field__error" id="training-time-end-time-help">{{ 'trainingTimes.fields.endRequired' | transloco }}</span>
+            @if (
+              form.controls.endTime.touched && form.controls.endTime.invalid
+            ) {
+              <span
+                class="form-field__error"
+                id="training-time-end-time-help"
+                >{{ 'trainingTimes.fields.endRequired' | transloco }}</span
+              >
             }
           </div>
         </div>
       </div>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
       }
 
       <div class="form-actions">
         <button class="btn btn--primary" type="submit" [disabled]="submitting">
-          {{ submitting ? ('common.saving' | transloco) : ('common.saveChanges' | transloco) }}
+          {{
+            submitting
+              ? ('common.saving' | transloco)
+              : ('common.saveChanges' | transloco)
+          }}
         </button>
       </div>
     </form>

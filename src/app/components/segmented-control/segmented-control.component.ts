@@ -1,4 +1,10 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 export interface SegmentedOption<T extends string = string> {
@@ -19,7 +25,7 @@ let nextId = 0;
   imports: [TranslocoPipe],
   templateUrl: './segmented-control.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './segmented-control.component.scss'
+  styleUrl: './segmented-control.component.scss',
 })
 export class SegmentedControlComponent<T extends string = string> {
   /** Accessible name of the group (visually hidden, already translated), e.g. "Status". */

@@ -43,18 +43,30 @@ export class ApiMock {
   }
 
   async install(page: Page): Promise<void> {
-    await page.route('**/api/**', route => this.handle(route));
+    await page.route('**/api/**', (route) => this.handle(route));
   }
 
   /** Answer `method path` (exact path, or a RegExp on the path) with a response or a function. */
-  on(method: Method, path: string | RegExp, handler: Handler, options: { times?: number } = {}): this {
-    this.rules.unshift({ method, path, handler, times: options.times ?? Infinity });
+  on(
+    method: Method,
+    path: string | RegExp,
+    handler: Handler,
+    options: { times?: number } = {},
+  ): this {
+    this.rules.unshift({
+      method,
+      path,
+      handler,
+      times: options.times ?? Infinity,
+    });
     return this;
   }
 
   /** Every recorded request for `method path`, oldest first. */
   calls(method: Method, path: string | RegExp): RecordedRequest[] {
-    return this.requests.filter(request => request.method === method && matches(path, request.path));
+    return this.requests.filter(
+      (request) => request.method === method && matches(path, request.path),
+    );
   }
 
   last(method: Method, path: string | RegExp): RecordedRequest | undefined {
@@ -65,19 +77,29 @@ export class ApiMock {
     const recorded = record(route.request());
     this.requests.push(recorded);
     const rule = this.rules.find(
-      candidate => candidate.times > 0 && candidate.method === recorded.method && matches(candidate.path, recorded.path)
+      (candidate) =>
+        candidate.times > 0 &&
+        candidate.method === recorded.method &&
+        matches(candidate.path, recorded.path),
     );
     if (!rule) {
       this.unhandled.push(recorded);
-      await route.fulfill({ status: 599, contentType: 'application/json', body: JSON.stringify({ message: 'Not mocked' }) });
+      await route.fulfill({
+        status: 599,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Not mocked' }),
+      });
       return;
     }
     rule.times -= 1;
-    const response = typeof rule.handler === 'function' ? rule.handler(recorded) : rule.handler;
+    const response =
+      typeof rule.handler === 'function'
+        ? rule.handler(recorded)
+        : rule.handler;
     await route.fulfill({
       status: response.status ?? 200,
       contentType: 'application/json',
-      body: response.body === undefined ? '' : JSON.stringify(response.body)
+      body: response.body === undefined ? '' : JSON.stringify(response.body),
     });
   }
 }
@@ -88,7 +110,7 @@ function matches(path: string | RegExp, actual: string): boolean {
 
 function record(request: Request): RecordedRequest {
   const url = new URL(request.url());
-  let body: unknown = null;
+  let body: unknown;
   try {
     body = request.postDataJSON();
   } catch {
@@ -98,11 +120,17 @@ function record(request: Request): RecordedRequest {
     method: request.method(),
     path: url.pathname,
     query: Object.fromEntries(url.searchParams.entries()),
-    body: body ?? null
+    body: body ?? null,
   };
 }
 
 /** A NestJS-shaped error response. */
-export function apiError(status: number, message?: string | string[]): MockResponse {
-  return { status, body: message === undefined ? undefined : { statusCode: status, message } };
+export function apiError(
+  status: number,
+  message?: string | string[],
+): MockResponse {
+  return {
+    status,
+    body: message === undefined ? undefined : { statusCode: status, message },
+  };
 }

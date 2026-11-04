@@ -8,6 +8,6 @@ import { TranslocoPipe } from '@jsverse/transloco';
   standalone: true,
   imports: [TranslocoPipe, EmptyStateComponent, PageHeaderComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './records.component.html'
+  templateUrl: './records.component.html',
 })
 export class RecordsComponent {}

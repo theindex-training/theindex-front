@@ -1,0 +1,13 @@
+# Generated or vendored (docs/ holds screenshots and a generated report)
+package-lock.json
+dist/
+.angular/
+out-tsc/
+playwright-report/
+test-results/
+coverage/
+
+# Left as written: prose (Prettier rewraps Markdown tables and lists) and the deploy pipeline
+*.md
+.github/
+docs/

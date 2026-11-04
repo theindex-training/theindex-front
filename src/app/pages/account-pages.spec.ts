@@ -1,6 +1,9 @@
 import { Type } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -34,8 +37,8 @@ const CASES: [string, AccountCase][] = [
       profileUrl: '/api/trainees/p1',
       detailsUrl: '/trainees/p1',
       fieldPrefix: '#trainee-account',
-      errors: en.trainees.account
-    }
+      errors: en.trainees.account,
+    },
   ],
   [
     'trainer',
@@ -46,12 +49,17 @@ const CASES: [string, AccountCase][] = [
       profileUrl: '/api/trainers/p1',
       detailsUrl: '/trainers/p1',
       fieldPrefix: '#trainer-account',
-      errors: en.trainers.account
-    }
-  ]
+      errors: en.trainers.account,
+    },
+  ],
 ];
 
-const ACCOUNT = { id: 'acc1', email: 'old@gym.test', role: 'TRAINEE', status: 'ACTIVE' };
+const ACCOUNT = {
+  id: 'acc1',
+  email: 'old@gym.test',
+  role: 'TRAINEE',
+  status: 'ACTIVE',
+};
 
 describe.each(CASES)('%s account page', (_, testCase) => {
   let http: HttpTestingController;
@@ -59,8 +67,16 @@ describe.each(CASES)('%s account page', (_, testCase) => {
   let harness: RouterTestingHarness;
   let page: PageDriver;
 
-  const field = (name: 'email' | 'password' | 'confirm-password') => `${testCase.fieldPrefix}-${name}`;
-  const profile = (accountId: string | null) => ({ id: 'p1', name: 'Ivan Petrov', nickname: null, phone: null, accountId, isActive: true });
+  const field = (name: 'email' | 'password' | 'confirm-password') =>
+    `${testCase.fieldPrefix}-${name}`;
+  const profile = (accountId: string | null) => ({
+    id: 'p1',
+    name: 'Ivan Petrov',
+    nickname: null,
+    phone: null,
+    accountId,
+    isActive: true,
+  });
 
   beforeEach(async () => {
     localStorage.clear();
@@ -70,10 +86,13 @@ describe.each(CASES)('%s account page', (_, testCase) => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([
-          { path: `${testCase.profileType}s/:id/account`, component: testCase.component },
-          { path: '**', children: [] }
-        ])
-      ]
+          {
+            path: `${testCase.profileType}s/:id/account`,
+            component: testCase.component,
+          },
+          { path: '**', children: [] },
+        ]),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
@@ -84,8 +103,13 @@ describe.each(CASES)('%s account page', (_, testCase) => {
 
   async function open(account: 'none' | 'linked' | 'load-error' | 'null') {
     await harness.navigateByUrl(`/${testCase.profileType}s/p1/account`);
-    page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
-    http.expectOne(testCase.profileUrl).flush(profile(account === 'none' ? null : 'acc1'));
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
+    http
+      .expectOne(testCase.profileUrl)
+      .flush(profile(account === 'none' ? null : 'acc1'));
     if (account !== 'none') {
       const req = http.expectOne('/api/accounts/acc1');
       if (account === 'load-error') {
@@ -98,7 +122,11 @@ describe.each(CASES)('%s account page', (_, testCase) => {
     await page.settle();
   }
 
-  async function fill(email: string | null, password: string, confirm = password) {
+  async function fill(
+    email: string | null,
+    password: string,
+    confirm = password,
+  ) {
     if (email !== null) await page.type(field('email'), email);
     await page.type(field('password'), password);
     await page.type(field('confirm-password'), confirm);
@@ -138,7 +166,9 @@ describe.each(CASES)('%s account page', (_, testCase) => {
       await page.submit();
 
       http.expectNone(() => true);
-      expect(page.query(field('email'))!.getAttribute('aria-invalid')).toBe('true');
+      expect(page.query(field('email'))!.getAttribute('aria-invalid')).toBe(
+        'true',
+      );
     });
 
     it(`creates an active ${testCase.role} account and returns to the profile`, async () => {
@@ -153,7 +183,7 @@ describe.each(CASES)('%s account page', (_, testCase) => {
         role: testCase.role,
         status: 'ACTIVE',
         password: 'password1',
-        confirmPassword: 'password1'
+        confirmPassword: 'password1',
       });
       req.flush({ ...ACCOUNT, role: testCase.role });
       await settleOn(testCase.detailsUrl);
@@ -163,19 +193,29 @@ describe.each(CASES)('%s account page', (_, testCase) => {
       await fill('ivan@gym.test', 'password1');
       await page.submit();
       const error = apiError('Email already in use', 409);
-      http.expectOne(`/api/accounts/${testCase.profileType}/p1`).flush(error.body, error.options);
+      http
+        .expectOne(`/api/accounts/${testCase.profileType}/p1`)
+        .flush(error.body, error.options);
       await page.settle();
       expect(page.alert()).toBe('Email already in use');
 
       await page.submit();
       const fallback = apiError(undefined, 500);
-      http.expectOne(`/api/accounts/${testCase.profileType}/p1`).flush(fallback.body, fallback.options);
+      http
+        .expectOne(`/api/accounts/${testCase.profileType}/p1`)
+        .flush(fallback.body, fallback.options);
       await page.settle();
       expect(page.alert()).toBe(testCase.errors.createError);
     });
 
     it('has no deactivate button', () => {
-      expect(page.queryAll('button').some(button => button.textContent?.trim() === en.accounts.deactivate)).toBe(false);
+      expect(
+        page
+          .queryAll('button')
+          .some(
+            (button) => button.textContent?.trim() === en.accounts.deactivate,
+          ),
+      ).toBe(false);
     });
   });
 
@@ -183,7 +223,9 @@ describe.each(CASES)('%s account page', (_, testCase) => {
     beforeEach(() => open('linked'));
 
     it('fills in the email and lets the password stay blank', async () => {
-      expect(page.query<HTMLInputElement>(field('email'))!.value).toBe('old@gym.test');
+      expect(page.query<HTMLInputElement>(field('email'))!.value).toBe(
+        'old@gym.test',
+      );
 
       await page.type(field('email'), 'new@gym.test');
       await page.submit();
@@ -206,12 +248,16 @@ describe.each(CASES)('%s account page', (_, testCase) => {
       expect(http.expectOne('/api/accounts/acc1').request.body).toEqual({
         email: 'old@gym.test',
         password: 'new-password',
-        confirmPassword: 'new-password'
+        confirmPassword: 'new-password',
       });
     });
 
     it('deactivates the account without asking, and returns to the profile', async () => {
-      const deactivate = page.queryAll('button').find(button => button.textContent?.trim() === en.accounts.deactivate)!;
+      const deactivate = page
+        .queryAll('button')
+        .find(
+          (button) => button.textContent?.trim() === en.accounts.deactivate,
+        )!;
       deactivate.click();
       deactivate.click();
       await page.settle();
@@ -225,7 +271,12 @@ describe.each(CASES)('%s account page', (_, testCase) => {
     });
 
     it('shows a failed deactivation', async () => {
-      page.queryAll('button').find(button => button.textContent?.trim() === en.accounts.deactivate)!.click();
+      page
+        .queryAll('button')
+        .find(
+          (button) => button.textContent?.trim() === en.accounts.deactivate,
+        )!
+        .click();
       await page.settle();
       const error = apiError(undefined, 500);
       http.expectOne('/api/accounts/acc1').flush(error.body, error.options);
@@ -237,22 +288,32 @@ describe.each(CASES)('%s account page', (_, testCase) => {
 
   it.each(['load-error', 'null'] as const)(
     'falls back to "create" when the linked account cannot be loaded (%s)',
-    async state => {
+    async (state) => {
       await open(state);
 
       // CHARACTERIZATION: possibly unintended — the profile has an account, but a failed (or empty)
       // account load leaves the page in create mode, so saving would provision a second account.
       // TEST_NOTES.md S8.
-      expect(page.queryAll('button').some(button => button.textContent?.trim() === en.accounts.create)).toBe(true);
+      expect(
+        page
+          .queryAll('button')
+          .some((button) => button.textContent?.trim() === en.accounts.create),
+      ).toBe(true);
       await fill('ivan@gym.test', 'password1');
       await page.submit();
-      expect(http.expectOne(`/api/accounts/${testCase.profileType}/p1`).request.method).toBe('POST');
-    }
+      expect(
+        http.expectOne(`/api/accounts/${testCase.profileType}/p1`).request
+          .method,
+      ).toBe('POST');
+    },
   );
 
   it('shows the profile load error', async () => {
     await harness.navigateByUrl(`/${testCase.profileType}s/p1/account`);
-    page = driver(() => harness.routeNativeElement!, () => harness.fixture.whenStable());
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
     const error = apiError('Profile not found', 404);
     http.expectOne(testCase.profileUrl).flush(error.body, error.options);
     await page.settle();

@@ -1,10 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   GenerateSettlementPayload,
-  SettlementsService
+  SettlementsService,
 } from '../../services/settlements.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -14,9 +18,15 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-settlement-generate',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, FormsModule, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    FormsModule,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './settlement-generate.component.html'
+  templateUrl: './settlement-generate.component.html',
 })
 export class SettlementGenerateComponent {
   periodStart = this.todayIsoDate();
@@ -28,7 +38,7 @@ export class SettlementGenerateComponent {
   constructor(
     private readonly settlementsService: SettlementsService,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   generateSettlement(): void {
@@ -41,21 +51,24 @@ export class SettlementGenerateComponent {
 
     const payload: GenerateSettlementPayload = {
       periodStart: this.periodStart,
-      periodEnd: this.periodEnd
+      periodEnd: this.periodEnd,
     };
 
     this.generating = true;
 
     this.settlementsService.generate(payload).subscribe({
-      next: response => {
+      next: (response) => {
         this.generating = false;
         this.router.navigate(['/settlements', response.settlement.id]);
       },
-      error: error => {
-        this.errorMessage = apiErrorMessage(error, 'settlements.generate.error');
+      error: (error) => {
+        this.errorMessage = apiErrorMessage(
+          error,
+          'settlements.generate.error',
+        );
         this.generating = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 

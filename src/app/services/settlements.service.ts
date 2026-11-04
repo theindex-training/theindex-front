@@ -82,7 +82,7 @@ export interface SettlementAllocationsResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SettlementsService {
   private readonly baseUrl = `${environment.apiUrl}/settlements`;
@@ -93,7 +93,9 @@ export class SettlementsService {
     return this.http.get<Settlement[]>(this.baseUrl);
   }
 
-  generate(payload: GenerateSettlementPayload): Observable<GenerateSettlementResponse> {
+  generate(
+    payload: GenerateSettlementPayload,
+  ): Observable<GenerateSettlementResponse> {
     return this.http.post<GenerateSettlementResponse>(this.baseUrl, payload);
   }
 
@@ -109,12 +111,18 @@ export class SettlementsService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  allocations(id: string, query: SettlementAllocationsQuery): Observable<SettlementAllocationsResponse> {
+  allocations(
+    id: string,
+    query: SettlementAllocationsQuery,
+  ): Observable<SettlementAllocationsResponse> {
     const params = buildHttpParams({
       trainerId: query.trainerId,
       offset: query.offset,
-      limit: query.limit
+      limit: query.limit,
     });
-    return this.http.get<SettlementAllocationsResponse>(`${this.baseUrl}/${id}/allocations`, { params });
+    return this.http.get<SettlementAllocationsResponse>(
+      `${this.baseUrl}/${id}/allocations`,
+      { params },
+    );
   }
 }

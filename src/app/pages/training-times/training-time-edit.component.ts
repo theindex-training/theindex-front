@@ -1,17 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TrainingTime,
   TrainingTimesService,
-  UpdateTrainingTimePayload
+  UpdateTrainingTimePayload,
 } from '../../services/training-times.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -21,9 +26,15 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-training-time-edit',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './training-time-edit.component.html'
+  templateUrl: './training-time-edit.component.html',
 })
 export class TrainingTimeEditComponent implements OnInit {
   readonly form: FormGroup<{
@@ -41,11 +52,13 @@ export class TrainingTimeEditComponent implements OnInit {
     private readonly trainingTimesService: TrainingTimesService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
-      startTime: this.formBuilder.nonNullable.control('', [Validators.required]),
-      endTime: this.formBuilder.nonNullable.control('', [Validators.required])
+      startTime: this.formBuilder.nonNullable.control('', [
+        Validators.required,
+      ]),
+      endTime: this.formBuilder.nonNullable.control('', [Validators.required]),
     });
   }
 
@@ -62,7 +75,7 @@ export class TrainingTimeEditComponent implements OnInit {
         this.trainingTime = trainingTime;
         this.form.patchValue({
           startTime: trainingTime.startTime,
-          endTime: trainingTime.endTime
+          endTime: trainingTime.endTime,
         });
         this.loading = false;
         this.changeDetector.detectChanges();
@@ -71,7 +84,7 @@ export class TrainingTimeEditComponent implements OnInit {
         this.errorMessage = apiErrorMessage(error, 'trainingTimes.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -87,7 +100,7 @@ export class TrainingTimeEditComponent implements OnInit {
     const raw = this.form.getRawValue();
     const payload: UpdateTrainingTimePayload = {
       startTime: raw.startTime,
-      endTime: raw.endTime
+      endTime: raw.endTime,
     };
 
     this.submitting = true;
@@ -102,7 +115,7 @@ export class TrainingTimeEditComponent implements OnInit {
         this.errorMessage = apiErrorMessage(error, 'trainingTimes.edit.error');
         this.submitting = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 }

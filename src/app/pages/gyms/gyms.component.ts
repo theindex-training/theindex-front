@@ -1,9 +1,14 @@
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import {
   SegmentedControlComponent,
-  SegmentedOption
+  SegmentedOption,
 } from '../../components/segmented-control/segmented-control.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
@@ -11,7 +16,10 @@ import { ChipComponent } from '../../components/chip/chip.component';
 import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import { ListRowComponent } from '../../components/list-row/list-row.component';
 import { IconComponent } from '../../components/icon/icon.component';
-import { GymLocation, GymLocationsService } from '../../services/gym-locations.service';
+import {
+  GymLocation,
+  GymLocationsService,
+} from '../../services/gym-locations.service';
 
 import { displayValue } from '../../utils/display.util';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -22,8 +30,8 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-gyms',
   standalone: true,
   imports: [
-    UiMessagePipe, 
-    TranslocoPipe, 
+    UiMessagePipe,
+    TranslocoPipe,
     RouterLink,
     PageHeaderComponent,
     SegmentedControlComponent,
@@ -32,10 +40,10 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
     ChipComponent,
     StatusDotComponent,
     ListRowComponent,
-    IconComponent
+    IconComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './gyms.component.html'
+  templateUrl: './gyms.component.html',
 })
 export class GymsComponent implements OnInit {
   gyms: GymLocation[] = [];
@@ -43,14 +51,14 @@ export class GymsComponent implements OnInit {
   readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
     { value: 'all', label: 'common.all' },
     { value: 'active', label: 'common.active' },
-    { value: 'inactive', label: 'common.inactive' }
+    { value: 'inactive', label: 'common.inactive' },
   ];
   loading = true;
   errorMessage: UiMessage | null = null;
 
   constructor(
     private readonly gymsService: GymLocationsService,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -73,11 +81,13 @@ export class GymsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'gyms.list.loadErrorMessage');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'gyms.list.loadErrorMessage',
+        );
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 

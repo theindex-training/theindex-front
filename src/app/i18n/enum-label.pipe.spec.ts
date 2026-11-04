@@ -37,7 +37,9 @@ describe('EnumLabelPipe', () => {
 
 describe('enum label helpers', () => {
   it('builds the key with the value upper-cased', () => {
-    expect(enumLabelKey('paymentStatus', 'paid')).toBe('enums.paymentStatus.PAID');
+    expect(enumLabelKey('paymentStatus', 'paid')).toBe(
+      'enums.paymentStatus.PAID',
+    );
   });
 
   it('knows the API values of each group, case-insensitively', () => {

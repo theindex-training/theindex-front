@@ -12,7 +12,10 @@
     (input)="handleInput($event)"
   />
   @if (value) {
-    <button class="search__clear" type="button" [attr.aria-label]="'common.clearSearch' | transloco"
+    <button
+      class="search__clear"
+      type="button"
+      [attr.aria-label]="'common.clearSearch' | transloco"
       (click)="clear(input)"
     >
       <app-icon name="close" />

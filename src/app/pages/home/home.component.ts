@@ -1,5 +1,11 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
@@ -27,8 +33,8 @@ import { UiMessagePipe } from '../../i18n/ui-message.pipe';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
-    UiMessagePipe, 
-    TranslocoPipe, 
+    UiMessagePipe,
+    TranslocoPipe,
     NgTemplateOutlet,
     FormsModule,
     RouterLink,
@@ -41,7 +47,8 @@ export class HomeComponent implements OnInit {
   private readonly i18n = inject(LanguageService);
   readonly format = inject(LocaleFormatService);
   inactiveTrainees: InactiveTraineeReportItem[] = [];
-  traineesWithoutActiveSubscription: TraineeWithoutActiveSubscriptionReportItem[] = [];
+  traineesWithoutActiveSubscription: TraineeWithoutActiveSubscriptionReportItem[] =
+    [];
   loadingInactiveReport = false;
   loadingWithoutActiveSubscriptionReport = false;
   inactiveReportErrorMessage: UiMessage | null = null;
@@ -73,8 +80,12 @@ export class HomeComponent implements OnInit {
     this.loadWithoutActiveSubscriptionReport();
   }
 
-  traineeDisplayName(item: { name?: string; nickname?: string | null }): string {
-    const name = this.readString(item.name) ?? this.i18n.t('home.reports.unknown');
+  traineeDisplayName(item: {
+    name?: string;
+    nickname?: string | null;
+  }): string {
+    const name =
+      this.readString(item.name) ?? this.i18n.t('home.reports.unknown');
     const nickname = this.readString(item.nickname);
     return nickname ? `${name} (${nickname})` : name;
   }
@@ -83,20 +94,30 @@ export class HomeComponent implements OnInit {
     return this.format.dateTime(value);
   }
 
-  formatSubscriptionSummary(subscription: AttendanceSubscriptionReport | null): string {
+  formatSubscriptionSummary(
+    subscription: AttendanceSubscriptionReport | null,
+  ): string {
     if (!subscription) {
       return '—';
     }
 
     const parts = [
       subscription.planName ? this.part('plan', subscription.planName) : null,
-      subscription.type ? this.part('type', this.planTypeLabel(subscription.type)) : null,
-      subscription.startDate ? this.part('start', this.format.date(subscription.startDate)) : null,
-      subscription.endDate ? this.part('end', this.format.date(subscription.endDate)) : null,
+      subscription.type
+        ? this.part('type', this.planTypeLabel(subscription.type))
+        : null,
+      subscription.startDate
+        ? this.part('start', this.format.date(subscription.startDate))
+        : null,
+      subscription.endDate
+        ? this.part('end', this.format.date(subscription.endDate))
+        : null,
       subscription.remainingTrainings !== null
         ? this.part('remainingTrainings', subscription.remainingTrainings)
         : null,
-      subscription.remainingDays !== null ? this.part('remainingDays', subscription.remainingDays) : null,
+      subscription.remainingDays !== null
+        ? this.part('remainingDays', subscription.remainingDays)
+        : null,
     ].filter((part): part is string => Boolean(part));
 
     return parts.length ? parts.join(' • ') : '—';
@@ -107,7 +128,9 @@ export class HomeComponent implements OnInit {
   }
 
   private planTypeLabel(type: string): string {
-    return isKnownEnum('planType', type) ? this.i18n.t(enumLabelKey('planType', type)) : type;
+    return isKnownEnum('planType', type)
+      ? this.i18n.t(enumLabelKey('planType', type))
+      : type;
   }
 
   onInactiveSkipDaysChange(): void {
@@ -129,14 +152,16 @@ export class HomeComponent implements OnInit {
         }),
       )
       .subscribe({
-      next: result => {
-        this.inactiveTrainees = result;
-      },
-      error: error => {
-        this.inactiveReportErrorMessage =
-          apiErrorMessage(error, 'home.reports.inactiveError');
-      },
-    });
+        next: (result) => {
+          this.inactiveTrainees = result;
+        },
+        error: (error) => {
+          this.inactiveReportErrorMessage = apiErrorMessage(
+            error,
+            'home.reports.inactiveError',
+          );
+        },
+      });
   }
 
   private loadWithoutActiveSubscriptionReport(): void {
@@ -152,12 +177,14 @@ export class HomeComponent implements OnInit {
         }),
       )
       .subscribe({
-        next: result => {
+        next: (result) => {
           this.traineesWithoutActiveSubscription = result;
         },
-        error: error => {
-          this.withoutActiveSubscriptionReportErrorMessage =
-            apiErrorMessage(error, 'home.reports.withoutError');
+        error: (error) => {
+          this.withoutActiveSubscriptionReportErrorMessage = apiErrorMessage(
+            error,
+            'home.reports.withoutError',
+          );
         },
       });
   }

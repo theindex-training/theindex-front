@@ -1,21 +1,26 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   GymSubscription,
-  GymSubscriptionsService
+  GymSubscriptionsService,
 } from '../../services/gym-subscriptions.service';
 import {
   TraineeProfile,
   TraineesService,
-  UpdateTraineePayload
+  UpdateTraineePayload,
 } from '../../services/trainees.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { trimmedLength } from '../../utils/form-validators.util';
@@ -26,9 +31,15 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-trainee-edit',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './trainee-edit.component.html'
+  templateUrl: './trainee-edit.component.html',
 })
 export class TraineeEditComponent implements OnInit {
   readonly form: FormGroup<{
@@ -50,16 +61,18 @@ export class TraineeEditComponent implements OnInit {
     private readonly gymSubscriptionsService: GymSubscriptionsService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        trimmedLength(2, 100)
+        trimmedLength(2, 100),
       ]),
-      nickname: this.formBuilder.control<string | null>(null, [trimmedLength(1, 50)]),
+      nickname: this.formBuilder.control<string | null>(null, [
+        trimmedLength(1, 50),
+      ]),
       phone: this.formBuilder.control<string | null>(null),
-      gymSubscriptionId: this.formBuilder.control<string | null>(null)
+      gymSubscriptionId: this.formBuilder.control<string | null>(null),
     });
   }
 
@@ -79,7 +92,7 @@ export class TraineeEditComponent implements OnInit {
       error: () => {
         this.gymSubscriptions = [];
         this.changeDetector.detectChanges();
-      }
+      },
     });
 
     this.traineesService.getById(id).subscribe({
@@ -89,17 +102,16 @@ export class TraineeEditComponent implements OnInit {
           name: trainee.name,
           nickname: trainee.nickname,
           phone: trainee.phone,
-          gymSubscriptionId: trainee.gymSubscriptionId
+          gymSubscriptionId: trainee.gymSubscriptionId,
         });
         this.loading = false;
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'trainees.errors.load');
+        this.errorMessage = apiErrorMessage(error, 'trainees.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -117,7 +129,7 @@ export class TraineeEditComponent implements OnInit {
       name: raw.name.trim(),
       nickname: this.normalizeOptional(raw.nickname),
       phone: this.normalizeOptional(raw.phone),
-      gymSubscriptionId: raw.gymSubscriptionId
+      gymSubscriptionId: raw.gymSubscriptionId,
     };
 
     this.submitting = true;
@@ -129,11 +141,10 @@ export class TraineeEditComponent implements OnInit {
         this.router.navigate(['/trainees']);
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'trainees.edit.error');
+        this.errorMessage = apiErrorMessage(error, 'trainees.edit.error');
         this.submitting = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 

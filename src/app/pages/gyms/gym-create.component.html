@@ -9,25 +9,36 @@
     <div class="form-grid">
       <div class="form-row">
         <div class="form-field">
-          <label class="form-field__label" for="gym-name">{{ 'gyms.fields.name' | transloco }}</label>
+          <label class="form-field__label" for="gym-name">{{
+            'gyms.fields.name' | transloco
+          }}</label>
           <input
             id="gym-name"
             type="text"
             formControlName="name"
             [placeholder]="'gyms.fields.namePlaceholder' | transloco"
             aria-describedby="gym-name-help"
-            [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+            [attr.aria-invalid]="
+              form.controls.name.touched && form.controls.name.invalid
+            "
           />
           @if (form.controls.name.touched && form.controls.name.invalid) {
-            <span class="form-field__error" id="gym-name-help">{{ 'gyms.fields.nameError' | transloco }}</span>
+            <span class="form-field__error" id="gym-name-help">{{
+              'gyms.fields.nameError' | transloco
+            }}</span>
           } @else {
-            <span class="form-field__hint" id="gym-name-help">{{ 'gyms.fields.nameHint' | transloco }}</span>
+            <span class="form-field__hint" id="gym-name-help">{{
+              'gyms.fields.nameHint' | transloco
+            }}</span>
           }
         </div>
 
         <div class="form-field">
           <label class="form-field__label" for="gym-address">
-            {{ 'gyms.fields.address' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span>
+            {{ 'gyms.fields.address' | transloco }}
+            <span class="form-field__optional">{{
+              'common.optional' | transloco
+            }}</span>
           </label>
           <input
             id="gym-address"
@@ -35,24 +46,36 @@
             formControlName="address"
             [placeholder]="'gyms.fields.addressPlaceholder' | transloco"
             aria-describedby="gym-address-help"
-            [attr.aria-invalid]="form.controls.address.touched && form.controls.address.invalid"
+            [attr.aria-invalid]="
+              form.controls.address.touched && form.controls.address.invalid
+            "
           />
           @if (form.controls.address.touched && form.controls.address.invalid) {
-            <span class="form-field__error" id="gym-address-help">{{ 'gyms.fields.addressError' | transloco }}</span>
+            <span class="form-field__error" id="gym-address-help">{{
+              'gyms.fields.addressError' | transloco
+            }}</span>
           } @else {
-            <span class="form-field__hint" id="gym-address-help">{{ 'gyms.fields.addressHint' | transloco }}</span>
+            <span class="form-field__hint" id="gym-address-help">{{
+              'gyms.fields.addressHint' | transloco
+            }}</span>
           }
         </div>
       </div>
     </div>
 
     @if (errorMessage) {
-      <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+      <p class="notice notice--danger" role="alert">
+        {{ errorMessage | uiMessage }}
+      </p>
     }
 
     <div class="form-actions">
       <button class="btn btn--primary" type="submit" [disabled]="submitting">
-        {{ submitting ? ('common.saving' | transloco) : ('gyms.create.submit' | transloco) }}
+        {{
+          submitting
+            ? ('common.saving' | transloco)
+            : ('gyms.create.submit' | transloco)
+        }}
       </button>
     </div>
   </form>

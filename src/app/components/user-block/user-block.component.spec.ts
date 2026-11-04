@@ -7,13 +7,19 @@ import { UserBlockComponent } from './user-block.component';
 describe('UserBlockComponent', () => {
   beforeEach(() => {
     localStorage.clear();
-    TestBed.configureTestingModule({ providers: [provideRouter([{ path: '**', children: [] }])] });
+    TestBed.configureTestingModule({
+      providers: [provideRouter([{ path: '**', children: [] }])],
+    });
   });
 
   async function render() {
     const fixture = TestBed.createComponent(UserBlockComponent);
     await fixture.whenStable();
-    return { fixture, component: fixture.componentInstance, el: fixture.nativeElement as HTMLElement };
+    return {
+      fixture,
+      component: fixture.componentInstance,
+      el: fixture.nativeElement as HTMLElement,
+    };
   }
 
   it('shows the email, its initials and the translated role', async () => {
@@ -45,11 +51,11 @@ describe('UserBlockComponent', () => {
     const { fixture, el } = await render();
 
     const logOut = Array.from(el.querySelectorAll('button')).find(
-      button => button.textContent?.trim() === en.common.logOut
+      (button) => button.textContent?.trim() === en.common.logOut,
     )!;
     logOut.click();
     await fixture.whenStable();
-    await new Promise(resolve => setTimeout(resolve));
+    await new Promise((resolve) => setTimeout(resolve));
 
     expect(localStorage.getItem('accessToken')).toBeNull();
     expect(TestBed.inject(Router).url).toBe('/login');

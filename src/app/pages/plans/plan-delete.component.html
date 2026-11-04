@@ -8,7 +8,9 @@
   @if (loading) {
     <p class="notice" role="status">{{ 'plans.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !plan) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
   } @else if (plan) {
     <div class="panel">
       <dl class="detail-list">
@@ -28,7 +30,11 @@
           <dt>{{ 'common.status' | transloco }}</dt>
           <dd>
             <app-status-dot [tone]="plan.isActive ? 'success' : 'neutral'">
-              {{ plan.isActive ? ('plans.status.active' | transloco) : ('plans.status.inactive' | transloco) }}
+              {{
+                plan.isActive
+                  ? ('plans.status.active' | transloco)
+                  : ('plans.status.inactive' | transloco)
+              }}
             </app-status-dot>
           </dd>
         </div>
@@ -39,7 +45,9 @@
       </p>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
       }
 
       <div class="form-actions">
@@ -49,7 +57,13 @@
           (click)="confirmDeactivate()"
           [disabled]="submitting || !plan.isActive"
         >
-          {{ plan.isActive ? (submitting ? ('common.deactivating' | transloco) : ('plans.delete.submit' | transloco)) : ('plans.delete.inactive' | transloco) }}
+          {{
+            plan.isActive
+              ? submitting
+                ? ('common.deactivating' | transloco)
+                : ('plans.delete.submit' | transloco)
+              : ('plans.delete.inactive' | transloco)
+          }}
         </button>
       </div>
     </div>

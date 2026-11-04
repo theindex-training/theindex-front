@@ -3,8 +3,14 @@ import { buildNavigation, isUrlInItems } from './navigation';
 
 // Nav labels are translation keys; resolve them to the English text to keep the expectations readable.
 const english = (key: string): string =>
-  key.split('.').reduce<unknown>((node, part) => (node as Record<string, unknown>)?.[part], en) as string;
-const labels = (items: { label: string }[]) => items.map(item => english(item.label));
+  key
+    .split('.')
+    .reduce<unknown>(
+      (node, part) => (node as Record<string, unknown>)?.[part],
+      en,
+    ) as string;
+const labels = (items: { label: string }[]) =>
+  items.map((item) => english(item.label));
 
 describe('buildNavigation', () => {
   it('gives admins every item, with Register as the primary tab', () => {
@@ -16,18 +22,39 @@ describe('buildNavigation', () => {
       'Register attendance',
       'Attendance history',
       'Settlements',
-      'Cash register'
+      'Cash register',
     ]);
-    expect(labels(nav.manage)).toEqual(['Plans', 'Gyms', 'Gym subscriptions', 'Trainers', 'Training times']);
-    expect(nav.tabs.map(tab => english(tab.tabLabel ?? tab.label))).toEqual(['Home', 'Trainees', 'Register', 'Settle']);
-    expect(nav.tabs.filter(tab => tab.primary).map(tab => tab.route)).toEqual(['/attendance/new']);
-    expect(labels(nav.moreMain)).toEqual(['Attendance history', 'Cash register']);
+    expect(labels(nav.manage)).toEqual([
+      'Plans',
+      'Gyms',
+      'Gym subscriptions',
+      'Trainers',
+      'Training times',
+    ]);
+    expect(nav.tabs.map((tab) => english(tab.tabLabel ?? tab.label))).toEqual([
+      'Home',
+      'Trainees',
+      'Register',
+      'Settle',
+    ]);
+    expect(
+      nav.tabs.filter((tab) => tab.primary).map((tab) => tab.route),
+    ).toEqual(['/attendance/new']);
+    expect(labels(nav.moreMain)).toEqual([
+      'Attendance history',
+      'Cash register',
+    ]);
     expect(english(nav.sheetLabel)).toBe('More');
   });
 
   it('hides ADMIN-only items (Cash register, Trainers) from trainers', () => {
     const nav = buildNavigation('TRAINER');
-    const all = labels([...nav.main, ...nav.manage, ...nav.moreMain, ...nav.moreManage]);
+    const all = labels([
+      ...nav.main,
+      ...nav.manage,
+      ...nav.moreMain,
+      ...nav.moreManage,
+    ]);
 
     expect(all).not.toContain('Cash register');
     expect(all).not.toContain('Trainers');
@@ -45,7 +72,10 @@ describe('buildNavigation', () => {
   });
 
   it('shows only unrestricted items when the role is unknown', () => {
-    const all = labels([...buildNavigation(null).main, ...buildNavigation(null).manage]);
+    const all = labels([
+      ...buildNavigation(null).main,
+      ...buildNavigation(null).manage,
+    ]);
 
     expect(all).not.toContain('Cash register');
     expect(all).not.toContain('Trainers');
@@ -59,7 +89,9 @@ describe('isUrlInItems', () => {
   it('matches sheet routes and their child pages', () => {
     expect(isUrlInItems('/plans', sheetItems)).toBe(true);
     expect(isUrlInItems('/plans/p1/edit', sheetItems)).toBe(true);
-    expect(isUrlInItems('/gym-subscriptions?active=true', sheetItems)).toBe(true);
+    expect(isUrlInItems('/gym-subscriptions?active=true', sheetItems)).toBe(
+      true,
+    );
   });
 
   it('matches exact-only items exactly', () => {

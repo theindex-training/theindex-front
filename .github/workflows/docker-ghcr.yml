@@ -1,16 +1,16 @@
 name: Build and push Docker images (GHCR)
 
 # One pipeline, laid out like theindex-api's:
-# - every PR (any base branch): unit tests, production build and the E2E journeys; build/deploy are skipped;
-# - push to main (or a v* tag): the same tests, then build and push the image, then deploy.
-# The image is never built or deployed unless both test jobs pass.
-# To block merging on red checks, mark "test-and-build" and "e2e" as required in the
+# - every PR (any base branch): lint, unit tests, production build and the E2E journeys; build/deploy are skipped;
+# - push to main (or a v* tag): the same checks, then build and push the image, then deploy.
+# The image is never built or deployed unless the lint and both test jobs pass.
+# To block merging on red checks, mark "lint", "test-and-build" and "e2e" as required in the
 # branch protection settings for main.
 on:
   push:
     branches: [ "main" ]
     tags: [ "v*" ]   # optional: push a v1.0.0 tag to publish a versioned image
-  pull_request:   # every PR (any base branch): runs the tests only; build/deploy are skipped
+  pull_request:   # every PR (any base branch): runs lint + tests only; build/deploy are skipped
   workflow_dispatch:
 
 permissions:
@@ -27,6 +27,33 @@ env:
   IMAGE_OWNER: ${{ github.repository_owner }}
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (no --fix; any error or warning fails)
+        run: npm run lint:check
+
+      - name: Formatting (Prettier, SCSS and JSON included)
+        run: npm run format:check
+
+      - name: Type-check E2E journeys
+        run: npm run typecheck:e2e
+
   test-and-build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -86,7 +113,7 @@ jobs:
           retention-days: 7
 
   build-front:
-    needs: [test-and-build, e2e]
+    needs: [lint, test-and-build, e2e]
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
@@ -121,8 +148,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   deploy:
-    # Listed explicitly so a red test job always blocks the deploy.
-    needs: [test-and-build, e2e, build-front]
+    # Listed explicitly so a red lint or test job always blocks the deploy.
+    needs: [lint, test-and-build, e2e, build-front]
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:

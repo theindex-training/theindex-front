@@ -5,7 +5,7 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
   standalone: true,
   templateUrl: './ui-button.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './ui-button.component.scss'
+  styleUrl: './ui-button.component.scss',
 })
 export class UiButtonComponent {
   @Input() type: 'button' | 'submit' = 'button';

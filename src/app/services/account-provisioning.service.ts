@@ -32,7 +32,7 @@ export interface ProvisionedAccount {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AccountProvisioningService {
   private readonly baseUrl = `${environment.apiUrl}/accounts`;
@@ -42,20 +42,28 @@ export class AccountProvisioningService {
   provisionForProfile(
     profileType: 'trainer' | 'trainee',
     profileId: string,
-    payload: ProvisionAccountPayload
+    payload: ProvisionAccountPayload,
   ): Observable<ProvisionedAccount> {
     return this.http.post<ProvisionedAccount>(
       `${this.baseUrl}/${profileType}/${profileId}`,
-      payload
+      payload,
     );
   }
 
   getById(accountId: string): Observable<ProvisionedAccount | null> {
-    return this.http.get<ProvisionedAccount | null>(`${this.baseUrl}/${accountId}`);
+    return this.http.get<ProvisionedAccount | null>(
+      `${this.baseUrl}/${accountId}`,
+    );
   }
 
-  update(accountId: string, payload: UpdateAccountPayload): Observable<ProvisionedAccount> {
-    return this.http.patch<ProvisionedAccount>(`${this.baseUrl}/${accountId}`, payload);
+  update(
+    accountId: string,
+    payload: UpdateAccountPayload,
+  ): Observable<ProvisionedAccount> {
+    return this.http.patch<ProvisionedAccount>(
+      `${this.baseUrl}/${accountId}`,
+      payload,
+    );
   }
 
   deactivate(accountId: string): Observable<ProvisionedAccount> {

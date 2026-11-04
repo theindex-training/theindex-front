@@ -8,42 +8,63 @@
   @if (loading) {
     <p class="notice" role="status">{{ 'trainees.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !trainee) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
   } @else if (trainee) {
     <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
       <div class="form-grid">
         <div class="form-row">
           <div class="form-field">
-            <label class="form-field__label" for="trainee-name">{{ 'trainees.fields.name' | transloco }}</label>
+            <label class="form-field__label" for="trainee-name">{{
+              'trainees.fields.name' | transloco
+            }}</label>
             <input
               id="trainee-name"
               type="text"
               formControlName="name"
               aria-describedby="trainee-name-help"
-              [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+              [attr.aria-invalid]="
+                form.controls.name.touched && form.controls.name.invalid
+              "
             />
             @if (form.controls.name.touched && form.controls.name.invalid) {
-              <span class="form-field__error" id="trainee-name-help">{{ 'trainees.fields.nameError' | transloco }}</span>
+              <span class="form-field__error" id="trainee-name-help">{{
+                'trainees.fields.nameError' | transloco
+              }}</span>
             } @else {
-              <span class="form-field__hint" id="trainee-name-help">{{ 'trainees.fields.nameHint' | transloco }}</span>
+              <span class="form-field__hint" id="trainee-name-help">{{
+                'trainees.fields.nameHint' | transloco
+              }}</span>
             }
           </div>
 
           <div class="form-field">
             <label class="form-field__label" for="trainee-nickname">
-              {{ 'trainees.fields.nickname' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span>
+              {{ 'trainees.fields.nickname' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
             </label>
             <input
               id="trainee-nickname"
               type="text"
               formControlName="nickname"
               aria-describedby="trainee-nickname-help"
-              [attr.aria-invalid]="form.controls.nickname.touched && form.controls.nickname.invalid"
+              [attr.aria-invalid]="
+                form.controls.nickname.touched && form.controls.nickname.invalid
+              "
             />
-            @if (form.controls.nickname.touched && form.controls.nickname.invalid) {
-              <span class="form-field__error" id="trainee-nickname-help">{{ 'trainees.fields.nicknameError' | transloco }}</span>
+            @if (
+              form.controls.nickname.touched && form.controls.nickname.invalid
+            ) {
+              <span class="form-field__error" id="trainee-nickname-help">{{
+                'trainees.fields.nicknameError' | transloco
+              }}</span>
             } @else {
-              <span class="form-field__hint" id="trainee-nickname-help">{{ 'trainees.fields.nicknameHint' | transloco }}</span>
+              <span class="form-field__hint" id="trainee-nickname-help">{{
+                'trainees.fields.nicknameHint' | transloco
+              }}</span>
             }
           </div>
         </div>
@@ -51,19 +72,35 @@
         <div class="form-row">
           <div class="form-field">
             <label class="form-field__label" for="trainee-phone">
-              {{ 'trainees.fields.phone' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span>
+              {{ 'trainees.fields.phone' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
             </label>
             <input id="trainee-phone" type="tel" formControlName="phone" />
           </div>
 
           <div class="form-field">
             <label class="form-field__label" for="trainee-gym-subscription">
-              {{ 'trainees.fields.gymSubscription' | transloco }} <span class="form-field__optional">{{ 'common.optional' | transloco }}</span>
+              {{ 'trainees.fields.gymSubscription' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
             </label>
-            <select id="trainee-gym-subscription" formControlName="gymSubscriptionId">
-              <option [ngValue]="null">{{ 'trainees.fields.noGymSubscription' | transloco }}</option>
-              @for (gymSubscription of gymSubscriptions; track gymSubscription.id) {
-                <option [value]="gymSubscription.id">{{ gymSubscription.name }}</option>
+            <select
+              id="trainee-gym-subscription"
+              formControlName="gymSubscriptionId"
+            >
+              <option [ngValue]="null">
+                {{ 'trainees.fields.noGymSubscription' | transloco }}
+              </option>
+              @for (
+                gymSubscription of gymSubscriptions;
+                track gymSubscription.id
+              ) {
+                <option [value]="gymSubscription.id">
+                  {{ gymSubscription.name }}
+                </option>
               }
             </select>
           </div>
@@ -71,12 +108,18 @@
       </div>
 
       @if (errorMessage) {
-        <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
       }
 
       <div class="form-actions">
         <button class="btn btn--primary" type="submit" [disabled]="submitting">
-          {{ submitting ? ('common.saving' | transloco) : ('common.saveChanges' | transloco) }}
+          {{
+            submitting
+              ? ('common.saving' | transloco)
+              : ('common.saveChanges' | transloco)
+          }}
         </button>
       </div>
     </form>

@@ -120,7 +120,9 @@
 // Stays in thumb reach while scrolling a long trainee list (above the tab bar on mobile).
 .save-bar {
   position: sticky;
-  bottom: calc(var(--tab-bar-height, 4rem) + env(safe-area-inset-bottom) + var(--space-3));
+  bottom: calc(
+    var(--tab-bar-height, 4rem) + env(safe-area-inset-bottom) + var(--space-3)
+  );
   z-index: 5;
   display: flex;
   flex-direction: column;

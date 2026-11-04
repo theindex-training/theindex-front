@@ -1,9 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   GymSubscription,
-  GymSubscriptionsService
+  GymSubscriptionsService,
 } from '../../services/gym-subscriptions.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
@@ -14,9 +19,16 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-gym-subscription-details',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    RouterLink,
+    PageHeaderComponent,
+    StatusDotComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './gym-subscription-details.component.html'
+  templateUrl: './gym-subscription-details.component.html',
 })
 export class GymSubscriptionDetailsComponent implements OnInit {
   gymSubscription: GymSubscription | null = null;
@@ -26,7 +38,7 @@ export class GymSubscriptionDetailsComponent implements OnInit {
   constructor(
     private readonly gymSubscriptionsService: GymSubscriptionsService,
     private readonly route: ActivatedRoute,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -44,10 +56,13 @@ export class GymSubscriptionDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'gymSubscriptions.errors.load');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'gymSubscriptions.errors.load',
+        );
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 }

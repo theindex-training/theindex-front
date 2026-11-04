@@ -1,18 +1,26 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   GymSubscription,
-  GymSubscriptionsService
+  GymSubscriptionsService,
 } from '../../services/gym-subscriptions.service';
-import { CreateTraineePayload, TraineesService } from '../../services/trainees.service';
+import {
+  CreateTraineePayload,
+  TraineesService,
+} from '../../services/trainees.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { trimmedLength } from '../../utils/form-validators.util';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -22,9 +30,15 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-trainee-create',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './trainee-create.component.html'
+  templateUrl: './trainee-create.component.html',
 })
 export class TraineeCreateComponent implements OnInit {
   readonly form: FormGroup<{
@@ -44,16 +58,18 @@ export class TraineeCreateComponent implements OnInit {
     private readonly traineesService: TraineesService,
     private readonly gymSubscriptionsService: GymSubscriptionsService,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        trimmedLength(2, 100)
+        trimmedLength(2, 100),
       ]),
-      nickname: this.formBuilder.control<string | null>(null, [trimmedLength(1, 50)]),
+      nickname: this.formBuilder.control<string | null>(null, [
+        trimmedLength(1, 50),
+      ]),
       phone: this.formBuilder.control<string | null>(null),
-      gymSubscriptionId: this.formBuilder.control<string | null>(null)
+      gymSubscriptionId: this.formBuilder.control<string | null>(null),
     });
   }
 
@@ -68,7 +84,7 @@ export class TraineeCreateComponent implements OnInit {
         this.gymSubscriptions = [];
         this.gymSubscriptionsLoading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -84,7 +100,7 @@ export class TraineeCreateComponent implements OnInit {
       nickname: this.normalizeOptional(raw.nickname),
       phone: this.normalizeOptional(raw.phone),
       gymSubscriptionId: raw.gymSubscriptionId,
-      isActive: true
+      isActive: true,
     };
 
     this.submitting = true;
@@ -96,11 +112,10 @@ export class TraineeCreateComponent implements OnInit {
         this.router.navigate(['/trainees']);
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'trainees.create.error');
+        this.errorMessage = apiErrorMessage(error, 'trainees.create.error');
         this.submitting = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 

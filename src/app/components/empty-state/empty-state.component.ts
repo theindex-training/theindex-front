@@ -11,7 +11,7 @@ import { IconComponent, IconName } from '../icon/icon.component';
   imports: [IconComponent],
   templateUrl: './empty-state.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './empty-state.component.scss'
+  styleUrl: './empty-state.component.scss',
 })
 export class EmptyStateComponent {
   @Input({ required: true }) title = '';

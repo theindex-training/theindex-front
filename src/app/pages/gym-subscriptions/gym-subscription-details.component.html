@@ -2,13 +2,20 @@
   <app-page-header
     [title]="'gymSubscriptions.details.title' | transloco"
     [subtitle]="'gymSubscriptions.details.subtitle' | transloco"
-    [back]="{ label: ('gymSubscriptions.backToList' | transloco), link: '/gym-subscriptions' }"
+    [back]="{
+      label: ('gymSubscriptions.backToList' | transloco),
+      link: '/gym-subscriptions',
+    }"
   />
 
   @if (loading) {
-    <p class="notice" role="status">{{ 'gymSubscriptions.loadingOne' | transloco }}</p>
+    <p class="notice" role="status">
+      {{ 'gymSubscriptions.loadingOne' | transloco }}
+    </p>
   } @else if (errorMessage && !gymSubscription) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
   } @else if (gymSubscription) {
     <div class="panel">
       <dl class="detail-list">
@@ -19,16 +26,30 @@
         <div>
           <dt>{{ 'common.status' | transloco }}</dt>
           <dd>
-            <app-status-dot [tone]="gymSubscription.isActive ? 'success' : 'neutral'">
-              {{ gymSubscription.isActive ? ('gymSubscriptions.status.active' | transloco) : ('gymSubscriptions.status.inactive' | transloco) }}
+            <app-status-dot
+              [tone]="gymSubscription.isActive ? 'success' : 'neutral'"
+            >
+              {{
+                gymSubscription.isActive
+                  ? ('gymSubscriptions.status.active' | transloco)
+                  : ('gymSubscriptions.status.inactive' | transloco)
+              }}
             </app-status-dot>
           </dd>
         </div>
       </dl>
 
       <div class="form-actions">
-        <a class="btn btn--ghost" [routerLink]="['/gym-subscriptions', gymSubscription.id, 'delete']">{{ 'gymSubscriptions.details.deactivate' | transloco }}</a>
-        <a class="btn btn--primary" [routerLink]="['/gym-subscriptions', gymSubscription.id, 'edit']">{{ 'gymSubscriptions.details.edit' | transloco }}</a>
+        <a
+          class="btn btn--ghost"
+          [routerLink]="['/gym-subscriptions', gymSubscription.id, 'delete']"
+          >{{ 'gymSubscriptions.details.deactivate' | transloco }}</a
+        >
+        <a
+          class="btn btn--primary"
+          [routerLink]="['/gym-subscriptions', gymSubscription.id, 'edit']"
+          >{{ 'gymSubscriptions.details.edit' | transloco }}</a
+        >
       </div>
     </div>
   }

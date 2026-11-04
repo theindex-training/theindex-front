@@ -1,5 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import en from '../../../../public/i18n/en.json';
@@ -7,7 +10,7 @@ import { PageDriver, apiError, driver } from '../../../testing/dom';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
 import {
   CashRegisterState,
-  CashRegisterTransaction
+  CashRegisterTransaction,
 } from '../../services/cash-register.service';
 import { CashRegisterComponent } from './cash-register.component';
 
@@ -15,7 +18,9 @@ const copy = en.cashRegister;
 const STATE_URL = '/api/cash-register';
 const MANUAL_URL = '/api/cash-register/transactions/manual';
 
-function transaction(overrides: Partial<CashRegisterTransaction> = {}): CashRegisterTransaction {
+function transaction(
+  overrides: Partial<CashRegisterTransaction> = {},
+): CashRegisterTransaction {
   return {
     id: 't1',
     type: 'MANUAL_IN',
@@ -26,7 +31,7 @@ function transaction(overrides: Partial<CashRegisterTransaction> = {}): CashRegi
     notes: null,
     createdAt: '2026-11-01T10:00:00Z',
     sourceDetails: null,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -40,19 +45,31 @@ describe('CashRegisterComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [CashRegisterComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
     const format = TestBed.inject(LocaleFormatService);
-    money = cents => format.money(cents);
+    money = (cents) => format.money(cents);
   });
 
   afterEach(() => http.verify());
 
-  async function render(state: CashRegisterState = { balanceCents: 12_345, transactions: [transaction()] }) {
+  async function render(
+    state: CashRegisterState = {
+      balanceCents: 12_345,
+      transactions: [transaction()],
+    },
+  ) {
     fixture = TestBed.createComponent(CashRegisterComponent);
     component = fixture.componentInstance;
-    page = driver(() => fixture.nativeElement, () => fixture.whenStable());
+    page = driver(
+      () => fixture.nativeElement,
+      () => fixture.whenStable(),
+    );
     await page.settle();
     const req = http.expectOne(STATE_URL);
     expect(req.request.method).toBe('GET');
@@ -60,7 +77,11 @@ describe('CashRegisterComponent', () => {
     await page.settle();
   }
 
-  async function addTransaction(direction: 'IN' | 'OUT', amount: string, notes?: string) {
+  async function addTransaction(
+    direction: 'IN' | 'OUT',
+    amount: string,
+    notes?: string,
+  ) {
     await page.select('#cash-direction', direction);
     await page.type('#cash-amount', amount);
     if (notes !== undefined) {
@@ -92,7 +113,10 @@ describe('CashRegisterComponent', () => {
 
     it('shows the error state and reloads on "Try again"', async () => {
       fixture = TestBed.createComponent(CashRegisterComponent);
-      page = driver(() => fixture.nativeElement, () => fixture.whenStable());
+      page = driver(
+        () => fixture.nativeElement,
+        () => fixture.whenStable(),
+      );
       await page.settle();
       const error = apiError(undefined, 500);
       http.expectOne(STATE_URL).flush(error.body, error.options);
@@ -101,7 +125,9 @@ describe('CashRegisterComponent', () => {
       expect(page.text()).toContain(copy.loadError);
       expect(page.text()).toContain(copy.loadErrorMessage);
 
-      const retry = page.queryAll('button').find(button => button.textContent?.includes(en.common.tryAgain))!;
+      const retry = page
+        .queryAll('button')
+        .find((button) => button.textContent?.includes(en.common.tryAgain))!;
       retry.click();
       await page.settle();
       http.expectOne(STATE_URL).flush({ balanceCents: 0, transactions: [] });
@@ -120,7 +146,7 @@ describe('CashRegisterComponent', () => {
       expect(expectManualPost().request.body).toEqual({
         direction: 'OUT',
         amountCents: 1234,
-        notes: 'float top-up'
+        notes: 'float top-up',
       });
     });
 
@@ -128,7 +154,9 @@ describe('CashRegisterComponent', () => {
       await addTransaction('IN', '20', '   ');
 
       // What goes over the wire: the payload holds notes: undefined, which JSON drops.
-      const wire = JSON.parse(expectManualPost().request.serializeBody() as string);
+      const wire = JSON.parse(
+        expectManualPost().request.serializeBody() as string,
+      );
       expect(wire).toEqual({ direction: 'IN', amountCents: 2000 });
       expect('notes' in wire).toBe(false);
     });
@@ -142,7 +170,7 @@ describe('CashRegisterComponent', () => {
     it.each([
       ['zero', '0'],
       ['negative', '-5'],
-      ['more than two decimals', '12.345']
+      ['more than two decimals', '12.345'],
     ])('rejects a %s amount', async (_, amount) => {
       await addTransaction('IN', amount);
 
@@ -155,12 +183,18 @@ describe('CashRegisterComponent', () => {
       expectManualPost().flush(transaction({ id: 't2', type: 'MANUAL_OUT' }));
       await page.settle();
 
-      http.expectOne(STATE_URL).flush({ balanceCents: 11_111, transactions: [] });
+      http
+        .expectOne(STATE_URL)
+        .flush({ balanceCents: 11_111, transactions: [] });
       await page.settle();
 
       expect(page.text()).toContain(copy.created);
       expect(page.text()).toContain(money(11_111));
-      expect(component.form.getRawValue()).toEqual({ direction: 'IN', amount: 0, notes: '' });
+      expect(component.form.getRawValue()).toEqual({
+        direction: 'IN',
+        amount: 0,
+        notes: '',
+      });
       expect(component.form.touched).toBe(false);
     });
 
@@ -178,7 +212,11 @@ describe('CashRegisterComponent', () => {
       await page.settle();
 
       expect(page.alert()).toBe('Insufficient balance');
-      expect(component.form.getRawValue()).toEqual({ direction: 'OUT', amount: 500, notes: 'safe' });
+      expect(component.form.getRawValue()).toEqual({
+        direction: 'OUT',
+        amount: 500,
+        notes: 'safe',
+      });
       expect(page.text()).toContain(copy.add);
     });
 
@@ -200,14 +238,17 @@ describe('CashRegisterComponent', () => {
       const payout = transaction({
         type: 'SETTLEMENT_OUT',
         sourceType: 'SETTLEMENT',
-        sourceDetails: { periodStart: '2026-10-01', periodEnd: '2026-10-31' }
+        sourceDetails: { periodStart: '2026-10-01', periodEnd: '2026-10-31' },
       });
 
       expect(component.formatTransactionDetails(payout)).toBe(
-        `Settlement period: ${format.date('2026-10-01')} → ${format.date('2026-10-31')}`
+        `Settlement period: ${format.date('2026-10-01')} → ${format.date('2026-10-31')}`,
       );
       expect(
-        component.formatTransactionDetails({ ...payout, sourceDetails: { periodStart: '2026-10-01' } })
+        component.formatTransactionDetails({
+          ...payout,
+          sourceDetails: { periodStart: '2026-10-01' },
+        }),
       ).toBe(copy.settlementTransaction);
     });
 
@@ -216,41 +257,67 @@ describe('CashRegisterComponent', () => {
         type: 'SUBSCRIPTION_IN',
         sourceType: 'SUBSCRIPTION',
         sourceDetails: {
-          boughtBy: { traineeId: 'tr1', name: 'Ivan Petrov', nickname: ' Vanko ' },
+          boughtBy: {
+            traineeId: 'tr1',
+            name: 'Ivan Petrov',
+            nickname: ' Vanko ',
+          },
           planTitle: '10 visits',
-          subscriptionType: 'PUNCH'
-        }
+          subscriptionType: 'PUNCH',
+        },
       });
 
       expect(component.formatTransactionDetails(sale)).toBe(
-        `Bought by Ivan Petrov (Vanko) • Plan: 10 visits • Type: ${en.enums.planType.PUNCH}`
+        `Bought by Ivan Petrov (Vanko) • Plan: 10 visits • Type: ${en.enums.planType.PUNCH}`,
       );
       expect(component.formatSubscriptionDetailSuffix(sale)).toBe(
-        ` • Plan: 10 visits • Type: ${en.enums.planType.PUNCH}`
+        ` • Plan: 10 visits • Type: ${en.enums.planType.PUNCH}`,
       );
-      expect(component.formatSubscriptionBuyerPath(sale)).toEqual(['/trainees', 'tr1']);
+      expect(component.formatSubscriptionBuyerPath(sale)).toEqual([
+        '/trainees',
+        'tr1',
+      ]);
     });
 
     it('humanizes an unknown subscription type and falls back when details are empty', () => {
       const sale = transaction({
         sourceType: 'SUBSCRIPTION',
-        sourceDetails: { subscriptionType: 'FAMILY_PASS' }
+        sourceDetails: { subscriptionType: 'FAMILY_PASS' },
       });
-      expect(component.formatTransactionDetails(sale)).toBe('Type: Family Pass');
+      expect(component.formatTransactionDetails(sale)).toBe(
+        'Type: Family Pass',
+      );
 
-      const bare = transaction({ sourceType: 'SUBSCRIPTION', sourceDetails: {} });
-      expect(component.formatTransactionDetails(bare)).toBe(copy.subscriptionPurchase);
-      expect(component.formatSubscriptionBuyerLabel(bare)).toBe(copy.unknownTrainee);
-      expect(component.formatSubscriptionBuyerPath(bare)).toEqual(['/trainees']);
+      const bare = transaction({
+        sourceType: 'SUBSCRIPTION',
+        sourceDetails: {},
+      });
+      expect(component.formatTransactionDetails(bare)).toBe(
+        copy.subscriptionPurchase,
+      );
+      expect(component.formatSubscriptionBuyerLabel(bare)).toBe(
+        copy.unknownTrainee,
+      );
+      expect(component.formatSubscriptionBuyerPath(bare)).toEqual([
+        '/trainees',
+      ]);
     });
 
     it('shows "-" for manual entries and missing details', () => {
-      expect(component.formatTransactionDetails(transaction({ sourceDetails: {} }))).toBe('-');
-      expect(component.formatTransactionDetails(transaction({ sourceType: 'SETTLEMENT' }))).toBe('-');
+      expect(
+        component.formatTransactionDetails(transaction({ sourceDetails: {} })),
+      ).toBe('-');
+      expect(
+        component.formatTransactionDetails(
+          transaction({ sourceType: 'SETTLEMENT' }),
+        ),
+      ).toBe('-');
     });
 
     it('labels known transaction types and humanizes unknown ones', () => {
-      expect(component.formatTransactionType('MANUAL_OUT')).toBe(en.enums.cashTransactionType.MANUAL_OUT);
+      expect(component.formatTransactionType('MANUAL_OUT')).toBe(
+        en.enums.cashTransactionType.MANUAL_OUT,
+      );
       expect(component.formatTransactionType('REFUND_OUT')).toBe('Refund Out');
     });
   });

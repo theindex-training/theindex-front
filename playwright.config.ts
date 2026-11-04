@@ -12,20 +12,25 @@ export default defineConfig({
   forbidOnly: !!process.env['CI'],
   retries: 0,
   workers: process.env['CI'] ? 2 : undefined,
-  reporter: process.env['CI'] ? [['list'], ['html', { open: 'never' }]] : 'list',
+  reporter: process.env['CI']
+    ? [['list'], ['html', { open: 'never' }]]
+    : 'list',
   timeout: 30_000,
   expect: { timeout: 5_000 },
   use: {
     baseURL: 'http://localhost:4200',
     timezoneId: 'Europe/Sofia',
     locale: 'en-GB',
-    trace: 'retain-on-failure'
+    trace: 'retain-on-failure',
   },
   projects: [
     {
       name: 'desktop',
       grep: /@desktop/,
-      use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } }
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 800 },
+      },
     },
     {
       name: 'mobile',
@@ -34,15 +39,15 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         viewport: { width: 390, height: 844 },
         isMobile: true,
-        hasTouch: true
-      }
-    }
+        hasTouch: true,
+      },
+    },
   ],
   webServer: {
     // No proxy: every /api call is answered by the test's mock before it leaves the browser.
     command: 'npx ng serve --port 4200',
     url: 'http://localhost:4200',
     reuseExistingServer: !process.env['CI'],
-    timeout: 180_000
-  }
+    timeout: 180_000,
+  },
 });

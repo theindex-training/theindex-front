@@ -1,14 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CreateTrainerPayload, TrainersService } from '../../services/trainers.service';
+import {
+  CreateTrainerPayload,
+  TrainersService,
+} from '../../services/trainers.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { trimmedLength } from '../../utils/form-validators.util';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -18,9 +25,15 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-trainer-create',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './trainer-create.component.html'
+  templateUrl: './trainer-create.component.html',
 })
 export class TrainerCreateComponent {
   readonly form: FormGroup<{
@@ -35,14 +48,16 @@ export class TrainerCreateComponent {
     private readonly formBuilder: FormBuilder,
     private readonly trainersService: TrainersService,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        trimmedLength(2, 100)
+        trimmedLength(2, 100),
       ]),
-      nickname: this.formBuilder.control<string | null>(null, [trimmedLength(1, 50)])
+      nickname: this.formBuilder.control<string | null>(null, [
+        trimmedLength(1, 50),
+      ]),
     });
   }
 
@@ -56,7 +71,7 @@ export class TrainerCreateComponent {
     const payload: CreateTrainerPayload = {
       name: raw.name.trim(),
       nickname: this.normalizeOptional(raw.nickname),
-      isActive: true
+      isActive: true,
     };
 
     this.submitting = true;
@@ -68,11 +83,10 @@ export class TrainerCreateComponent {
         this.router.navigate(['/trainers']);
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'trainers.create.error');
+        this.errorMessage = apiErrorMessage(error, 'trainers.create.error');
         this.submitting = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 

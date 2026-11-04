@@ -43,7 +43,7 @@ export interface CreateManualCashRegisterTransactionPayload {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CashRegisterService {
   private readonly baseUrl = `${environment.apiUrl}/cash-register`;
@@ -55,8 +55,11 @@ export class CashRegisterService {
   }
 
   createManualTransaction(
-    payload: CreateManualCashRegisterTransactionPayload
+    payload: CreateManualCashRegisterTransactionPayload,
   ): Observable<CashRegisterTransaction> {
-    return this.http.post<CashRegisterTransaction>(`${this.baseUrl}/transactions/manual`, payload);
+    return this.http.post<CashRegisterTransaction>(
+      `${this.baseUrl}/transactions/manual`,
+      payload,
+    );
   }
 }

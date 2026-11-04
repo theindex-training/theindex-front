@@ -8,7 +8,9 @@
   @if (loading) {
     <p class="notice" role="status">{{ 'gyms.loadingOne' | transloco }}</p>
   } @else if (errorMessage && !gym) {
-    <p class="notice notice--danger" role="alert">{{ errorMessage | uiMessage }}</p>
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
   } @else if (gym) {
     <div class="panel">
       <dl class="detail-list">
@@ -24,15 +26,23 @@
           <dt>{{ 'common.status' | transloco }}</dt>
           <dd>
             <app-status-dot [tone]="gym.isActive ? 'success' : 'neutral'">
-              {{ gym.isActive ? ('gyms.status.active' | transloco) : ('gyms.status.inactive' | transloco) }}
+              {{
+                gym.isActive
+                  ? ('gyms.status.active' | transloco)
+                  : ('gyms.status.inactive' | transloco)
+              }}
             </app-status-dot>
           </dd>
         </div>
       </dl>
 
       <div class="form-actions">
-        <a class="btn btn--ghost" [routerLink]="['/gyms', gym.id, 'delete']">{{ 'gyms.details.deactivate' | transloco }}</a>
-        <a class="btn btn--primary" [routerLink]="['/gyms', gym.id, 'edit']">{{ 'gyms.details.edit' | transloco }}</a>
+        <a class="btn btn--ghost" [routerLink]="['/gyms', gym.id, 'delete']">{{
+          'gyms.details.deactivate' | transloco
+        }}</a>
+        <a class="btn btn--primary" [routerLink]="['/gyms', gym.id, 'edit']">{{
+          'gyms.details.edit' | transloco
+        }}</a>
       </div>
     </div>
   }

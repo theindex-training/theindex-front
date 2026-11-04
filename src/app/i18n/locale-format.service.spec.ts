@@ -13,7 +13,7 @@ describe('LocaleFormatService', () => {
   });
 
   // Intl uses narrow no-break spaces in some locales; compare with plain spaces.
-  const plain = (value: string) => value.replace(/[  ]/g, ' ');
+  const plain = (value: string) => value.replace(/[\u00A0\u202F]/g, ' ');
 
   it('formats EUR money from cents in the active language', () => {
     language.use('bg').subscribe();
@@ -64,11 +64,19 @@ describe('LocaleFormatService', () => {
 
   it('formats short weekday names and capitalized month titles for calendars', () => {
     language.use('en').subscribe();
-    expect([1, 2, 7].map(day => format.weekdayShort(day))).toEqual(['Mo', 'Tu', 'Su']);
+    expect([1, 2, 7].map((day) => format.weekdayShort(day))).toEqual([
+      'Mo',
+      'Tu',
+      'Su',
+    ]);
     expect(format.monthYear(new Date(2026, 9, 1))).toBe('October 2026');
 
     language.use('bg').subscribe();
-    expect([1, 2, 7].map(day => format.weekdayShort(day))).toEqual(['пн', 'вт', 'нд']);
+    expect([1, 2, 7].map((day) => format.weekdayShort(day))).toEqual([
+      'пн',
+      'вт',
+      'нд',
+    ]);
     // Standalone month name, capitalized as a title.
     expect(format.monthYear(new Date(2026, 9, 1))).toBe('Октомври 2026');
     expect(format.monthYear(null)).toBe('—');

@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Plan, PlansService } from '../../services/plans.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -14,9 +20,17 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 @Component({
   selector: 'app-plan-details',
   standalone: true,
-  imports: [EnumLabelPipe, UiMessagePipe, TranslocoPipe, CommonModule, RouterLink, PageHeaderComponent, StatusDotComponent],
+  imports: [
+    EnumLabelPipe,
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    RouterLink,
+    PageHeaderComponent,
+    StatusDotComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './plan-details.component.html'
+  templateUrl: './plan-details.component.html',
 })
 export class PlanDetailsComponent implements OnInit {
   private readonly i18n = inject(LanguageService);
@@ -28,7 +42,7 @@ export class PlanDetailsComponent implements OnInit {
   constructor(
     private readonly plansService: PlansService,
     private readonly route: ActivatedRoute,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -46,11 +60,10 @@ export class PlanDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'plans.errors.load');
+        this.errorMessage = apiErrorMessage(error, 'plans.errors.load');
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -60,8 +73,12 @@ export class PlanDetailsComponent implements OnInit {
 
   formatPlanDetails(plan: Plan): string {
     if (plan.type === 'PUNCH') {
-      return this.i18n.t('plans.fields.creditsCount', { count: plan.credits ?? 0 });
+      return this.i18n.t('plans.fields.creditsCount', {
+        count: plan.credits ?? 0,
+      });
     }
-    return this.i18n.t('plans.fields.daysCount', { count: plan.durationDays ?? 0 });
+    return this.i18n.t('plans.fields.daysCount', {
+      count: plan.durationDays ?? 0,
+    });
   }
 }

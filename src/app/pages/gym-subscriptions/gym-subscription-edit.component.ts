@@ -1,17 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   GymSubscription,
   GymSubscriptionsService,
-  UpdateGymSubscriptionPayload
+  UpdateGymSubscriptionPayload,
 } from '../../services/gym-subscriptions.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { trimmedLength } from '../../utils/form-validators.util';
@@ -22,9 +27,15 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 @Component({
   selector: 'app-gym-subscription-edit',
   standalone: true,
-  imports: [UiMessagePipe, TranslocoPipe, CommonModule, ReactiveFormsModule, PageHeaderComponent],
+  imports: [
+    UiMessagePipe,
+    TranslocoPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './gym-subscription-edit.component.html'
+  templateUrl: './gym-subscription-edit.component.html',
 })
 export class GymSubscriptionEditComponent implements OnInit {
   readonly form: FormGroup<{
@@ -41,13 +52,13 @@ export class GymSubscriptionEditComponent implements OnInit {
     private readonly gymSubscriptionsService: GymSubscriptionsService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
       name: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        trimmedLength(2, 120)
-      ])
+        trimmedLength(2, 120),
+      ]),
     });
   }
 
@@ -63,16 +74,19 @@ export class GymSubscriptionEditComponent implements OnInit {
       next: (gymSubscription) => {
         this.gymSubscription = gymSubscription;
         this.form.patchValue({
-          name: gymSubscription.name
+          name: gymSubscription.name,
         });
         this.loading = false;
         this.changeDetector.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'gymSubscriptions.errors.load');
+        this.errorMessage = apiErrorMessage(
+          error,
+          'gymSubscriptions.errors.load',
+        );
         this.loading = false;
         this.changeDetector.detectChanges();
-      }
+      },
     });
   }
 
@@ -87,23 +101,27 @@ export class GymSubscriptionEditComponent implements OnInit {
 
     const raw = this.form.getRawValue();
     const payload: UpdateGymSubscriptionPayload = {
-      name: raw.name.trim()
+      name: raw.name.trim(),
     };
 
     this.submitting = true;
     this.errorMessage = null;
 
-    this.gymSubscriptionsService.update(this.gymSubscription.id, payload).subscribe({
-      next: () => {
-        this.submitting = false;
-        this.router.navigate(['/gym-subscriptions']);
-      },
-      error: (error) => {
-        this.errorMessage =
-          apiErrorMessage(error, 'gymSubscriptions.edit.error');
-        this.submitting = false;
-        this.changeDetector.detectChanges();
-      }
-    });
+    this.gymSubscriptionsService
+      .update(this.gymSubscription.id, payload)
+      .subscribe({
+        next: () => {
+          this.submitting = false;
+          this.router.navigate(['/gym-subscriptions']);
+        },
+        error: (error) => {
+          this.errorMessage = apiErrorMessage(
+            error,
+            'gymSubscriptions.edit.error',
+          );
+          this.submitting = false;
+          this.changeDetector.detectChanges();
+        },
+      });
   }
 }
