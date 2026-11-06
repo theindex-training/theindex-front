@@ -79,6 +79,12 @@ const STAFF_MANAGE: NavItem[] = [
     roles: ['ADMIN'],
   },
   { label: 'nav.trainingTimes', route: '/training-times', icon: 'clock' },
+  {
+    label: 'nav.content',
+    route: '/content',
+    icon: 'file-text',
+    roles: ['ADMIN'],
+  },
 ];
 
 const STAFF_TAB_ROUTES = [

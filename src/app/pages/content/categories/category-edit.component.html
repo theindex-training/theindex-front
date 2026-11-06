@@ -1,0 +1,45 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="'content.categories.edit.title' | transloco"
+    [subtitle]="'content.categories.edit.subtitle' | transloco"
+    [back]="{
+      label: ('content.categories.backToList' | transloco),
+      link: '/content/categories',
+    }"
+  />
+
+  @if (loading) {
+    <p class="notice" role="status">
+      {{ 'content.categories.loadingOne' | transloco }}
+    </p>
+  } @else if (errorMessage && !category) {
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
+  } @else if (category) {
+    <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <app-category-fields [form]="form" mode="edit" />
+
+      @if (errorMessage) {
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
+      }
+
+      <div class="form-actions">
+        <a
+          class="btn btn--danger"
+          [routerLink]="['/content/categories', category.id, 'delete']"
+          >{{ 'content.categories.edit.delete' | transloco }}</a
+        >
+        <button class="btn btn--primary" type="submit" [disabled]="submitting">
+          {{
+            submitting
+              ? ('common.saving' | transloco)
+              : ('common.saveChanges' | transloco)
+          }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

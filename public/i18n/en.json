@@ -62,7 +62,8 @@
     "trainingTimes": "Training times",
     "profile": "Profile",
     "stats": "Stats",
-    "records": "Records"
+    "records": "Records",
+    "content": "Content"
   },
   "enums": {
     "role": {
@@ -663,6 +664,67 @@
       "warning": "Deleting cannot be undone.",
       "deleting": "Deleting...",
       "error": "Unable to delete this training time right now."
+    }
+  },
+  "content": {
+    "categories": {
+      "list": {
+        "title": "Categories",
+        "subtitle": "Topics that group articles on the public site, in the order of its menu.",
+        "new": "New category",
+        "count": "{count, plural, one {# category} other {# categories}}",
+        "loading": "Loading categories",
+        "loadError": "Couldn't load categories",
+        "loadErrorMessage": "Unable to load categories right now.",
+        "emptyTitle": "No categories yet",
+        "emptyMessage": "Add the topics your articles will be grouped by.",
+        "tableLabel": "Categories table",
+        "editColumn": "Edit"
+      },
+      "fields": {
+        "name": "Name",
+        "namePlaceholder": "Strength training",
+        "nameHint": "Up to 60 characters. Shown in the site's menu and on the category page.",
+        "nameError": "Enter a name of up to 60 characters.",
+        "slug": "Page address",
+        "slugHintCreate": "Leave empty to make it from the name. Lowercase Latin letters, digits and hyphens, e.g. silova-podgotovka.",
+        "slugHintEdit": "Lowercase Latin letters, digits and hyphens. A new address moves the page; it can't change while published articles use the category.",
+        "slugError": "Use lowercase Latin letters and digits joined by single hyphens, up to 80 characters.",
+        "slugRequired": "Enter the page address.",
+        "description": "Description",
+        "descriptionHint": "Up to 300 characters. The intro on the category page and its description in search results.",
+        "descriptionError": "Description must be at most 300 characters.",
+        "sortOrder": "Order",
+        "sortOrderHintCreate": "Whole number, 0 or more; lower numbers come first in the menu. Leave empty to add it at the end.",
+        "sortOrderHintEdit": "Whole number, 0 or more; lower numbers come first in the menu.",
+        "sortOrderError": "Enter a whole number, 0 or more."
+      },
+      "backToList": "Back to categories",
+      "loadingOne": "Loading category...",
+      "errors": {
+        "missingId": "Category ID is missing.",
+        "load": "Unable to load this category."
+      },
+      "create": {
+        "title": "New category",
+        "subtitle": "Add a topic to group articles by.",
+        "submit": "Create category",
+        "error": "Unable to create this category right now."
+      },
+      "edit": {
+        "title": "Edit category",
+        "subtitle": "Rename, describe, reorder or move the category's page.",
+        "delete": "Delete category",
+        "error": "Unable to save this category right now."
+      },
+      "delete": {
+        "title": "Delete category",
+        "subtitle": "Deleting a category can't be undone.",
+        "warning": "Its articles stay, published ones included: they just lose this category, and its page disappears from the site.",
+        "submit": "Delete category",
+        "deleting": "Deleting...",
+        "error": "Unable to delete this category right now."
+      }
     }
   },
   "attendance": {

@@ -47,8 +47,16 @@ test.describe(
       await expect(
         mainNav(page).getByRole('link', { name: t('nav.cashRegister') }),
       ).toHaveCount(0);
+      await expect(
+        mainNav(page).getByRole('link', { name: t('nav.content') }),
+      ).toHaveCount(0);
 
-      for (const url of ['/trainers', '/cash-register', '/settlements/new']) {
+      for (const url of [
+        '/trainers',
+        '/cash-register',
+        '/settlements/new',
+        '/content/categories',
+      ]) {
         await page.goto(url);
         await expect(page).toHaveURL(/\/unauthorized$/);
         await expect(unauthorizedHeading(page)).toBeVisible();

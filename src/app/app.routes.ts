@@ -401,6 +401,51 @@ export const routes: Routes = [
         data: { roles: ['ADMIN'] },
       },
       {
+        path: 'content',
+        pathMatch: 'full',
+        redirectTo: 'content/categories',
+      },
+      {
+        path: 'content/categories/new',
+        title: 'content.categories.create.title',
+        loadComponent: () =>
+          import('./pages/content/categories/category-create.component').then(
+            (m) => m.CategoryCreateComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
+      },
+      {
+        path: 'content/categories/:id/edit',
+        title: 'content.categories.edit.title',
+        loadComponent: () =>
+          import('./pages/content/categories/category-edit.component').then(
+            (m) => m.CategoryEditComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
+      },
+      {
+        path: 'content/categories/:id/delete',
+        title: 'content.categories.delete.title',
+        loadComponent: () =>
+          import('./pages/content/categories/category-delete.component').then(
+            (m) => m.CategoryDeleteComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
+      },
+      {
+        path: 'content/categories',
+        title: 'content.categories.list.title',
+        loadComponent: () =>
+          import('./pages/content/categories/categories.component').then(
+            (m) => m.CategoriesComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
+      },
+      {
         path: 'trainees/new',
         title: 'trainees.create.title',
         loadComponent: () =>

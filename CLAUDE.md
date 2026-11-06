@@ -104,6 +104,7 @@ src/
     app.routes.ts         # all routes; role restrictions via data: { roles: [...] } + roleGuard; title = translation key
     i18n/                 # LanguageService, Transloco setup, LocaleFormatService, UiMessage, enum labels, key tests
     pages/<feature>/      # one folder per feature: list, -create, -edit, -details, -delete components
+    pages/content/        # the public site's back office (ADMIN): categories/ now, articles later (see "Content area")
     components/           # shared UI: navigation shell (main-layout, sidebar, tab-bar, nav-sheet, brand, theme-switch, language-switch, user-block, icon, navigation.ts), list page pieces (page-header, search-field, segmented-control, chip, avatar, status-dot, list-row, empty-state, skeleton-list), ui-button/input, trainee tables, ranked-list
     services/             # one service per API resource + auth.service, auth.interceptor, theme.service
     guards/               # authGuard, loginGuard, roleGuard
@@ -118,6 +119,14 @@ public/                   # static assets; brand/ holds the official logo PNGs; 
 - Auth: `AuthService.login()` posts to `/api/auth/login` and stores `accessToken` in `localStorage`. `authInterceptor` adds `Authorization: Bearer <token>` and on 401 logs out and redirects to `/login`. Role, email and profile ids are decoded client-side from the JWT payload (`role`, `email`, `sub`, `trainerProfileId`, `traineeProfileId`).
 - Roles are the strings `ADMIN`, `TRAINER`, `TRAINEE`. The API enforces them; `roleGuard` only gates navigation (trainees get redirected to `/my-profile`).
 - Components subscribe directly, track `loading`/`errorMessage` fields, show `error?.error?.message` from API errors, and call `ChangeDetectorRef.detectChanges()` after async updates. Money arrives as integer cents (`priceCents`), formatted as EUR.
+
+## Content area (`/content`)
+The back office of the public site `theindex.training` (the sibling repo `theindex-training/theindex-web`; its `docs/decision-record.md` is the reference for the content features and their backlog).
+- ADMIN only: every `content/...` route has `roleGuard` + `data: { roles: ['ADMIN'] }`, and the "Content" nav item (Manage group) has `roles: ['ADMIN']`.
+- `/content` redirects to `/content/categories` (to the articles list once the article pages land, backlog item 10).
+- **Categories** (`pages/content/categories/`, `ArticleCategoriesService` → `/api/article-categories`): list, create, edit and delete pages. There is no details page: a row opens the edit page, which links to the delete page. Create and edit share `category-form.ts` (validators with the API DTO limits, payload building) and `app-category-fields`.
+  - Name 1–60 characters. The slug ("page address", `/articles/category/<slug>` on the site) is optional on create (the API makes it from the name) and required on edit. The order is optional on create (the API puts it last).
+  - The API answers 409 for a taken name or slug, and for a slug change while published articles use the category; those messages are shown as they come.
 
 ## How this repo relates to theindex-api
 - The API serves everything under `/api` (Swagger at `/api/docs` when running locally). Dev: `proxy.conf.json` forwards `/api` to `localhost:3000`. Prod: the nginx image only serves static files plus the SPA fallback; `/api` routing to the API container comes from the `docker compose` setup on the VPS (`/opt/theindex`), which is in neither repo.
@@ -312,7 +321,7 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
 - **`.skeleton`:** pulsing placeholder block.
 - **`.btn`** + `.btn--primary` / `.btn--secondary` / `.btn--ghost` (low emphasis) / `.btn--danger` (soft) / `.btn--danger-solid` (confirming a destructive action): link or button actions in page content. `ui-button` stays the full-width form button.
 
-**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-left, chevron-right, plus, alert, trash, arrow-left, eye, eye-off.
+**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-left, chevron-right, plus, alert, trash, arrow-left, eye, eye-off, file-text.
 
 ### Form and detail page pattern (reference: `pages/plans/plan-*.component.html`)
 Create, edit, details and delete pages share one structure. They need no page SCSS. Create/edit pages drop `page-narrow` and use the full width:

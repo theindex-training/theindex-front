@@ -138,3 +138,21 @@ export const trainingItem = (
     createdAt: trainedAt,
   };
 };
+
+/** An article category, as GET /api/article-categories returns it. */
+export const articleCategory = (
+  id: string,
+  name: string,
+  slug: string,
+  overrides: object = {},
+) => ({
+  id,
+  language: 'bg',
+  name,
+  slug,
+  description: null as string | null,
+  sortOrder: 0,
+  createdAt: '2026-11-06T10:00:00.000Z',
+  updatedAt: '2026-11-06T10:00:00.000Z',
+  ...overrides,
+});

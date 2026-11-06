@@ -1,0 +1,30 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="'content.categories.create.title' | transloco"
+    [subtitle]="'content.categories.create.subtitle' | transloco"
+    [back]="{
+      label: ('content.categories.backToList' | transloco),
+      link: '/content/categories',
+    }"
+  />
+
+  <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
+    <app-category-fields [form]="form" mode="create" />
+
+    @if (errorMessage) {
+      <p class="notice notice--danger" role="alert">
+        {{ errorMessage | uiMessage }}
+      </p>
+    }
+
+    <div class="form-actions">
+      <button class="btn btn--primary" type="submit" [disabled]="submitting">
+        {{
+          submitting
+            ? ('common.saving' | transloco)
+            : ('content.categories.create.submit' | transloco)
+        }}
+      </button>
+    </div>
+  </form>
+</section>
