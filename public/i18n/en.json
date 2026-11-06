@@ -108,6 +108,11 @@
       "SUBSCRIPTION": "Subscription",
       "SETTLEMENT": "Settlement",
       "MANUAL": "Manual"
+    },
+    "articleStatus": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "UNPUBLISHED": "Unpublished"
     }
   },
   "trainees": {
@@ -667,6 +672,148 @@
     }
   },
   "content": {
+    "nav": {
+      "label": "Content sections",
+      "articles": "Articles",
+      "categories": "Categories"
+    },
+    "articles": {
+      "untitled": "(untitled)",
+      "unpublishedChanges": "Unpublished changes",
+      "backToList": "Back to articles",
+      "list": {
+        "title": "Articles",
+        "subtitle": "The journal of the public site. Drafts stay private until they are published.",
+        "new": "New article",
+        "searchLabel": "Search articles",
+        "searchPlaceholder": "Search by title",
+        "filter": {
+          "DRAFT": "Drafts",
+          "PUBLISHED": "Live",
+          "UNPUBLISHED": "Offline"
+        },
+        "count": "{total, plural, one {# article} other {{shown} of # articles}}",
+        "loading": "Loading articles",
+        "loadError": "Couldn't load articles",
+        "loadErrorMessage": "Unable to load articles right now.",
+        "emptyTitle": "No articles yet",
+        "emptyMessage": "Write the first one; it stays a draft until you publish it.",
+        "emptyFilteredTitle": "No articles with this status",
+        "emptyFilteredMessage": "Show all articles to see the others.",
+        "noMatchesTitle": "No matches",
+        "noMatches": "No article title contains “{term}”.",
+        "tableLabel": "Articles table",
+        "changed": "Last change",
+        "editColumn": "Edit",
+        "showMore": "Show more"
+      },
+      "create": {
+        "title": "New article",
+        "subtitle": "Give it a title; the editor opens on the new draft.",
+        "titleHint": "Up to 200 characters. You can change it later.",
+        "titleError": "Enter a title of up to 200 characters.",
+        "submit": "Create draft",
+        "error": "Unable to create this article right now."
+      },
+      "errors": {
+        "missingId": "Article ID is missing.",
+        "load": "Unable to load this article."
+      },
+      "editor": {
+        "title": "Edit article",
+        "back": "Articles",
+        "loading": "Loading article...",
+        "reload": "Reload the article",
+        "leaveUnsaved": "Some changes are not saved. Leave the editor anyway?",
+        "save": {
+          "saved": "Saved",
+          "pending": "Unsaved changes",
+          "saving": "Saving…",
+          "invalid": "Not saved: correct the highlighted fields",
+          "failed": "Couldn't save",
+          "notSaved": "Not saved",
+          "error": "Unable to save the article right now. Your changes are kept; try again.",
+          "conflict": "The article was changed in another tab or by someone else. Reload it to continue."
+        }
+      },
+      "fields": {
+        "title": "Title",
+        "titlePlaceholder": "Article title",
+        "titleHint": "Up to 200 characters.",
+        "titleError": "The title can be at most 200 characters.",
+        "body": "Article text",
+        "slug": "Page address",
+        "slugHint": "Leave empty to make it from the title at the first publish; it is fixed after that. Lowercase Latin letters, digits and hyphens, e.g. kak-da-zapochnem.",
+        "slugError": "Use lowercase Latin letters and digits joined by single hyphens, up to 80 characters.",
+        "excerpt": "Excerpt",
+        "excerptHint": "{count}/300 characters. Shown on article cards; the start of the text is used when empty.",
+        "excerptError": "The excerpt can be at most 300 characters.",
+        "categories": "Categories",
+        "categoriesHint": "Up to {max}.",
+        "featuredImage": "Featured image",
+        "featuredImageHint": "Shown at the top of the article, on its card and when it is shared.",
+        "seoTitle": "SEO title",
+        "seoTitleHint": "{count}/70 characters. The title in search results; the article title is used when empty.",
+        "seoTitleError": "The SEO title can be at most 70 characters.",
+        "seoDescription": "SEO description",
+        "seoDescriptionHint": "{count}/160 characters. The text under the title in search results; the excerpt is used when empty.",
+        "seoDescriptionError": "The SEO description can be at most 160 characters."
+      },
+      "settings": {
+        "title": "Article settings",
+        "address": "Address",
+        "addressLater": "Set at the first publish",
+        "lastSaved": "Last saved",
+        "categoriesError": "Unable to load the categories.",
+        "noCategories": "There are no categories yet. Add them under Content → Categories.",
+        "noFeaturedImage": "No image chosen.",
+        "imageMissing": "The image couldn't be loaded.",
+        "chooseImage": "Choose image",
+        "changeImage": "Change image",
+        "removeImage": "Remove"
+      },
+      "blocks": {
+        "placeholder": "Write, or type / to add a block",
+        "add": "Add",
+        "tune": "Click to tune",
+        "drag": "or drag to move",
+        "convertTo": "Convert to",
+        "filter": "Filter",
+        "nothingFound": "Nothing found",
+        "text": "Text",
+        "heading": "Heading",
+        "heading2": "Heading 2",
+        "heading3": "Heading 3",
+        "unorderedList": "Bulleted list",
+        "orderedList": "Numbered list",
+        "unordered": "Bulleted",
+        "ordered": "Numbered",
+        "quote": "Quote",
+        "quoteCaption": "Author or source",
+        "delimiter": "Divider",
+        "image": "Image",
+        "imageChoose": "Choose image",
+        "imageReplace": "Replace image",
+        "imageMissing": "The image couldn't be loaded.",
+        "altText": "Alt text",
+        "caption": "Caption (optional)",
+        "video": "YouTube video",
+        "videoLink": "YouTube link",
+        "videoLinkHint": "Paste the video’s link and press Enter.",
+        "videoInvalid": "That is not a YouTube video link.",
+        "videoThumbnail": "Video thumbnail",
+        "videoOpen": "Watch on YouTube",
+        "link": "Link",
+        "addLink": "Add a link",
+        "bold": "Bold",
+        "italic": "Italic",
+        "stub": "This block can’t be shown.",
+        "delete": "Delete",
+        "confirmDelete": "Click to delete",
+        "moveUp": "Move up",
+        "moveDown": "Move down"
+      }
+    },
     "categories": {
       "list": {
         "title": "Categories",
@@ -724,6 +871,33 @@
         "submit": "Delete category",
         "deleting": "Deleting...",
         "error": "Unable to delete this category right now."
+      }
+    },
+    "media": {
+      "picker": {
+        "title": "Choose an image",
+        "modeLabel": "Image source",
+        "library": "Library",
+        "upload": "Upload",
+        "libraryLabel": "Images in the library",
+        "loading": "Loading images",
+        "loadErrorTitle": "Couldn't load images",
+        "loadError": "Unable to load the media library right now.",
+        "emptyTitle": "No images yet",
+        "emptyMessage": "Upload the first one; it stays in the library for other articles.",
+        "uploadAction": "Upload an image",
+        "showMore": "Show more",
+        "cancel": "Cancel",
+        "use": "Use this image",
+        "file": "Image file",
+        "fileHint": "JPEG, PNG or WebP, up to 15 MB. Location and camera details are removed.",
+        "fileError": "Choose an image file.",
+        "altText": "Alt text",
+        "altTextHint": "What the image shows, for screen readers and search engines. Up to 250 characters.",
+        "altTextError": "Describe the image in up to 250 characters.",
+        "uploadSubmit": "Upload and use",
+        "uploading": "Uploading...",
+        "uploadError": "Unable to upload this image right now."
       }
     }
   },

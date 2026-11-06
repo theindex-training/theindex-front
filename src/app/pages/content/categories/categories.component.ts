@@ -13,6 +13,7 @@ import { PageHeaderComponent } from '../../../components/page-header/page-header
 import { SkeletonListComponent } from '../../../components/skeleton-list/skeleton-list.component';
 import { apiErrorMessage, UiMessage } from '../../../i18n/ui-message';
 import { UiMessagePipe } from '../../../i18n/ui-message.pipe';
+import { ContentNavComponent } from '../content-nav.component';
 import {
   ArticleCategoriesService,
   ArticleCategory,
@@ -27,6 +28,7 @@ import {
     TranslocoPipe,
     UiMessagePipe,
     PageHeaderComponent,
+    ContentNavComponent,
     SkeletonListComponent,
     EmptyStateComponent,
     ListRowComponent,

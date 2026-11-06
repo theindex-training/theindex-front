@@ -21,6 +21,9 @@ import { loginGuard } from './guards/login.guard';
 import { roleGuard } from './guards/role.guard';
 import { TranslatedTitleStrategy } from './i18n/translated-title.strategy';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
+import { ArticleCreateComponent } from './pages/content/articles/article-create.component';
+import { ArticleEditorComponent } from './pages/content/articles/article-editor.component';
+import { leaveEditorGuard } from './pages/content/articles/leave-editor.guard';
 import { CategoryCreateComponent } from './pages/content/categories/category-create.component';
 import { PlanCreateComponent } from './pages/plans/plan-create.component';
 
@@ -76,6 +79,8 @@ const SHELL_ACCESS: Record<string, string[] | null> = {
   'trainees/:id/account': STAFF,
   'trainees/:id': STAFF,
   trainees: STAFF,
+  'content/articles/new': ADMIN,
+  'content/articles': ADMIN,
   'content/categories/new': ADMIN,
   'content/categories/:id/edit': ADMIN,
   'content/categories/:id/delete': ADMIN,
@@ -92,6 +97,17 @@ describe('route table', () => {
     expect(guardsOf(routes.find((route) => route.path === 'login')!)).toEqual([
       loginGuard,
     ]);
+  });
+
+  it('puts the full-screen article editor outside the shell, for admins, with the leave guard', () => {
+    const editor = routes.find(
+      (route) => route.path === 'content/articles/:id',
+    )!;
+    expect(guardsOf(editor)).toEqual([authGuard, roleGuard]);
+    expect(editor.data?.['roles']).toEqual(ADMIN);
+    expect(editor.canDeactivate).toEqual([leaveEditorGuard]);
+    // After the shell, so the shell's content/articles/new is matched first.
+    expect(routes.indexOf(editor)).toBeGreaterThan(routes.indexOf(shell));
   });
 
   it('leaves the error pages outside the shell and unguarded', () => {
@@ -202,15 +218,30 @@ describe('routing (real routes)', () => {
     expect(await open('/settlements/new')).toBe('/unauthorized');
     expect(await open('/content')).toBe('/unauthorized');
     expect(await open('/content/categories/new')).toBe('/unauthorized');
+    expect(await open('/content/articles/a-1')).toBe('/unauthorized');
     expect(await open('/settlements')).toBe('/settlements');
   });
 
-  it('sends an admin at /content to the categories, and /content/categories/new to the create page', async () => {
+  it('sends an admin at /content to the articles, and /content/categories/new to the create page', async () => {
     signInAs('ADMIN');
-    expect(await open('/content')).toBe('/content/categories');
+    expect(await open('/content')).toBe('/content/articles');
 
     await open('/content/categories/new');
     expect(leafComponent()).toBe(CategoryCreateComponent);
+  });
+
+  it('opens the new-article page for /content/articles/new and the editor for an id', async () => {
+    signInAs('ADMIN');
+    await open('/content/articles/new');
+    expect(leafComponent()).toBe(ArticleCreateComponent);
+
+    await open('/content/articles/a-1');
+    expect(router.url).toBe('/content/articles/a-1');
+    expect(leafComponent()).toBe(ArticleEditorComponent);
+  });
+
+  it('sends a signed-out visitor at the editor to /login', async () => {
+    expect(await open('/content/articles/a-1')).toBe('/login');
   });
 
   it('lets every role open Change password', async () => {

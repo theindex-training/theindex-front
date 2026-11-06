@@ -18,6 +18,7 @@ export const ENUM_VALUES = {
     'MANUAL_OUT',
   ],
   cashSourceType: ['SUBSCRIPTION', 'SETTLEMENT', 'MANUAL'],
+  articleStatus: ['DRAFT', 'PUBLISHED', 'UNPUBLISHED'],
 } as const satisfies Record<string, readonly string[]>;
 
 export type EnumGroup = keyof typeof ENUM_VALUES;

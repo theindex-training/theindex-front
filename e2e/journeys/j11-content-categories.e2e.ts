@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 import { apiError } from '../support/api-mock';
-import { articleCategory, mockStaffHome } from '../support/data';
+import { articleCategory, mockStaffHome, pageOf } from '../support/data';
 import { expect, test } from '../support/fixtures';
 import { t } from '../support/i18n';
 
@@ -8,6 +8,8 @@ import { t } from '../support/i18n';
 test.describe('J11 content categories', () => {
   const mainNav = (page: Page) =>
     page.getByRole('navigation', { name: t('nav.mainLabel') });
+  const contentNav = (page: Page) =>
+    page.getByRole('navigation', { name: t('content.nav.label') });
   const field = (page: Page, key: string) =>
     page.getByLabel(t(key), { exact: true });
 
@@ -42,12 +44,23 @@ test.describe('J11 content categories', () => {
         body: { deleted: true },
       });
 
-      // Content lives in the Manage group and opens on the categories.
+      api.on('GET', '/api/articles', { body: pageOf([]) });
+
+      // Content lives in the Manage group and opens on the articles; its tabs lead to categories.
       await page.goto('/home');
       await mainNav(page)
         .getByRole('link', { name: t('nav.content') })
         .click();
+      await expect(page).toHaveURL(/\/content\/articles$/);
+      await contentNav(page)
+        .getByRole('link', { name: t('content.nav.categories') })
+        .click();
       await expect(page).toHaveURL(/\/content\/categories$/);
+      await expect(
+        contentNav(page).getByRole('link', {
+          name: t('content.nav.categories'),
+        }),
+      ).toHaveAttribute('aria-current', 'page');
       await expect(
         mainNav(page).getByRole('link', { name: t('nav.content') }),
       ).toHaveAttribute('aria-current', 'page');
@@ -132,6 +145,7 @@ test.describe('J11 content categories', () => {
       api.on('GET', '/api/article-categories/c-1', {
         body: articleCategory('c-1', 'Хранене', 'hranene'),
       });
+      api.on('GET', '/api/articles', { body: pageOf([]) });
 
       await page.goto('/home');
       await mainNav(page)
@@ -141,6 +155,10 @@ test.describe('J11 content categories', () => {
         .getByRole('dialog', { name: t('nav.more') })
         .getByRole('navigation', { name: t('nav.morePages') })
         .getByRole('link', { name: t('nav.content') })
+        .click();
+      await expect(page).toHaveURL(/\/content\/articles$/);
+      await contentNav(page)
+        .getByRole('link', { name: t('content.nav.categories') })
         .click();
       await expect(page).toHaveURL(/\/content\/categories$/);
 

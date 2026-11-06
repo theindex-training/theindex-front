@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login.guard';
 import { roleGuard } from './guards/role.guard';
+import { leaveEditorGuard } from './pages/content/articles/leave-editor.guard';
 
 // Route titles are translation keys; TranslatedTitleStrategy turns them into "<page> · The Index".
 export const routes: Routes = [
@@ -403,7 +404,27 @@ export const routes: Routes = [
       {
         path: 'content',
         pathMatch: 'full',
-        redirectTo: 'content/categories',
+        redirectTo: 'content/articles',
+      },
+      {
+        path: 'content/articles/new',
+        title: 'content.articles.create.title',
+        loadComponent: () =>
+          import('./pages/content/articles/article-create.component').then(
+            (m) => m.ArticleCreateComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
+      },
+      {
+        path: 'content/articles',
+        title: 'content.articles.list.title',
+        loadComponent: () =>
+          import('./pages/content/articles/articles.component').then(
+            (m) => m.ArticlesComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
       },
       {
         path: 'content/categories/new',
@@ -506,6 +527,19 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] },
       },
     ],
+  },
+  {
+    // The article editor is full screen, outside the shell (theindex-web decision record, section
+    // 9). It comes after the shell, so the shell's content/articles/new matches first.
+    path: 'content/articles/:id',
+    title: 'content.articles.editor.title',
+    loadComponent: () =>
+      import('./pages/content/articles/article-editor.component').then(
+        (m) => m.ArticleEditorComponent,
+      ),
+    canActivate: [authGuard, roleGuard],
+    canDeactivate: [leaveEditorGuard],
+    data: { roles: ['ADMIN'] },
   },
   {
     path: '**',
