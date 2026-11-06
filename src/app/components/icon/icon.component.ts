@@ -28,7 +28,8 @@ export type IconName =
   | 'trash'
   | 'arrow-left'
   | 'eye'
-  | 'eye-off';
+  | 'eye-off'
+  | 'file-text';
 
 /**
  * Inline stroke icons in the Lucide style (24px grid, 2px round strokes, currentColor).

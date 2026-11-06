@@ -30,6 +30,7 @@ describe('buildNavigation', () => {
       'Gym subscriptions',
       'Trainers',
       'Training times',
+      'Content',
     ]);
     expect(nav.tabs.map((tab) => english(tab.tabLabel ?? tab.label))).toEqual([
       'Home',
@@ -47,7 +48,7 @@ describe('buildNavigation', () => {
     expect(english(nav.sheetLabel)).toBe('More');
   });
 
-  it('hides ADMIN-only items (Cash register, Trainers) from trainers', () => {
+  it('hides ADMIN-only items (Cash register, Trainers, Content) from trainers', () => {
     const nav = buildNavigation('TRAINER');
     const all = labels([
       ...nav.main,
@@ -58,6 +59,7 @@ describe('buildNavigation', () => {
 
     expect(all).not.toContain('Cash register');
     expect(all).not.toContain('Trainers');
+    expect(all).not.toContain('Content');
     expect(labels(nav.moreMain)).toEqual(['Attendance history']);
   });
 
@@ -79,6 +81,7 @@ describe('buildNavigation', () => {
 
     expect(all).not.toContain('Cash register');
     expect(all).not.toContain('Trainers');
+    expect(all).not.toContain('Content');
   });
 });
 
@@ -89,6 +92,7 @@ describe('isUrlInItems', () => {
   it('matches sheet routes and their child pages', () => {
     expect(isUrlInItems('/plans', sheetItems)).toBe(true);
     expect(isUrlInItems('/plans/p1/edit', sheetItems)).toBe(true);
+    expect(isUrlInItems('/content/categories/c1/edit', sheetItems)).toBe(true);
     expect(isUrlInItems('/gym-subscriptions?active=true', sheetItems)).toBe(
       true,
     );

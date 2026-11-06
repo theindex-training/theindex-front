@@ -21,6 +21,7 @@ import { loginGuard } from './guards/login.guard';
 import { roleGuard } from './guards/role.guard';
 import { TranslatedTitleStrategy } from './i18n/translated-title.strategy';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
+import { CategoryCreateComponent } from './pages/content/categories/category-create.component';
 import { PlanCreateComponent } from './pages/plans/plan-create.component';
 
 const STAFF = ['ADMIN', 'TRAINER'];
@@ -75,6 +76,10 @@ const SHELL_ACCESS: Record<string, string[] | null> = {
   'trainees/:id/account': STAFF,
   'trainees/:id': STAFF,
   trainees: STAFF,
+  'content/categories/new': ADMIN,
+  'content/categories/:id/edit': ADMIN,
+  'content/categories/:id/delete': ADMIN,
+  'content/categories': ADMIN,
 };
 
 const guardsOf = (route: Route) => (route.canActivate ?? []) as CanActivateFn[];
@@ -195,7 +200,17 @@ describe('routing (real routes)', () => {
     expect(await open('/trainers')).toBe('/unauthorized');
     expect(await open('/cash-register')).toBe('/unauthorized');
     expect(await open('/settlements/new')).toBe('/unauthorized');
+    expect(await open('/content')).toBe('/unauthorized');
+    expect(await open('/content/categories/new')).toBe('/unauthorized');
     expect(await open('/settlements')).toBe('/settlements');
+  });
+
+  it('sends an admin at /content to the categories, and /content/categories/new to the create page', async () => {
+    signInAs('ADMIN');
+    expect(await open('/content')).toBe('/content/categories');
+
+    await open('/content/categories/new');
+    expect(leafComponent()).toBe(CategoryCreateComponent);
   });
 
   it('lets every role open Change password', async () => {

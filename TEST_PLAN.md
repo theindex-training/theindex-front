@@ -16,6 +16,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - PR 4 covered §5–§12 (62 spec files, 547 tests; 17 more breaks in production code, all caught). It pinned S4, S8, S10, S11 and S12, and found S15 and S16.
 - PR 5 set up E2E (Playwright, API mock, CI job) and added all nine journeys: 37 E2E tests over the desktop and mobile projects. It found S17.
 - The trainings calendar (a feature, not a test PR) came with its own specs: 65 spec files, 587 unit tests, plus journey J10 (39 E2E tests). Three deliberate breaks (UTC day keys, list as the default view, no unpaid marker) were each caught.
+- The content categories (a feature: theindex-web decision record, backlog item 9) came with §13 and journey J11: 67 spec files, 623 unit tests, 41 E2E tests. Four deliberate breaks in `category-form.ts` (description not cleared to `null`, empty slug sent, no slug length check, fractional order accepted) were each caught.
 
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
 - **P0:** access control, sessions, money, and anything that writes attendance, subscriptions, settlements or cash. A bug here loses money or data, or exposes screens to the wrong role.
@@ -433,6 +434,28 @@ One spec per service, each method asserting method, URL, query and body. These p
 - [~] `AppComponent` "should create" adds nothing; the health-check test covers it.
 - Not unit-tested (presentational, covered by the pages and E2E): brand, chip, icon, status-dot, skeleton-list, empty-state, page-header, list-row, ui-button, sidebar, tab-bar, theme-switch, language-switch, not-found, unauthorized, records.
 
+### 13. Content: article categories (P1)
+
+**`services/article-categories.service.ts` → `article-categories.service.spec.ts`**
+- [x] `list`, `getById`, `create` (POST), `update` (PATCH), `delete` (DELETE) under `/api/article-categories`.
+
+**`pages/content/categories/*` → `categories.spec.ts`** (the four pages through `RouterTestingHarness`; the list reloads after each save)
+- [x] List: categories in the API's order, each linking to `/content/categories/<id>/edit`, with slug, description (or "—") and order; the count. Empty → the create action and no count. Error → "Try again" loads again.
+- [x] Create:
+  - an empty form sends nothing and shows the name error;
+  - only the trimmed name is sent when slug, description and order are empty (whitespace-only description included), so the API picks the slug and puts it last;
+  - a chosen slug, description and order are sent trimmed → `/content/categories`;
+  - refused before sending: slugs with capitals, Cyrillic, spaces, a double or trailing hyphen, or 81 characters; a negative or fractional order; a 61-character or whitespace-only name; a 301-character description;
+  - a 409 shows the API message, the button is usable again and the page stays.
+- [x] Edit:
+  - fills the form from `GET /api/article-categories/<id>`;
+  - PATCH sends every field, trimmed, an emptied description as `null` → `/content/categories`;
+  - slug and order are required;
+  - a refused slug change (409) shows the API message and keeps the typed slug;
+  - links to the delete page; a load error shows the API message and no form; a missing id sends nothing.
+- [x] Delete: shows name, slug and the warning; `DELETE /api/article-categories/<id>` → `/content/categories`; a failed delete shows the fallback and gives the button back; a missing id sends nothing.
+- [x] Routes (`app.routes.spec.ts`): every `content/categories...` route is ADMIN only; `/content` → `/content/categories`; a trainer gets `/unauthorized`. Navigation (`navigation.spec.ts`): "Content" is the last Manage item for admins only, and `/content/...` URLs light up the More tab.
+
 ---
 
 ## Part B — E2E user journeys (Playwright)
@@ -502,7 +525,8 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 1. No token, deep link `/trainees` → `/login`. No `/api/trainees` call.
 2. TRAINER token:
    - the sidebar has no Trainers and no Cash register;
-   - `/trainers` → `/unauthorized`, and so do `/cash-register` and `/settlements/new`;
+   - the sidebar has no Content either (added with J11);
+   - `/trainers` → `/unauthorized`, and so do `/cash-register`, `/settlements/new` and `/content/categories`;
    - `/settlements` loads with no generate action.
 3. TRAINEE token: `/home` → `/my-profile`, and `/trainees` → `/my-profile`.
 4. Any token, `/login` → the role's home (`loginGuard`).
@@ -642,6 +666,14 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 5. Next month is allowed and empty; Today comes back.
 6. List shows every training in the table and is still chosen after a reload; switching back shows the calendar.
 7. Phone: cells show markers only (no trainer text); the month is listed below the grid by day; tapping a day narrows the list to it.
+
+### J11. Content categories (P1) [desktop, mobile]
+✅ Added with the categories pages (theindex-web backlog item 9): `e2e/journeys/j11-content-categories.e2e.ts`, 2 tests.
+1. Desktop, ADMIN on `/home`: "Content" in the sidebar → `/content/categories`, the item is `aria-current="page"`, the count shows 1.
+2. "New category" with only a name → `POST /api/article-categories {name}` → back on the list, which now counts 2.
+3. Open it → the edit page with its slug. A slug the API refuses (409) shows the message in an alert. A free slug and a description → `PATCH {name, slug, description, sortOrder}` → the list.
+4. Open it again → "Delete category" → the warning → confirm → `DELETE` → the list.
+5. Phone: More → Content in the sheet → the categories as rows; a row opens the edit page.
 
 ---
 

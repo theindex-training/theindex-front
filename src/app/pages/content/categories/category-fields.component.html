@@ -1,0 +1,124 @@
+<div class="form-grid">
+  <div class="form-row">
+    <div class="form-field">
+      <label class="form-field__label" for="category-name">{{
+        'content.categories.fields.name' | transloco
+      }}</label>
+      <input
+        id="category-name"
+        type="text"
+        [formControl]="form.controls.name"
+        [placeholder]="'content.categories.fields.namePlaceholder' | transloco"
+        aria-describedby="category-name-help"
+        [attr.aria-invalid]="showError('name')"
+      />
+      @if (showError('name')) {
+        <span class="form-field__error" id="category-name-help">{{
+          'content.categories.fields.nameError' | transloco
+        }}</span>
+      } @else {
+        <span class="form-field__hint" id="category-name-help">{{
+          'content.categories.fields.nameHint' | transloco
+        }}</span>
+      }
+    </div>
+
+    <div class="form-field">
+      <label class="form-field__label" for="category-slug">
+        {{ 'content.categories.fields.slug' | transloco }}
+        @if (mode === 'create') {
+          <span class="form-field__optional">{{
+            'common.optional' | transloco
+          }}</span>
+        }
+      </label>
+      <input
+        id="category-slug"
+        type="text"
+        autocomplete="off"
+        autocapitalize="none"
+        spellcheck="false"
+        [formControl]="form.controls.slug"
+        aria-describedby="category-slug-help"
+        [attr.aria-invalid]="showError('slug')"
+      />
+      @if (showError('slug')) {
+        <span class="form-field__error" id="category-slug-help">{{
+          (form.controls.slug.hasError('required')
+            ? 'content.categories.fields.slugRequired'
+            : 'content.categories.fields.slugError'
+          ) | transloco
+        }}</span>
+      } @else {
+        <span class="form-field__hint" id="category-slug-help">{{
+          (mode === 'create'
+            ? 'content.categories.fields.slugHintCreate'
+            : 'content.categories.fields.slugHintEdit'
+          ) | transloco
+        }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-field">
+      <label class="form-field__label" for="category-description">
+        {{ 'content.categories.fields.description' | transloco }}
+        <span class="form-field__optional">{{
+          'common.optional' | transloco
+        }}</span>
+      </label>
+      <textarea
+        id="category-description"
+        rows="3"
+        [formControl]="form.controls.description"
+        aria-describedby="category-description-help"
+        [attr.aria-invalid]="showError('description')"
+      ></textarea>
+      @if (showError('description')) {
+        <span class="form-field__error" id="category-description-help">{{
+          'content.categories.fields.descriptionError' | transloco
+        }}</span>
+      } @else {
+        <span class="form-field__hint" id="category-description-help">{{
+          'content.categories.fields.descriptionHint' | transloco
+        }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-field">
+      <label class="form-field__label" for="category-order">
+        {{ 'content.categories.fields.sortOrder' | transloco }}
+        @if (mode === 'create') {
+          <span class="form-field__optional">{{
+            'common.optional' | transloco
+          }}</span>
+        }
+      </label>
+      <input
+        id="category-order"
+        type="number"
+        inputmode="numeric"
+        min="0"
+        step="1"
+        [formControl]="form.controls.sortOrder"
+        aria-describedby="category-order-help"
+        [attr.aria-invalid]="showError('sortOrder')"
+      />
+      @if (showError('sortOrder')) {
+        <span class="form-field__error" id="category-order-help">{{
+          'content.categories.fields.sortOrderError' | transloco
+        }}</span>
+      } @else {
+        <span class="form-field__hint" id="category-order-help">{{
+          (mode === 'create'
+            ? 'content.categories.fields.sortOrderHintCreate'
+            : 'content.categories.fields.sortOrderHintEdit'
+          ) | transloco
+        }}</span>
+      }
+    </div>
+  </div>
+</div>

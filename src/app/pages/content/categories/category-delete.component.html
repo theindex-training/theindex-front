@@ -1,0 +1,62 @@
+<section class="page-stack page-narrow">
+  <app-page-header
+    [title]="'content.categories.delete.title' | transloco"
+    [subtitle]="'content.categories.delete.subtitle' | transloco"
+    [back]="{
+      label: ('content.categories.backToList' | transloco),
+      link: '/content/categories',
+    }"
+  />
+
+  @if (loading) {
+    <p class="notice" role="status">
+      {{ 'content.categories.loadingOne' | transloco }}
+    </p>
+  } @else if (errorMessage && !category) {
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
+  } @else if (category) {
+    <div class="panel">
+      <dl class="detail-list">
+        <div>
+          <dt>{{ 'content.categories.fields.name' | transloco }}</dt>
+          <dd>{{ category.name }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'content.categories.fields.slug' | transloco }}</dt>
+          <dd>{{ category.slug }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'content.categories.fields.description' | transloco }}</dt>
+          <dd>{{ category.description || ('common.dash' | transloco) }}</dd>
+        </div>
+      </dl>
+
+      <p class="notice notice--warning">
+        {{ 'content.categories.delete.warning' | transloco }}
+      </p>
+
+      @if (errorMessage) {
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
+      }
+
+      <div class="form-actions">
+        <button
+          class="btn btn--danger-solid"
+          type="button"
+          (click)="confirmDelete()"
+          [disabled]="submitting"
+        >
+          {{
+            submitting
+              ? ('content.categories.delete.deleting' | transloco)
+              : ('content.categories.delete.submit' | transloco)
+          }}
+        </button>
+      </div>
+    </div>
+  }
+</section>
