@@ -1,0 +1,53 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="'content.articles.create.title' | transloco"
+    [subtitle]="'content.articles.create.subtitle' | transloco"
+    [back]="{
+      label: ('content.articles.backToList' | transloco),
+      link: '/content/articles',
+    }"
+  />
+
+  <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
+    <div class="form-grid">
+      <div class="form-field">
+        <label class="form-field__label" for="article-new-title">{{
+          'content.articles.fields.title' | transloco
+        }}</label>
+        <input
+          id="article-new-title"
+          type="text"
+          formControlName="title"
+          [placeholder]="'content.articles.fields.titlePlaceholder' | transloco"
+          aria-describedby="article-new-title-help"
+          [attr.aria-invalid]="titleInvalid"
+        />
+        @if (titleInvalid) {
+          <span class="form-field__error" id="article-new-title-help">{{
+            'content.articles.create.titleError' | transloco
+          }}</span>
+        } @else {
+          <span class="form-field__hint" id="article-new-title-help">{{
+            'content.articles.create.titleHint' | transloco
+          }}</span>
+        }
+      </div>
+    </div>
+
+    @if (errorMessage) {
+      <p class="notice notice--danger" role="alert">
+        {{ errorMessage | uiMessage }}
+      </p>
+    }
+
+    <div class="form-actions">
+      <button class="btn btn--primary" type="submit" [disabled]="submitting">
+        {{
+          submitting
+            ? ('common.saving' | transloco)
+            : ('content.articles.create.submit' | transloco)
+        }}
+      </button>
+    </div>
+  </form>
+</section>

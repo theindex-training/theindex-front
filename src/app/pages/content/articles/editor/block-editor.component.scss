@@ -1,0 +1,144 @@
+// Editor.js ships light-only styles in a <style> it adds at runtime. These rules map them onto the
+// design tokens (both themes). Each starts with .block-editor, so it outranks the library's.
+
+.block-editor {
+  color: var(--text);
+  font-size: var(--text-lg);
+  line-height: 1.6;
+
+  .ce-block__content,
+  .ce-toolbar__content {
+    max-width: none;
+  }
+
+  .ce-block--selected .ce-block__content {
+    background: var(--accent-soft);
+  }
+
+  .ce-paragraph a,
+  .cdx-quote a,
+  .cdx-list a {
+    color: var(--accent-text);
+  }
+
+  h2.ce-header {
+    font-size: var(--text-2xl);
+  }
+
+  h3.ce-header {
+    font-size: var(--text-xl);
+  }
+
+  .cdx-quote__text {
+    min-height: 4.5rem;
+  }
+
+  [data-placeholder]::before,
+  [data-placeholder-active]::before {
+    color: var(--muted) !important;
+  }
+
+  .cdx-input {
+    border-color: var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: none;
+  }
+
+  .ce-toolbar__plus,
+  .ce-toolbar__settings-btn {
+    color: var(--text);
+    background: transparent;
+
+    &:hover {
+      background: var(--surface-2);
+    }
+  }
+
+  @media (max-width: 1023.98px) {
+    .ce-toolbar__plus,
+    .ce-toolbar__settings-btn {
+      border-color: var(--border);
+      background: var(--surface);
+      box-shadow: none;
+    }
+  }
+
+  .ce-popover {
+    --color-background: var(--surface);
+    --color-text-primary: var(--text);
+    --color-text-secondary: var(--muted);
+    --color-border: var(--border);
+    --color-shadow: var(--scrim);
+    --color-border-icon: var(--border);
+    --color-border-icon-disabled: var(--border);
+    --color-text-icon-active: var(--accent-text);
+    --color-background-icon-active: var(--accent-soft);
+    --color-background-item-focus: var(--surface-2);
+    --color-shadow-item-focus: transparent;
+    --color-background-item-hover: var(--surface-2);
+    --color-background-item-confirm: var(--danger);
+    --color-background-item-confirm-hover: var(--danger);
+  }
+
+  .ce-popover__container {
+    border: 1px solid var(--border);
+  }
+
+  .ce-popover-item--confirmation .ce-popover-item__title,
+  .ce-popover-item--confirmation .ce-popover-item__icon {
+    color: var(--on-danger);
+  }
+
+  .cdx-search-field,
+  .ce-inline-tool-input {
+    border-color: var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  .cdx-search-field__input {
+    min-height: 0;
+    color: var(--text);
+  }
+
+  .ce-inline-tool,
+  .ce-popover-item__icon {
+    color: inherit;
+  }
+
+  // Our image and video blocks (editor-tools.ts).
+  .article-block {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+  }
+
+  .article-block__media {
+    display: grid;
+    gap: var(--space-1);
+    justify-items: start;
+  }
+
+  .article-block__image {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+  }
+
+  .article-block__note {
+    margin: 0;
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+
+  a.article-block__note {
+    color: var(--accent-text);
+  }
+
+  .article-block__caption {
+    font-size: var(--text-sm);
+  }
+}

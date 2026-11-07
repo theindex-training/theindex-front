@@ -1,0 +1,185 @@
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- a click on the backdrop closes the picker; keyboard users have Escape and the close button -->
+<dialog
+  #dialog
+  class="media-picker"
+  aria-labelledby="media-picker-title"
+  (close)="handleClose()"
+  (click)="handleDialogClick($event)"
+>
+  <div class="media-picker__panel">
+    <div class="media-picker__header">
+      <h2 class="media-picker__title" id="media-picker-title">
+        {{ 'content.media.picker.title' | transloco }}
+      </h2>
+      <button
+        class="icon-btn"
+        type="button"
+        [attr.aria-label]="'common.close' | transloco"
+        (click)="close()"
+      >
+        <app-icon name="close" />
+      </button>
+    </div>
+
+    <app-segmented-control
+      [label]="'content.media.picker.modeLabel' | transloco"
+      [options]="modes"
+      [value]="mode"
+      (valueChange)="setMode($event)"
+    />
+
+    @if (mode === 'library') {
+      @if (loadError) {
+        <app-empty-state
+          tone="danger"
+          [title]="'content.media.picker.loadErrorTitle' | transloco"
+          [message]="loadError | uiMessage"
+        >
+          <button class="btn btn--secondary" type="button" (click)="loadMore()">
+            {{ 'common.tryAgain' | transloco }}
+          </button>
+        </app-empty-state>
+      } @else if (loading && !items.length) {
+        <app-skeleton-list
+          [label]="'content.media.picker.loading' | transloco"
+          [rows]="2"
+        />
+      } @else if (!items.length) {
+        <app-empty-state
+          icon="file-text"
+          [title]="'content.media.picker.emptyTitle' | transloco"
+          [message]="'content.media.picker.emptyMessage' | transloco"
+        >
+          <button
+            class="btn btn--primary"
+            type="button"
+            (click)="setMode('upload')"
+          >
+            {{ 'content.media.picker.uploadAction' | transloco }}
+          </button>
+        </app-empty-state>
+      } @else {
+        <ul
+          class="media-grid"
+          [attr.aria-label]="'content.media.picker.libraryLabel' | transloco"
+        >
+          @for (item of items; track item.id) {
+            <li>
+              <button
+                class="media-grid__item"
+                type="button"
+                [attr.aria-pressed]="selected?.id === item.id"
+                (click)="select(item)"
+              >
+                <img
+                  [src]="thumbnail(item)"
+                  [alt]="item.altText"
+                  [width]="item.width"
+                  [height]="item.height"
+                  loading="lazy"
+                />
+              </button>
+            </li>
+          }
+        </ul>
+        @if (items.length < total) {
+          <button
+            class="btn btn--ghost"
+            type="button"
+            [disabled]="loading"
+            (click)="loadMore()"
+          >
+            {{
+              (loading ? 'common.loading' : 'content.media.picker.showMore')
+                | transloco
+            }}
+          </button>
+        }
+        <div class="form-actions">
+          <button class="btn btn--secondary" type="button" (click)="close()">
+            {{ 'content.media.picker.cancel' | transloco }}
+          </button>
+          <button
+            class="btn btn--primary"
+            type="button"
+            [disabled]="!selected"
+            (click)="useSelected()"
+          >
+            {{ 'content.media.picker.use' | transloco }}
+          </button>
+        </div>
+      }
+    } @else {
+      <form class="form-grid" [formGroup]="uploadForm" (ngSubmit)="upload()">
+        <div class="form-field">
+          <label class="form-field__label" for="media-file">{{
+            'content.media.picker.file' | transloco
+          }}</label>
+          <input
+            id="media-file"
+            type="file"
+            [accept]="accept"
+            aria-describedby="media-file-help"
+            [attr.aria-invalid]="fileInvalid"
+            (change)="fileChosen($event)"
+          />
+          @if (fileInvalid) {
+            <span class="form-field__error" id="media-file-help">{{
+              'content.media.picker.fileError' | transloco
+            }}</span>
+          } @else {
+            <span class="form-field__hint" id="media-file-help">{{
+              'content.media.picker.fileHint' | transloco
+            }}</span>
+          }
+        </div>
+
+        @if (previewUrl) {
+          <img class="media-picker__preview" [src]="previewUrl" alt="" />
+        }
+
+        <div class="form-field">
+          <label class="form-field__label" for="media-alt">{{
+            'content.media.picker.altText' | transloco
+          }}</label>
+          <textarea
+            id="media-alt"
+            rows="2"
+            formControlName="altText"
+            aria-describedby="media-alt-help"
+            [attr.aria-invalid]="altTextInvalid"
+          ></textarea>
+          @if (altTextInvalid) {
+            <span class="form-field__error" id="media-alt-help">{{
+              'content.media.picker.altTextError' | transloco
+            }}</span>
+          } @else {
+            <span class="form-field__hint" id="media-alt-help">{{
+              'content.media.picker.altTextHint' | transloco
+            }}</span>
+          }
+        </div>
+
+        @if (uploadError) {
+          <p class="notice notice--danger" role="alert">
+            {{ uploadError | uiMessage }}
+          </p>
+        }
+
+        <div class="form-actions">
+          <button class="btn btn--secondary" type="button" (click)="close()">
+            {{ 'content.media.picker.cancel' | transloco }}
+          </button>
+          <button class="btn btn--primary" type="submit" [disabled]="uploading">
+            {{
+              (uploading
+                ? 'content.media.picker.uploading'
+                : 'content.media.picker.uploadSubmit'
+              ) | transloco
+            }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</dialog>

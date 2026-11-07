@@ -17,6 +17,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - PR 5 set up E2E (Playwright, API mock, CI job) and added all nine journeys: 37 E2E tests over the desktop and mobile projects. It found S17.
 - The trainings calendar (a feature, not a test PR) came with its own specs: 65 spec files, 587 unit tests, plus journey J10 (39 E2E tests). Three deliberate breaks (UTC day keys, list as the default view, no unpaid marker) were each caught.
 - The content categories (a feature: theindex-web decision record, backlog item 9) came with §13 and journey J11: 67 spec files, 623 unit tests, 41 E2E tests. Four deliberate breaks in `category-form.ts` (description not cleared to `null`, empty slug sent, no slug length check, fractional order accepted) were each caught.
+- The article list and editor (backlog item 10) came with §14 and journey J12: 72 spec files, 695 unit tests, 43 E2E tests. Six deliberate breaks: autosave sending every field, an emptied optional field sent as `""`, the list `meta` kept, a 409 not stopping the autosave and an image caption lost on save were caught at once; a slug sent after the first publish slipped through, so it got the "published meanwhile" test, which catches it.
 
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
 - **P0:** access control, sessions, money, and anything that writes attendance, subscriptions, settlements or cash. A bug here loses money or data, or exposes screens to the wrong role.
@@ -456,6 +457,34 @@ One spec per service, each method asserting method, URL, query and body. These p
 - [x] Delete: shows name, slug and the warning; `DELETE /api/article-categories/<id>` → `/content/categories`; a failed delete shows the fallback and gives the button back; a missing id sends nothing.
 - [x] Routes (`app.routes.spec.ts`): every `content/categories...` route is ADMIN only; `/content` → `/content/categories`; a trainer gets `/unauthorized`. Navigation (`navigation.spec.ts`): "Content" is the last Manage item for admins only, and `/content/...` URLs light up the More tab.
 
+### 14. Content: articles, editor and media picker (P1)
+
+**`services/articles.service.ts`, `services/media.service.ts` → their specs**
+- [x] `list` sends only the query values that are set; `getById`, `create {title}`, `saveDraft` (PATCH `/:id/draft` with `baseRevision`).
+- [x] Media: `list(page, pageSize)`, `getById`, `upload` as multipart (`file` with its name, `altText`); `mediaThumbnail` picks the narrowest variant wide enough, else the widest, else the master.
+
+**`pages/content/articles/editor/article-content.ts` → `article-content.spec.ts`**
+- [x] Stored content → editor data adds the list tool's `meta` (nested items too); other blocks, `time` and `version` pass through; no content → no blocks.
+- [x] The round trip is lossless; the list `meta`, start number and block tunes are dropped before sending; a checklist goes out as an unordered list.
+- [x] `youtubeVideoId` reads watch, youtu.be, embed, shorts, live and nocookie links (the API's rules) and refuses other hosts, short ids, channels and non-http schemes; the paste pattern matches YouTube links only.
+
+**`editor/draft-autosave.ts` → `draft-autosave.spec.ts`** (fake `setTimeout`; real `ArticlesService` + `HttpTestingController`)
+- [x] Waits for the delay after the last change, then sends only the changed fields and the revision; the next save uses the revision the last one returned.
+- [x] One request at a time: a change made while saving goes with the next save (at once if the delay ran out meanwhile, after the delay otherwise).
+- [x] A field with an error waits (status `invalid`) while the others are saved; nothing is sent when every changed field has an error.
+- [x] A failed save keeps the changes (status `error`, translated fallback) and "Try again" resends them; a 409 stops autosave for good with the API's message; `save()` with nothing changed answers true without a request.
+
+**`pages/content/articles/*` → `articles.spec.ts`** (`RouterTestingHarness`, the real Editor.js in jsdom with `matchMedia` and `<dialog>` stubbed; the autosave delay is the `AUTOSAVE_DELAY` token, 20 ms here)
+- [x] List: rows with status, "Unpublished changes", category names and "(untitled)"; the count; the status filter and the debounced search go to the API; "Show more" adds the next page, and is usable again when a filter change cancels it (review of theindex-front#80); the empty, filtered-empty, no-match and error states.
+- [x] New article: nothing sent without a title; `POST {title}` trimmed → the editor; an API error shows and gives the button back.
+- [x] Editor load: title, body text, slug, excerpt, categories, featured image (by `GET /api/media/:id`), status and "Set at the first publish"; a load error and a missing id.
+- [x] Autosave from the page: changed text fields only, trimmed, empty optional ones as `null`; the body as stored blocks after an edit (Editor.js batches its change events for 400 ms); a field over its limit waits with its error; a refused slug format; the whole category list; image and video blocks shown from their ids and saved back unchanged.
+- [x] Media picker through the featured image: choose from the library (`Use this image` disabled until a choice), remove; upload with required file and alt text (multipart body), an API refusal shown in the dialog; closing the picker cancels an upload on its way, so it can't fill the next session (review of theindex-front#80).
+- [x] A published article has no slug field and shows `/articles/<slug>`; a slug waiting with an error is dropped once a save shows the article was published meanwhile.
+- [x] 409 → the API message, no more saves, "Reload the article" loads it again; a 500 → "Couldn't save" + "Try again"; a language switch rebuilds Editor.js with the text kept and the new placeholder.
+- [x] Leaving: the guard saves at once and then leaves; when that save fails it asks (`window.confirm`) and stays on "no".
+- [x] Routes (`app.routes.spec.ts`): `content/articles` and `content/articles/new` are ADMIN pages in the shell; the editor `content/articles/:id` is outside the shell with `authGuard` + `roleGuard` (ADMIN) and the leave guard, after the shell so `new` matches first; `/content` → `/content/articles`; a trainer gets `/unauthorized`, a signed-out visitor `/login`.
+
 ---
 
 ## Part B — E2E user journeys (Playwright)
@@ -669,11 +698,20 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 
 ### J11. Content categories (P1) [desktop, mobile]
 ✅ Added with the categories pages (theindex-web backlog item 9): `e2e/journeys/j11-content-categories.e2e.ts`, 2 tests.
-1. Desktop, ADMIN on `/home`: "Content" in the sidebar → `/content/categories`, the item is `aria-current="page"`, the count shows 1.
+1. Desktop, ADMIN on `/home`: "Content" in the sidebar → `/content/articles` (since item 10), then the "Categories" tab → `/content/categories`, the tab is `aria-current="page"`, the count shows 1.
 2. "New category" with only a name → `POST /api/article-categories {name}` → back on the list, which now counts 2.
 3. Open it → the edit page with its slug. A slug the API refuses (409) shows the message in an alert. A free slug and a description → `PATCH {name, slug, description, sortOrder}` → the list.
 4. Open it again → "Delete category" → the warning → confirm → `DELETE` → the list.
 5. Phone: More → Content in the sheet → the categories as rows; a row opens the edit page.
+
+### J12. Content articles (P1) [desktop, mobile]
+✅ Added with the article list and editor (theindex-web backlog item 10): `e2e/journeys/j12-content-articles.e2e.ts`, 2 tests. The mock answers autosaves like the API (merges the changes, counts the revision up, 409 on a stale one).
+1. Desktop: "Content" → `/content/articles`, three rows; the "Live" filter → `GET /api/articles?status=PUBLISHED&page=1&pageSize=20`.
+2. "New article" → title → `POST {title}` → the full-screen editor (no app navigation) with the title and "Saved".
+3. Typing in the body → one autosave with the paragraph block. Enter, "/" in the new block (after the browser is idle: Editor.js wires new blocks up then), filter "YouTube", the link field → an `embed` block with the video id.
+4. Settings: excerpt and a category → saved together, only those fields. Featured image from the library, then an upload (alt text required first; multipart body with the file name and alt text).
+5. Change the title and click "Articles": the leave guard saves it first, then the list opens.
+6. Phone: a row of the list opens the editor; the settings panel follows the text; an SEO title → one autosave with only that field.
 
 ---
 

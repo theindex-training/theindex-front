@@ -1,0 +1,201 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="'content.articles.list.title' | transloco"
+    [subtitle]="'content.articles.list.subtitle' | transloco"
+    [action]="{
+      label: ('content.articles.list.new' | transloco),
+      link: '/content/articles/new',
+    }"
+  />
+
+  <app-content-nav />
+
+  <div class="list-toolbar">
+    <app-search-field
+      class="list-toolbar__search"
+      [label]="'content.articles.list.searchLabel' | transloco"
+      [placeholder]="'content.articles.list.searchPlaceholder' | transloco"
+      [value]="searchTerm"
+      (valueChange)="setSearch($event)"
+    />
+    <app-segmented-control
+      [label]="'common.status' | transloco"
+      [options]="statusOptions"
+      [value]="status"
+      (valueChange)="setStatus($event)"
+    />
+    @if (!loading && !errorMessage && articles.length) {
+      <p
+        class="list-toolbar__count"
+        data-testid="list-count"
+        aria-live="polite"
+      >
+        {{
+          'content.articles.list.count'
+            | transloco: { shown: articles.length, total: total }
+        }}
+      </p>
+    }
+  </div>
+
+  @if (loading) {
+    <app-skeleton-list
+      [label]="'content.articles.list.loading' | transloco"
+      [rows]="4"
+    />
+  } @else if (errorMessage) {
+    <app-empty-state
+      tone="danger"
+      [title]="'content.articles.list.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="load()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else if (!articles.length && searchTerm.trim()) {
+    <app-empty-state
+      [title]="'content.articles.list.noMatchesTitle' | transloco"
+      [message]="
+        'content.articles.list.noMatches'
+          | transloco: { term: searchTerm.trim() }
+      "
+    >
+      <button class="btn btn--secondary" type="button" (click)="clearSearch()">
+        {{ 'common.clearSearch' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else if (!articles.length && filtered) {
+    <app-empty-state
+      icon="file-text"
+      [title]="'content.articles.list.emptyFilteredTitle' | transloco"
+      [message]="'content.articles.list.emptyFilteredMessage' | transloco"
+    >
+      <button class="btn btn--secondary" type="button" (click)="showAll()">
+        {{ 'common.showAll' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else if (!articles.length) {
+    <app-empty-state
+      icon="file-text"
+      [title]="'content.articles.list.emptyTitle' | transloco"
+      [message]="'content.articles.list.emptyMessage' | transloco"
+    >
+      <a class="btn btn--primary" routerLink="/content/articles/new">{{
+        'content.articles.list.new' | transloco
+      }}</a>
+    </app-empty-state>
+  } @else {
+    <div
+      class="data-table-wrap responsive-table"
+      tabindex="0"
+      role="region"
+      [attr.aria-label]="'content.articles.list.tableLabel' | transloco"
+    >
+      <table class="data-table">
+        <caption class="visually-hidden">
+          {{
+            'content.articles.list.title' | transloco
+          }}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">
+              {{ 'content.articles.fields.title' | transloco }}
+            </th>
+            <th scope="col">{{ 'common.status' | transloco }}</th>
+            <th scope="col">
+              {{ 'content.articles.fields.categories' | transloco }}
+            </th>
+            <th scope="col">
+              {{ 'content.articles.list.changed' | transloco }}
+            </th>
+            <th scope="col" class="cell-fit">
+              <span class="visually-hidden">{{
+                'content.articles.list.editColumn' | transloco
+              }}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (article of articles; track article.id) {
+            <tr>
+              <td>
+                <a
+                  class="cell-link"
+                  [class.text-muted]="!article.title.trim()"
+                  [routerLink]="['/content/articles', article.id]"
+                  >{{ titleOf(article) }}</a
+                >
+              </td>
+              <td>
+                <app-status-dot [tone]="tone(article.status)">
+                  {{ article.status | enumLabel: 'articleStatus' }}
+                </app-status-dot>
+                @if (
+                  article.status !== 'DRAFT' && article.hasUnpublishedChanges
+                ) {
+                  <span class="text-muted">
+                    {{ 'content.articles.unpublishedChanges' | transloco }}
+                  </span>
+                }
+              </td>
+              <td [class.text-muted]="!categoriesOf(article)">
+                {{ categoriesOf(article) || ('common.dash' | transloco) }}
+              </td>
+              <td class="num">{{ changedAt(article) }}</td>
+              <td class="cell-fit">
+                <a
+                  class="row-chevron"
+                  [routerLink]="['/content/articles', article.id]"
+                  tabindex="-1"
+                  aria-hidden="true"
+                >
+                  <app-icon name="chevron-right" />
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <ul
+      class="list-card responsive-list"
+      [attr.aria-label]="'content.articles.list.title' | transloco"
+    >
+      @for (article of articles; track article.id) {
+        <li>
+          <app-list-row
+            [link]="['/content/articles', article.id]"
+            [title]="titleOf(article)"
+          >
+            <span listRowMeta
+              >{{ article.status | enumLabel: 'articleStatus' }} ·
+              {{ changedAt(article) }}</span
+            >
+          </app-list-row>
+        </li>
+      }
+    </ul>
+
+    @if (moreError) {
+      <p class="notice notice--danger" role="alert">
+        {{ moreError | uiMessage }}
+      </p>
+    }
+    @if (articles.length < total) {
+      <button
+        class="btn btn--secondary"
+        type="button"
+        [disabled]="loadingMore"
+        (click)="loadMore()"
+      >
+        {{
+          (loadingMore ? 'common.loading' : 'content.articles.list.showMore')
+            | transloco
+        }}
+      </button>
+    }
+  }
+</section>

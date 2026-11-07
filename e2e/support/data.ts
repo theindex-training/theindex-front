@@ -156,3 +156,84 @@ export const articleCategory = (
   updatedAt: '2026-11-06T10:00:00.000Z',
   ...overrides,
 });
+
+/** A row of GET /api/articles (the draft's title). */
+export const articleSummary = (
+  id: string,
+  title: string,
+  overrides: object = {},
+) => ({
+  id,
+  status: 'DRAFT',
+  slug: null as string | null,
+  title,
+  publishedTitle: null as string | null,
+  categoryIds: [] as string[],
+  featuredMediaId: null as string | null,
+  hasUnpublishedChanges: true,
+  draftUpdatedAt: '2026-11-06T10:00:00.000Z',
+  firstPublishedAt: null as string | null,
+  lastPublishedAt: null as string | null,
+  createdAt: '2026-11-06T09:00:00.000Z',
+  updatedAt: '2026-11-06T10:00:00.000Z',
+  ...overrides,
+});
+
+/** A page of GET /api/articles or GET /api/media. */
+export const pageOf = (items: object[], total = items.length, page = 1) => ({
+  items,
+  total,
+  page,
+  pageSize: 20,
+});
+
+/** GET /api/articles/:id: a never-published draft with an empty body. */
+export const article = (id: string, title: string, overrides: object = {}) => ({
+  id,
+  language: 'bg',
+  status: 'DRAFT',
+  slug: null as string | null,
+  published: null,
+  draft: {
+    title,
+    excerpt: null as string | null,
+    content: { blocks: [] as { type: string; data: object }[] },
+    featuredMediaId: null as string | null,
+    categoryIds: [] as string[],
+    seoTitle: null as string | null,
+    seoDescription: null as string | null,
+    slug: null as string | null,
+  },
+  draftRevision: 0,
+  draftUpdatedAt: '2026-11-06T10:00:00.000Z',
+  hasUnpublishedChanges: true,
+  firstPublishedAt: null as string | null,
+  lastPublishedAt: null as string | null,
+  unpublishedAt: null as string | null,
+  createdByAccountId: 'acc-admin',
+  updatedByAccountId: 'acc-admin',
+  createdAt: '2026-11-06T10:00:00.000Z',
+  updatedAt: '2026-11-06T10:00:00.000Z',
+  ...overrides,
+});
+
+/** An image of the media library. Its files are the app's own logo, so they load. */
+export const mediaItem = (id: string, altText: string) => {
+  const file = {
+    url: '/brand/the-index-logo-red.png',
+    width: 640,
+    height: 270,
+  };
+  return {
+    id,
+    altText,
+    ...file,
+    variants: [file],
+    ogImage: { ...file, width: 1200, height: 630 },
+    originalFilename: `${id}.png`,
+    sizeBytes: 10_000,
+    uploadedByAccountId: 'acc-admin',
+    createdAt: '2026-11-06T10:00:00.000Z',
+    updatedAt: '2026-11-06T10:00:00.000Z',
+  };
+};

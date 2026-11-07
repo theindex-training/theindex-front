@@ -1,0 +1,351 @@
+<div class="editor-page">
+  <header class="editor-bar">
+    <a class="btn btn--ghost editor-bar__back" routerLink="/content/articles">
+      <app-icon name="arrow-left" />
+      <span>{{ 'content.articles.editor.back' | transloco }}</span>
+    </a>
+
+    @if (autosave; as saver) {
+      <p
+        class="editor-bar__status"
+        [class.text-danger]="
+          saver.status() === 'error' || saver.status() === 'conflict'
+        "
+        role="status"
+        data-testid="article-save-status"
+      >
+        {{ statusKey | transloco }}
+      </p>
+      @if (saver.status() === 'error') {
+        <button class="btn btn--secondary" type="button" (click)="retrySave()">
+          {{ 'common.tryAgain' | transloco }}
+        </button>
+      }
+    }
+  </header>
+
+  <main id="main-content" class="editor-layout" tabindex="-1">
+    @if (loading) {
+      <p class="notice" role="status">
+        {{ 'content.articles.editor.loading' | transloco }}
+      </p>
+    } @else if (loadError || !article || !form) {
+      <div class="editor-main">
+        <p class="notice notice--danger" role="alert">
+          {{ loadError ?? { key: 'content.articles.errors.load' } | uiMessage }}
+        </p>
+      </div>
+    } @else {
+      <div class="editor-main">
+        @if (autosave; as saver) {
+          @if (saver.status() === 'conflict') {
+            <div class="notice notice--warning" role="alert">
+              <p>{{ saver.error() | uiMessage }}</p>
+              <button class="btn btn--primary" type="button" (click)="load()">
+                {{ 'content.articles.editor.reload' | transloco }}
+              </button>
+            </div>
+          } @else if (saver.status() === 'error') {
+            <p class="notice notice--danger" role="alert">
+              {{ saver.error() | uiMessage }}
+            </p>
+          }
+        }
+
+        <div class="form-field">
+          <label class="visually-hidden" for="article-title">{{
+            'content.articles.fields.title' | transloco
+          }}</label>
+          <textarea
+            id="article-title"
+            class="editor-title"
+            rows="1"
+            [formControl]="form.controls.title"
+            [placeholder]="
+              'content.articles.fields.titlePlaceholder' | transloco
+            "
+            aria-describedby="article-title-help"
+            [attr.aria-invalid]="showError('title')"
+            (keydown.enter)="preventLineBreak($event)"
+          ></textarea>
+          @if (showError('title')) {
+            <span class="form-field__error" id="article-title-help">{{
+              'content.articles.fields.titleError' | transloco
+            }}</span>
+          } @else {
+            <span class="visually-hidden" id="article-title-help">{{
+              'content.articles.fields.titleHint' | transloco
+            }}</span>
+          }
+        </div>
+
+        <app-block-editor
+          [content]="article.draft.content"
+          [media]="mediaHooks"
+          [label]="'content.articles.fields.body' | transloco"
+          (changed)="contentChanged()"
+        />
+      </div>
+
+      <aside
+        class="editor-settings panel"
+        aria-labelledby="article-settings-title"
+      >
+        <h2 class="panel__title" id="article-settings-title">
+          {{ 'content.articles.settings.title' | transloco }}
+        </h2>
+
+        <dl class="detail-list">
+          <div>
+            <dt>{{ 'common.status' | transloco }}</dt>
+            <dd data-testid="article-status">
+              {{ article.status | enumLabel: 'articleStatus' }}
+              @if (published && article.hasUnpublishedChanges) {
+                <span class="text-muted">
+                  · {{ 'content.articles.unpublishedChanges' | transloco }}
+                </span>
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>{{ 'content.articles.settings.address' | transloco }}</dt>
+            <dd>
+              @if (article.slug) {
+                <span class="num">/articles/{{ article.slug }}</span>
+              } @else {
+                <span class="text-muted">{{
+                  'content.articles.settings.addressLater' | transloco
+                }}</span>
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>{{ 'content.articles.settings.lastSaved' | transloco }}</dt>
+            <dd>{{ lastSaved() }}</dd>
+          </div>
+        </dl>
+
+        <div class="form-grid">
+          @if (!published) {
+            <div class="form-field">
+              <label class="form-field__label" for="article-slug">
+                {{ 'content.articles.fields.slug' | transloco }}
+                <span class="form-field__optional">{{
+                  'common.optional' | transloco
+                }}</span>
+              </label>
+              <input
+                id="article-slug"
+                type="text"
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+                [formControl]="form.controls.slug"
+                aria-describedby="article-slug-help"
+                [attr.aria-invalid]="showError('slug')"
+              />
+              @if (showError('slug')) {
+                <span class="form-field__error" id="article-slug-help">{{
+                  'content.articles.fields.slugError' | transloco
+                }}</span>
+              } @else {
+                <span class="form-field__hint" id="article-slug-help">{{
+                  'content.articles.fields.slugHint' | transloco
+                }}</span>
+              }
+            </div>
+          }
+
+          <div class="form-field">
+            <label class="form-field__label" for="article-excerpt">
+              {{ 'content.articles.fields.excerpt' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
+            </label>
+            <textarea
+              id="article-excerpt"
+              rows="4"
+              [formControl]="form.controls.excerpt"
+              aria-describedby="article-excerpt-help"
+              [attr.aria-invalid]="showError('excerpt')"
+            ></textarea>
+            @if (showError('excerpt')) {
+              <span class="form-field__error" id="article-excerpt-help">{{
+                'content.articles.fields.excerptError' | transloco
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="article-excerpt-help">{{
+                'content.articles.fields.excerptHint'
+                  | transloco: { count: length('excerpt') }
+              }}</span>
+            }
+          </div>
+
+          <fieldset class="editor-settings__group">
+            <legend class="form-field__label">
+              {{ 'content.articles.fields.categories' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
+            </legend>
+            @if (categoriesLoading) {
+              <p class="text-muted">{{ 'common.loading' | transloco }}</p>
+            } @else if (categoriesError) {
+              <p class="notice notice--danger" role="alert">
+                {{ categoriesError | uiMessage }}
+              </p>
+              <button
+                class="btn btn--secondary"
+                type="button"
+                (click)="loadCategories()"
+              >
+                {{ 'common.tryAgain' | transloco }}
+              </button>
+            } @else if (!categories.length) {
+              <p class="text-muted">
+                {{ 'content.articles.settings.noCategories' | transloco }}
+              </p>
+            } @else {
+              @for (category of categories; track category.id) {
+                <label class="form-field form-field--check">
+                  <input
+                    type="checkbox"
+                    [checked]="isCategoryChecked(category.id)"
+                    [disabled]="isCategoryDisabled(category.id)"
+                    (change)="
+                      toggleCategory(category.id, $any($event.target).checked)
+                    "
+                  />
+                  <span>{{ category.name }}</span>
+                </label>
+              }
+              <span class="form-field__hint">{{
+                'content.articles.fields.categoriesHint'
+                  | transloco: { max: limits.categories }
+              }}</span>
+            }
+          </fieldset>
+
+          <section
+            class="editor-settings__group"
+            aria-labelledby="article-featured-title"
+          >
+            <h3 class="form-field__label" id="article-featured-title">
+              {{ 'content.articles.fields.featuredImage' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
+            </h3>
+            @if (featuredMedia) {
+              <img
+                class="editor-settings__image"
+                data-testid="article-featured-image"
+                [src]="thumbnail(featuredMedia)"
+                [alt]="featuredMedia.altText"
+                [width]="featuredMedia.width"
+                [height]="featuredMedia.height"
+              />
+            } @else if (featuredMediaMissing) {
+              <p class="notice notice--warning">
+                {{ 'content.articles.settings.imageMissing' | transloco }}
+              </p>
+            } @else if (!featuredMediaId) {
+              <p class="text-muted">
+                {{ 'content.articles.settings.noFeaturedImage' | transloco }}
+              </p>
+            }
+            <span class="form-field__hint">{{
+              'content.articles.fields.featuredImageHint' | transloco
+            }}</span>
+            <div class="editor-settings__actions">
+              @if (featuredMediaId) {
+                <button
+                  class="btn btn--ghost"
+                  type="button"
+                  (click)="removeFeaturedImage()"
+                >
+                  {{ 'content.articles.settings.removeImage' | transloco }}
+                </button>
+              }
+              <button
+                class="btn btn--secondary"
+                type="button"
+                (click)="chooseFeaturedImage()"
+              >
+                {{
+                  (featuredMediaId
+                    ? 'content.articles.settings.changeImage'
+                    : 'content.articles.settings.chooseImage'
+                  ) | transloco
+                }}
+              </button>
+            </div>
+          </section>
+
+          <div class="form-field">
+            <label class="form-field__label" for="article-seo-title">
+              {{ 'content.articles.fields.seoTitle' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
+            </label>
+            <input
+              id="article-seo-title"
+              type="text"
+              [formControl]="form.controls.seoTitle"
+              aria-describedby="article-seo-title-help"
+              [attr.aria-invalid]="showError('seoTitle')"
+            />
+            @if (showError('seoTitle')) {
+              <span class="form-field__error" id="article-seo-title-help">{{
+                'content.articles.fields.seoTitleError' | transloco
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="article-seo-title-help">{{
+                'content.articles.fields.seoTitleHint'
+                  | transloco: { count: length('seoTitle') }
+              }}</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label" for="article-seo-description">
+              {{ 'content.articles.fields.seoDescription' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
+            </label>
+            <textarea
+              id="article-seo-description"
+              rows="3"
+              [formControl]="form.controls.seoDescription"
+              aria-describedby="article-seo-description-help"
+              [attr.aria-invalid]="showError('seoDescription')"
+            ></textarea>
+            @if (showError('seoDescription')) {
+              <span
+                class="form-field__error"
+                id="article-seo-description-help"
+                >{{
+                  'content.articles.fields.seoDescriptionError' | transloco
+                }}</span
+              >
+            } @else {
+              <span
+                class="form-field__hint"
+                id="article-seo-description-help"
+                >{{
+                  'content.articles.fields.seoDescriptionHint'
+                    | transloco: { count: length('seoDescription') }
+                }}</span
+              >
+            }
+          </div>
+        </div>
+      </aside>
+    }
+  </main>
+
+  <app-media-picker />
+</div>
