@@ -164,6 +164,9 @@ export class ArticleEditorComponent implements OnInit, OnDestroy, LeavesSafely {
   private formChanges: Subscription | null = null;
   /** The stored body's blocks, to tell a real edit from Editor.js reporting one. */
   private savedBlocks = '';
+  /** Counts lifecycle actions starting and ending; a save remembers it when sent. */
+  private lifecycleEpoch = 0;
+  private saveEpoch = 0;
   /** Set once the article is deleted, so leaving doesn't try to save it. */
   private deleted = false;
 
@@ -356,7 +359,7 @@ export class ArticleEditorComponent implements OnInit, OnDestroy, LeavesSafely {
       return;
     }
     this.begin('publish');
-    if (!(await autosave.save())) {
+    if (!(await this.saveAll())) {
       this.fail(i18nMessage('content.articles.actions.saveFirst'));
       return;
     }
@@ -405,7 +408,7 @@ export class ArticleEditorComponent implements OnInit, OnDestroy, LeavesSafely {
       tab.opener = null;
     }
     this.begin('preview');
-    const saved = await this.autosave.save();
+    const saved = await this.saveAll();
     this.articlesService.createPreviewToken(article.id).subscribe({
       next: ({ token }) => {
         const url = `${environment.publicSiteUrl}/preview?token=${encodeURIComponent(token)}`;
@@ -444,6 +447,8 @@ export class ArticleEditorComponent implements OnInit, OnDestroy, LeavesSafely {
       return;
     }
     this.begin('unpublish');
+    // A save still on its way must not answer after the unpublish (see `start()`).
+    await this.autosave?.save();
     this.articlesService.unpublish(article.id).subscribe({
       next: (unpublished) => {
         this.applyLifecycle(unpublished);
@@ -501,6 +506,7 @@ export class ArticleEditorComponent implements OnInit, OnDestroy, LeavesSafely {
       return;
     }
     this.begin('delete');
+    await this.autosave?.save();
     this.articlesService.delete(article.id).subscribe({
       next: () => {
         this.deleted = true;
@@ -532,10 +538,17 @@ export class ArticleEditorComponent implements OnInit, OnDestroy, LeavesSafely {
    * field with an error, or a 409).
    */
   async canLeave(): Promise<boolean> {
-    if (this.deleted || !this.autosave?.hasUnsavedChanges) {
+    if (this.deleted || !this.autosave) {
       return true;
     }
-    if (await this.autosave.save()) {
+    // After a 409 autosave has stopped; only changes it still holds are worth asking about.
+    if (
+      this.autosave.status() === 'conflict' &&
+      !this.autosave.hasUnsavedChanges
+    ) {
+      return true;
+    }
+    if (await this.saveAll()) {
       return true;
     }
     return window.confirm(
@@ -552,8 +565,21 @@ export class ArticleEditorComponent implements OnInit, OnDestroy, LeavesSafely {
     }
   }
 
+  /**
+   * Saves everything, the body included: Editor.js holds its change events for 400 ms, so an
+   * edit just made may not have reached autosave yet. An unchanged body is not sent.
+   */
+  private saveAll(): Promise<boolean> {
+    if (!this.autosave) {
+      return Promise.resolve(false);
+    }
+    this.autosave.change('content');
+    return this.autosave.save();
+  }
+
   private begin(action: ArticleAction): void {
     this.busy = action;
+    this.lifecycleEpoch += 1;
     this.actionNotice = null;
     this.actionError = null;
     this.publishProblems = [];
@@ -562,12 +588,14 @@ export class ArticleEditorComponent implements OnInit, OnDestroy, LeavesSafely {
 
   private succeed(noticeKey: string | null): void {
     this.busy = null;
+    this.lifecycleEpoch += 1;
     this.actionNotice = noticeKey ? i18nMessage(noticeKey) : null;
     this.changeDetector.detectChanges();
   }
 
   private fail(error: UiMessage | null): void {
     this.busy = null;
+    this.lifecycleEpoch += 1;
     this.actionError = error;
     this.changeDetector.detectChanges();
   }
@@ -584,6 +612,27 @@ export class ArticleEditorComponent implements OnInit, OnDestroy, LeavesSafely {
     this.article = {
       ...article,
       hasUnpublishedChanges: article.hasUnpublishedChanges || newer,
+    };
+  }
+
+  /**
+   * The article after a draft save. A save sent before or during a publish, unpublish or discard
+   * may answer after it, with the status from before; then only a newer draft is taken from it.
+   */
+  private afterSave(saved: Article): Article {
+    const current = this.article;
+    if (!current || this.saveEpoch === this.lifecycleEpoch) {
+      return saved;
+    }
+    if (saved.draftRevision <= current.draftRevision) {
+      return current;
+    }
+    return {
+      ...current,
+      draft: saved.draft,
+      draftRevision: saved.draftRevision,
+      draftUpdatedAt: saved.draftUpdatedAt,
+      hasUnpublishedChanges: true,
     };
   }
 
@@ -608,17 +657,25 @@ export class ArticleEditorComponent implements OnInit, OnDestroy, LeavesSafely {
     this.featuredMedia = null;
     this.featuredMediaMissing = false;
 
-    this.autosave = new DraftAutosave({
+    const autosave: DraftAutosave = new DraftAutosave({
       revision: article.draftRevision,
       delayMs: this.autosaveDelay,
       collect: (fields) => this.collect(fields),
-      send: (payload) => this.articlesService.saveDraft(article.id, payload),
+      send: (payload) => {
+        this.saveEpoch = this.lifecycleEpoch;
+        return this.articlesService.saveDraft(article.id, payload);
+      },
       saved: (saved) => {
-        this.article = saved;
+        // An autosave stopped by Discard or a reload answers into a page that moved on.
+        if (this.autosave !== autosave) {
+          return;
+        }
         this.savedBlocks = blocksKey(saved.draft.content);
+        this.article = this.afterSave(saved);
         this.changeDetector.detectChanges();
       },
     });
+    this.autosave = autosave;
 
     this.formChanges = new Subscription();
     for (const field of TEXT_FIELDS) {

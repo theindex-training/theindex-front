@@ -194,6 +194,21 @@ describe('article lifecycle in the editor', () => {
     JSON.parse(req.request.serializeBody() as string) as unknown;
   const drafts = () =>
     http.match({ method: 'PATCH', url: '/api/articles/a1/draft' });
+  /** Editor.js starts watching a rendered block for edits in an idle callback. */
+  const idle = () =>
+    new Promise<void>((resolve) => requestIdleCallback(() => resolve()));
+  /** Polls for the next autosave (`match()` takes what it returns, so this keeps it). */
+  async function nextSave(ms = 5000): Promise<TestRequest> {
+    const end = Date.now() + ms;
+    for (;;) {
+      const [req] = drafts();
+      if (req) return req;
+      if (Date.now() > end) throw new Error('No autosave was sent');
+      await sleep(20);
+    }
+  }
+  const paragraph = () =>
+    ui.query('[data-testid="article-body"] .ce-paragraph')!;
 
   describe('publish and update', () => {
     it('publishes a draft at the revision it has, and shows where it is live', async () => {
@@ -243,6 +258,42 @@ describe('article lifecycle in the editor', () => {
       expect(bodyOf(req)).toEqual({ baseRevision: 4 });
       req.flush({ ...LIVE, draftRevision: 4 });
       await ui.settle();
+    });
+
+    it('publishes a body edit made just now, before Editor.js reports it (review of #81)', async () => {
+      await openEditor();
+      await idle();
+
+      paragraph().innerHTML = 'Нов текст.';
+      await click(publishButton());
+      const save = await nextSave();
+      expect(bodyOf(save)).toMatchObject({
+        baseRevision: 3,
+        content: {
+          blocks: [
+            { id: 'p1', type: 'paragraph', data: { text: 'Нов текст.' } },
+          ],
+        },
+      });
+      // The API answers with the draft it saved.
+      const savedContent = (
+        bodyOf(save) as { content: Article['draft']['content'] }
+      ).content;
+      save.flush({
+        ...DRAFT,
+        draftRevision: 4,
+        draft: { ...DRAFT.draft, content: savedContent },
+      });
+      await sleep(0);
+      await ui.settle();
+
+      const req = post('publish');
+      expect(bodyOf(req)).toEqual({ baseRevision: 4 });
+      req.flush({ ...LIVE, draftRevision: 4 });
+      await ui.settle();
+      // Editor.js's own event comes later, with the text already saved: nothing more is sent.
+      await sleep(600);
+      expect(drafts()).toHaveLength(0);
     });
 
     it('publishes nothing while a field has an error, and says why', async () => {
@@ -342,6 +393,24 @@ describe('article lifecycle in the editor', () => {
       expect(publishButton().disabled).toBe(false);
       expect(button(actions.delete)).toBeDefined();
       expect(button(actions.unpublish)).toBeUndefined();
+    });
+  });
+
+  describe('leaving', () => {
+    it('saves a body edit made just before leaving (review of #81)', async () => {
+      await openEditor();
+      await idle();
+
+      paragraph().innerHTML = 'Последна дума.';
+      const leaving = router.navigateByUrl('/elsewhere');
+      const save = await nextSave();
+      expect(bodyOf(save)).toMatchObject({
+        content: { blocks: [{ data: { text: 'Последна дума.' } }] },
+      });
+      save.flush({ ...DRAFT, draftRevision: 4 });
+
+      expect(await leaving).toBe(true);
+      expect(router.url).toBe('/elsewhere');
     });
   });
 
@@ -459,6 +528,51 @@ describe('article lifecycle in the editor', () => {
       expect(bodyOf(save)).toEqual({ baseRevision: 4, title: 'Отново' });
       save.flush({ ...CHANGED, draftRevision: 5 });
       await ui.settle();
+    });
+
+    it('waits for an autosave on its way before unpublishing (review of #81)', async () => {
+      await openEditor(LIVE);
+      await ui.type('#article-title', 'Ново');
+      const save = await nextSave();
+
+      await click(button(actions.unpublish));
+      await click(dialogButton(confirm.unpublish.confirm));
+      expect(http.match({ method: 'POST' })).toHaveLength(0);
+      save.flush({ ...CHANGED, draftRevision: 4 });
+      await sleep(0);
+      await ui.settle();
+
+      post('unpublish').flush({ ...OFFLINE, draftRevision: 4 });
+      await ui.settle();
+      expect(statusText()).toBe('Unpublished');
+      expect(button(actions.delete)).toBeDefined();
+    });
+
+    it('keeps Unpublished when a save sent during the unpublish answers after it (review of #81)', async () => {
+      await openEditor(LIVE);
+      await click(button(actions.unpublish));
+      await click(dialogButton(confirm.unpublish.confirm));
+      const unpublish = post('unpublish');
+
+      await ui.type('#article-title', 'Ново');
+      const save = await nextSave();
+      unpublish.flush(OFFLINE);
+      await ui.settle();
+      // The save was handled before the unpublish, so it answers with the old status.
+      save.flush({
+        ...CHANGED,
+        draftRevision: 4,
+        draft: { ...LIVE.draft, title: 'Ново' },
+      });
+      await ui.settle();
+
+      expect(statusText()).toBe(`Unpublished · ${t.unpublishedChanges}`);
+      expect(publishButton().textContent?.trim()).toBe(actions.republish);
+      const panel = ui
+        .queryAll('aside button')
+        .map((b) => b.textContent?.trim());
+      expect(panel).toContain(actions.delete);
+      expect(panel).not.toContain(actions.unpublish);
     });
 
     it('deletes a draft after the confirmation and goes back to the list', async () => {
