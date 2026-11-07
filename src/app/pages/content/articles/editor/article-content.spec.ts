@@ -1,6 +1,7 @@
 import { ArticleContent } from '../../../../services/articles.service';
 import {
   YOUTUBE_LINK_PATTERN,
+  blocksKey,
   fromEditorData,
   toEditorData,
   youtubeVideoId,
@@ -109,6 +110,26 @@ describe('article content mapping', () => {
     });
   });
 
+  it('drops the alignment the quote tool adds, which the API does not keep', () => {
+    const content = fromEditorData({
+      blocks: [
+        {
+          id: 'q1',
+          type: 'quote',
+          data: { text: 'Без болка', caption: 'Треньор', alignment: 'left' },
+        },
+      ],
+    });
+
+    expect(content.blocks).toEqual([
+      {
+        id: 'q1',
+        type: 'quote',
+        data: { text: 'Без болка', caption: 'Треньор' },
+      },
+    ]);
+  });
+
   it('sends a checklist as a plain list, which the API accepts', () => {
     const content = fromEditorData({
       blocks: [
@@ -166,5 +187,43 @@ describe('youtubeVideoId', () => {
     expect(YOUTUBE_LINK_PATTERN.test('https://example.com/youtube.com/x')).toBe(
       false,
     );
+  });
+});
+
+describe('blocksKey', () => {
+  it('is the same for content that reads the same: ids, time, version and key order ignored', () => {
+    const editorSaved: ArticleContent = {
+      time: 1,
+      version: '2.31.7',
+      blocks: [
+        { id: 'new-id', type: 'header', data: { level: 2, text: 'Загрявка' } },
+      ],
+    };
+    const stored: ArticleContent = {
+      blocks: [{ type: 'header', data: { text: 'Загрявка', level: 2 } }],
+    };
+
+    expect(blocksKey(editorSaved)).toBe(blocksKey(stored));
+    expect(blocksKey(null)).toBe(blocksKey({ blocks: [] }));
+  });
+
+  it('differs when a text, a type, a level or the order of blocks differs', () => {
+    const key = blocksKey(STORED);
+    const changed = (blocks: ArticleContent['blocks']) => blocksKey({ blocks });
+
+    expect(
+      changed([
+        { type: 'paragraph', data: { text: 'Здравейте, атлети' } },
+        ...STORED.blocks.slice(1),
+      ]),
+    ).not.toBe(key);
+    expect(
+      changed([
+        STORED.blocks[0],
+        { id: 'h1', type: 'header', data: { text: 'Загрявка', level: 3 } },
+        ...STORED.blocks.slice(2),
+      ]),
+    ).not.toBe(key);
+    expect(changed([...STORED.blocks].reverse())).not.toBe(key);
   });
 });

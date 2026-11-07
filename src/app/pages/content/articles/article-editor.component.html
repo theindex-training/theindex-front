@@ -22,6 +22,74 @@
         </button>
       }
     }
+
+    @if (article) {
+      <div class="editor-bar__actions">
+        <button
+          class="btn btn--secondary"
+          type="button"
+          [disabled]="!!busy"
+          (click)="preview()"
+        >
+          {{
+            (busy === 'preview'
+              ? 'content.articles.actions.previewing'
+              : 'content.articles.actions.preview'
+            ) | transloco
+          }}
+        </button>
+        <button
+          class="btn btn--primary"
+          type="button"
+          data-testid="article-publish"
+          [disabled]="!canPublish"
+          (click)="publish()"
+        >
+          {{
+            (busy === 'publish'
+              ? 'content.articles.actions.publishing'
+              : publishKey
+            ) | transloco
+          }}
+        </button>
+      </div>
+    }
+
+    @if (actionNotice || actionError || publishProblems.length) {
+      <div class="editor-bar__notice">
+        @if (publishProblems.length) {
+          <div class="notice notice--danger" role="alert">
+            <p>{{ 'content.articles.actions.problemsTitle' | transloco }}</p>
+            <ul>
+              @for (problem of publishProblems; track $index) {
+                <li>{{ problem }}</li>
+              }
+            </ul>
+          </div>
+        } @else if (actionError) {
+          <p class="notice notice--danger" role="alert">
+            {{ actionError | uiMessage }}
+          </p>
+        } @else if (actionNotice) {
+          <p class="notice notice--success" role="status">
+            {{ actionNotice | uiMessage }}
+            @if (siteUrl && article?.status === 'PUBLISHED') {
+              <a [href]="siteUrl" target="_blank" rel="noopener">{{
+                'content.articles.actions.viewOnSite' | transloco
+              }}</a>
+            }
+          </p>
+        }
+        <button
+          class="icon-btn"
+          type="button"
+          [attr.aria-label]="'content.articles.actions.dismiss' | transloco"
+          (click)="dismissNotice()"
+        >
+          <app-icon name="close" />
+        </button>
+      </div>
+    }
   </header>
 
   <main id="main-content" class="editor-layout" tabindex="-1">
@@ -110,7 +178,11 @@
           <div>
             <dt>{{ 'content.articles.settings.address' | transloco }}</dt>
             <dd>
-              @if (article.slug) {
+              @if (article.slug && article.status === 'PUBLISHED' && siteUrl) {
+                <a class="num" [href]="siteUrl" target="_blank" rel="noopener"
+                  >/articles/{{ article.slug }}</a
+                >
+              } @else if (article.slug) {
                 <span class="num">/articles/{{ article.slug }}</span>
               } @else {
                 <span class="text-muted">{{
@@ -343,9 +415,54 @@
             }
           </div>
         </div>
+
+        <section
+          class="editor-settings__group editor-settings__manage"
+          aria-labelledby="article-manage-title"
+        >
+          <h3 class="form-field__label" id="article-manage-title">
+            {{ 'content.articles.actions.manage' | transloco }}
+          </h3>
+          @if (published && article.hasUnpublishedChanges) {
+            <button
+              class="btn btn--ghost"
+              type="button"
+              [disabled]="!!busy"
+              (click)="discard()"
+            >
+              {{ 'content.articles.actions.discard' | transloco }}
+            </button>
+            <span class="form-field__hint">{{
+              'content.articles.actions.discardHint' | transloco
+            }}</span>
+          }
+          @if (article.status === 'PUBLISHED') {
+            <button
+              class="btn btn--danger"
+              type="button"
+              [disabled]="!!busy"
+              (click)="unpublish()"
+            >
+              {{ 'content.articles.actions.unpublish' | transloco }}
+            </button>
+            <span class="form-field__hint">{{
+              'content.articles.actions.deleteHint' | transloco
+            }}</span>
+          } @else {
+            <button
+              class="btn btn--danger"
+              type="button"
+              [disabled]="!!busy"
+              (click)="deleteArticle()"
+            >
+              {{ 'content.articles.actions.delete' | transloco }}
+            </button>
+          }
+        </section>
       </aside>
     }
   </main>
 
   <app-media-picker />
+  <app-confirm-dialog />
 </div>

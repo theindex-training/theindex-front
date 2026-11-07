@@ -18,6 +18,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - The trainings calendar (a feature, not a test PR) came with its own specs: 65 spec files, 587 unit tests, plus journey J10 (39 E2E tests). Three deliberate breaks (UTC day keys, list as the default view, no unpaid marker) were each caught.
 - The content categories (a feature: theindex-web decision record, backlog item 9) came with §13 and journey J11: 67 spec files, 623 unit tests, 41 E2E tests. Four deliberate breaks in `category-form.ts` (description not cleared to `null`, empty slug sent, no slug length check, fractional order accepted) were each caught.
 - The article list and editor (backlog item 10) came with §14 and journey J12: 72 spec files, 695 unit tests, 43 E2E tests. Six deliberate breaks: autosave sending every field, an emptied optional field sent as `""`, the list `meta` kept, a 409 not stopping the autosave and an image caption lost on save were caught at once; a slug sent after the first publish slipped through, so it got the "published meanwhile" test, which catches it.
+- The publishing actions (backlog item 11) came with §15 and journey J13: 73 spec files, 721 unit tests, 45 E2E tests. Ten deliberate breaks were each caught: no save before publishing, Unpublish without its confirmation, "unpublished changes" lost when the draft moved on while publishing, the 400's problems not listed, the preview tab's `opener` kept, Update enabled with nothing to update, Discard not rebuilding the editor, the body always sent, blocks compared with their key order, and the saved blocks not updated after a save (the last one got its own test first).
 
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
 - **P0:** access control, sessions, money, and anything that writes attendance, subscriptions, settlements or cash. A bug here loses money or data, or exposes screens to the wrong role.
@@ -485,6 +486,27 @@ One spec per service, each method asserting method, URL, query and body. These p
 - [x] Leaving: the guard saves at once and then leaves; when that save fails it asks (`window.confirm`) and stays on "no".
 - [x] Routes (`app.routes.spec.ts`): `content/articles` and `content/articles/new` are ADMIN pages in the shell; the editor `content/articles/:id` is outside the shell with `authGuard` + `roleGuard` (ADMIN) and the leave guard, after the shell so `new` matches first; `/content` → `/content/articles`; a trainer gets `/unauthorized`, a signed-out visitor `/login`.
 
+### 15. Content: publishing an article (P1)
+
+**`services/articles.service.ts` → `articles.service.spec.ts`**
+- [x] `publish {baseRevision}`, `unpublish {}`, `discardDraft {baseRevision}`, `delete`, `createPreviewToken {}` on the article's URLs.
+
+**`pages/content/articles/editor/article-content.ts` → `article-content.spec.ts`**
+- [x] `blocksKey` is the same for content that reads the same (ids, `time`, `version` and key order ignored) and differs for a text, a heading level or the block order; the quote tool's `alignment` is dropped before sending.
+
+**`pages/content/articles/article-editor.component.ts` → `article-lifecycle.spec.ts`** (same setup as `articles.spec.ts`; `window.open` stubbed with a fake tab)
+- [x] Publish: sends the revision the page has; "Publishing..." and disabled meanwhile; then the success notice with "View on site" (`environment.publicSiteUrl`), status Published, no slug field, Update disabled, Unpublish instead of Delete.
+- [x] A change waiting for autosave is saved first, and its revision published; a body edit made within Editor.js's 400 ms batching is read and saved before publishing, and leaving saves it too (review of theindex-front#81); a field with an error publishes nothing and says so.
+- [x] A 400 lists every problem under a heading and gives the button back; Dismiss clears it. A 409 shows the API message.
+- [x] Update on a changed published article; "unpublished changes" stays when the draft was saved again while publishing; "Publish again" for an unpublished one.
+- [x] Preview opens the tab in the click (`opener` cleared), then sends it to `/preview?token=…`; a failed token closes the tab and shows the fallback.
+- [x] Unpublish waits for an autosave on its way; a save sent during the unpublish that answers after it keeps the new status and takes only its newer draft (review of theindex-front#81).
+- [x] Unpublish, Discard and Delete each ask first (title and consequence shown), and Cancel or Escape sends nothing. Unpublish → Unpublished, "Publish again", Delete offered. Discard → the editor shows the live version and autosave continues from the new revision. Delete → `/content/articles`; a refused delete shows the API message and stays.
+
+**`articles.spec.ts`**
+- [x] An Editor.js change event that leaves the text as it was sends nothing and the status stays Saved.
+- [x] The Editor.js edits wait for `requestIdleCallback` and poll for the save, instead of fixed sleeps that failed under the full suite's load.
+
 ---
 
 ## Part B — E2E user journeys (Playwright)
@@ -712,6 +734,15 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 4. Settings: excerpt and a category → saved together, only those fields. Featured image from the library, then an upload (alt text required first; multipart body with the file name and alt text).
 5. Change the title and click "Articles": the leave guard saves it first, then the list opens.
 6. Phone: a row of the list opens the editor; the settings panel follows the text; an SEO title → one autosave with only that field.
+
+### J13. Content publishing (P1) [desktop, mobile]
+✅ Added with the publishing actions (theindex-web backlog item 11): `e2e/journeys/j13-content-publishing.e2e.ts`, 2 tests. `e2e/support/article-api.ts` answers the editor like the API: autosave, publish with its rules (400 with a list), unpublish, discard, delete (409 while published) and preview tokens.
+1. Desktop: a draft without a title → Publish → the problem is listed. A title → Publish → that revision is published; "View on site" links to the site; Update is disabled.
+2. Preview opens a new tab at `http://localhost:4321/preview?token=tok-1` (the dev `publicSiteUrl`, answered by a route).
+3. An excerpt → Update enabled, "unpublished changes" → Update → published.
+4. Unpublish: the dialog explains it; Cancel sends nothing; confirm → Unpublished, "Publish again".
+5. Delete permanently: Cancel has the focus; confirm → `DELETE` → the list.
+6. Phone: Discard changes on a changed published article → confirm → the editor shows the live title.
 
 ---
 

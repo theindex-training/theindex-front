@@ -58,6 +58,11 @@ export function fromEditorData(output: OutputData): ArticleContent {
         },
       };
     }
+    if (block.type === 'quote') {
+      // The quote tool adds an alignment, which the API doesn't keep.
+      const { text, caption } = block.data as { text: string; caption: string };
+      return { ...base, type: 'quote', data: { text, caption } };
+    }
     const data = block.data as unknown;
     return { ...base, type: block.type, data } as ArticleBlock;
   });
@@ -65,6 +70,35 @@ export function fromEditorData(output: OutputData): ArticleContent {
   if (output.time !== undefined) content.time = output.time;
   if (output.version !== undefined) content.version = output.version;
   return content;
+}
+
+/**
+ * What the blocks say, without their ids or Editor.js's `time` and `version`: two contents with
+ * the same key read the same on the site.
+ */
+export function blocksKey(content: ArticleContent | null): string {
+  return JSON.stringify(
+    (content?.blocks ?? []).map((block) => [
+      block.type,
+      sortedKeys(block.data),
+    ]),
+  );
+}
+
+/** The value with every object's keys in order, so key order never makes two values differ. */
+function sortedKeys(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortedKeys);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((key) => [
+          key,
+          sortedKeys((value as Record<string, unknown>)[key]),
+        ]),
+    );
+  }
+  return value;
 }
 
 interface EditorListItem {
