@@ -132,6 +132,8 @@ export class ArticlesComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.errorMessage = null;
     this.moreError = null;
+    // This may cancel a "Show more" on its way; its callbacks then never run.
+    this.loadingMore = false;
     this.request?.unsubscribe();
     this.request = this.articlesService.list(this.query(1)).subscribe({
       next: (page) => {

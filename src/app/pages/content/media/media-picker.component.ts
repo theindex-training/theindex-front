@@ -14,6 +14,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { Subscription } from 'rxjs';
 import { EmptyStateComponent } from '../../../components/empty-state/empty-state.component';
 import { IconComponent } from '../../../components/icon/icon.component';
 import {
@@ -85,6 +86,8 @@ export class MediaPickerComponent implements OnDestroy {
   private readonly dialog!: ElementRef<HTMLDialogElement>;
   private resolveOpen: ((media: Media | null) => void) | null = null;
   private returnFocusTo: HTMLElement | null = null;
+  private listRequest: Subscription | null = null;
+  private uploadRequest: Subscription | null = null;
 
   constructor(
     formBuilder: FormBuilder,
@@ -106,6 +109,7 @@ export class MediaPickerComponent implements OnDestroy {
   /** Shows the picker on the library. Resolves when an image is chosen or the picker closes. */
   open(): Promise<Media | null> {
     this.resolveOpen?.(null);
+    this.cancelRequests();
     this.returnFocusTo = document.activeElement as HTMLElement | null;
     this.mode = 'library';
     this.selected = null;
@@ -132,6 +136,7 @@ export class MediaPickerComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.cancelRequests();
     this.revokePreview();
     this.resolveOpen?.(null);
     this.resolveOpen = null;
@@ -148,7 +153,7 @@ export class MediaPickerComponent implements OnDestroy {
     }
     this.loading = true;
     this.loadError = null;
-    this.mediaService.list(this.page + 1).subscribe({
+    this.listRequest = this.mediaService.list(this.page + 1).subscribe({
       next: (page) => {
         this.items = [...this.items, ...page.items];
         this.total = page.total;
@@ -211,24 +216,28 @@ export class MediaPickerComponent implements OnDestroy {
 
     this.uploading = true;
     this.uploadError = null;
-    this.mediaService.upload(this.file, this.altText.value.trim()).subscribe({
-      next: (media) => {
-        this.uploading = false;
-        this.finish(media);
-      },
-      error: (error) => {
-        this.uploadError = apiErrorMessage(
-          error,
-          'content.media.picker.uploadError',
-        );
-        this.uploading = false;
-        this.changeDetector.detectChanges();
-      },
-    });
+    this.uploadRequest = this.mediaService
+      .upload(this.file, this.altText.value.trim())
+      .subscribe({
+        next: (media) => {
+          this.uploading = false;
+          this.finish(media);
+        },
+        error: (error) => {
+          this.uploadError = apiErrorMessage(
+            error,
+            'content.media.picker.uploadError',
+          );
+          this.uploading = false;
+          this.changeDetector.detectChanges();
+        },
+      });
   }
 
-  // Fires for every close: the buttons, Escape and a backdrop click.
+  // Fires for every close: the buttons, Escape and a backdrop click. Closing ends the session, so
+  // an upload or a page of the library still on its way can't reach the next one.
   handleClose(): void {
+    this.cancelRequests();
     this.revokePreview();
     const resolve = this.resolveOpen;
     this.resolveOpen = null;
@@ -249,6 +258,15 @@ export class MediaPickerComponent implements OnDestroy {
     this.resolveOpen = null;
     resolve?.(media);
     this.close();
+  }
+
+  private cancelRequests(): void {
+    this.listRequest?.unsubscribe();
+    this.uploadRequest?.unsubscribe();
+    this.listRequest = null;
+    this.uploadRequest = null;
+    this.loading = false;
+    this.uploading = false;
   }
 
   private resetUpload(): void {

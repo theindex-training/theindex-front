@@ -315,6 +315,25 @@ describe('article pages', () => {
       expect(ui.queryAll('tbody tr')).toHaveLength(1);
     });
 
+    it('gives "Show more" back when the filter changes while it is loading', async () => {
+      await openList([summary('a1', 'Първа')], 2);
+
+      await clickButton(t.list.showMore);
+      const more = expectList('?page=2&pageSize=20');
+      ui.queryAll<HTMLInputElement>('input[type="radio"]')[1].click();
+      await ui.settle();
+      expect(more.cancelled).toBe(true);
+      expectList('?status=DRAFT&page=1&pageSize=20').flush(
+        page([summary('a1', 'Първа')], 2),
+      );
+      await ui.settle();
+
+      expect(button(t.list.showMore)?.disabled).toBe(false);
+      expect(button(t.list.showMore)?.textContent?.trim()).toBe(
+        t.list.showMore,
+      );
+    });
+
     it('loads the next page on "Show more" and adds it to the rows', async () => {
       await openList([summary('a1', 'Първа')], 2);
 
@@ -729,6 +748,39 @@ describe('article pages', () => {
       expect(bodyOf(req)).toEqual({ baseRevision: 3, featuredMediaId: 'm9' });
       req.flush({ ...DRAFT, draftRevision: 4 });
       await ui.settle();
+    });
+
+    it('drops an upload the admin cancelled, so it never reaches the next picker', async () => {
+      await openEditor();
+      const picker = en.content.media.picker;
+      await clickButton(t.settings.changeImage);
+      http.expectOne('/api/media?page=1').flush(page([]));
+      await ui.settle();
+      await clickButton(picker.uploadAction);
+      const input = ui.query<HTMLInputElement>('#media-file')!;
+      Object.defineProperty(input, 'files', {
+        value: [new File(['jpg'], 'bar.jpg', { type: 'image/jpeg' })],
+      });
+      input.dispatchEvent(new Event('change'));
+      await ui.type('#media-alt', 'Атлет');
+      await clickButton(picker.uploadSubmit);
+      const upload = http.expectOne('/api/media');
+
+      await clickButton(picker.cancel);
+      expect(upload.cancelled).toBe(true);
+
+      // The next session starts on the library and waits for a choice.
+      await clickButton(t.settings.changeImage);
+      http.expectOne('/api/media?page=1').flush(page([image('m2', 'Въже')]));
+      await ui.settle();
+      expect(ui.query('dialog')!.hasAttribute('open')).toBe(true);
+      expect(button(picker.use)?.disabled).toBe(true);
+      await sleep(40);
+      expect(drafts()).toHaveLength(0);
+      expect(
+        ui.query<HTMLImageElement>('[data-testid="article-featured-image"]')!
+          .alt,
+      ).toBe('Щанга на земята');
     });
 
     it('shows the API message when an upload is refused, and stays open', async () => {
