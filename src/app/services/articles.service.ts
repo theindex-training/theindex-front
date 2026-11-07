@@ -145,6 +145,12 @@ export interface StaleRevisionError {
   currentRevision: number;
 }
 
+/** `POST /api/articles/:id/preview-token`: for the public site's `/preview?token=…`, 30 minutes. */
+export interface PreviewToken {
+  token: string;
+  expiresAt: string;
+}
+
 /** Articles of the public site in the back office (theindex-api `articles`, ADMIN only). */
 @Injectable({
   providedIn: 'root',
@@ -173,5 +179,39 @@ export class ArticlesService {
   /** Autosave. 409 when `baseRevision` is no longer the current one. */
   saveDraft(id: string, payload: SaveDraftPayload): Observable<Article> {
     return this.http.patch<Article>(`${this.baseUrl}/${id}/draft`, payload);
+  }
+
+  /**
+   * First publish, republish or "Update": the draft at `baseRevision` goes live. 400 lists every
+   * problem (`message` is an array); 409 when the revision is stale or the slug was just taken.
+   */
+  publish(id: string, baseRevision: number): Observable<Article> {
+    return this.http.post<Article>(`${this.baseUrl}/${id}/publish`, {
+      baseRevision,
+    });
+  }
+
+  /** PUBLISHED → UNPUBLISHED; the published version is kept. 409 unless published. */
+  unpublish(id: string): Observable<Article> {
+    return this.http.post<Article>(`${this.baseUrl}/${id}/unpublish`, {});
+  }
+
+  /** The draft becomes the published version again. 409 when stale or never published. */
+  discardDraft(id: string, baseRevision: number): Observable<Article> {
+    return this.http.post<Article>(`${this.baseUrl}/${id}/discard-draft`, {
+      baseRevision,
+    });
+  }
+
+  /** Permanent. 409 while the article is published. */
+  delete(id: string): Observable<{ deleted: boolean }> {
+    return this.http.delete<{ deleted: boolean }>(`${this.baseUrl}/${id}`);
+  }
+
+  createPreviewToken(id: string): Observable<PreviewToken> {
+    return this.http.post<PreviewToken>(
+      `${this.baseUrl}/${id}/preview-token`,
+      {},
+    );
   }
 }

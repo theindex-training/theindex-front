@@ -10,6 +10,7 @@
     },
     "skipToContent": "Skip to content",
     "close": "Close",
+    "cancel": "Cancel",
     "search": "Search",
     "clearSearch": "Clear search",
     "showAll": "Show all",
@@ -771,6 +772,51 @@
         "chooseImage": "Choose image",
         "changeImage": "Change image",
         "removeImage": "Remove"
+      },
+      "actions": {
+        "publish": "Publish",
+        "republish": "Publish again",
+        "update": "Update",
+        "publishing": "Publishing...",
+        "preview": "Preview",
+        "previewing": "Opening...",
+        "published": "Published. The article is on the site now.",
+        "updated": "Updated. The site shows the changes now.",
+        "unpublished": "Unpublished. The article is no longer on the site.",
+        "discarded": "The changes are discarded. The editor shows the version on the site.",
+        "viewOnSite": "View on site",
+        "problemsTitle": "It can't be published yet:",
+        "saveFirst": "The latest changes couldn't be saved, so nothing was published. Check the save status and the highlighted fields.",
+        "publishError": "Unable to publish the article right now.",
+        "previewError": "Unable to open the preview right now.",
+        "previewUnsaved": "The latest changes aren't saved yet, so the preview shows the last saved version.",
+        "manage": "Publishing",
+        "discard": "Discard changes",
+        "discardHint": "Go back to the version on the site.",
+        "discardError": "Unable to discard the changes right now.",
+        "unpublish": "Unpublish",
+        "unpublishError": "Unable to unpublish the article right now.",
+        "deleteHint": "To delete the article, unpublish it first.",
+        "delete": "Delete permanently",
+        "deleteError": "Unable to delete the article right now.",
+        "dismiss": "Dismiss"
+      },
+      "confirm": {
+        "unpublish": {
+          "title": "Unpublish this article?",
+          "message": "It disappears from the site within about a minute, and search engines drop it. The text and settings stay here, and you can publish it again.",
+          "confirm": "Unpublish"
+        },
+        "discard": {
+          "title": "Discard the unpublished changes?",
+          "message": "The draft goes back to the version on the site. The changes since the last publish are lost.",
+          "confirm": "Discard changes"
+        },
+        "delete": {
+          "title": "Delete this article permanently?",
+          "message": "This can't be undone. The text and settings are deleted; its images stay in the media library.",
+          "confirm": "Delete permanently"
+        }
       },
       "blocks": {
         "placeholder": "Write, or type / to add a block",

@@ -435,6 +435,24 @@ describe('article pages', () => {
         .find((label) => label.textContent?.trim() === name)!
         .querySelector('input')!;
 
+    /** Editor.js starts watching a rendered block for edits in an idle callback. */
+    const idle = () =>
+      new Promise<void>((resolve) => requestIdleCallback(() => resolve()));
+
+    /**
+     * The autosave an Editor.js edit leads to; Editor.js batches its change events for 400 ms.
+     * (`match()` takes the requests it returns, so this polls and keeps what it finds.)
+     */
+    async function bodySave(ms = 5000): Promise<TestRequest> {
+      const end = Date.now() + ms;
+      for (;;) {
+        const [req] = drafts();
+        if (req) return req;
+        if (Date.now() > end) throw new Error('No autosave was sent');
+        await sleep(20);
+      }
+    }
+
     /** Waits for the autosave delay (20 ms here) and returns the PATCH it sent. */
     async function nextSave(): Promise<TestRequest> {
       await sleep(40);
@@ -498,14 +516,11 @@ describe('article pages', () => {
 
     it('autosaves the body as stored blocks after an edit', async () => {
       await openEditor();
-      // Editor.js watches a block for edits once the browser is idle after rendering it.
-      await sleep(300);
+      await idle();
 
       const paragraph = ui.query('[data-testid="article-body"] .ce-paragraph')!;
       paragraph.innerHTML = 'Добре дошли в <b>залата</b>!';
-      // Editor.js batches its change events for 400 ms, then the autosave delay runs.
-      await sleep(600);
-      const [req] = drafts();
+      const req = await bodySave();
 
       expect(bodyOf(req)).toEqual({
         baseRevision: 3,
@@ -523,6 +538,45 @@ describe('article pages', () => {
       });
       req.flush({ ...DRAFT, draftRevision: 4 });
       await ui.settle();
+    });
+
+    it('sends nothing when Editor.js reports a change that leaves the text as it was', async () => {
+      await openEditor();
+      await idle();
+
+      const paragraph = ui.query('[data-testid="article-body"] .ce-paragraph')!;
+      paragraph.innerHTML = 'Добре дошли в залата.';
+      // Editor.js batches its change events for 400 ms, then the autosave delay runs.
+      await sleep(1000);
+      await ui.settle();
+
+      expect(drafts()).toHaveLength(0);
+      expect(status()).toBe(t.editor.save.saved);
+    });
+
+    it('compares later change events with the body it saved last', async () => {
+      await openEditor();
+      await idle();
+      const paragraph = () =>
+        ui.query('[data-testid="article-body"] .ce-paragraph')!;
+
+      paragraph().innerHTML = 'Нов текст.';
+      const req = await bodySave();
+      req.flush({
+        ...DRAFT,
+        draftRevision: 4,
+        draft: {
+          ...DRAFT.draft,
+          content: bodyOf(req)['content'] as Article['draft']['content'],
+        },
+      });
+      await ui.settle();
+
+      // The same text again: nothing new to save.
+      paragraph().innerHTML = 'Нов текст.';
+      await sleep(1000);
+      await ui.settle();
+      expect(drafts()).toHaveLength(0);
     });
 
     it('shows image and video blocks from their ids, and saves them back unchanged', async () => {
@@ -554,7 +608,7 @@ describe('article pages', () => {
       };
       await openEditor(withMedia);
       http.expectOne('/api/media/m5').flush(image('m5', 'Клек с щанга'));
-      await sleep(300);
+      await idle();
       await ui.settle();
 
       const body = ui.query('[data-testid="article-body"]')!;
@@ -575,8 +629,7 @@ describe('article pages', () => {
       );
 
       body.querySelector('.ce-paragraph')!.innerHTML = 'Вижте това:';
-      await sleep(600);
-      const [req] = drafts();
+      const req = await bodySave();
       expect((bodyOf(req)['content'] as { blocks: unknown[] }).blocks).toEqual([
         { id: 'p1', type: 'paragraph', data: { text: 'Вижте това:' } },
         withMedia.draft.content.blocks[1],
@@ -588,6 +641,7 @@ describe('article pages', () => {
 
     it('rebuilds the editor in the new language, keeping the text', async () => {
       await openEditor();
+      await idle();
       const body = () => ui.query('[data-testid="article-body"]')!;
       body().querySelector('.ce-paragraph')!.innerHTML = 'Незапазен текст';
 
@@ -602,8 +656,14 @@ describe('article pages', () => {
           .querySelector('.ce-paragraph')!
           .getAttribute('data-placeholder-active'),
       ).toBe(bg.content.articles.blocks.placeholder);
-      await sleep(600);
-      http.match({ method: 'PATCH' }).forEach((req) => req.flush(DRAFT));
+      // The edit is autosaved too, from the rebuilt editor.
+      const req = await bodySave();
+      expect(
+        (bodyOf(req)['content'] as { blocks: { data: unknown }[] }).blocks[0]
+          .data,
+      ).toEqual({ text: 'Незапазен текст' });
+      req.flush({ ...DRAFT, draftRevision: 4 });
+      await ui.settle();
     });
 
     it('keeps a field that is too long out of the save until it is fixed', async () => {

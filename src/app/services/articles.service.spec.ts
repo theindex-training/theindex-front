@@ -64,4 +64,20 @@ describe('ArticlesService', () => {
       ],
     ]);
   });
+
+  it('publishes, unpublishes, discards, deletes and asks for a preview token', () => {
+    service.publish('a1', 4).subscribe();
+    service.unpublish('a1').subscribe();
+    service.discardDraft('a1', 5).subscribe();
+    service.delete('a1').subscribe();
+    service.createPreviewToken('a1').subscribe();
+
+    expect(sent()).toEqual([
+      ['POST', '/api/articles/a1/publish', { baseRevision: 4 }],
+      ['POST', '/api/articles/a1/unpublish', {}],
+      ['POST', '/api/articles/a1/discard-draft', { baseRevision: 5 }],
+      ['DELETE', '/api/articles/a1', null],
+      ['POST', '/api/articles/a1/preview-token', {}],
+    ]);
+  });
 });
