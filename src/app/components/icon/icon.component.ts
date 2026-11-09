@@ -30,7 +30,10 @@ export type IconName =
   | 'eye'
   | 'eye-off'
   | 'file-text'
-  | 'renew';
+  | 'renew'
+  | 'chevron-up'
+  | 'chevron-down'
+  | 'timer';
 
 /**
  * Inline stroke icons in the Lucide style (24px grid, 2px round strokes, currentColor).

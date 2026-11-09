@@ -105,6 +105,7 @@ src/
     app.routes.ts         # all routes; role restrictions via data: { roles: [...] } + roleGuard; title = translation key
     i18n/                 # LanguageService, Transloco setup, LocaleFormatService, UiMessage, enum labels, key tests
     pages/<feature>/      # one folder per feature: list, -create, -edit, -details, -delete components
+    pages/workouts/       # workouts of the day (ADMIN, TRAINER): week list, workout form with PDF import, exercises/, types/; see "Workouts area"
     pages/content/        # the public site's back office (ADMIN): articles/ (list, editor), categories/, media/ (picker); see "Content area"
     components/           # shared UI: navigation shell (main-layout, sidebar, tab-bar, nav-sheet, brand, theme-switch, language-switch, user-block, icon, navigation.ts), list page pieces (page-header, search-field, segmented-control, chip, avatar, status-dot, list-row, empty-state, skeleton-list), ui-button/input, trainee tables, ranked-list
     services/             # one service per API resource + auth.service, auth.interceptor, theme.service
@@ -123,6 +124,14 @@ public/                   # static assets; brand/ holds the official logo PNGs; 
 
 ## Renewals (`/renewals`)
 ADMIN and TRAINER, the menu item right under Dashboard (first in the More sheet on phones). `pages/renewals/` shows `GET /api/subscription-renewals` (`SubscriptionRenewalsService`): active trainees who have had a subscription, in a Punch or Time tab (an `app-segmented-control`), each with a used up/expired section and an active one. The API decides the tab, the sections and the order (theindex-api `subscriptions/subscription-renewals.ts`); the page only formats them. The Dashboard's "without active subscription" report is separate and unchanged.
+
+## Workouts area (`/workouts`)
+The workout of the day, for ADMIN and TRAINER (every `workouts/...` route has `roleGuard` + `data: { roles: ['ADMIN', 'TRAINER'] }`); trainees don't see workouts yet. One nav item ("Workouts", main group, in the More sheet on phones); `app-workouts-nav` (`pages/workouts/workouts-nav.component.ts`) is the Workouts / Exercises / Types tab row under the header of the three list pages. The data model is theindex-api's (see its CLAUDE.md): a workout has parts (type + score), each part one variant per level (RX always), each variant its structure and items.
+- **Week list** (`/workouts`, `WorkoutsService` → `/api/workouts?from&to`): Monday to Sunday, a day at a time, each workout written out per level; an empty day links to `/workouts/new?date=`. `?week=YYYY-MM-DD` (any day of the week) picks the week. The text of a workout comes from the pure `workout-format.ts` (`structurePhrases`, `itemLine`), with units and phrases from `workouts.format.*`.
+- **Workout form** (`/workouts/new`, `/workouts/:id/edit`, one component, `workout-edit.component`): date, name, notes, then the parts. A part has a type (choosing it sets the score, which stays editable), an optional heading and its levels; "Add Intermediate / Beginner" copies RX. `app-workout-variant` renders one level: the structure fields its type uses (`structureFields` in `workout-form.ts`; a field with a value is never hidden) and the exercise rows (exercise, counted in, amount, load, and "More options" for range, women's values, % of 1RM, interval number, note, max effort). Delete is a button on the edit page behind `window.confirm`.
+  - `workout-form.ts` is the form's model, pure and unit-tested: builders, `fillFromWorkout` / `fillFromDraft`, `workoutPayload`, and `itemProblem`, which mirrors the API's `workout-rules.ts`. Times are typed as `m:ss` and always need the colon (`parseClock`), so "12" is never guessed at; rep schemes as `21-15-9`.
+  - **From a PDF**: "Choose a PDF" posts the file to `/api/workouts/import-pdf` and puts the draft in the form; nothing is saved until the form is submitted. Movements the catalogue lacks are listed with a category select and a "Create" button (`ExercisesService.create`), and their rows stay invalid until then. The API's warnings are shown as they come (English).
+- **Exercises** (`/workouts/exercises`, `ExercisesService` → `/api/exercises`) and **workout types** (`/workouts/types`, `WorkoutTypesService` → `/api/workout-types`): a list plus one create/edit page each (`exercise-edit`, `workout-type-edit`; the id in the route decides), with delete on the edit page behind `window.confirm`. The exercise list filters on the client (name or alias, status). Built-in types show a "Built-in" chip and have no delete.
 
 ## Content area (`/content`)
 The back office of the public site `theindex.training` (the sibling repo `theindex-training/theindex-web`; its `docs/decision-record.md` is the reference for the content features and their backlog).
@@ -339,7 +348,7 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
 - **`.skeleton`:** pulsing placeholder block.
 - **`.btn`** + `.btn--primary` / `.btn--secondary` / `.btn--ghost` (low emphasis) / `.btn--danger` (soft) / `.btn--danger-solid` (confirming a destructive action): link or button actions in page content. `ui-button` stays the full-width form button.
 
-**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-left, chevron-right, plus, alert, trash, arrow-left, eye, eye-off, file-text, renew.
+**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-left, chevron-right, plus, alert, trash, arrow-left, eye, eye-off, file-text, renew, chevron-up, chevron-down, timer.
 
 ### Form and detail page pattern (reference: `pages/plans/plan-*.component.html`)
 Create, edit, details and delete pages share one structure. They need no page SCSS. Create/edit pages drop `page-narrow` and use the full width:

@@ -65,7 +65,8 @@
     "profile": "Profile",
     "stats": "Stats",
     "records": "Records",
-    "content": "Content"
+    "content": "Content",
+    "workouts": "Workouts"
   },
   "enums": {
     "role": {
@@ -115,6 +116,32 @@
       "DRAFT": "Draft",
       "PUBLISHED": "Published",
       "UNPUBLISHED": "Unpublished"
+    },
+    "exerciseModality": {
+      "WEIGHTLIFTING": "Weightlifting",
+      "GYMNASTICS": "Gymnastics",
+      "MONOSTRUCTURAL": "Cardio",
+      "OTHER": "Other"
+    },
+    "exerciseMeasure": {
+      "REPS": "Reps",
+      "DISTANCE": "Distance",
+      "TIME": "Time",
+      "CALORIES": "Calories"
+    },
+    "scoreType": {
+      "TIME": "Time",
+      "ROUNDS_REPS": "Rounds + reps",
+      "REPS": "Reps",
+      "LOAD": "Load",
+      "CALORIES": "Calories",
+      "DISTANCE": "Distance",
+      "NONE": "Not scored"
+    },
+    "workoutLevel": {
+      "RX": "RX",
+      "INTERMEDIATE": "Intermediate",
+      "BEGINNER": "Beginner"
     }
   },
   "trainees": {
@@ -1275,6 +1302,257 @@
     "unauthorized": {
       "title": "Access restricted",
       "text": "You do not have permission to access the administrative areas yet."
+    }
+  },
+  "workouts": {
+    "nav": {
+      "label": "Workouts sections",
+      "workouts": "Workouts",
+      "exercises": "Exercises",
+      "types": "Types"
+    },
+    "list": {
+      "title": "Workouts",
+      "subtitle": "The workout of the day, a week at a time. Trainees don't see workouts yet.",
+      "new": "New workout",
+      "previousWeek": "Previous week",
+      "nextWeek": "Next week",
+      "thisWeek": "This week",
+      "week": "{from} – {to}",
+      "weekDays": "Days of the week",
+      "today": "Today",
+      "untitled": "Workout",
+      "edit": "Edit",
+      "editFor": "Edit the workout for {day}",
+      "score": "Score: {score}",
+      "noWorkout": "No workout yet",
+      "add": "Add workout",
+      "addFor": "Add a workout for {day}",
+      "loading": "Loading workouts",
+      "loadError": "Couldn't load workouts",
+      "loadErrorMessage": "Unable to load workouts right now."
+    },
+    "format": {
+      "rounds": "{count, plural, one {# round} other {# rounds}}",
+      "every": "every {time}",
+      "work": "work {time}",
+      "rest": "rest {time}",
+      "cap": "cap {time}",
+      "metres": "m",
+      "calories": "cal",
+      "kg": "kg",
+      "max": "Max",
+      "maxIn": "Max in {time}",
+      "maxOf": "Max of {amount}",
+      "gendered": "{male}/{female} {unit} (M/W)",
+      "slot": "Min {slot}"
+    },
+    "form": {
+      "createTitle": "New workout",
+      "editTitle": "Edit workout",
+      "createSubtitle": "Build the workout from exercises, or start from a lesson-plan PDF.",
+      "editSubtitle": "Change the day, the parts or the exercises.",
+      "backToList": "Back to workouts",
+      "loading": "Loading the workout form...",
+      "loadError": "Unable to load the workout form right now.",
+      "invalid": "Some fields need attention. Check the messages in red.",
+      "saveError": "Unable to save this workout right now.",
+      "deleteConfirm": "Delete this workout? This can't be undone.",
+      "deleteError": "Unable to delete this workout right now.",
+      "delete": "Delete workout",
+      "deleting": "Deleting...",
+      "create": "Create workout",
+      "date": "Day",
+      "dateError": "Choose the day of the workout.",
+      "dateHint": "The day the workout is for.",
+      "title": "Name",
+      "titleError": "The name must be at most 120 characters.",
+      "titleHint": "Up to 120 characters, when the workout has a name, e.g. Helen.",
+      "notes": "Notes",
+      "notesError": "Notes must be at most 1000 characters.",
+      "notesHint": "Up to 1000 characters, for the whole workout.",
+      "part": {
+        "heading": "Part {n}",
+        "moveUp": "Move part {n} up",
+        "moveDown": "Move part {n} down",
+        "remove": "Remove part {n}",
+        "type": "Type",
+        "typeError": "Choose a workout type.",
+        "typeHint": "How the part is done.",
+        "score": "Score",
+        "scoreHint": "How results are recorded and compared.",
+        "title": "Heading",
+        "titleHint": "Up to 120 characters, e.g. Strength or Skill.",
+        "add": "Add part"
+      },
+      "level": {
+        "remove": "Remove level",
+        "sameAsRx": "Levels that aren't added do the workout as RX.",
+        "add": "Add {level}"
+      },
+      "structure": {
+        "rounds": "Rounds",
+        "repScheme": "Rep scheme",
+        "duration": "Duration",
+        "timeCap": "Time cap",
+        "interval": "Every",
+        "work": "Work",
+        "rest": "Rest",
+        "roundsHint": "Whole number, 1 or more.",
+        "repSchemeHint": "Reps per round, e.g. 21-15-9.",
+        "timeHint": "Minutes and seconds, e.g. 12:00.",
+        "intervalHint": "Length of one interval, e.g. 1:00.",
+        "notes": "Level notes"
+      },
+      "amount": {
+        "REPS": "Reps",
+        "DISTANCE": "Metres",
+        "TIME": "Time (m:ss)",
+        "CALORIES": "Calories"
+      },
+      "item": {
+        "exercise": "Exercise {n}",
+        "choose": "Choose an exercise",
+        "measure": "Counted in",
+        "load": "Load (kg)",
+        "moveUp": "Move exercise {n} up",
+        "moveDown": "Move exercise {n} down",
+        "remove": "Remove exercise {n}",
+        "fromPdf": "In the PDF: “{name}”. It isn't in the exercise list yet: create it above or choose another.",
+        "rangeTo": "Up to (range)",
+        "femaleAmount": "Women's amount",
+        "femaleLoad": "Women's load (kg)",
+        "percent": "% of 1-rep max",
+        "slot": "Interval no.",
+        "notes": "Note",
+        "maxEffort": "Max effort (as much as possible)",
+        "less": "Fewer options",
+        "more": "More options",
+        "add": "Add exercise"
+      },
+      "itemErrors": {
+        "exercise": "Choose an exercise.",
+        "unknownExercise": "Create this exercise or choose another one.",
+        "whole": "Amounts are whole numbers, 1 or more.",
+        "time": "Write times as minutes and seconds, e.g. 0:40.",
+        "amountRequired": "Enter an amount, or mark the exercise as max effort.",
+        "repsRequired": "Enter the reps, add a rep scheme to the level, or mark the exercise as max effort.",
+        "rangeNeedsAmount": "A range needs the amount it starts from.",
+        "range": "The range must end above where it starts.",
+        "femaleNeedsAmount": "A women's amount needs the general amount.",
+        "femaleNeedsLoad": "A women's load needs the general load.",
+        "field": "Check the load, percentage, interval number and note of this exercise."
+      }
+    },
+    "import": {
+      "title": "Start from a PDF",
+      "intro": "Upload the lesson plan for the day. The workout at its top (RX, Intermediate, Beginner and Skill) fills the form below for you to check. Nothing is saved until you create the workout.",
+      "choose": "Choose a PDF",
+      "reading": "Reading the PDF...",
+      "done": "Filled in from {file}. Check it before saving.",
+      "error": "Unable to read this PDF right now.",
+      "warnings": "Not everything could be read:",
+      "unknown": "These exercises from the PDF aren't in the exercise list yet. Create them, or choose another exercise below.",
+      "modalityFor": "Category of {name}",
+      "createExercise": "Create “{name}”",
+      "creating": "Creating “{name}”...",
+      "createExerciseError": "Unable to create this exercise right now."
+    },
+    "exercises": {
+      "list": {
+        "title": "Exercises",
+        "subtitle": "The movements workouts are built from.",
+        "new": "New exercise",
+        "search": "Search exercises",
+        "count": "{shown} of {total, plural, one {# exercise} other {# exercises}}",
+        "loading": "Loading exercises",
+        "loadError": "Couldn't load exercises",
+        "loadErrorMessage": "Unable to load exercises right now.",
+        "emptyTitle": "No exercises yet",
+        "emptyMessage": "Add the movements you programme: squats, pull-ups, runs...",
+        "noMatchesTitle": "No matches",
+        "noMatchesMessage": "No exercise matches the search and the filter.",
+        "tableLabel": "Exercises table",
+        "editColumn": "Edit"
+      },
+      "fields": {
+        "name": "Name",
+        "nameHint": "Up to 80 characters, singular, e.g. Pull-up.",
+        "nameError": "Enter a name of up to 80 characters.",
+        "aliases": "Other names",
+        "aliasesHint": "Separated by commas, e.g. KB swing, American swing. The PDF import recognises them.",
+        "aliasesError": "Up to 20 names of up to 80 characters each, separated by commas.",
+        "modality": "Category",
+        "measure": "Usually counted in",
+        "measureShort": "Counted in",
+        "measureHint": "What the workout form starts with when the exercise is chosen.",
+        "isActive": "Active (offered when building workouts)"
+      },
+      "backToList": "Back to exercises",
+      "loadingOne": "Loading exercise...",
+      "errors": {
+        "load": "Unable to load this exercise.",
+        "save": "Unable to save this exercise right now.",
+        "delete": "Unable to delete this exercise right now."
+      },
+      "create": {
+        "title": "New exercise",
+        "subtitle": "Add a movement to build workouts from.",
+        "submit": "Create exercise"
+      },
+      "edit": {
+        "title": "Edit exercise",
+        "subtitle": "Rename it, add other names or make it inactive.",
+        "delete": "Delete exercise",
+        "deleting": "Deleting...",
+        "deleteConfirm": "Delete “{name}”? An exercise used in workouts can't be deleted, only made inactive."
+      }
+    },
+    "types": {
+      "list": {
+        "title": "Workout types",
+        "subtitle": "How a workout is done and scored: for time, AMRAP, EMOM and your own.",
+        "new": "New type",
+        "count": "{count, plural, one {# type} other {# types}}",
+        "loading": "Loading workout types",
+        "loadError": "Couldn't load workout types",
+        "loadErrorMessage": "Unable to load workout types right now.",
+        "emptyTitle": "No workout types yet",
+        "emptyMessage": "Add the kinds of workouts you programme.",
+        "tableLabel": "Workout types table",
+        "editColumn": "Edit",
+        "builtIn": "Built-in"
+      },
+      "fields": {
+        "name": "Name",
+        "nameHint": "Up to 60 characters, e.g. Chipper.",
+        "nameError": "Enter a name of up to 60 characters.",
+        "scoreType": "Score",
+        "scoreTypeHint": "The score a workout of this type starts with; each workout can choose another.",
+        "description": "Description",
+        "descriptionHint": "Up to 500 characters. Shown when the type is chosen for a workout.",
+        "descriptionError": "Description must be at most 500 characters."
+      },
+      "backToList": "Back to workout types",
+      "loadingOne": "Loading workout type...",
+      "errors": {
+        "load": "Unable to load this workout type.",
+        "save": "Unable to save this workout type right now.",
+        "delete": "Unable to delete this workout type right now."
+      },
+      "create": {
+        "title": "New workout type",
+        "subtitle": "Describe a kind of workout and how it is scored.",
+        "submit": "Create type"
+      },
+      "edit": {
+        "title": "Edit workout type",
+        "subtitle": "Rename it, describe it or change its score.",
+        "delete": "Delete type",
+        "deleting": "Deleting...",
+        "deleteConfirm": "Delete “{name}”? A type used in workouts can't be deleted.",
+        "builtIn": "This is a built-in type: it can be renamed and described, but not deleted."
+      }
     }
   }
 }

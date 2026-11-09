@@ -1,0 +1,83 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { environment } from '@environments/environment';
+import { Observable } from 'rxjs';
+import { buildHttpParams } from '../utils/http-params.util';
+
+/** CrossFit's three modalities, plus everything else (theindex-api `ExerciseModality`). */
+export type ExerciseModality =
+  'WEIGHTLIFTING' | 'GYMNASTICS' | 'MONOSTRUCTURAL' | 'OTHER';
+
+/** What an amount of a movement is counted in: reps, metres, seconds or calories. */
+export type ExerciseMeasure = 'REPS' | 'DISTANCE' | 'TIME' | 'CALORIES';
+
+export const EXERCISE_MODALITIES: ExerciseModality[] = [
+  'WEIGHTLIFTING',
+  'GYMNASTICS',
+  'MONOSTRUCTURAL',
+  'OTHER',
+];
+export const EXERCISE_MEASURES: ExerciseMeasure[] = [
+  'REPS',
+  'DISTANCE',
+  'TIME',
+  'CALORIES',
+];
+
+/**
+ * A movement workouts are built from (theindex-api `exercises`, ADMIN and TRAINER). `aliases`
+ * are other spellings the PDF import recognises; no two exercises may share a spelling (409).
+ */
+export interface Exercise {
+  id: string;
+  name: string;
+  aliases: string[];
+  modality: ExerciseModality;
+  defaultMeasure: ExerciseMeasure;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateExercisePayload {
+  name: string;
+  aliases?: string[];
+  modality: ExerciseModality;
+  defaultMeasure?: ExerciseMeasure;
+  isActive?: boolean;
+}
+
+export type UpdateExercisePayload = Partial<CreateExercisePayload>;
+
+@Injectable({
+  providedIn: 'root',
+})
+export class ExercisesService {
+  private readonly baseUrl = `${environment.apiUrl}/exercises`;
+
+  constructor(private readonly http: HttpClient) {}
+
+  /** By name. `active` keeps only active (true) or inactive (false) ones. */
+  list(filters: { active?: boolean; q?: string } = {}): Observable<Exercise[]> {
+    return this.http.get<Exercise[]>(this.baseUrl, {
+      params: buildHttpParams({ active: filters.active, q: filters.q }),
+    });
+  }
+
+  getById(id: string): Observable<Exercise> {
+    return this.http.get<Exercise>(`${this.baseUrl}/${id}`);
+  }
+
+  create(payload: CreateExercisePayload): Observable<Exercise> {
+    return this.http.post<Exercise>(this.baseUrl, payload);
+  }
+
+  update(id: string, payload: UpdateExercisePayload): Observable<Exercise> {
+    return this.http.patch<Exercise>(`${this.baseUrl}/${id}`, payload);
+  }
+
+  /** Permanent; the API refuses (409) while a workout uses the exercise. */
+  delete(id: string): Observable<{ deleted: boolean }> {
+    return this.http.delete<{ deleted: boolean }>(`${this.baseUrl}/${id}`);
+  }
+}

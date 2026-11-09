@@ -1,0 +1,144 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="
+      (isNew ? 'workouts.types.create.title' : 'workouts.types.edit.title')
+        | transloco
+    "
+    [subtitle]="
+      (isNew
+        ? 'workouts.types.create.subtitle'
+        : 'workouts.types.edit.subtitle'
+      ) | transloco
+    "
+    [back]="{
+      label: ('workouts.types.backToList' | transloco),
+      link: '/workouts/types',
+    }"
+  />
+
+  @if (loading) {
+    <p class="notice" role="status">
+      {{ 'workouts.types.loadingOne' | transloco }}
+    </p>
+  } @else if (errorMessage && !isNew && !type) {
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
+  } @else {
+    <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <div class="form-grid">
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="type-name">{{
+              'workouts.types.fields.name' | transloco
+            }}</label>
+            <input
+              id="type-name"
+              type="text"
+              formControlName="name"
+              aria-describedby="type-name-help"
+              [attr.aria-invalid]="showError('name')"
+            />
+            @if (showError('name')) {
+              <span class="form-field__error" id="type-name-help">{{
+                'workouts.types.fields.nameError' | transloco
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="type-name-help">{{
+                'workouts.types.fields.nameHint' | transloco
+              }}</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label" for="type-score">{{
+              'workouts.types.fields.scoreType' | transloco
+            }}</label>
+            <select
+              id="type-score"
+              formControlName="scoreType"
+              aria-describedby="type-score-help"
+            >
+              @for (score of scoreTypes; track score) {
+                <option [value]="score">
+                  {{ score | enumLabel: 'scoreType' }}
+                </option>
+              }
+            </select>
+            <span class="form-field__hint" id="type-score-help">{{
+              'workouts.types.fields.scoreTypeHint' | transloco
+            }}</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="type-description">
+              {{ 'workouts.types.fields.description' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
+            </label>
+            <textarea
+              id="type-description"
+              rows="3"
+              formControlName="description"
+              aria-describedby="type-description-help"
+              [attr.aria-invalid]="showError('description')"
+            ></textarea>
+            @if (showError('description')) {
+              <span class="form-field__error" id="type-description-help">{{
+                'workouts.types.fields.descriptionError' | transloco
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="type-description-help">{{
+                'workouts.types.fields.descriptionHint' | transloco
+              }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (type?.code) {
+        <p class="notice">{{ 'workouts.types.edit.builtIn' | transloco }}</p>
+      }
+
+      @if (errorMessage) {
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
+      }
+
+      <div class="form-actions">
+        @if (type && !type.code) {
+          <button
+            class="btn btn--danger"
+            type="button"
+            data-testid="type-delete"
+            (click)="deleteType()"
+            [disabled]="deleting || submitting"
+          >
+            {{
+              (deleting
+                ? 'workouts.types.edit.deleting'
+                : 'workouts.types.edit.delete'
+              ) | transloco
+            }}
+          </button>
+        }
+        <button
+          class="btn btn--primary"
+          type="submit"
+          [disabled]="submitting || deleting"
+        >
+          {{
+            submitting
+              ? ('common.saving' | transloco)
+              : ((isNew ? 'workouts.types.create.submit' : 'common.saveChanges')
+                | transloco)
+          }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

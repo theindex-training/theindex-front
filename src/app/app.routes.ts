@@ -412,6 +412,96 @@ export const routes: Routes = [
         data: { roles: ['ADMIN'] },
       },
       {
+        path: 'workouts/exercises/new',
+        title: 'workouts.exercises.create.title',
+        loadComponent: () =>
+          import('./pages/workouts/exercises/exercise-edit.component').then(
+            (m) => m.ExerciseEditComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
+        path: 'workouts/exercises/:id/edit',
+        title: 'workouts.exercises.edit.title',
+        loadComponent: () =>
+          import('./pages/workouts/exercises/exercise-edit.component').then(
+            (m) => m.ExerciseEditComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
+        path: 'workouts/exercises',
+        title: 'workouts.exercises.list.title',
+        loadComponent: () =>
+          import('./pages/workouts/exercises/exercises.component').then(
+            (m) => m.ExercisesComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
+        path: 'workouts/types/new',
+        title: 'workouts.types.create.title',
+        loadComponent: () =>
+          import('./pages/workouts/types/workout-type-edit.component').then(
+            (m) => m.WorkoutTypeEditComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
+        path: 'workouts/types/:id/edit',
+        title: 'workouts.types.edit.title',
+        loadComponent: () =>
+          import('./pages/workouts/types/workout-type-edit.component').then(
+            (m) => m.WorkoutTypeEditComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
+        path: 'workouts/types',
+        title: 'workouts.types.list.title',
+        loadComponent: () =>
+          import('./pages/workouts/types/workout-types.component').then(
+            (m) => m.WorkoutTypesComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
+        path: 'workouts/new',
+        title: 'workouts.form.createTitle',
+        loadComponent: () =>
+          import('./pages/workouts/workout-edit.component').then(
+            (m) => m.WorkoutEditComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
+        path: 'workouts/:id/edit',
+        title: 'workouts.form.editTitle',
+        loadComponent: () =>
+          import('./pages/workouts/workout-edit.component').then(
+            (m) => m.WorkoutEditComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
+        path: 'workouts',
+        title: 'workouts.list.title',
+        loadComponent: () =>
+          import('./pages/workouts/workouts.component').then(
+            (m) => m.WorkoutsComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
         path: 'content',
         pathMatch: 'full',
         redirectTo: 'content/articles',

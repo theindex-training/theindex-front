@@ -57,6 +57,7 @@ const STAFF_MAIN: NavItem[] = [
     route: '/settlements',
     icon: 'wallet',
   },
+  { label: 'nav.workouts', route: '/workouts', icon: 'timer' },
   {
     label: 'nav.cashRegister',
     route: '/cash-register',

@@ -1,0 +1,162 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="
+      (isNew
+        ? 'workouts.exercises.create.title'
+        : 'workouts.exercises.edit.title'
+      ) | transloco
+    "
+    [subtitle]="
+      (isNew
+        ? 'workouts.exercises.create.subtitle'
+        : 'workouts.exercises.edit.subtitle'
+      ) | transloco
+    "
+    [back]="{
+      label: ('workouts.exercises.backToList' | transloco),
+      link: '/workouts/exercises',
+    }"
+  />
+
+  @if (loading) {
+    <p class="notice" role="status">
+      {{ 'workouts.exercises.loadingOne' | transloco }}
+    </p>
+  } @else if (errorMessage && !isNew && !exercise) {
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
+  } @else {
+    <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <div class="form-grid">
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="exercise-name">{{
+              'workouts.exercises.fields.name' | transloco
+            }}</label>
+            <input
+              id="exercise-name"
+              type="text"
+              formControlName="name"
+              aria-describedby="exercise-name-help"
+              [attr.aria-invalid]="showError('name')"
+            />
+            @if (showError('name')) {
+              <span class="form-field__error" id="exercise-name-help">{{
+                'workouts.exercises.fields.nameError' | transloco
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="exercise-name-help">{{
+                'workouts.exercises.fields.nameHint' | transloco
+              }}</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label" for="exercise-aliases">
+              {{ 'workouts.exercises.fields.aliases' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
+            </label>
+            <input
+              id="exercise-aliases"
+              type="text"
+              formControlName="aliases"
+              aria-describedby="exercise-aliases-help"
+              [attr.aria-invalid]="showError('aliases')"
+            />
+            @if (showError('aliases')) {
+              <span class="form-field__error" id="exercise-aliases-help">{{
+                'workouts.exercises.fields.aliasesError' | transloco
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="exercise-aliases-help">{{
+                'workouts.exercises.fields.aliasesHint' | transloco
+              }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="exercise-modality">{{
+              'workouts.exercises.fields.modality' | transloco
+            }}</label>
+            <select id="exercise-modality" formControlName="modality">
+              @for (modality of modalities; track modality) {
+                <option [value]="modality">
+                  {{ modality | enumLabel: 'exerciseModality' }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label" for="exercise-measure">{{
+              'workouts.exercises.fields.measure' | transloco
+            }}</label>
+            <select
+              id="exercise-measure"
+              formControlName="defaultMeasure"
+              aria-describedby="exercise-measure-help"
+            >
+              @for (measure of measures; track measure) {
+                <option [value]="measure">
+                  {{ measure | enumLabel: 'exerciseMeasure' }}
+                </option>
+              }
+            </select>
+            <span class="form-field__hint" id="exercise-measure-help">{{
+              'workouts.exercises.fields.measureHint' | transloco
+            }}</span>
+          </div>
+        </div>
+
+        <label class="form-field form-field--check">
+          <input type="checkbox" formControlName="isActive" />
+          <span>{{ 'workouts.exercises.fields.isActive' | transloco }}</span>
+        </label>
+      </div>
+
+      @if (errorMessage) {
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
+      }
+
+      <div class="form-actions">
+        @if (exercise) {
+          <button
+            class="btn btn--danger"
+            type="button"
+            data-testid="exercise-delete"
+            (click)="deleteExercise()"
+            [disabled]="deleting || submitting"
+          >
+            {{
+              (deleting
+                ? 'workouts.exercises.edit.deleting'
+                : 'workouts.exercises.edit.delete'
+              ) | transloco
+            }}
+          </button>
+        }
+        <button
+          class="btn btn--primary"
+          type="submit"
+          [disabled]="submitting || deleting"
+        >
+          {{
+            submitting
+              ? ('common.saving' | transloco)
+              : ((isNew
+                  ? 'workouts.exercises.create.submit'
+                  : 'common.saveChanges'
+                ) | transloco)
+          }}
+        </button>
+      </div>
+    </form>
+  }
+</section>
