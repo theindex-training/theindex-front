@@ -36,6 +36,7 @@ const STAFF_MAIN: NavItem[] = [
     route: '/home',
     icon: 'home',
   },
+  { label: 'nav.renewals', route: '/renewals', icon: 'renew' },
   { label: 'nav.trainees', route: '/trainees', icon: 'users' },
   {
     label: 'nav.registerAttendance',

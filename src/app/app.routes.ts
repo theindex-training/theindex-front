@@ -47,6 +47,16 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN', 'TRAINER'] },
       },
+      {
+        path: 'renewals',
+        title: 'nav.renewals',
+        loadComponent: () =>
+          import('./pages/renewals/renewals.component').then(
+            (m) => m.RenewalsComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
 
       {
         path: 'my-profile',

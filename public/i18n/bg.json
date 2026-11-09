@@ -48,6 +48,7 @@
     "account": "Акаунт",
     "homeLink": "The Index, начало",
     "dashboard": "Табло",
+    "renewals": "Подновявания",
     "home": "Начало",
     "trainees": "Трениращи",
     "registerAttendance": "Отбележи присъствие",
@@ -1152,6 +1153,51 @@
       "remainingDays": "Оставащи дни: {value}",
       "inactiveError": "В момента справката за неактивни трениращи не може да се зареди.",
       "withoutError": "В момента справката за трениращи без активен абонамент не може да се зареди."
+    }
+  },
+  "renewals": {
+    "subtitle": "Кой е без платени тренировки и на кого предстои да остане без.",
+    "typeLabel": "Вид абонамент",
+    "loading": "Зареждане на абонаментите",
+    "loadError": "Абонаментите не се заредиха",
+    "loadErrorMessage": "Абонаментите не се заредиха. Опитайте отново.",
+    "count": "{count, plural, one {# трениращ} other {# трениращи}}",
+    "tableLabel": "Таблица {title}",
+    "punch": {
+      "exhaustedTitle": "Изчерпани",
+      "exhaustedSub": "Без оставащи тренировки. Първо тези с най-много неплатени.",
+      "exhaustedEmpty": "Никой не е изчерпал абонамента си по посещения.",
+      "activeTitle": "Активни",
+      "activeSub": "Първо тези с най-малко оставащи тренировки. Няколко абонамента се събират.",
+      "activeEmpty": "Няма активни абонаменти по посещения."
+    },
+    "time": {
+      "exhaustedTitle": "Изтекли",
+      "exhaustedSub": "Първо най-отдавна изтеклите.",
+      "exhaustedEmpty": "Няма изтекли абонаменти за период.",
+      "activeTitle": "Активни",
+      "activeSub": "Първо тези, които изтичат най-скоро.",
+      "activeEmpty": "Няма активни абонаменти за период."
+    },
+    "fields": {
+      "trainee": "Трениращ",
+      "plan": "План",
+      "unpaid": "Неплатени тренировки",
+      "left": "Оставащи тренировки",
+      "lastTraining": "Последна тренировка",
+      "endedOn": "Изтекъл на",
+      "expired": "Изтекъл",
+      "endsOn": "Изтича на",
+      "daysLeft": "Оставащи дни",
+      "details": "Подробности"
+    },
+    "values": {
+      "subscriptions": "{count, plural, one {# абонамент} other {# абонамента}}",
+      "daysAgo": "{count, plural, =0 {Днес} one {Преди # ден} other {Преди # дни}}",
+      "daysLeft": "{count, plural, =0 {Изтича днес} one {# ден} other {# дни}}",
+      "unpaidChip": "{count, plural, one {# неплатена} other {# неплатени}}",
+      "leftChip": "{count, plural, one {Остава #} other {Остават #}}",
+      "daysLeftChip": "{count, plural, =0 {Изтича днес} one {Остава # ден} other {Остават # дни}}"
     }
   },
   "auth": {

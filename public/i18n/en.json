@@ -48,6 +48,7 @@
     "account": "Account",
     "homeLink": "The Index, home",
     "dashboard": "Dashboard",
+    "renewals": "Renewals",
     "home": "Home",
     "trainees": "Trainees",
     "registerAttendance": "Register attendance",
@@ -1152,6 +1153,51 @@
       "remainingDays": "Remaining days: {value}",
       "inactiveError": "Unable to load inactive trainees report right now.",
       "withoutError": "Unable to load trainees without active subscription report right now."
+    }
+  },
+  "renewals": {
+    "subtitle": "Who has run out of paid trainings, and who runs out next.",
+    "typeLabel": "Subscription type",
+    "loading": "Loading subscriptions",
+    "loadError": "Couldn't load subscriptions",
+    "loadErrorMessage": "Couldn't load the subscriptions. Please try again.",
+    "count": "{count, plural, one {# trainee} other {# trainees}}",
+    "tableLabel": "{title} table",
+    "punch": {
+      "exhaustedTitle": "Used up",
+      "exhaustedSub": "No trainings left. Most unpaid trainings first.",
+      "exhaustedEmpty": "No one has used up their punch subscription.",
+      "activeTitle": "Active",
+      "activeSub": "Fewest trainings left first. Several subscriptions are added up.",
+      "activeEmpty": "No active punch subscriptions."
+    },
+    "time": {
+      "exhaustedTitle": "Expired",
+      "exhaustedSub": "Longest expired first.",
+      "exhaustedEmpty": "No expired time-based subscriptions.",
+      "activeTitle": "Active",
+      "activeSub": "Ending soonest first.",
+      "activeEmpty": "No active time-based subscriptions."
+    },
+    "fields": {
+      "trainee": "Trainee",
+      "plan": "Plan",
+      "unpaid": "Unpaid trainings",
+      "left": "Trainings left",
+      "lastTraining": "Last training",
+      "endedOn": "Ended on",
+      "expired": "Expired",
+      "endsOn": "Ends on",
+      "daysLeft": "Days left",
+      "details": "Details"
+    },
+    "values": {
+      "subscriptions": "{count, plural, one {# subscription} other {# subscriptions}}",
+      "daysAgo": "{count, plural, =0 {Today} one {# day ago} other {# days ago}}",
+      "daysLeft": "{count, plural, =0 {Ends today} one {# day} other {# days}}",
+      "unpaidChip": "{count, plural, one {# unpaid} other {# unpaid}}",
+      "leftChip": "{count, plural, one {# left} other {# left}}",
+      "daysLeftChip": "{count, plural, =0 {Ends today} one {# day left} other {# days left}}"
     }
   },
   "auth": {

@@ -37,6 +37,7 @@ const TRAINEE = ['TRAINEE'];
  */
 const SHELL_ACCESS: Record<string, string[] | null> = {
   home: STAFF,
+  renewals: STAFF,
   'my-profile': TRAINEE,
   stats: TRAINEE,
   records: TRAINEE,
@@ -211,6 +212,7 @@ describe('routing (real routes)', () => {
   it('keeps a trainee out of staff pages and a trainer out of admin pages', async () => {
     signInAs('TRAINEE');
     expect(await open('/trainees')).toBe('/my-profile');
+    expect(await open('/renewals')).toBe('/my-profile');
 
     signInAs('TRAINER');
     expect(await open('/trainers')).toBe('/unauthorized');
@@ -220,6 +222,7 @@ describe('routing (real routes)', () => {
     expect(await open('/content/categories/new')).toBe('/unauthorized');
     expect(await open('/content/articles/a-1')).toBe('/unauthorized');
     expect(await open('/settlements')).toBe('/settlements');
+    expect(await open('/renewals')).toBe('/renewals');
   });
 
   it('sends an admin at /content to the articles, and /content/categories/new to the create page', async () => {
