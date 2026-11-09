@@ -121,6 +121,9 @@ public/                   # static assets; brand/ holds the official logo PNGs; 
 - Roles are the strings `ADMIN`, `TRAINER`, `TRAINEE`. The API enforces them; `roleGuard` only gates navigation (trainees get redirected to `/my-profile`).
 - Components subscribe directly, track `loading`/`errorMessage` fields, show `error?.error?.message` from API errors, and call `ChangeDetectorRef.detectChanges()` after async updates. Money arrives as integer cents (`priceCents`), formatted as EUR.
 
+## Renewals (`/renewals`)
+ADMIN and TRAINER, the menu item right under Dashboard (first in the More sheet on phones). `pages/renewals/` shows `GET /api/subscription-renewals` (`SubscriptionRenewalsService`): active trainees who have had a subscription, in a Punch or Time tab (an `app-segmented-control`), each with a used up/expired section and an active one. The API decides the tab, the sections and the order (theindex-api `subscriptions/subscription-renewals.ts`); the page only formats them. The Dashboard's "without active subscription" report is separate and unchanged.
+
 ## Content area (`/content`)
 The back office of the public site `theindex.training` (the sibling repo `theindex-training/theindex-web`; its `docs/decision-record.md` is the reference for the content features and their backlog).
 - ADMIN only: every `content/...` route has `roleGuard` + `data: { roles: ['ADMIN'] }`, and the "Content" nav item (Manage group) has `roles: ['ADMIN']`.
@@ -336,7 +339,7 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
 - **`.skeleton`:** pulsing placeholder block.
 - **`.btn`** + `.btn--primary` / `.btn--secondary` / `.btn--ghost` (low emphasis) / `.btn--danger` (soft) / `.btn--danger-solid` (confirming a destructive action): link or button actions in page content. `ui-button` stays the full-width form button.
 
-**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-left, chevron-right, plus, alert, trash, arrow-left, eye, eye-off, file-text.
+**Icons** available in `app-icon`: home, users, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-left, chevron-right, plus, alert, trash, arrow-left, eye, eye-off, file-text, renew.
 
 ### Form and detail page pattern (reference: `pages/plans/plan-*.component.html`)
 Create, edit, details and delete pages share one structure. They need no page SCSS. Create/edit pages drop `page-narrow` and use the full width:

@@ -237,3 +237,23 @@ export const mediaItem = (id: string, altText: string) => {
     updatedAt: '2026-11-06T10:00:00.000Z',
   };
 };
+
+/** One trainee on the renewals page (theindex-api `GET /subscription-renewals`). */
+export const renewalRow = (
+  traineeId: string,
+  name: string,
+  overrides: object = {},
+) => ({
+  traineeId,
+  name,
+  nickname: null,
+  planTitle: '16 trainings',
+  activeSubscriptions: 0,
+  remainingCredits: null,
+  endsAt: null,
+  daysLeft: null,
+  daysSinceEnd: null,
+  unpaidTrainings: 0,
+  lastTrainedAt: null,
+  ...overrides,
+});

@@ -1,0 +1,157 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="'nav.renewals' | transloco"
+    [subtitle]="'renewals.subtitle' | transloco"
+  />
+
+  <div class="list-toolbar">
+    <app-segmented-control
+      [label]="'renewals.typeLabel' | transloco"
+      [options]="tabOptions"
+      [value]="tab"
+      (valueChange)="tab = $event"
+    />
+  </div>
+
+  @if (loading) {
+    <app-skeleton-list [label]="'renewals.loading' | transloco" [rows]="6" />
+  } @else if (errorMessage) {
+    <app-empty-state
+      tone="danger"
+      [title]="'renewals.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="load()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else {
+    @for (section of sections; track section.id) {
+      <section
+        class="page-stack"
+        [attr.aria-labelledby]="section.id + '-title'"
+        [attr.data-testid]="'renewals-' + section.id"
+      >
+        <div class="section-header">
+          <div>
+            <h2 class="panel__title" [id]="section.id + '-title'">
+              {{ section.title | transloco }}
+            </h2>
+            <p class="text-muted section-header__sub">
+              {{ section.subtitle | transloco }}
+            </p>
+          </div>
+          @if (section.rows.length) {
+            <p class="list-toolbar__count">
+              {{ 'renewals.count' | transloco: { count: section.rows.length } }}
+            </p>
+          }
+        </div>
+
+        @if (!section.rows.length) {
+          <p class="notice" role="status">{{ section.empty | transloco }}</p>
+        } @else {
+          <!-- Desktop / tablet (≥ 768px): table -->
+          <div
+            class="data-table-wrap responsive-table"
+            tabindex="0"
+            role="region"
+            [attr.aria-label]="
+              'renewals.tableLabel'
+                | transloco: { title: (section.title | transloco) }
+            "
+          >
+            <table class="data-table">
+              <caption class="visually-hidden">
+                {{
+                  section.title | transloco
+                }}
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">
+                    {{ 'renewals.fields.trainee' | transloco }}
+                  </th>
+                  @for (column of section.columns; track column.header) {
+                    <th scope="col" [class.cell-right]="column.numeric">
+                      {{ column.header | transloco }}
+                    </th>
+                  }
+                  <th scope="col" class="cell-fit">
+                    <span class="visually-hidden">{{
+                      'renewals.fields.details' | transloco
+                    }}</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of section.rows; track row.traineeId) {
+                  <tr>
+                    <td>
+                      <div class="person-cell">
+                        <app-avatar [name]="row.name" />
+                        <div class="person-cell__text">
+                          <a
+                            class="cell-link"
+                            [routerLink]="['/trainees', row.traineeId]"
+                            >{{ row.name }}</a
+                          >
+                          @if (row.nickname) {
+                            <span class="person-cell__sub">{{
+                              quotedNickname(row.nickname)
+                            }}</span>
+                          }
+                        </div>
+                      </div>
+                    </td>
+                    @for (column of section.columns; track column.header) {
+                      <td
+                        [class.cell-right]="column.numeric"
+                        [class.num]="column.numeric"
+                      >
+                        {{ column.value(row) }}
+                      </td>
+                    }
+                    <td class="cell-fit">
+                      <!-- Mouse shortcut only; the name link is the accessible link for the row. -->
+                      <a
+                        class="row-chevron"
+                        [routerLink]="['/trainees', row.traineeId]"
+                        tabindex="-1"
+                        aria-hidden="true"
+                      >
+                        <app-icon name="chevron-right" />
+                      </a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile (< 768px): tappable rows -->
+          <ul
+            class="list-card responsive-list"
+            [attr.aria-label]="section.title | transloco"
+          >
+            @for (row of section.rows; track row.traineeId) {
+              <li>
+                <app-list-row
+                  [link]="['/trainees', row.traineeId]"
+                  [title]="row.name"
+                  [titleSuffix]="quotedNickname(row.nickname)"
+                  [avatarName]="row.name"
+                >
+                  <span listRowMeta>{{ section.meta(row) }}</span>
+                  <app-chip listRowTrailing [tone]="section.chipTone(row)">{{
+                    section.chip(row)
+                  }}</app-chip>
+                </app-list-row>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  }
+</section>

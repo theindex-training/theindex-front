@@ -19,6 +19,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - The content categories (a feature: theindex-web decision record, backlog item 9) came with §13 and journey J11: 67 spec files, 623 unit tests, 41 E2E tests. Four deliberate breaks in `category-form.ts` (description not cleared to `null`, empty slug sent, no slug length check, fractional order accepted) were each caught.
 - The article list and editor (backlog item 10) came with §14 and journey J12: 72 spec files, 695 unit tests, 43 E2E tests. Six deliberate breaks: autosave sending every field, an emptied optional field sent as `""`, the list `meta` kept, a 409 not stopping the autosave and an image caption lost on save were caught at once; a slug sent after the first publish slipped through, so it got the "published meanwhile" test, which catches it.
 - The publishing actions (backlog item 11) came with §15 and journey J13: 73 spec files, 721 unit tests, 45 E2E tests. Ten deliberate breaks were each caught: no save before publishing, Unpublish without its confirmation, "unpublished changes" lost when the draft moved on while publishing, the 400's problems not listed, the preview tab's `opener` kept, Update enabled with nothing to update, Discard not rebuilding the editor, the body always sent, blocks compared with their key order, and the saved blocks not updated after a save (the last one got its own test first).
+- The renewals page (a feature) came with §16 and journey J14: 75 spec files, 729 unit tests, 47 E2E tests. Three deliberate breaks (the punch tab showing the time lists, the subscription count dropped from the plan, days left shown as days since the end) were each caught.
 
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
 - **P0:** access control, sessions, money, and anything that writes attendance, subscriptions, settlements or cash. A bug here loses money or data, or exposes screens to the wrong role.
@@ -509,6 +510,21 @@ One spec per service, each method asserting method, URL, query and body. These p
 
 ---
 
+### 16. Renewals (P1)
+
+**`services/subscription-renewals.service.ts` → `subscription-renewals.service.spec.ts`**
+- [x] `overview()` GETs `/api/subscription-renewals` with no params and passes the answer through.
+
+**`pages/renewals/renewals.component.ts` → `renewals.component.spec.ts`**
+- [x] Punch tab first: "Used up" then "Active", in the API's order, with the plan (plus "· N subscriptions" when several run), unpaid trainings or trainings left, and the last training; the mobile rows carry the same figure as a chip.
+- [x] The time tab shows "Expired" (ended on, days ago, unpaid) and "Active" (ends on, days left, "Ends today" at 0) without asking the API again.
+- [x] Every name links to `/trainees/:id`; an empty section says so; an API error shows its message and "Try again" reloads; Bulgarian plurals.
+
+**`app.routes.spec.ts`, `navigation.spec.ts`**
+- [x] `/renewals` is for ADMIN and TRAINER (a trainee goes to `/my-profile`); the menu item sits right under Dashboard, and on phones first in the More sheet.
+
+---
+
 ## Part B — E2E user journeys (Playwright)
 
 ### B0. Setup ✅ (PR 5, together with J1 and J2)
@@ -744,6 +760,11 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 5. Delete permanently: Cancel has the focus; confirm → `DELETE` → the list.
 6. Phone: Discard changes on a changed published article → confirm → the editor shows the live title.
 
+
+### J14. Renewals (P1) [desktop, mobile]
+✅ Added with the renewals page: `e2e/journeys/j14-renewals.e2e.ts`, 2 tests.
+1. Desktop, trainer: the second menu link is Renewals; it opens `/renewals`. The punch tables list used up and active trainees in the API's order; the Time option shows expired ("9 days ago") and active ("10 days"); the overview is loaded once; names link to the trainee.
+2. Phone, admin: Renewals is the first link in the More sheet; the used-up list shows the unpaid chip.
 ---
 
 ## Suspected unintended behavior (to characterize, then log in `TEST_NOTES.md`)

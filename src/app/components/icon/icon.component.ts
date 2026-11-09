@@ -29,7 +29,8 @@ export type IconName =
   | 'arrow-left'
   | 'eye'
   | 'eye-off'
-  | 'file-text';
+  | 'file-text'
+  | 'renew';
 
 /**
  * Inline stroke icons in the Lucide style (24px grid, 2px round strokes, currentColor).

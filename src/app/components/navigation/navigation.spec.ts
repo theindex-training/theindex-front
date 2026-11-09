@@ -18,6 +18,7 @@ describe('buildNavigation', () => {
 
     expect(labels(nav.main)).toEqual([
       'Dashboard',
+      'Renewals',
       'Trainees',
       'Register attendance',
       'Attendance history',
@@ -42,6 +43,7 @@ describe('buildNavigation', () => {
       nav.tabs.filter((tab) => tab.primary).map((tab) => tab.route),
     ).toEqual(['/attendance/new']);
     expect(labels(nav.moreMain)).toEqual([
+      'Renewals',
       'Attendance history',
       'Cash register',
     ]);
@@ -60,7 +62,7 @@ describe('buildNavigation', () => {
     expect(all).not.toContain('Cash register');
     expect(all).not.toContain('Trainers');
     expect(all).not.toContain('Content');
-    expect(labels(nav.moreMain)).toEqual(['Attendance history']);
+    expect(labels(nav.moreMain)).toEqual(['Renewals', 'Attendance history']);
   });
 
   it('gives trainees their own three tabs and an Account sheet', () => {
