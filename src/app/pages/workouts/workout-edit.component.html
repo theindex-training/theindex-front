@@ -40,7 +40,7 @@
             type="file"
             accept="application/pdf,.pdf"
             data-testid="workout-pdf"
-            [disabled]="importing"
+            [disabled]="importing || submitting || deleting"
             (change)="importPdf($event)"
           />
           {{
@@ -430,7 +430,7 @@
             type="button"
             data-testid="workout-delete"
             (click)="deleteWorkout()"
-            [disabled]="deleting || submitting"
+            [disabled]="deleting || submitting || importing"
           >
             {{
               (deleting ? 'workouts.form.deleting' : 'workouts.form.delete')
@@ -441,7 +441,7 @@
         <button
           class="btn btn--primary"
           type="submit"
-          [disabled]="submitting || deleting"
+          [disabled]="submitting || deleting || importing"
         >
           {{
             submitting

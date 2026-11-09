@@ -237,6 +237,25 @@ describe('workouts area pages', () => {
       expect(page.query('[data-testid="day-2026-11-02"]')).not.toBeNull();
     });
 
+    it('follows the week in the address when only the address changes', async () => {
+      await open('/workouts?week=2026-11-16');
+      http.expectOne('/api/workouts?from=2026-11-16&to=2026-11-22').flush([]);
+      await page.settle();
+
+      // A link to another week (the sidebar's Workouts link, a bookmark) reuses the page.
+      await harness.navigateByUrl('/workouts?week=2026-11-09');
+      await page.settle();
+
+      http
+        .expectOne('/api/workouts?from=2026-11-09&to=2026-11-15')
+        .flush([HELEN]);
+      await page.settle();
+      expect(
+        page.query('[data-testid="workouts-week"]')?.textContent,
+      ).toContain('9 Nov – 15 Nov 2026');
+      expect(page.text()).toContain('Helen');
+    });
+
     it('shows the API error with a way to try again', async () => {
       await open('/workouts?week=2026-11-09');
       http
@@ -760,6 +779,25 @@ describe('workouts area pages', () => {
         save.flush({ ...HELEN, date: '2026-11-14' });
         await page.settle();
         http.expectOne('/api/workouts?from=2026-11-09&to=2026-11-15').flush([]);
+      });
+
+      it('saves nothing while a PDF is being read', async () => {
+        await openForm('/workouts/w1/edit', HELEN);
+
+        await upload();
+        const importReq = http.expectOne('/api/workouts/import-pdf');
+        const save = page.query<HTMLButtonElement>('button[type="submit"]')!;
+        expect(save.disabled).toBe(true);
+        // The form is valid as loaded: a submit now would save it without the PDF.
+        await page.submit('form');
+        http.expectNone('/api/workouts/w1');
+
+        importReq.flush(DRAFT);
+        await page.settle();
+        expect(save.disabled).toBe(false);
+        expect(page.query<HTMLInputElement>('#workout-date')?.value).toBe(
+          '2026-11-14',
+        );
       });
 
       it('shows why a PDF could not be read and leaves the form as it was', async () => {

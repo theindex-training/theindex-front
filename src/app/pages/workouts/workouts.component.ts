@@ -2,8 +2,10 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   OnInit,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ChipComponent } from '../../components/chip/chip.component';
@@ -76,12 +78,24 @@ export class WorkoutsComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly changeDetector: ChangeDetectorRef,
+    private readonly destroyRef: DestroyRef,
   ) {}
 
   ngOnInit(): void {
-    const week = this.route.snapshot.queryParamMap.get('week') ?? '';
-    this.weekStart = mondayOf(DATE_PATTERN.test(week) ? week : this.today());
-    this.load();
+    // The page is reused when only `?week=` changes (the sidebar's Workouts link, the back
+    // button), so the week follows the address, not just its first value.
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const week = params.get('week') ?? '';
+        const start = mondayOf(DATE_PATTERN.test(week) ? week : this.today());
+        if (start !== this.weekStart) {
+          this.weekStart = start;
+          this.load();
+          // The address changed outside a render: ask for one (the app is zoneless).
+          this.changeDetector.markForCheck();
+        }
+      });
   }
 
   private today(): string {
@@ -132,15 +146,18 @@ export class WorkoutsComponent implements OnInit {
     });
   }
 
-  /** Moves by whole weeks; the address follows, so a reload or a link keeps the week. */
+  /**
+   * Moves by whole weeks. The week is shown at once and the address follows, so a reload or a
+   * link keeps it (the address change itself then finds the week already shown).
+   */
   showWeek(start: string): void {
     this.weekStart = mondayOf(start);
+    this.load();
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { week: this.isThisWeek ? null : this.weekStart },
       replaceUrl: true,
     });
-    this.load();
   }
 
   previousWeek(): void {

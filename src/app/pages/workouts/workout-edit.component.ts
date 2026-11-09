@@ -254,7 +254,7 @@ export class WorkoutEditComponent implements OnInit {
     const file = input.files?.[0];
     // Let the same file be chosen again after a fix.
     input.value = '';
-    if (!file || this.importing) {
+    if (!file || this.importing || this.submitting || this.deleting) {
       return;
     }
 
@@ -344,7 +344,9 @@ export class WorkoutEditComponent implements OnInit {
   // ---- save and delete ----
 
   handleSubmit(): void {
-    if (this.submitting || this.deleting) {
+    // While a PDF is being read the form still holds what was there before: saving it would
+    // leave the page and drop the import.
+    if (this.submitting || this.deleting || this.importing) {
       return;
     }
     this.submitted = true;
@@ -377,7 +379,7 @@ export class WorkoutEditComponent implements OnInit {
   }
 
   deleteWorkout(): void {
-    if (!this.workout || this.submitting || this.deleting) {
+    if (!this.workout || this.submitting || this.deleting || this.importing) {
       return;
     }
     if (!window.confirm(this.language.t('workouts.form.deleteConfirm'))) {
