@@ -20,9 +20,11 @@ import {
   WorkoutItemFields,
   WorkoutLevel,
   WorkoutPayload,
+  WorkoutSummary,
   WorkoutVariantFields,
 } from '../../services/workouts.service';
 import { trimmedLength } from '../../utils/form-validators.util';
+import { hasSummaryText } from './workout-summary';
 
 /** Limits from theindex-api's workout DTOs (workouts/dto/workout.dto.ts). */
 export const WORKOUT_TITLE_MAX = 120;
@@ -174,6 +176,8 @@ export type WorkoutForm = FormGroup<{
   date: FormControl<string>;
   title: FormControl<string>;
   notes: FormControl<string>;
+  /** Set from the summary editor when the form is submitted, and by a PDF draft. */
+  summary: FormControl<WorkoutSummary | null>;
   parts: FormArray<PartForm>;
 }>;
 
@@ -297,32 +301,21 @@ export function buildPart(fb: FormBuilder): PartForm {
   });
 }
 
+/** The summary needs some text: what the API requires. */
+const summaryRequired: ValidatorFn = (control) =>
+  hasSummaryText(control.value as WorkoutSummary | null)
+    ? null
+    : { required: true };
+
 export function buildWorkoutForm(fb: FormBuilder, date = ''): WorkoutForm {
   const nn = fb.nonNullable;
   return fb.group({
     date: nn.control(date, [Validators.required]),
     title: nn.control('', [trimmedLength(0, WORKOUT_TITLE_MAX)]),
     notes: nn.control('', [trimmedLength(0, WORKOUT_NOTES_MAX)]),
+    summary: fb.control<WorkoutSummary | null>(null, [summaryRequired]),
     parts: fb.array<PartForm>([buildPart(fb)]),
   });
-}
-
-/** A new level starts as a copy of RX, which is what it usually differs from only slightly. */
-export function copyVariant(
-  fb: FormBuilder,
-  source: VariantForm,
-  level: WorkoutLevel,
-): VariantForm {
-  const value = source.getRawValue();
-  const copy = buildVariant(fb, level);
-  copy.controls.items.clear();
-  for (const item of value.items) {
-    const row = buildItem(fb);
-    row.setValue(item);
-    copy.controls.items.push(row);
-  }
-  copy.patchValue({ ...value, level, items: undefined });
-  return copy;
 }
 
 // ---- filling the form ----
@@ -406,13 +399,14 @@ export function fillFromWorkout(
     date: workout.date,
     title: workout.title ?? '',
     notes: workout.notes ?? '',
+    summary: workout.summary,
   });
   fillParts(fb, form, workout.parts);
 }
 
 /**
- * Puts a PDF draft into the form. The date and title are taken only where the draft has them;
- * the parts replace what was there.
+ * Puts a PDF draft into the form. The date, title and summary are taken only where the draft
+ * has them; the parts replace what was there. (The page also puts the summary in its editor.)
  */
 export function fillFromDraft(
   fb: FormBuilder,
@@ -424,6 +418,9 @@ export function fillFromDraft(
   }
   if (draft.title) {
     form.controls.title.setValue(draft.title);
+  }
+  if (draft.summary) {
+    form.controls.summary.setValue(draft.summary);
   }
   if (draft.parts.length) {
     fillParts(fb, form, draft.parts);
@@ -473,6 +470,7 @@ export function workoutPayload(form: WorkoutForm): WorkoutPayload {
     date: raw.date,
     title: text(raw.title),
     notes: text(raw.notes),
+    summary: raw.summary ?? { blocks: [] },
     parts: raw.parts.map((part) => ({
       ...(part.id ? { id: part.id } : {}),
       title: text(part.title),

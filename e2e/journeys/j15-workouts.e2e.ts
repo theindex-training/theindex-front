@@ -68,6 +68,13 @@ test.describe('J15 workouts', () => {
         sourceCode: '261109',
         date: '2026-11-09',
         title: 'Helen',
+        summary: {
+          blocks: [
+            { type: 'paragraph', data: { text: '<b>3 rounds for time:</b>' } },
+            { type: 'paragraph', data: { text: '400-m run' } },
+            { type: 'paragraph', data: { text: '12 pull-ups' } },
+          ],
+        },
         unknownExercises: ['Pull-up'],
         warnings: [],
         parts: [
@@ -107,6 +114,14 @@ test.describe('J15 workouts', () => {
         date: '2026-11-09',
         title: 'Helen',
         notes: null,
+        summary: {
+          blocks: [
+            { type: 'paragraph', data: { text: '<b>3 rounds for time:</b>' } },
+            { type: 'paragraph', data: { text: '400-m run' } },
+            { type: 'paragraph', data: { text: '12 pull-ups' } },
+          ],
+        },
+        summaryText: '3 rounds for time:\n400-m run\n12 pull-ups',
         parts: [
           {
             id: 'p-1',
@@ -172,6 +187,14 @@ test.describe('J15 workouts', () => {
         page.getByLabel(t('workouts.form.structure.rounds'), { exact: true }),
       ).toHaveValue('3');
 
+      // The RX column as printed is the summary, in its editor.
+      await expect(page.getByTestId('workout-summary')).toContainText(
+        '3 rounds for time:',
+      );
+      await expect(page.getByTestId('workout-summary')).toContainText(
+        '12 pull-ups',
+      );
+
       // The PDF named a movement the catalogue lacks: it is created from here.
       const pending = page.getByTestId('pending-exercises');
       await expect(pending).toContainText('Pull-up');
@@ -193,9 +216,19 @@ test.describe('J15 workouts', () => {
         .getByRole('button', { name: t('workouts.form.create') })
         .click();
       await expect(page).toHaveURL(/\/workouts\?week=2026-11-09$/);
+      await expect
+        .poll(() => api.calls('POST', '/api/workouts').length)
+        .toBe(1);
       expect(api.last('POST', '/api/workouts')?.body).toMatchObject({
         date: '2026-11-09',
         title: 'Helen',
+        summary: {
+          blocks: [
+            { data: { text: '<b>3 rounds for time:</b>' } },
+            { data: { text: '400-m run' } },
+            { data: { text: '12 pull-ups' } },
+          ],
+        },
         parts: [
           {
             workoutTypeId: 't-time',
@@ -214,7 +247,7 @@ test.describe('J15 workouts', () => {
         ],
       });
       await expect(page.getByTestId('day-2026-11-09')).toContainText(
-        '12 Pull-up',
+        '12 pull-ups',
       );
     },
   );

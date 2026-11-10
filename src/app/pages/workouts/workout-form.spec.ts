@@ -6,7 +6,6 @@ import {
   buildItem,
   buildVariant,
   buildWorkoutForm,
-  copyVariant,
   fillFromDraft,
   fillFromWorkout,
   formatClock,
@@ -56,6 +55,12 @@ const HELEN: Workout = {
   date: '2026-11-09',
   title: 'Helen',
   notes: null,
+  summary: {
+    blocks: [
+      { type: 'paragraph', data: { text: '<b>3 rounds for time:</b>' } },
+    ],
+  },
+  summaryText: '3 rounds for time:',
   parts: [
     {
       id: 'p1',
@@ -218,6 +223,7 @@ describe('workout form: filling and sending', () => {
       date: '2026-11-09',
       title: 'Helen',
       notes: null,
+      summary: HELEN.summary,
       parts: [
         {
           id: 'p1',
@@ -245,7 +251,11 @@ describe('workout form: filling and sending', () => {
 
   it('trims text, sends empty text as null and turns what was typed into numbers', () => {
     const form = buildWorkoutForm(fb, '2026-11-10');
-    form.patchValue({ title: '  Fran ', notes: '   ' });
+    form.patchValue({
+      title: '  Fran ',
+      notes: '   ',
+      summary: { blocks: [{ type: 'paragraph', data: { text: 'Fran' } }] },
+    });
     const part = form.controls.parts.at(0);
     part.patchValue({ workoutTypeId: 't-time', scoreType: 'TIME', title: ' ' });
     const variant = part.controls.variants.at(0);
@@ -266,6 +276,7 @@ describe('workout form: filling and sending', () => {
       date: '2026-11-10',
       title: 'Fran',
       notes: null,
+      summary: { blocks: [{ type: 'paragraph', data: { text: 'Fran' } }] },
     });
     expect(payload.parts[0]).not.toHaveProperty('id');
     expect(payload.parts[0].title).toBeNull();
@@ -285,28 +296,17 @@ describe('workout form: filling and sending', () => {
     });
   });
 
-  it('a new level starts as a copy of RX', () => {
-    const form = buildWorkoutForm(fb);
-    fillFromWorkout(fb, form, HELEN);
-    const rx = form.controls.parts.at(0).controls.variants.at(0);
-
-    const beginner = copyVariant(fb, rx, 'BEGINNER');
-    beginner.controls.items.at(0).controls.quantity.setValue('200');
-
-    expect(beginner.getRawValue()).toMatchObject({
-      level: 'BEGINNER',
-      rounds: 3,
-      timeCap: '15:00',
-    });
-    expect(beginner.controls.items).toHaveLength(3);
-    expect(rx.controls.items.at(0).controls.quantity.value).toBe('400');
-  });
-
   it('a PDF draft fills the form; unknown movements wait for an exercise', () => {
     const draft: WorkoutDraft = {
       sourceCode: '261114',
       date: '2026-11-14',
       title: null,
+      summary: {
+        blocks: [
+          { type: 'paragraph', data: { text: '<b>AMRAP 12:</b>' } },
+          { type: 'paragraph', data: { text: '20/15-cal bike' } },
+        ],
+      },
       unknownExercises: ['Wall ball'],
       warnings: [],
       parts: [
@@ -338,20 +338,6 @@ describe('workout form: filling and sending', () => {
                 },
               ],
             },
-            {
-              ...NO_STRUCTURE,
-              level: 'BEGINNER',
-              durationSeconds: 720,
-              items: [
-                {
-                  ...NO_ITEM,
-                  exerciseId: null,
-                  exerciseName: 'Wall ball',
-                  measure: 'REPS',
-                  quantity: 10,
-                },
-              ],
-            },
           ],
         },
       ],
@@ -361,10 +347,11 @@ describe('workout form: filling and sending', () => {
 
     fillFromDraft(fb, form, draft);
 
-    // The draft has a date but no title: the typed title stays.
+    // The draft has a date and a summary but no title: the typed title stays.
     expect(form.getRawValue()).toMatchObject({
       date: '2026-11-14',
       title: 'Typed before',
+      summary: draft.summary,
     });
     expect(pendingNames(form)).toEqual(['Wall ball']);
     expect(form.valid).toBe(false);
@@ -374,15 +361,12 @@ describe('workout form: filling and sending', () => {
     expect(pendingNames(form)).toEqual([]);
     expect(form.valid).toBe(true);
     const payload = workoutPayload(form);
-    expect(payload.parts[0].variants.map((v) => v.level)).toEqual([
-      'RX',
-      'BEGINNER',
-    ]);
+    expect(payload.summary).toEqual(draft.summary);
+    expect(payload.parts[0].variants.map((v) => v.level)).toEqual(['RX']);
     expect(payload.parts[0].variants[0].items).toMatchObject([
       { exerciseId: 'e-bike', quantity: 20, quantityFemale: 15 },
       { exerciseId: 'e-wb', quantity: 15 },
     ]);
-    expect(payload.parts[0].variants[1].items[0].exerciseId).toBe('e-wb');
   });
 
   it('a draft without parts leaves the form’s parts alone', () => {
@@ -392,13 +376,34 @@ describe('workout form: filling and sending', () => {
       sourceCode: null,
       date: null,
       title: null,
+      summary: null,
       parts: [],
       unknownExercises: [],
       warnings: ['The RX workout could not be read'],
     });
 
     expect(form.controls.date.value).toBe('2026-11-01');
+    expect(form.controls.summary.value).toBeNull();
     expect(form.controls.parts).toHaveLength(1);
+  });
+
+  it('requires a summary with some text', () => {
+    const form = buildWorkoutForm(fb, '2026-11-10');
+    const summary = form.controls.summary;
+    const of = (...texts: string[]) => ({
+      blocks: texts.map((text) => ({
+        type: 'paragraph' as const,
+        data: { text },
+      })),
+    });
+
+    expect(summary.hasError('required')).toBe(true);
+    summary.setValue(of());
+    expect(summary.hasError('required')).toBe(true);
+    summary.setValue(of('<b> </b>', '<br>', '&nbsp;'));
+    expect(summary.hasError('required')).toBe(true);
+    summary.setValue(of('<b>AMRAP 12</b>'));
+    expect(summary.valid).toBe(true);
   });
 });
 

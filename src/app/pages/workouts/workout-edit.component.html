@@ -179,6 +179,28 @@
           </div>
           <div class="form-row">
             <div class="form-field">
+              <span class="form-field__label" id="workout-summary-label">{{
+                'workouts.form.summary' | transloco
+              }}</span>
+              <app-summary-editor
+                [content]="workout?.summary ?? null"
+                [label]="'workouts.form.summary' | transloco"
+                describedBy="workout-summary-help"
+                [invalid]="summaryInvalid"
+              />
+              @if (summaryInvalid) {
+                <span class="form-field__error" id="workout-summary-help">{{
+                  'workouts.form.summaryError' | transloco
+                }}</span>
+              } @else {
+                <span class="form-field__hint" id="workout-summary-help">{{
+                  'workouts.form.summaryHint' | transloco
+                }}</span>
+              }
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
               <label class="form-field__label" for="workout-notes">
                 {{ 'workouts.form.notes' | transloco }}
                 <span class="form-field__optional">{{
@@ -206,216 +228,86 @@
         </div>
       </div>
 
-      <ng-container formArrayName="parts">
-        @for (part of parts; track part; let p = $index) {
-          <section
-            class="panel wk-part"
-            [formGroupName]="p"
-            [attr.aria-labelledby]="'part-' + p + '-title'"
-            [attr.data-testid]="'part-' + p"
-          >
-            <div class="wk-part__header">
-              <h2 class="panel__title" [id]="'part-' + p + '-title'">
-                {{ 'workouts.form.part.heading' | transloco: { n: p + 1 } }}
-              </h2>
-              @if (parts.length > 1) {
-                <div class="wk-part__actions">
-                  <button
-                    class="icon-btn"
-                    type="button"
-                    [disabled]="p === 0"
-                    [attr.aria-label]="
-                      'workouts.form.part.moveUp' | transloco: { n: p + 1 }
-                    "
-                    (click)="movePart(p, -1)"
-                  >
-                    <app-icon name="chevron-up" />
-                  </button>
-                  <button
-                    class="icon-btn"
-                    type="button"
-                    [disabled]="p === parts.length - 1"
-                    [attr.aria-label]="
-                      'workouts.form.part.moveDown' | transloco: { n: p + 1 }
-                    "
-                    (click)="movePart(p, 1)"
-                  >
-                    <app-icon name="chevron-down" />
-                  </button>
-                  <button
-                    class="icon-btn icon-btn--danger"
-                    type="button"
-                    [attr.aria-label]="
-                      'workouts.form.part.remove' | transloco: { n: p + 1 }
-                    "
-                    (click)="removePart(p)"
-                  >
-                    <app-icon name="trash" />
-                  </button>
-                </div>
+      <section
+        class="panel wk-part"
+        [formGroup]="part"
+        aria-labelledby="part-0-title"
+        data-testid="part-0"
+      >
+        <div class="wk-part__intro">
+          <h2 class="panel__title" id="part-0-title">
+            {{ 'workouts.form.rx.title' | transloco }}
+          </h2>
+          <p class="text-muted">{{ 'workouts.form.rx.intro' | transloco }}</p>
+        </div>
+
+        @if (hiddenSections) {
+          <p class="notice notice--warning" data-testid="hidden-sections">
+            {{
+              'workouts.form.rx.hiddenSections'
+                | transloco: { count: hiddenSections }
+            }}
+          </p>
+        }
+
+        <div class="form-grid">
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-field__label" for="part-0-type">{{
+                'workouts.form.part.type' | transloco
+              }}</label>
+              <select
+                id="part-0-type"
+                formControlName="workoutTypeId"
+                (change)="typeChosen(part)"
+                aria-describedby="part-0-type-help"
+                [attr.aria-invalid]="showError(part.controls.workoutTypeId)"
+              >
+                @for (type of types; track type.id) {
+                  <option [value]="type.id">{{ type.name }}</option>
+                }
+              </select>
+              @if (showError(part.controls.workoutTypeId)) {
+                <span class="form-field__error" id="part-0-type-help">{{
+                  'workouts.form.part.typeError' | transloco
+                }}</span>
+              } @else {
+                <span class="form-field__hint" id="part-0-type-help">{{
+                  typeOf(part)?.description ||
+                    ('workouts.form.part.typeHint' | transloco)
+                }}</span>
               }
             </div>
-
-            <div class="form-grid">
-              <div class="form-row">
-                <div class="form-field">
-                  <label
-                    class="form-field__label"
-                    [for]="'part-' + p + '-type'"
-                    >{{ 'workouts.form.part.type' | transloco }}</label
-                  >
-                  <select
-                    [id]="'part-' + p + '-type'"
-                    formControlName="workoutTypeId"
-                    (change)="typeChosen(part)"
-                    [attr.aria-describedby]="'part-' + p + '-type-help'"
-                    [attr.aria-invalid]="showError(part.controls.workoutTypeId)"
-                  >
-                    @for (type of types; track type.id) {
-                      <option [value]="type.id">{{ type.name }}</option>
-                    }
-                  </select>
-                  @if (showError(part.controls.workoutTypeId)) {
-                    <span
-                      class="form-field__error"
-                      [id]="'part-' + p + '-type-help'"
-                      >{{ 'workouts.form.part.typeError' | transloco }}</span
-                    >
-                  } @else {
-                    <span
-                      class="form-field__hint"
-                      [id]="'part-' + p + '-type-help'"
-                      >{{
-                        typeOf(part)?.description ||
-                          ('workouts.form.part.typeHint' | transloco)
-                      }}</span
-                    >
-                  }
-                </div>
-                <div class="form-field">
-                  <label
-                    class="form-field__label"
-                    [for]="'part-' + p + '-score'"
-                    >{{ 'workouts.form.part.score' | transloco }}</label
-                  >
-                  <select
-                    [id]="'part-' + p + '-score'"
-                    formControlName="scoreType"
-                    [attr.aria-describedby]="'part-' + p + '-score-help'"
-                  >
-                    @for (score of scoreTypes; track score) {
-                      <option [value]="score">
-                        {{ score | enumLabel: 'scoreType' }}
-                      </option>
-                    }
-                  </select>
-                  <span
-                    class="form-field__hint"
-                    [id]="'part-' + p + '-score-help'"
-                    >{{ 'workouts.form.part.scoreHint' | transloco }}</span
-                  >
-                </div>
-                <div class="form-field">
-                  <label
-                    class="form-field__label"
-                    [for]="'part-' + p + '-heading'"
-                  >
-                    {{ 'workouts.form.part.title' | transloco }}
-                    <span class="form-field__optional">{{
-                      'common.optional' | transloco
-                    }}</span>
-                  </label>
-                  <input
-                    [id]="'part-' + p + '-heading'"
-                    type="text"
-                    formControlName="title"
-                    [attr.aria-describedby]="'part-' + p + '-heading-help'"
-                    [attr.aria-invalid]="showError(part.controls.title)"
-                  />
-                  <span
-                    [class]="
-                      showError(part.controls.title)
-                        ? 'form-field__error'
-                        : 'form-field__hint'
-                    "
-                    [id]="'part-' + p + '-heading-help'"
-                    >{{ 'workouts.form.part.titleHint' | transloco }}</span
-                  >
-                </div>
-              </div>
-            </div>
-
-            @for (variant of variants(part); track variant; let v = $index) {
-              <section
-                class="panel-section wk-level"
-                [attr.aria-labelledby]="'part-' + p + '-level-' + v"
-                [attr.data-testid]="
-                  'part-' + p + '-' + variant.controls.level.value
-                "
+            <div class="form-field">
+              <label class="form-field__label" for="part-0-score">{{
+                'workouts.form.part.score' | transloco
+              }}</label>
+              <select
+                id="part-0-score"
+                formControlName="scoreType"
+                aria-describedby="part-0-score-help"
               >
-                <div class="wk-part__header">
-                  <h3
-                    class="wk-level__title"
-                    [id]="'part-' + p + '-level-' + v"
-                  >
-                    {{
-                      variant.controls.level.value | enumLabel: 'workoutLevel'
-                    }}
-                  </h3>
-                  @if (variant.controls.level.value !== 'RX') {
-                    <button
-                      class="btn btn--ghost"
-                      type="button"
-                      (click)="removeLevel(part, v)"
-                    >
-                      {{ 'workouts.form.level.remove' | transloco }}
-                    </button>
-                  }
-                </div>
-                <app-workout-variant
-                  [variant]="variant"
-                  [type]="typeOf(part)"
-                  [exercises]="exercises"
-                  [idPrefix]="'p' + p + '-' + variant.controls.level.value"
-                  [showErrors]="submitted"
-                />
-              </section>
-            }
-
-            @if (missingLevels(part).length) {
-              <div class="wk-level__add">
-                <span class="text-muted">{{
-                  'workouts.form.level.sameAsRx' | transloco
-                }}</span>
-                @for (level of missingLevels(part); track level) {
-                  <button
-                    class="btn btn--secondary"
-                    type="button"
-                    (click)="addLevel(part, level)"
-                  >
-                    {{
-                      'workouts.form.level.add'
-                        | transloco
-                          : { level: (level | enumLabel: 'workoutLevel') }
-                    }}
-                  </button>
+                @for (score of scoreTypes; track score) {
+                  <option [value]="score">
+                    {{ score | enumLabel: 'scoreType' }}
+                  </option>
                 }
-              </div>
-            }
-          </section>
-        }
-      </ng-container>
+              </select>
+              <span class="form-field__hint" id="part-0-score-help">{{
+                'workouts.form.part.scoreHint' | transloco
+              }}</span>
+            </div>
+          </div>
+        </div>
 
-      <div>
-        <button
-          class="btn btn--secondary"
-          type="button"
-          [disabled]="parts.length >= maxParts"
-          (click)="addPart()"
-        >
-          {{ 'workouts.form.part.add' | transloco }}
-        </button>
-      </div>
+        <app-workout-variant
+          [variant]="rx"
+          [type]="typeOf(part)"
+          [exercises]="exercises"
+          idPrefix="p0-RX"
+          [showErrors]="submitted"
+        />
+      </section>
 
       @if (errorMessage) {
         <p class="notice notice--danger" role="alert">

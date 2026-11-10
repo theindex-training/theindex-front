@@ -43,36 +43,12 @@
   flex: 1 1 10rem;
 }
 
-.wk-part__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.wk-part__header .panel__title,
-.wk-level__title {
-  margin: 0;
-}
-
-.wk-part__actions {
-  display: flex;
-  gap: var(--space-1);
-}
-
-.wk-level {
+.wk-part__intro {
   display: grid;
-  gap: var(--space-3);
-}
+  gap: var(--space-1);
 
-.wk-level__title {
-  font-size: var(--text-lg);
-  color: var(--accent-text);
-}
-
-.wk-level__add {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
+  .panel__title,
+  p {
+    margin: 0;
+  }
 }

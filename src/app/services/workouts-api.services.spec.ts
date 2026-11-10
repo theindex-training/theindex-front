@@ -77,6 +77,7 @@ describe('workouts, exercises and workout types services', () => {
       date: '2026-11-09',
       title: 'Helen',
       notes: null,
+      summary: { blocks: [{ type: 'paragraph', data: { text: 'Helen' } }] },
       parts: [],
     };
 

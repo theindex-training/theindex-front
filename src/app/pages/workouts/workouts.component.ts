@@ -26,6 +26,7 @@ import {
 } from '../../services/workouts.service';
 import { addDays, dayKeyToDate, localDayKey } from '../../utils/calendar.util';
 import { itemLine, structurePhrases } from './workout-format';
+import { hasSummaryText } from './workout-summary';
 import { WorkoutsNavComponent } from './workouts-nav.component';
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -43,8 +44,8 @@ interface WeekDay {
 }
 
 /**
- * The workouts of one week, Monday to Sunday, a day at a time: what is planned, and where a day
- * is still empty. `?week=YYYY-MM-DD` (any day of the week) picks the week; without it, this one.
+ * The workouts of one week, Monday to Sunday, a day at a time: each with its type, score and
+ * summary (the text people read), and where a day is still empty. `?week=YYYY-MM-DD` (any day of the week) picks the week; without it, this one.
  */
 @Component({
   selector: 'app-workouts',
@@ -193,6 +194,16 @@ export class WorkoutsComponent implements OnInit {
 
   lines(variant: WorkoutVariant): string[] {
     return variant.items.map((item) => itemLine(item, this.t));
+  }
+
+  hasSummary(workout: Workout): boolean {
+    return hasSummaryText(workout.summary);
+  }
+
+  /** The RX level of the first part: what the page shows when there is no summary. */
+  rxOf(workout: Workout): WorkoutVariant | undefined {
+    const variants = workout.parts[0]?.variants ?? [];
+    return variants.find((v) => v.level === 'RX') ?? variants[0];
   }
 
   scored(part: WorkoutPart): boolean {

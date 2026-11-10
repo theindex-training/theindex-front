@@ -3,12 +3,12 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
+  ViewChild,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { forkJoin } from 'rxjs';
-import { IconComponent } from '../../components/icon/icon.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 import { LanguageService } from '../../i18n/language.service';
@@ -26,19 +26,11 @@ import {
   WorkoutType,
   WorkoutTypesService,
 } from '../../services/workout-types.service';
+import { Workout, WorkoutsService } from '../../services/workouts.service';
 import {
-  Workout,
-  WORKOUT_LEVELS,
-  WorkoutLevel,
-  WorkoutsService,
-} from '../../services/workouts.service';
-import {
-  buildPart,
   buildWorkoutForm,
-  copyVariant,
   fillFromDraft,
   fillFromWorkout,
-  MAX_PARTS,
   PartForm,
   pendingNames,
   resolvePending,
@@ -46,14 +38,16 @@ import {
   WorkoutForm,
   workoutPayload,
 } from './workout-form';
+import { SummaryEditorComponent } from './summary-editor.component';
 import { WorkoutVariantComponent } from './workout-variant.component';
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
  * Creates a workout (`/workouts/new`, optionally `?date=YYYY-MM-DD`) or edits and deletes one
- * (`/workouts/:id/edit`). A lesson-plan PDF can fill the form; nothing is saved until the form
- * is submitted, and movements the catalogue doesn't have yet are created here first.
+ * (`/workouts/:id/edit`): its summary (the text people read) and its RX workout (one part with
+ * its RX level). A lesson-plan PDF can fill both; nothing is saved until the form is submitted,
+ * and movements the catalogue doesn't have yet are created here first.
  */
 @Component({
   selector: 'app-workout-edit',
@@ -64,8 +58,8 @@ const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
     UiMessagePipe,
     EnumLabelPipe,
     PageHeaderComponent,
-    IconComponent,
     WorkoutVariantComponent,
+    SummaryEditorComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './workout-edit.component.html',
@@ -73,10 +67,11 @@ const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 })
 export class WorkoutEditComponent implements OnInit {
   readonly form: WorkoutForm;
+
+  @ViewChild(SummaryEditorComponent)
+  private readonly summaryEditor?: SummaryEditorComponent;
   readonly scoreTypes = SCORE_TYPES;
-  readonly levels = WORKOUT_LEVELS;
   readonly modalities = EXERCISE_MODALITIES;
-  readonly maxParts = MAX_PARTS;
 
   /** Null on the create page. */
   workoutId: string | null = null;
@@ -196,55 +191,36 @@ export class WorkoutEditComponent implements OnInit {
     return (control.touched || this.submitted) && control.invalid;
   }
 
-  // ---- parts and levels ----
+  // ---- what the page shows ----
 
-  addPart(): void {
-    if (this.parts.length >= MAX_PARTS) {
-      return;
-    }
-    const part = buildPart(this.formBuilder);
-    this.applyTypeDefault(part, this.types[0]);
-    this.form.controls.parts.push(part);
+  /** The part the page shows and edits: the first. */
+  get part(): PartForm {
+    return this.parts[0];
   }
 
-  removePart(index: number): void {
-    this.form.controls.parts.removeAt(index);
+  /** The level the page shows and edits: RX, which every part has. */
+  get rx(): VariantForm {
+    const variants = this.part.controls.variants.controls;
+    return variants.find((v) => v.controls.level.value === 'RX') ?? variants[0];
   }
 
-  movePart(index: number, delta: -1 | 1): void {
-    const array = this.form.controls.parts;
-    const target = index + delta;
-    if (target < 0 || target >= array.length) {
-      return;
-    }
-    const part = array.at(index);
-    array.removeAt(index);
-    array.insert(target, part);
+  /**
+   * Parts after the first and other levels than RX, which the API keeps but this page doesn't
+   * show (a workout saved before the page showed RX only). Saving keeps them.
+   */
+  get hiddenSections(): number {
+    return this.parts.reduce(
+      (count, part, index) =>
+        count +
+        (index === 0
+          ? part.controls.variants.length - 1
+          : part.controls.variants.length),
+      0,
+    );
   }
 
-  variants(part: PartForm): VariantForm[] {
-    return part.controls.variants.controls;
-  }
-
-  missingLevels(part: PartForm): WorkoutLevel[] {
-    const present = this.variants(part).map((v) => v.controls.level.value);
-    return WORKOUT_LEVELS.filter((level) => !present.includes(level));
-  }
-
-  /** A new level starts as a copy of RX and takes its place in the RX, Intermediate, Beginner order. */
-  addLevel(part: PartForm, level: WorkoutLevel): void {
-    const variants = part.controls.variants;
-    const copy = copyVariant(this.formBuilder, variants.at(0), level);
-    const after = variants.controls.filter(
-      (v) =>
-        WORKOUT_LEVELS.indexOf(v.controls.level.value) <
-        WORKOUT_LEVELS.indexOf(level),
-    ).length;
-    variants.insert(after, copy);
-  }
-
-  removeLevel(part: PartForm, index: number): void {
-    part.controls.variants.removeAt(index);
+  get summaryInvalid(): boolean {
+    return this.showError(this.form.controls.summary);
   }
 
   // ---- PDF import ----
@@ -266,6 +242,9 @@ export class WorkoutEditComponent implements OnInit {
     this.workoutsService.importPdf(file).subscribe({
       next: (draft) => {
         fillFromDraft(this.formBuilder, this.form, draft);
+        if (draft.summary) {
+          void this.summaryEditor?.load(draft.summary);
+        }
         for (const part of this.parts) {
           // A draft part without a type (the built-in one is missing) falls back to the first.
           this.applyTypeDefault(part, this.types[0]);
@@ -330,7 +309,7 @@ export class WorkoutEditComponent implements OnInit {
   /** What the PDF counted the movement in, where it first appears. */
   private measureOfPending(name: string): ExerciseMeasure {
     for (const part of this.parts) {
-      for (const variant of this.variants(part)) {
+      for (const variant of part.controls.variants.controls) {
         for (const item of variant.controls.items.controls) {
           if (item.controls.pendingName.value === name) {
             return item.controls.measure.value;
@@ -343,21 +322,26 @@ export class WorkoutEditComponent implements OnInit {
 
   // ---- save and delete ----
 
-  handleSubmit(): void {
+  async handleSubmit(): Promise<void> {
     // While a PDF is being read the form still holds what was there before: saving it would
     // leave the page and drop the import.
     if (this.submitting || this.deleting || this.importing) {
       return;
     }
     this.submitted = true;
+    this.submitting = true;
+    this.errorMessage = null;
+    // The summary lives in Editor.js until now.
+    const summary = await this.summaryEditor?.save().catch(() => null);
+    this.form.controls.summary.setValue(summary ?? null);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.errorMessage = i18nMessage('workouts.form.invalid');
+      this.submitting = false;
+      this.changeDetector.detectChanges();
       return;
     }
 
-    this.submitting = true;
-    this.errorMessage = null;
     const payload = workoutPayload(this.form);
     const request = this.workoutId
       ? this.workoutsService.update(this.workoutId, payload)

@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
+  TestRequest,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
@@ -85,6 +86,13 @@ const HELEN = {
   date: '2026-11-09',
   title: 'Helen',
   notes: null,
+  summary: {
+    blocks: [
+      { type: 'paragraph', data: { text: '<b>3 rounds for time:</b>' } },
+      { type: 'paragraph', data: { text: '400-m run<br>12 pull-ups' } },
+    ],
+  },
+  summaryText: '3 rounds for time:\n400-m run\n12 pull-ups',
   parts: [
     {
       id: 'p1',
@@ -125,9 +133,20 @@ describe('workouts area pages', () => {
   let harness: RouterTestingHarness;
   let page: PageDriver;
 
+  const originalMatchMedia = window.matchMedia;
+
   beforeEach(async () => {
     localStorage.clear();
     signInAs('TRAINER');
+    // jsdom has no matchMedia, which Editor.js (the summary editor) asks for.
+    window.matchMedia = ((query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+    })) as unknown as typeof window.matchMedia;
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(),
@@ -160,6 +179,7 @@ describe('workouts area pages', () => {
   afterEach(() => {
     http.verify();
     vi.restoreAllMocks();
+    window.matchMedia = originalMatchMedia;
   });
 
   async function open(url: string): Promise<void> {
@@ -206,9 +226,15 @@ describe('workouts area pages', () => {
       expect(text).toContain('Helen');
       expect(text).toContain('For time');
       expect(text).toContain('Score: Time');
-      expect(text).toContain('3 rounds');
-      expect(text).toContain('400 m Run');
-      expect(text).toContain('12 Pull-up');
+      // The summary, with its formatting.
+      const summary = monday.querySelector(
+        '[data-testid="workout-summary-text"]',
+      )!;
+      expect(
+        Array.from(summary.querySelectorAll('p')).map((p) => p.innerHTML),
+      ).toEqual(['<b>3 rounds for time:</b>', '400-m run<br>12 pull-ups']);
+      // Not the generated exercise lines.
+      expect(text).not.toContain('400 m Run');
       expect(monday.querySelector('a')?.getAttribute('href')).toBe(
         '/workouts/w1/edit',
       );
@@ -218,6 +244,23 @@ describe('workouts area pages', () => {
       expect(tuesday.querySelector('a')?.getAttribute('href')).toBe(
         '/workouts/new?date=2026-11-10',
       );
+    });
+
+    it('shows the RX exercises of a workout saved without a summary', async () => {
+      await open('/workouts?week=2026-11-09');
+      http
+        .expectOne('/api/workouts?from=2026-11-09&to=2026-11-15')
+        .flush([{ ...HELEN, summary: { blocks: [] }, summaryText: '' }]);
+      await page.settle();
+
+      const monday = page.query('[data-testid="day-2026-11-09"]')!;
+      const text = monday.textContent.replace(/\s+/g, ' ');
+      expect(
+        monday.querySelector('[data-testid="workout-summary-text"]'),
+      ).toBeNull();
+      expect(text).toContain('3 rounds');
+      expect(text).toContain('400 m Run');
+      expect(text).toContain('12 Pull-up');
     });
 
     it('moves a week at a time and keeps the week in the address', async () => {
@@ -531,6 +574,39 @@ describe('workouts area pages', () => {
   describe('workout form', () => {
     const item = (n: number, field: string) => `#p0-RX-i${n}-${field}`;
 
+    /** Editor.js starts watching a rendered block for edits in an idle callback. */
+    const idle = () =>
+      new Promise<void>((resolve) => requestIdleCallback(() => resolve()));
+
+    const summaryParagraphs = () =>
+      page
+        .queryAll('[data-testid="workout-summary"] .ce-paragraph')
+        .map((p) => p.innerHTML);
+
+    /** Types into the summary editor's first paragraph, as a trainer would. */
+    async function typeSummary(html: string): Promise<void> {
+      await idle();
+      page.query('[data-testid="workout-summary"] .ce-paragraph')!.innerHTML =
+        html;
+    }
+
+    /**
+     * Submits; the page reads the summary from Editor.js first, so the request (or the
+     * refusal) comes a moment later.
+     */
+    async function submitAndSend(url: string): Promise<TestRequest> {
+      await page.submit('form');
+      return vi.waitFor(() => http.expectOne(url), { timeout: 3000 });
+    }
+
+    async function submitAndRefuse(): Promise<void> {
+      await page.submit('form');
+      await vi.waitFor(() => expect(page.alert()).toBe(texts.form.invalid), {
+        timeout: 3000,
+      });
+      await page.settle();
+    }
+
     it('starts on the day in the address with the first type and its score', async () => {
       await openForm('/workouts/new?date=2026-11-10');
 
@@ -565,14 +641,29 @@ describe('workouts area pages', () => {
       await page.select(item(1, 'exercise'), 'e-pull');
       await page.type(item(1, 'quantity'), '12');
       await page.type(item(1, 'load'), '10');
-      await page.submit('form');
+      await typeSummary(
+        '<b>3 rounds for time:</b><br>400-m run<br>12 pull-ups',
+      );
 
-      const req = http.expectOne('/api/workouts');
+      const req = await submitAndSend('/api/workouts');
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({
         date: '2026-11-10',
         title: 'Mini Helen',
         notes: null,
+        summary: {
+          time: expect.any(Number),
+          version: expect.any(String),
+          blocks: [
+            {
+              id: expect.any(String),
+              type: 'paragraph',
+              data: {
+                text: '<b>3 rounds for time:</b><br>400-m run<br>12 pull-ups',
+              },
+            },
+          ],
+        },
         parts: [
           {
             title: null,
@@ -612,18 +703,19 @@ describe('workouts area pages', () => {
     it('sends nothing while an exercise has a problem, and says which', async () => {
       await openForm('/workouts/new?date=2026-11-10');
 
-      await page.submit('form');
-      expect(page.alert()).toBe(texts.form.invalid);
+      await submitAndRefuse();
       expect(page.text()).toContain(texts.form.itemErrors.exercise);
+      expect(page.text()).toContain(texts.form.summaryError);
 
       await page.select(item(0, 'exercise'), 'e-pull');
-      await page.submit('form');
+      await typeSummary('21-15-9 pull-ups');
+      await submitAndRefuse();
       expect(page.text()).toContain(texts.form.itemErrors.repsRequired);
+      expect(page.text()).not.toContain(texts.form.summaryError);
 
       // A rep scheme on the level gives the reps.
       await page.type('#p0-RX-repScheme', '21-15-9');
-      await page.submit('form');
-      const req = http.expectOne('/api/workouts');
+      const req = await submitAndSend('/api/workouts');
       expect(
         (req.request.body as { parts: { variants: object[] }[] }).parts[0]
           .variants[0],
@@ -653,41 +745,71 @@ describe('workouts area pages', () => {
       expect(fields()).toEqual(['Duration']);
     });
 
-    it('adds a level as a copy of RX and sends both', async () => {
+    it('shows the saved summary and the RX workout, and sends them back with the part’s id', async () => {
       await openForm('/workouts/w1/edit', HELEN);
-      const add = () =>
-        page
-          .queryAll<HTMLButtonElement>('.wk-level__add button')
-          .map((button) => button.textContent.trim());
-      expect(add()).toEqual(['Add Intermediate', 'Add Beginner']);
+      await idle();
 
-      page.queryAll<HTMLButtonElement>('.wk-level__add button')[1].click();
-      await page.settle();
-      expect(add()).toEqual(['Add Intermediate']);
-      await page.type('#p0-BEGINNER-i0-quantity', '200');
-      await page.submit('form');
-
-      const req = http.expectOne('/api/workouts/w1');
-      expect(req.request.method).toBe('PATCH');
-      const [part] = (
-        req.request.body as {
-          parts: {
-            id: string;
-            variants: { level: string; items: object[] }[];
-          }[];
-        }
-      ).parts;
-      // The part keeps its id, so results can hang on it later.
-      expect(part.id).toBe('p1');
-      expect(part.variants.map((v) => v.level)).toEqual(['RX', 'BEGINNER']);
-      expect(part.variants[0].items[0]).toMatchObject({ quantity: 400 });
-      expect(part.variants[1].items).toMatchObject([
-        { exerciseId: 'e-run', quantity: 200 },
-        { exerciseId: 'e-pull', quantity: 12 },
+      expect(summaryParagraphs()).toEqual([
+        '<b>3 rounds for time:</b>',
+        '400-m run<br>12 pull-ups',
       ]);
+      // One part, its RX level: nothing to add parts or levels with.
+      expect(page.text()).toContain(texts.form.rx.title);
+      expect(page.queryAll('[data-testid^="part-"]')).toHaveLength(1);
+      expect(page.query('[data-testid="hidden-sections"]')).toBeNull();
+
+      await page.type(item(0, 'quantity'), '800');
+      const req = await submitAndSend('/api/workouts/w1');
+      expect(req.request.method).toBe('PATCH');
+      const body = req.request.body as {
+        summary: { blocks: { data: { text: string } }[] };
+        parts: { id: string; variants: { level: string; items: object[] }[] }[];
+      };
+      expect(body.summary.blocks.map((b) => b.data.text)).toEqual([
+        '<b>3 rounds for time:</b>',
+        '400-m run<br>12 pull-ups',
+      ]);
+      // The part keeps its id, so results can hang on it later.
+      expect(body.parts.map((p) => p.id)).toEqual(['p1']);
+      expect(body.parts[0].variants.map((v) => v.level)).toEqual(['RX']);
+      expect(body.parts[0].variants[0].items[0]).toMatchObject({
+        quantity: 800,
+      });
       req.flush(HELEN);
       await page.settle();
       expect(router.url).toBe('/workouts?week=2026-11-09');
+      http.expectOne('/api/workouts?from=2026-11-09&to=2026-11-15').flush([]);
+    });
+
+    it('keeps the levels and parts it doesn’t show, and says so', async () => {
+      const rx = HELEN.parts[0].variants[0];
+      const older = {
+        ...HELEN,
+        parts: [
+          {
+            ...HELEN.parts[0],
+            variants: [rx, { ...rx, level: 'BEGINNER', rounds: 2 }],
+          },
+          { ...HELEN.parts[0], id: 'p2', title: 'Skill' },
+        ],
+      };
+      await openForm('/workouts/w1/edit', older);
+
+      expect(
+        page.query('[data-testid="hidden-sections"]')?.textContent,
+      ).toContain('also has 2 levels or parts');
+
+      const req = await submitAndSend('/api/workouts/w1');
+      const body = req.request.body as {
+        parts: { id: string; variants: { level: string; rounds: number }[] }[];
+      };
+      expect(body.parts.map((p) => p.id)).toEqual(['p1', 'p2']);
+      expect(body.parts[0].variants.map((v) => [v.level, v.rounds])).toEqual([
+        ['RX', 3],
+        ['BEGINNER', 2],
+      ]);
+      req.flush(HELEN);
+      await page.settle();
       http.expectOne('/api/workouts?from=2026-11-09&to=2026-11-15').flush([]);
     });
 
@@ -731,8 +853,15 @@ describe('workouts area pages', () => {
         sourceCode: '261114',
         date: '2026-11-14',
         title: null,
+        summary: {
+          blocks: [
+            { type: 'paragraph', data: { text: '<b>AMRAP 12:</b>' } },
+            { type: 'paragraph', data: { text: '200-m run' } },
+            { type: 'paragraph', data: { text: '15 wall balls (20/14 lb)' } },
+          ],
+        },
         unknownExercises: ['Wall ball'],
-        warnings: ['The Beginner workout could not be read'],
+        warnings: ['The date could not be read from the heading'],
         parts: [
           {
             title: null,
@@ -806,7 +935,15 @@ describe('workouts area pages', () => {
         );
         expect(
           page.query('[data-testid="import-warnings"]')?.textContent,
-        ).toContain('The Beginner workout could not be read');
+        ).toContain('The date could not be read from the heading');
+        // The summary is the RX column as printed.
+        await vi.waitFor(() =>
+          expect(summaryParagraphs()).toEqual([
+            '<b>AMRAP 12:</b>',
+            '200-m run',
+            '15 wall balls (20/14 lb)',
+          ]),
+        );
         const pending = page.query('[data-testid="pending-exercises"]')!;
         expect(pending.textContent).toContain('Wall ball');
         // The women's load opened the item's extra fields.
@@ -815,8 +952,7 @@ describe('workouts area pages', () => {
         ).toBe('6');
 
         // Saving waits for the exercise.
-        await page.submit('form');
-        expect(page.alert()).toBe(texts.form.invalid);
+        await submitAndRefuse();
 
         await page.select('#pending-modality-0', 'WEIGHTLIFTING');
         await page.click('[data-testid="pending-exercises"] button');
@@ -835,10 +971,16 @@ describe('workouts area pages', () => {
           'e-wb',
         );
 
-        await page.submit('form');
-        const save = http.expectOne('/api/workouts');
+        const save = await submitAndSend('/api/workouts');
         expect(save.request.body).toMatchObject({
           date: '2026-11-14',
+          summary: {
+            blocks: [
+              { data: { text: '<b>AMRAP 12:</b>' } },
+              { data: { text: '200-m run' } },
+              { data: { text: '15 wall balls (20/14 lb)' } },
+            ],
+          },
           parts: [
             {
               workoutTypeId: 't-amrap',
@@ -875,6 +1017,8 @@ describe('workouts area pages', () => {
         expect(save.disabled).toBe(true);
         // The form is valid as loaded: a submit now would save it without the PDF.
         await page.submit('form');
+        await idle();
+        await page.settle();
         http.expectNone('/api/workouts/w1');
 
         importReq.flush(DRAFT);

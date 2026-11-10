@@ -6,6 +6,16 @@ import { buildHttpParams } from '../utils/http-params.util';
 import { ExerciseMeasure } from './exercises.service';
 import { ScoreType, WorkoutTypeCode } from './workout-types.service';
 
+/**
+ * The workout as people read it: Editor.js output with paragraphs only, their text keeping bold,
+ * italic and line breaks (theindex-api `workouts/workout-summary.ts` checks and sanitizes it).
+ */
+export interface WorkoutSummary {
+  time?: number;
+  version?: string;
+  blocks: { id?: string; type: 'paragraph'; data: { text: string } }[];
+}
+
 /** The versions of one workout. RX is the workout as prescribed and always exists. */
 export type WorkoutLevel = 'RX' | 'INTERMEDIATE' | 'BEGINNER';
 export const WORKOUT_LEVELS: WorkoutLevel[] = [
@@ -69,7 +79,8 @@ export interface WorkoutPart {
 
 /**
  * The workout of a day (theindex-api `workouts`, ADMIN and TRAINER; trainees don't see workouts
- * yet). Parts are what is done and how it is scored; each has one variant per level.
+ * yet). The summary is the text people read. Parts are what is done and how it is scored; each
+ * has one variant per level. The app shows one part with its RX level; the API allows more.
  */
 export interface Workout {
   id: string;
@@ -77,6 +88,9 @@ export interface Workout {
   date: string;
   title: string | null;
   notes: string | null;
+  summary: WorkoutSummary;
+  /** The summary without markup, a line per paragraph or line break. */
+  summaryText: string;
   parts: WorkoutPart[];
   createdAt?: string;
   updatedAt?: string;
@@ -95,6 +109,8 @@ export interface WorkoutPayload {
   date: string;
   title: string | null;
   notes: string | null;
+  /** Required: at least one paragraph with text. */
+  summary: WorkoutSummary;
   parts: WorkoutPartPayload[];
 }
 
@@ -120,6 +136,9 @@ export interface WorkoutDraft {
   sourceCode: string | null;
   date: string | null;
   title: string | null;
+  /** The RX column as printed, its first line in bold; null when the column is empty. */
+  summary: WorkoutSummary | null;
+  /** The RX workout only: the API ignores the other levels and the skill column. */
   parts: WorkoutDraftPart[];
   /** Movements to create before the workout can be saved. */
   unknownExercises: string[];

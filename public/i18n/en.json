@@ -1372,23 +1372,11 @@
       "notesError": "Notes must be at most 1000 characters.",
       "notesHint": "Up to 1000 characters, for the whole workout.",
       "part": {
-        "heading": "Part {n}",
-        "moveUp": "Move part {n} up",
-        "moveDown": "Move part {n} down",
-        "remove": "Remove part {n}",
         "type": "Type",
         "typeError": "Choose a workout type.",
         "typeHint": "How the part is done.",
         "score": "Score",
-        "scoreHint": "How results are recorded and compared.",
-        "title": "Heading",
-        "titleHint": "Up to 120 characters, e.g. Strength or Skill.",
-        "add": "Add part"
-      },
-      "level": {
-        "remove": "Remove level",
-        "sameAsRx": "Levels that aren't added do the workout as RX.",
-        "add": "Add {level}"
+        "scoreHint": "How results are recorded and compared."
       },
       "structure": {
         "rounds": "Rounds",
@@ -1442,11 +1430,20 @@
         "femaleNeedsAmount": "A women's amount needs the general amount.",
         "femaleNeedsLoad": "A women's load needs the general load.",
         "field": "Check the load, percentage, interval number and note of this exercise."
+      },
+      "summary": "Summary",
+      "summaryHint": "The workout as people read it, e.g. as written in the lesson plan. New lines, bold and italic (select text). Up to 3000 characters.",
+      "summaryError": "Write the summary of the workout.",
+      "summaryPlaceholder": "3 rounds for time: 400-m run, 21 KB swings, 12 pull-ups…",
+      "rx": {
+        "title": "RX workout",
+        "intro": "The workout as prescribed, built from exercises, so results and records can be kept.",
+        "hiddenSections": "{count, plural, one {This workout also has # level or part this page doesn't show. Saving keeps it.} other {This workout also has # levels or parts this page doesn't show. Saving keeps them.}}"
       }
     },
     "import": {
       "title": "Start from a PDF",
-      "intro": "Upload the lesson plan for the day. The workout at its top (RX, Intermediate, Beginner and Skill) fills the form below for you to check. Nothing is saved until you create the workout.",
+      "intro": "Upload the lesson plan for the day. Its RX workout (the first column at the top) fills the summary and the RX workout below for you to check; the other levels and the skill work are left out. Nothing is saved until you create the workout.",
       "choose": "Choose a PDF",
       "reading": "Reading the PDF...",
       "done": "Filled in from {file}. Check it before saving.",
