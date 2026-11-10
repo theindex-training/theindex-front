@@ -98,6 +98,9 @@
             <th scope="col">
               {{ 'workouts.exercises.fields.measureShort' | transloco }}
             </th>
+            <th scope="col">
+              {{ 'workouts.exercises.fields.video' | transloco }}
+            </th>
             <th scope="col">{{ 'common.status' | transloco }}</th>
             <th scope="col" class="cell-fit">
               <span class="visually-hidden">{{
@@ -122,6 +125,24 @@
               <td>{{ exercise.modality | enumLabel: 'exerciseModality' }}</td>
               <td>
                 {{ exercise.defaultMeasure | enumLabel: 'exerciseMeasure' }}
+              </td>
+              <td>
+                @if (exercise.videoUrl) {
+                  <a
+                    [href]="exercise.videoUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    [attr.aria-label]="
+                      'workouts.exercises.list.watchVideo'
+                        | transloco: { name: exercise.name }
+                    "
+                    >{{ 'workouts.exercises.list.watch' | transloco }}</a
+                  >
+                } @else {
+                  <span class="text-muted">{{
+                    'common.dash' | transloco
+                  }}</span>
+                }
               </td>
               <td>
                 <app-status-dot

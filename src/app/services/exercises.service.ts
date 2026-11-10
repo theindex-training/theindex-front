@@ -27,6 +27,7 @@ export const EXERCISE_MEASURES: ExerciseMeasure[] = [
 /**
  * A movement workouts are built from (theindex-api `exercises`, ADMIN and TRAINER). `aliases`
  * are other spellings the PDF import recognises; no two exercises may share a spelling (409).
+ * The starter library has the crossfit.com movements, each with its YouTube video.
  */
 export interface Exercise {
   id: string;
@@ -35,6 +36,10 @@ export interface Exercise {
   modality: ExerciseModality;
   defaultMeasure: ExerciseMeasure;
   isActive: boolean;
+  /** Written by the trainers; the starter library leaves it empty. */
+  description: string | null;
+  /** https://www.youtube.com/watch?v=<id>; the API stores every link in this form. */
+  videoUrl: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -45,6 +50,10 @@ export interface CreateExercisePayload {
   modality: ExerciseModality;
   defaultMeasure?: ExerciseMeasure;
   isActive?: boolean;
+  /** Empty or null removes it. */
+  description?: string | null;
+  /** A YouTube link in any common form; empty or null removes it. */
+  videoUrl?: string | null;
 }
 
 export type UpdateExercisePayload = Partial<CreateExercisePayload>;

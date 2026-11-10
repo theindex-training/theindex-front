@@ -1473,7 +1473,9 @@
         "noMatchesTitle": "No matches",
         "noMatchesMessage": "No exercise matches the search and the filter.",
         "tableLabel": "Exercises table",
-        "editColumn": "Edit"
+        "editColumn": "Edit",
+        "watch": "Watch",
+        "watchVideo": "Watch the video of {name}"
       },
       "fields": {
         "name": "Name",
@@ -1486,7 +1488,15 @@
         "measure": "Usually counted in",
         "measureShort": "Counted in",
         "measureHint": "What the workout form starts with when the exercise is chosen.",
-        "isActive": "Active (offered when building workouts)"
+        "isActive": "Active (offered when building workouts)",
+        "description": "Description",
+        "descriptionHint": "Up to 2000 characters: how the movement is done, points of performance, common faults.",
+        "descriptionError": "The description must be at most 2000 characters.",
+        "videoUrl": "Video link",
+        "videoUrlHint": "A YouTube link, e.g. https://www.youtube.com/watch?v=rMvwVtlqjTE or https://youtu.be/rMvwVtlqjTE.",
+        "videoUrlError": "Enter a link to a YouTube video, up to 300 characters.",
+        "openVideo": "Open the video",
+        "video": "Video"
       },
       "backToList": "Back to exercises",
       "loadingOne": "Loading exercise...",

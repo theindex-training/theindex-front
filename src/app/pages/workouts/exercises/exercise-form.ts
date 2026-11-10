@@ -11,10 +11,13 @@ import {
   ExerciseModality,
 } from '../../../services/exercises.service';
 import { trimmedLength } from '../../../utils/form-validators.util';
+import { youtubeVideoId } from '../../../utils/youtube.util';
 
 /** Limits from theindex-api's exercise DTOs (exercises/dto/exercise-fields.ts). */
 export const EXERCISE_NAME_MAX = 80;
 export const EXERCISE_ALIASES_MAX = 20;
+export const EXERCISE_DESCRIPTION_MAX = 2000;
+export const EXERCISE_VIDEO_URL_MAX = 300;
 
 export type ExerciseForm = FormGroup<{
   name: FormControl<string>;
@@ -23,6 +26,8 @@ export type ExerciseForm = FormGroup<{
   modality: FormControl<ExerciseModality>;
   defaultMeasure: FormControl<ExerciseMeasure>;
   isActive: FormControl<boolean>;
+  description: FormControl<string>;
+  videoUrl: FormControl<string>;
 }>;
 
 /** "KB swing,  American swing ," -> ["KB swing", "American swing"]. */
@@ -42,6 +47,17 @@ function aliasList(control: { value: unknown }) {
     : { aliases: true };
 }
 
+/** A link to a YouTube video, up to 300 characters. Empty passes. */
+function youtubeLink(control: { value: unknown }) {
+  const value = ((control.value as string | null) ?? '').trim();
+  if (!value) {
+    return null;
+  }
+  return value.length <= EXERCISE_VIDEO_URL_MAX && youtubeVideoId(value)
+    ? null
+    : { youtube: true };
+}
+
 export function buildExerciseForm(fb: FormBuilder): ExerciseForm {
   const nn = fb.nonNullable;
   return fb.group({
@@ -53,6 +69,8 @@ export function buildExerciseForm(fb: FormBuilder): ExerciseForm {
     modality: nn.control<ExerciseModality>('WEIGHTLIFTING'),
     defaultMeasure: nn.control<ExerciseMeasure>('REPS'),
     isActive: nn.control(true),
+    description: nn.control('', [trimmedLength(0, EXERCISE_DESCRIPTION_MAX)]),
+    videoUrl: nn.control('', [youtubeLink]),
   });
 }
 
@@ -63,10 +81,12 @@ export function fillExerciseForm(form: ExerciseForm, exercise: Exercise): void {
     modality: exercise.modality,
     defaultMeasure: exercise.defaultMeasure,
     isActive: exercise.isActive,
+    description: exercise.description ?? '',
+    videoUrl: exercise.videoUrl ?? '',
   });
 }
 
-/** Every field, with the name trimmed and the aliases as a list. */
+/** Every field, trimmed, with the aliases as a list; an empty description or link is sent as null. */
 export function exercisePayload(form: ExerciseForm): CreateExercisePayload {
   const raw = form.getRawValue();
   return {
@@ -75,5 +95,7 @@ export function exercisePayload(form: ExerciseForm): CreateExercisePayload {
     modality: raw.modality,
     defaultMeasure: raw.defaultMeasure,
     isActive: raw.isActive,
+    description: raw.description.trim() || null,
+    videoUrl: raw.videoUrl.trim() || null,
   };
 }

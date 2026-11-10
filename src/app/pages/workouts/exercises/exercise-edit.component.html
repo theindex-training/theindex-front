@@ -113,6 +113,73 @@
           </div>
         </div>
 
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="exercise-video">
+              {{ 'workouts.exercises.fields.videoUrl' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
+            </label>
+            <input
+              id="exercise-video"
+              type="url"
+              inputmode="url"
+              autocomplete="off"
+              spellcheck="false"
+              formControlName="videoUrl"
+              aria-describedby="exercise-video-help"
+              [attr.aria-invalid]="showError('videoUrl')"
+            />
+            @if (showError('videoUrl')) {
+              <span class="form-field__error" id="exercise-video-help">{{
+                'workouts.exercises.fields.videoUrlError' | transloco
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="exercise-video-help">{{
+                'workouts.exercises.fields.videoUrlHint' | transloco
+              }}</span>
+            }
+            @if (videoLink(); as link) {
+              <a
+                class="exercise-video-link"
+                [href]="link"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="exercise-video-open"
+                >{{ 'workouts.exercises.fields.openVideo' | transloco }}</a
+              >
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="exercise-description">
+              {{ 'workouts.exercises.fields.description' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
+            </label>
+            <textarea
+              id="exercise-description"
+              rows="4"
+              formControlName="description"
+              aria-describedby="exercise-description-help"
+              [attr.aria-invalid]="showError('description')"
+            ></textarea>
+            @if (showError('description')) {
+              <span class="form-field__error" id="exercise-description-help">{{
+                'workouts.exercises.fields.descriptionError' | transloco
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="exercise-description-help">{{
+                'workouts.exercises.fields.descriptionHint' | transloco
+              }}</span>
+            }
+          </div>
+        </div>
+
         <label class="form-field form-field--check">
           <input type="checkbox" formControlName="isActive" />
           <span>{{ 'workouts.exercises.fields.isActive' | transloco }}</span>

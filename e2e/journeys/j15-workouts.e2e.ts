@@ -40,6 +40,8 @@ test.describe('J15 workouts', () => {
     modality: 'MONOSTRUCTURAL',
     defaultMeasure: 'DISTANCE',
     isActive: true,
+    description: null,
+    videoUrl: null,
   };
   const pullUp = {
     ...run,

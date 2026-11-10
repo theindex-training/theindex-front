@@ -7,6 +7,7 @@ import {
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { youtubeVideoId } from '../../../utils/youtube.util';
 import { PageHeaderComponent } from '../../../components/page-header/page-header.component';
 import { EnumLabelPipe } from '../../../i18n/enum-label.pipe';
 import { LanguageService } from '../../../i18n/language.service';
@@ -38,6 +39,15 @@ import {
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './exercise-edit.component.html',
+  styles: `
+    .exercise-video-link {
+      display: inline-flex;
+      align-items: center;
+      align-self: flex-start;
+      min-height: var(--touch-target);
+      font-weight: 600;
+    }
+  `,
 })
 export class ExerciseEditComponent implements OnInit {
   readonly form: ExerciseForm;
@@ -90,6 +100,13 @@ export class ExerciseEditComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
     });
+  }
+
+  /** The video as typed, when it is a YouTube link: a way to check it before saving. */
+  videoLink(): string | null {
+    const value = this.form.controls.videoUrl.value.trim();
+    const id = value ? youtubeVideoId(value) : null;
+    return id ? `https://www.youtube.com/watch?v=${id}` : null;
   }
 
   showError(name: keyof ExerciseForm['controls']): boolean {

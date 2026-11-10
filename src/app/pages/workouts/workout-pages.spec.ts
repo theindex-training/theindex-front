@@ -27,13 +27,18 @@ const exercise = (id: string, name: string, over: object = {}) => ({
   modality: 'GYMNASTICS',
   defaultMeasure: 'REPS',
   isActive: true,
+  description: null as string | null,
+  videoUrl: null as string | null,
   ...over,
 });
 const RUN = exercise('e-run', 'Run', {
   modality: 'MONOSTRUCTURAL',
   defaultMeasure: 'DISTANCE',
 });
-const PULL_UP = exercise('e-pull', 'Pull-up', { aliases: ['Kipping pull-up'] });
+const PULL_UP = exercise('e-pull', 'Pull-up', {
+  aliases: ['Kipping pull-up'],
+  videoUrl: 'https://www.youtube.com/watch?v=lzRo-4pq_AY',
+});
 const OLD = exercise('e-old', 'Old move', { isActive: false });
 const EXERCISES = [OLD, PULL_UP, RUN];
 
@@ -317,10 +322,90 @@ describe('workouts area pages', () => {
         modality: 'WEIGHTLIFTING',
         defaultMeasure: 'TIME',
         isActive: true,
+        description: null,
+        videoUrl: null,
       });
       req.flush(exercise('e-new', 'Kettlebell swing'));
       await page.settle();
       expect(router.url).toBe('/workouts/exercises');
+      http.expectOne('/api/exercises').flush([]);
+    });
+
+    it('links each exercise with a video to it, in a new tab', async () => {
+      await open('/workouts/exercises');
+      http.expectOne('/api/exercises').flush(EXERCISES);
+      await page.settle();
+
+      const links = page.queryAll<HTMLAnchorElement>(
+        'tbody a[target="_blank"]',
+      );
+      expect(
+        links.map((a) => [a.getAttribute('aria-label'), a.href, a.rel]),
+      ).toEqual([
+        [
+          'Watch the video of Pull-up',
+          'https://www.youtube.com/watch?v=lzRo-4pq_AY',
+          'noopener noreferrer',
+        ],
+      ]);
+    });
+
+    it('sends a description and a YouTube link, trimmed, and refuses another kind of link', async () => {
+      await open('/workouts/exercises/new');
+
+      await page.type('#exercise-name', 'Air squat');
+      await page.type('#exercise-video', 'https://vimeo.com/1');
+      await page.submit();
+      expect(page.text()).toContain(texts.exercises.fields.videoUrlError);
+      expect(page.query('[data-testid="exercise-video-open"]')).toBeNull();
+
+      await page.type(
+        '#exercise-video',
+        '  https://youtu.be/rMvwVtlqjTE?si=x ',
+      );
+      expect(
+        page.query<HTMLAnchorElement>('[data-testid="exercise-video-open"]')
+          ?.href,
+      ).toBe('https://www.youtube.com/watch?v=rMvwVtlqjTE');
+      await page.type('#exercise-description', '  Hips back and down.  ');
+      await page.submit();
+
+      const req = http.expectOne('/api/exercises');
+      expect(req.request.body).toMatchObject({
+        name: 'Air squat',
+        description: 'Hips back and down.',
+        videoUrl: 'https://youtu.be/rMvwVtlqjTE?si=x',
+      });
+      req.flush(exercise('e-new', 'Air squat'));
+      await page.settle();
+      http.expectOne('/api/exercises').flush([]);
+    });
+
+    it('shows the stored video and description, and clearing them sends null', async () => {
+      await open('/workouts/exercises/e-pull/edit');
+      http
+        .expectOne('/api/exercises/e-pull')
+        .flush({ ...PULL_UP, description: 'Kip, then pull.' });
+      await page.settle();
+
+      expect(page.query<HTMLInputElement>('#exercise-video')?.value).toBe(
+        'https://www.youtube.com/watch?v=lzRo-4pq_AY',
+      );
+      expect(
+        page.query<HTMLTextAreaElement>('#exercise-description')?.value,
+      ).toBe('Kip, then pull.');
+
+      await page.type('#exercise-video', '');
+      await page.type('#exercise-description', '   ');
+      await page.submit();
+
+      const req = http.expectOne('/api/exercises/e-pull');
+      expect(req.request.body).toMatchObject({
+        description: null,
+        videoUrl: null,
+      });
+      req.flush(PULL_UP);
+      await page.settle();
       http.expectOne('/api/exercises').flush([]);
     });
 
