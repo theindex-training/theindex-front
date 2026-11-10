@@ -41,6 +41,21 @@ describe('AttendanceService', () => {
     expect(sent()).toEqual([['POST', '/api/attendance/batch', payload]]);
   });
 
+  it('previews a batch with the same payload, on its own URL', () => {
+    const payload = {
+      trainerId: 'tr1',
+      traineeIds: ['a', 'b'],
+      locationId: 'g1',
+      trainedDate: '2026-11-02',
+      trainedTime: '18:30',
+    };
+    service.previewBatch(payload).subscribe();
+
+    expect(sent()).toEqual([
+      ['POST', '/api/attendance/batch/preview', payload],
+    ]);
+  });
+
   it('queries sessions, dropping the optional filters that are not set', () => {
     service
       .sessions({ startDate: '2026-10-01', endDate: '2026-10-31' })

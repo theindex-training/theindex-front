@@ -19,6 +19,38 @@ export interface AttendanceBatchResponse {
   results: unknown[];
 }
 
+/** How close a trainee is to the end of what they paid for (theindex-api `attendance-preview.ts`). */
+export type AttendancePreviewLevel = 'UNPAID' | 'LAST' | 'LOW' | 'OK';
+
+/** One trainee in the preview of a batch: what saving the training would do. */
+export interface AttendancePreviewRow {
+  traineeId: string;
+  name: string;
+  nickname: string | null;
+  paymentStatus: 'PAID' | 'UNPAID';
+  level: AttendancePreviewLevel;
+  /** The subscription that would pay; null when the training would be unpaid. */
+  subscription: {
+    id: string;
+    type: 'PUNCH' | 'TIME';
+    planTitle: string;
+    /** PUNCH: trainings left after this one, over all active punch subscriptions. */
+    remainingCreditsAfter: number | null;
+    /** TIME: when the paid period ends, and the days until then. */
+    endsAt: string | null;
+    daysLeft: number | null;
+  } | null;
+}
+
+/** `POST /api/attendance/batch/preview`: trainees needing attention come first. */
+export interface AttendanceBatchPreview {
+  trainerId: string;
+  locationId: string;
+  trainedAt: string;
+  count: number;
+  trainees: AttendancePreviewRow[];
+}
+
 export interface AttendanceSessionsQuery {
   startDate: string;
   endDate: string;
@@ -142,6 +174,16 @@ export class AttendanceService {
   ): Observable<AttendanceBatchResponse> {
     return this.http.post<AttendanceBatchResponse>(
       `${this.baseUrl}/batch`,
+      payload,
+    );
+  }
+
+  /** What `createBatch` would do with the same payload; saves nothing. */
+  previewBatch(
+    payload: CreateAttendanceBatchPayload,
+  ): Observable<AttendanceBatchPreview> {
+    return this.http.post<AttendanceBatchPreview>(
+      `${this.baseUrl}/batch/preview`,
       payload,
     );
   }

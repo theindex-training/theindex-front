@@ -387,6 +387,8 @@ Create, edit, details and delete pages share one structure. They need no page SC
 - **Detail pages with tables** (e.g. trainee details):
   - Put each table in its own `section.page-stack` with a `.section-header` (title, muted line and an optional control such as a segmented filter), instead of nesting the table card inside a panel.
 - **Register attendance** (`pages/attendance/attendance-register`) is the phone-first exception:
+  - Two steps on one page, with nothing saved before the second: pick the session and who trained ("Review"), then a summary ("Save attendance", or "Back" to the selection, which is kept).
+  - The summary shows `POST /api/attendance/batch/preview` (`AttendanceService.previewBatch`, the same payload as the save): the session, then per trainee what is left **after** this training. Punch: trainings left ("Last paid training" at 0). Time: the end date and days left. No subscription: "Unpaid". The API decides the order (unpaid, last, low, then the rest) and the `level` that colours the chip (theindex-api `attendance/attendance-preview.ts`); the page only formats them. The save sends exactly the reviewed payload; a changed selection is previewed again.
   - Compact session fields.
   - Full-width tappable trainee rows (a `label` around a real checkbox; `.is-selected` adds the accent tint and a left bar).
   - A sticky save bar that sits above the tab bar on mobile and at the bottom of the viewport on desktop.

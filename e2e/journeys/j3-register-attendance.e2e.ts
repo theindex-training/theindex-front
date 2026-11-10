@@ -1,8 +1,10 @@
 import { Page } from '@playwright/test';
 import { apiError } from '../support/api-mock';
 import {
+  batchPreview,
   gym,
   mockStaffHome,
+  previewRow,
   sessionsResponse,
   trainee,
   trainer,
@@ -39,6 +41,18 @@ test.describe('J3 register attendance', () => {
       ],
     });
     api.on('GET', '/api/attendance/sessions', { body: sessionsResponse([]) });
+    api.on('POST', '/api/attendance/batch/preview', {
+      body: batchPreview([
+        previewRow('t-georgi', 'Georgi Dimitrov', 'UNPAID', null, 'Gosho'),
+        previewRow(
+          't-ivan',
+          'Ivan Petrov',
+          'LAST',
+          { remainingCreditsAfter: 0 },
+          'Vanko',
+        ),
+      ]),
+    });
     api.on('POST', '/api/attendance/batch', {
       body: {
         trainerId: 'trainer-1',
@@ -53,8 +67,14 @@ test.describe('J3 register attendance', () => {
     page.getByRole('checkbox', { name: new RegExp(name) });
   const search = (page: Page) =>
     page.getByRole('searchbox', { name: t('attendance.register.searchLabel') });
+  const review = (page: Page) =>
+    page.getByRole('button', { name: t('attendance.register.review') });
   const save = (page: Page) =>
-    page.getByRole('button', { name: t('attendance.register.submit') });
+    page.getByRole('button', {
+      name: t('attendance.register.summary.confirm'),
+    });
+  const summaryRows = (page: Page) =>
+    page.getByTestId('attendance-summary-row');
 
   async function openFromTabBar(page: Page) {
     await page.goto('/home');
@@ -98,11 +118,13 @@ test.describe('J3 register attendance', () => {
         '18:00 - 19:00',
       ]);
 
-      await save(page).click();
+      await review(page).click();
       await expect(page.getByRole('alert')).toHaveText(
         t('attendance.register.selectAtLeastOne'),
       );
-      expect(api.calls('POST', '/api/attendance/batch')).toHaveLength(0);
+      expect(api.calls('POST', '/api/attendance/batch/preview')).toHaveLength(
+        0,
+      );
 
       await search(page).fill('iv');
       await expect(page.getByRole('checkbox')).toHaveCount(2);
@@ -123,18 +145,56 @@ test.describe('J3 register attendance', () => {
       await page
         .getByLabel(t('attendance.register.time'))
         .selectOption('18:00');
+      await review(page).click();
+
+      // The summary: nothing saved yet, the unpaid and the last paid training first.
+      const batch = {
+        trainerId: 'trainer-1',
+        locationId: 'gym-1',
+        traineeIds: ['t-ivan', 't-georgi'],
+        trainedDate: '2026-11-02',
+        trainedTime: '18:00',
+      };
+      await expect(
+        page.getByRole('heading', {
+          name: t('attendance.register.summary.title'),
+        }),
+      ).toBeFocused();
+      expect(api.last('POST', '/api/attendance/batch/preview')?.body).toEqual(
+        batch,
+      );
+      expect(api.calls('POST', '/api/attendance/batch')).toHaveLength(0);
+      await expect(summaryRows(page)).toHaveCount(2);
+      await expect(summaryRows(page).nth(0)).toContainText('Georgi Dimitrov');
+      await expect(summaryRows(page).nth(0)).toContainText(
+        t('attendance.register.summary.unpaid'),
+      );
+      await expect(summaryRows(page).nth(1)).toContainText('Ivan Petrov');
+      await expect(summaryRows(page).nth(1)).toContainText(
+        t('attendance.register.summary.lastTraining'),
+      );
+      await expect(
+        page.getByTestId('attendance-summary-session'),
+      ).toContainText('Petar');
+
+      // Back keeps the selection; reviewing again asks again.
+      await page
+        .getByRole('button', { name: t('attendance.register.summary.back') })
+        .click();
+      await expect(traineeBox(page, 'Ivan Petrov')).toBeChecked();
+      await expect(traineeBox(page, 'Georgi Dimitrov')).toBeChecked();
+      await review(page).click();
+      await expect(summaryRows(page)).toHaveCount(2);
+      expect(api.calls('POST', '/api/attendance/batch/preview')).toHaveLength(
+        2,
+      );
+
       await save(page).click();
 
       await expect(page).toHaveURL(/\/attendance$/);
       await expect
         .poll(() => api.last('POST', '/api/attendance/batch')?.body)
-        .toEqual({
-          trainerId: 'trainer-1',
-          locationId: 'gym-1',
-          traineeIds: ['t-ivan', 't-georgi'],
-          trainedDate: '2026-11-02',
-          trainedTime: '18:00',
-        });
+        .toEqual(batch);
       await expect
         .poll(() => api.last('GET', '/api/attendance/sessions')?.query)
         .toEqual({
@@ -160,12 +220,17 @@ test.describe('J3 register attendance', () => {
       await openFromTabBar(page);
 
       await traineeBox(page, 'Ivan Petrov').check();
+      await review(page).click();
       await save(page).click();
 
       await expect(page.getByRole('alert')).toHaveText(
         'trainedDate must not be in the future, trainee is inactive',
       );
       await expect(page).toHaveURL(/\/attendance\/new$/);
+      await expect(summaryRows(page)).toHaveCount(2);
+      await page
+        .getByRole('button', { name: t('attendance.register.summary.back') })
+        .click();
       await expect(traineeBox(page, 'Ivan Petrov')).toBeChecked();
     },
   );
@@ -176,6 +241,7 @@ test.describe('J3 register attendance', () => {
     async ({ page, api }) => {
       await openFromTabBar(page);
       await traineeBox(page, 'Georgi Dimitrov').check();
+      await review(page).click();
       await save(page).click();
 
       await expect(page).toHaveURL(/\/attendance$/);

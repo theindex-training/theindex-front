@@ -257,3 +257,38 @@ export const renewalRow = (
   lastTrainedAt: null,
   ...overrides,
 });
+
+/**
+ * One trainee in the summary before saving attendance (theindex-api
+ * `POST /attendance/batch/preview`). `subscription` null means unpaid.
+ */
+export const previewRow = (
+  traineeId: string,
+  name: string,
+  level: 'UNPAID' | 'LAST' | 'LOW' | 'OK',
+  subscription: object | null,
+  nickname: string | null = null,
+) => ({
+  traineeId,
+  name,
+  nickname,
+  paymentStatus: subscription ? 'PAID' : 'UNPAID',
+  level,
+  subscription: subscription && {
+    id: `sub-${traineeId}`,
+    type: 'PUNCH',
+    planTitle: '16 trainings',
+    remainingCreditsAfter: null,
+    endsAt: null,
+    daysLeft: null,
+    ...subscription,
+  },
+});
+
+export const batchPreview = (trainees: object[]) => ({
+  trainerId: 'trainer-1',
+  locationId: 'gym-1',
+  trainedAt: '2026-11-02T16:00:00.000Z',
+  count: trainees.length,
+  trainees,
+});

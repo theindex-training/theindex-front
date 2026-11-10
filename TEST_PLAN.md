@@ -612,12 +612,14 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
    - `GET /api/training-times`
    - `GET /api/trainees?active=true`
 3. The trainer select shows T1, the gym select the first gym, and the date `2026-11-02`. Times are listed in start order.
-4. Save with nobody selected: the "select at least one" alert shows and there is no POST.
+4. "Review" with nobody selected: the "select at least one" alert shows and there is no POST.
 5. Search "iv": only matching trainees are listed. Check two. Clear the search; both are still checked. Check a third. "Clear shown" with a filter active unchecks only the filtered ones; re-check them.
-6. Pick the 18:00 training time (option label "18:00 - 19:00"; select it by value `18:00`, not by label). Save.
-7. `POST /api/attendance/batch` with `{trainerId:'T1', locationId:<gym1>, traineeIds:[3 ids], trainedDate:'2026-11-02', trainedTime:'18:00'}` → the app lands on `/attendance`.
-8. History loads `GET /api/attendance/sessions?startDate=2026-10-26&endDate=2026-11-02&trainerId=T1`.
-9. Variant: the batch POST → 400 `{message:[…]}`. The joined message shows, the app stays on the page, and the selection is kept.
+6. Pick the 18:00 training time (option label "18:00 - 19:00"; select it by value `18:00`, not by label). "Review".
+7. `POST /api/attendance/batch/preview` with `{trainerId:'T1', locationId:<gym1>, traineeIds:[…], trainedDate:'2026-11-02', trainedTime:'18:00'}` and no batch POST yet. The summary heading has focus; the rows (`attendance-summary-row`) are in the API's order, with "Unpaid" and "Last paid training".
+8. "Back": the selection is kept. "Review" again asks for the preview again.
+9. "Save attendance": `POST /api/attendance/batch` with the same body → the app lands on `/attendance`.
+10. History loads `GET /api/attendance/sessions?startDate=2026-10-26&endDate=2026-11-02&trainerId=T1`.
+11. Variant: the batch POST → 400 `{message:[…]}`. The joined message shows, the app stays on the summary, and "Back" shows the selection kept.
 
 ### J4. Review and correct attendance history (P0) [desktop, plus a mobile list check]
 ✅ Done in PR 5: `e2e/journeys/j4-attendance-history.e2e.ts`, 3 tests.
