@@ -15,167 +15,257 @@
     />
   } @else {
     <form class="register" [formGroup]="form" (ngSubmit)="handleSubmit()">
-      <fieldset class="panel session">
-        <legend class="visually-hidden">
-          {{ 'attendance.register.session' | transloco }}
-        </legend>
-        <label class="form-field session__pick">
-          <span class="form-field__label">{{
-            'attendance.register.trainer' | transloco
-          }}</span>
-          <select formControlName="trainerId">
-            <option value="" disabled>
-              {{ 'attendance.register.selectTrainer' | transloco }}
-            </option>
-            @for (trainer of trainers; track trainer.id) {
-              <option [value]="trainer.id">
-                {{ trainer.name
-                }}{{ trainer.nickname ? ' (' + trainer.nickname + ')' : '' }}
-              </option>
-            }
-          </select>
-          @if (
-            form.controls.trainerId.touched && form.controls.trainerId.invalid
-          ) {
-            <span class="form-field__error">{{
-              'attendance.register.trainerRequired' | transloco
-            }}</span>
-          }
-        </label>
-
-        <label class="form-field session__pick">
-          <span class="form-field__label">{{
-            'attendance.register.gym' | transloco
-          }}</span>
-          <select formControlName="locationId">
-            <option value="" disabled>
-              {{ 'attendance.register.selectGym' | transloco }}
-            </option>
-            @for (gym of gymLocations; track gym.id) {
-              <option [value]="gym.id">{{ gym.name }}</option>
-            }
-          </select>
-          @if (
-            form.controls.locationId.touched && form.controls.locationId.invalid
-          ) {
-            <span class="form-field__error">{{
-              'attendance.register.gymRequired' | transloco
-            }}</span>
-          }
-        </label>
-
-        <label class="form-field">
-          <span class="form-field__label">{{
-            'attendance.register.date' | transloco
-          }}</span>
-          <input type="date" formControlName="trainedDate" />
-          @if (
-            form.controls.trainedDate.touched &&
-            form.controls.trainedDate.invalid
-          ) {
-            <span class="form-field__error">{{
-              'attendance.register.dateRequired' | transloco
-            }}</span>
-          }
-        </label>
-
-        <label class="form-field">
-          <span class="form-field__label"
-            >{{ 'attendance.register.time' | transloco }}
-            <span class="form-field__optional">{{
-              'common.optional' | transloco
-            }}</span></span
-          >
-          <select formControlName="trainedTime">
-            <option value="">
-              {{ 'attendance.register.notSpecified' | transloco }}
-            </option>
-            @for (trainingTime of trainingTimes; track trainingTime.id) {
-              <option
-                [value]="formatTimeWithoutSeconds(trainingTime.startTime)"
+      @if (step === 'review' && preview) {
+        <section
+          class="page-stack"
+          aria-labelledby="register-summary-title"
+          data-testid="attendance-summary"
+        >
+          <div class="section-header">
+            <div>
+              <h2
+                class="panel__title summary__title"
+                id="register-summary-title"
+                tabindex="-1"
+                #summaryTitle
               >
-                {{ formatTrainingTimeOption(trainingTime) }}
-              </option>
-            }
-          </select>
-        </label>
-      </fieldset>
-
-      <fieldset class="who">
-        <legend class="who__title">
-          {{ 'attendance.register.whoTrained' | transloco }}
-        </legend>
-
-        <div class="who__tools">
-          <div class="who__search">
-            <app-icon class="who__search-icon" name="search" />
-            <input
-              type="search"
-              formControlName="traineeSearch"
-              [placeholder]="
-                'attendance.register.searchPlaceholder' | transloco
-              "
-              [attr.aria-label]="'attendance.register.searchLabel' | transloco"
-              autocomplete="off"
-            />
+                {{ 'attendance.register.summary.title' | transloco }}
+              </h2>
+              <p class="text-muted section-header__sub">
+                {{ 'attendance.register.summary.subtitle' | transloco }}
+              </p>
+            </div>
           </div>
-          <div class="who__bulk">
-            <button
-              class="btn btn--ghost"
-              type="button"
-              (click)="selectFiltered()"
-            >
-              {{ 'attendance.register.selectShown' | transloco }}
-            </button>
-            <button
-              class="btn btn--ghost"
-              type="button"
-              (click)="clearFiltered()"
-            >
-              {{ 'attendance.register.clearShown' | transloco }}
-            </button>
-          </div>
-        </div>
 
-        @if (filteredTrainees.length === 0) {
-          <p class="notice" role="status">
-            {{ 'attendance.register.noMatches' | transloco }}
+          <div class="panel">
+            <dl
+              class="detail-list summary__session"
+              data-testid="attendance-summary-session"
+            >
+              <div>
+                <dt>{{ 'attendance.register.trainer' | transloco }}</dt>
+                <dd>{{ sessionTrainer }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'attendance.register.gym' | transloco }}</dt>
+                <dd>{{ sessionGym }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'attendance.register.date' | transloco }}</dt>
+                <dd>{{ sessionDate }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'attendance.register.time' | transloco }}</dt>
+                <dd>{{ sessionTime }}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <p class="summary__count" data-testid="attendance-summary-count">
+            <strong>{{
+              'attendance.register.summary.count'
+                | transloco: { count: preview.count }
+            }}</strong>
+            ·
+            {{
+              'attendance.register.summary.attention'
+                | transloco: { count: attentionCount }
+            }}
           </p>
-        } @else {
+
           <ul
             class="list-card"
             [attr.aria-label]="'attendance.register.traineesLabel' | transloco"
           >
-            @for (trainee of filteredTrainees; track trainee.id) {
-              <li>
-                <label
-                  class="trainee"
-                  [class.is-selected]="isSelected(trainee.id)"
-                >
-                  <app-avatar [name]="trainee.name" />
-                  <span class="trainee__text">
-                    <span class="trainee__name">{{ trainee.name }}</span>
-                    <span class="trainee__nickname">{{
-                      trainee.nickname || '—'
-                    }}</span>
-                  </span>
-                  <input
-                    class="trainee__check"
-                    type="checkbox"
-                    [checked]="isSelected(trainee.id)"
-                    (change)="
-                      toggleTraineeSelection(
-                        trainee.id,
-                        $any($event.target).checked
-                      )
-                    "
-                  />
-                </label>
+            @for (row of preview.trainees; track row.traineeId) {
+              <li
+                class="record summary-row"
+                data-testid="attendance-summary-row"
+              >
+                <app-avatar [name]="row.name" />
+                <div class="record__main">
+                  <span class="record__title">{{
+                    personName(row.name, row.nickname)
+                  }}</span>
+                  <span class="record__meta">{{ summaryNote(row) }}</span>
+                </div>
+                <div class="record__aside">
+                  <app-chip [tone]="summaryTone(row)">{{
+                    summaryChip(row)
+                  }}</app-chip>
+                </div>
               </li>
             }
           </ul>
-        }
-      </fieldset>
+        </section>
+      } @else {
+        <fieldset class="panel session">
+          <legend class="visually-hidden">
+            {{ 'attendance.register.session' | transloco }}
+          </legend>
+          <label class="form-field session__pick">
+            <span class="form-field__label">{{
+              'attendance.register.trainer' | transloco
+            }}</span>
+            <select formControlName="trainerId">
+              <option value="" disabled>
+                {{ 'attendance.register.selectTrainer' | transloco }}
+              </option>
+              @for (trainer of trainers; track trainer.id) {
+                <option [value]="trainer.id">
+                  {{ trainer.name
+                  }}{{ trainer.nickname ? ' (' + trainer.nickname + ')' : '' }}
+                </option>
+              }
+            </select>
+            @if (
+              form.controls.trainerId.touched && form.controls.trainerId.invalid
+            ) {
+              <span class="form-field__error">{{
+                'attendance.register.trainerRequired' | transloco
+              }}</span>
+            }
+          </label>
+
+          <label class="form-field session__pick">
+            <span class="form-field__label">{{
+              'attendance.register.gym' | transloco
+            }}</span>
+            <select formControlName="locationId">
+              <option value="" disabled>
+                {{ 'attendance.register.selectGym' | transloco }}
+              </option>
+              @for (gym of gymLocations; track gym.id) {
+                <option [value]="gym.id">{{ gym.name }}</option>
+              }
+            </select>
+            @if (
+              form.controls.locationId.touched &&
+              form.controls.locationId.invalid
+            ) {
+              <span class="form-field__error">{{
+                'attendance.register.gymRequired' | transloco
+              }}</span>
+            }
+          </label>
+
+          <label class="form-field">
+            <span class="form-field__label">{{
+              'attendance.register.date' | transloco
+            }}</span>
+            <input type="date" formControlName="trainedDate" />
+            @if (
+              form.controls.trainedDate.touched &&
+              form.controls.trainedDate.invalid
+            ) {
+              <span class="form-field__error">{{
+                'attendance.register.dateRequired' | transloco
+              }}</span>
+            }
+          </label>
+
+          <label class="form-field">
+            <span class="form-field__label"
+              >{{ 'attendance.register.time' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span></span
+            >
+            <select formControlName="trainedTime">
+              <option value="">
+                {{ 'attendance.register.notSpecified' | transloco }}
+              </option>
+              @for (trainingTime of trainingTimes; track trainingTime.id) {
+                <option
+                  [value]="formatTimeWithoutSeconds(trainingTime.startTime)"
+                >
+                  {{ formatTrainingTimeOption(trainingTime) }}
+                </option>
+              }
+            </select>
+          </label>
+        </fieldset>
+
+        <fieldset class="who">
+          <legend class="who__title">
+            {{ 'attendance.register.whoTrained' | transloco }}
+          </legend>
+
+          <div class="who__tools">
+            <div class="who__search">
+              <app-icon class="who__search-icon" name="search" />
+              <input
+                type="search"
+                formControlName="traineeSearch"
+                [placeholder]="
+                  'attendance.register.searchPlaceholder' | transloco
+                "
+                [attr.aria-label]="
+                  'attendance.register.searchLabel' | transloco
+                "
+                autocomplete="off"
+              />
+            </div>
+            <div class="who__bulk">
+              <button
+                class="btn btn--ghost"
+                type="button"
+                (click)="selectFiltered()"
+              >
+                {{ 'attendance.register.selectShown' | transloco }}
+              </button>
+              <button
+                class="btn btn--ghost"
+                type="button"
+                (click)="clearFiltered()"
+              >
+                {{ 'attendance.register.clearShown' | transloco }}
+              </button>
+            </div>
+          </div>
+
+          @if (filteredTrainees.length === 0) {
+            <p class="notice" role="status">
+              {{ 'attendance.register.noMatches' | transloco }}
+            </p>
+          } @else {
+            <ul
+              class="list-card"
+              [attr.aria-label]="
+                'attendance.register.traineesLabel' | transloco
+              "
+            >
+              @for (trainee of filteredTrainees; track trainee.id) {
+                <li>
+                  <label
+                    class="trainee"
+                    [class.is-selected]="isSelected(trainee.id)"
+                  >
+                    <app-avatar [name]="trainee.name" />
+                    <span class="trainee__text">
+                      <span class="trainee__name">{{ trainee.name }}</span>
+                      <span class="trainee__nickname">{{
+                        trainee.nickname || '—'
+                      }}</span>
+                    </span>
+                    <input
+                      class="trainee__check"
+                      type="checkbox"
+                      [checked]="isSelected(trainee.id)"
+                      (change)="
+                        toggleTraineeSelection(
+                          trainee.id,
+                          $any($event.target).checked
+                        )
+                      "
+                    />
+                  </label>
+                </li>
+              }
+            </ul>
+          }
+        </fieldset>
+      }
 
       <div class="save-bar">
         @if (errorMessage) {
@@ -184,23 +274,42 @@
           </p>
         }
         <div class="save-bar__inner">
-          <p class="save-bar__count" aria-live="polite">
-            <strong class="num">{{ selectedTraineeIds.size }}</strong>
-            {{
-              'attendance.register.selected'
-                | transloco: { count: selectedTraineeIds.size }
-            }}
-          </p>
+          @if (step === 'review') {
+            <button
+              class="btn btn--ghost"
+              type="button"
+              [disabled]="submitting"
+              (click)="backToSelection()"
+            >
+              {{ 'attendance.register.summary.back' | transloco }}
+            </button>
+          } @else {
+            <p class="save-bar__count" aria-live="polite">
+              <strong class="num">{{ selectedTraineeIds.size }}</strong>
+              {{
+                'attendance.register.selected'
+                  | transloco: { count: selectedTraineeIds.size }
+              }}
+            </p>
+          }
           <button
             class="btn btn--primary save-bar__submit"
             type="submit"
             [disabled]="submitting"
           >
-            {{
-              submitting
-                ? ('common.saving' | transloco)
-                : ('attendance.register.submit' | transloco)
-            }}
+            @if (step === 'review') {
+              {{
+                submitting
+                  ? ('common.saving' | transloco)
+                  : ('attendance.register.summary.confirm' | transloco)
+              }}
+            } @else {
+              {{
+                submitting
+                  ? ('attendance.register.checking' | transloco)
+                  : ('attendance.register.review' | transloco)
+              }}
+            }
           </button>
         </div>
       </div>

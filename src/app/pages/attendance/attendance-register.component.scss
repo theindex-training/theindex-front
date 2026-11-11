@@ -117,6 +117,43 @@
   margin: 0;
 }
 
+// The summary heading takes focus when the summary replaces the selection; it is not a control.
+.summary__title:focus {
+  outline: none;
+}
+
+// Two short pairs per line on phones, so the trainees start higher up.
+.summary__session {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-3);
+}
+
+.summary__count {
+  margin: 0;
+  color: var(--muted);
+}
+
+.summary__count strong {
+  color: var(--text);
+}
+
+// Summary rows: on phones the figure sits under the name, so long names keep the full width.
+.summary-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
+}
+
+.summary-row .record__aside {
+  grid-column: 2;
+  align-items: flex-start;
+}
+
+.summary-row .record__title {
+  overflow-wrap: break-word;
+}
+
 // Stays in thumb reach while scrolling a long trainee list (above the tab bar on mobile).
 .save-bar {
   position: sticky;
@@ -168,6 +205,19 @@
 
   .session__pick {
     grid-column: auto;
+  }
+
+  .summary__session {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .summary-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .summary-row .record__aside {
+    grid-column: auto;
+    align-items: flex-end;
   }
 }
 

@@ -971,10 +971,26 @@
       "noMatches": "No trainees match this search.",
       "traineesLabel": "Trainees",
       "selected": "{count, plural, one {selected} other {selected}}",
-      "submit": "Register attendance",
       "loadError": "Unable to load trainers, gyms, training times, or trainees right now.",
       "selectAtLeastOne": "Select at least one trainee for this attendance batch.",
-      "error": "Unable to register attendance right now."
+      "error": "Unable to register attendance right now.",
+      "review": "Review",
+      "checking": "Checking...",
+      "previewError": "Unable to check the subscriptions right now.",
+      "summary": {
+        "title": "Check before saving",
+        "subtitle": "Nothing is saved yet. This is what each trainee has left after this training.",
+        "count": "{count, plural, one {# trainee} other {# trainees}}",
+        "attention": "{count, plural, =0 {Everyone has paid trainings left} one {# near the end or unpaid} other {# near the end or unpaid}}",
+        "noSubscription": "No active subscription",
+        "unpaid": "Unpaid",
+        "lastTraining": "Last paid training",
+        "creditsLeft": "{count, plural, one {# left} other {# left}}",
+        "endsOn": "Ends {date}",
+        "daysLeft": "{count, plural, =0 {Ends today} one {# day left} other {# days left}}",
+        "back": "Back",
+        "confirm": "Save attendance"
+      }
     },
     "backToList": "Back to attendance",
     "sessions": {
