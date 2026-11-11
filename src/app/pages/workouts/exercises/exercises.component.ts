@@ -18,7 +18,6 @@ import {
 } from '../../../components/segmented-control/segmented-control.component';
 import { SkeletonListComponent } from '../../../components/skeleton-list/skeleton-list.component';
 import { StatusDotComponent } from '../../../components/status-dot/status-dot.component';
-import { EnumLabelPipe } from '../../../i18n/enum-label.pipe';
 import { apiErrorMessage, UiMessage } from '../../../i18n/ui-message';
 import { UiMessagePipe } from '../../../i18n/ui-message.pipe';
 import {
@@ -37,7 +36,6 @@ type StatusFilter = 'all' | 'active' | 'inactive';
     RouterLink,
     TranslocoPipe,
     UiMessagePipe,
-    EnumLabelPipe,
     PageHeaderComponent,
     WorkoutsNavComponent,
     SearchFieldComponent,

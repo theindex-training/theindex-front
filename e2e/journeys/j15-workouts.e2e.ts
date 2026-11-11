@@ -4,41 +4,18 @@ import { expect, test } from '../support/fixtures';
 import { t } from '../support/i18n';
 
 /**
- * J15: a trainer plans the workout of a day from a lesson-plan PDF. The API reads the PDF (mocked
- * here); the page shows the draft, creates the exercise the catalogue lacks, and saves the
- * workout only when the form is submitted.
+ * J15: a trainer plans a workout of the day from a lesson-plan PDF. The API reads the PDF (mocked
+ * here); the page shows the draft (summary and exercises), creates the exercise the catalogue
+ * lacks, and saves the workout only when the form is submitted.
  */
 test.describe('J15 workouts', () => {
   const mainNav = (page: Page) =>
     page.getByRole('navigation', { name: t('nav.mainLabel') });
 
-  const noItem = {
-    quantity: null,
-    quantityMax: null,
-    quantityFemale: null,
-    maxEffort: false,
-    loadKg: null,
-    loadFemaleKg: null,
-    loadPercent: null,
-    slot: null,
-    notes: null,
-  };
-  const noStructure = {
-    rounds: null,
-    repScheme: null,
-    durationSeconds: null,
-    timeCapSeconds: null,
-    intervalSeconds: null,
-    workSeconds: null,
-    restSeconds: null,
-    notes: null,
-  };
   const run = {
     id: 'e-run',
     name: 'Run',
     aliases: [],
-    modality: 'MONOSTRUCTURAL',
-    defaultMeasure: 'DISTANCE',
     isActive: true,
     description: null,
     videoUrl: null,
@@ -47,18 +24,12 @@ test.describe('J15 workouts', () => {
     ...run,
     id: 'e-pull',
     name: 'Pull-up',
-    modality: 'GYMNASTICS',
+    videoUrl: 'https://www.youtube.com/watch?v=lzRo-4pq_AY',
   };
-  const forTime = {
-    id: 't-time',
-    name: 'For time',
-    description: null,
-    code: 'FOR_TIME',
-    scoreType: 'TIME',
-  };
+  const summary = '3 rounds for time:\n400-m run\n12 pull-ups';
 
   test(
-    'opens Workouts, fills the form from a PDF, creates the missing exercise and saves',
+    'opens a day, fills the form from a PDF, creates the missing exercise and saves',
     { tag: ['@desktop', '@mobile'] },
     async ({ page, api, signInAs }) => {
       await signInAs('TRAINER');
@@ -68,90 +39,25 @@ test.describe('J15 workouts', () => {
         sourceCode: '261109',
         date: '2026-11-09',
         title: 'Helen',
-        summary: {
-          blocks: [
-            { type: 'paragraph', data: { text: '<b>3 rounds for time:</b>' } },
-            { type: 'paragraph', data: { text: '400-m run' } },
-            { type: 'paragraph', data: { text: '12 pull-ups' } },
-          ],
-        },
-        unknownExercises: ['Pull-up'],
-        warnings: [],
-        parts: [
-          {
-            title: null,
-            typeCode: 'FOR_TIME',
-            workoutTypeId: 't-time',
-            scoreType: 'TIME',
-            variants: [
-              {
-                ...noStructure,
-                level: 'RX',
-                rounds: 3,
-                items: [
-                  {
-                    ...noItem,
-                    exerciseId: 'e-run',
-                    exerciseName: 'Run',
-                    measure: 'DISTANCE',
-                    quantity: 400,
-                  },
-                  {
-                    ...noItem,
-                    exerciseId: null,
-                    exerciseName: 'Pull-up',
-                    measure: 'REPS',
-                    quantity: 12,
-                  },
-                ],
-              },
-            ],
-          },
+        summary,
+        exercises: [
+          { name: 'Run', exerciseId: 'e-run', exerciseName: 'Run' },
+          { name: 'Pull-up', exerciseId: null, exerciseName: null },
         ],
+        warnings: [],
       };
       const saved = {
         id: 'w-1',
         date: '2026-11-09',
         title: 'Helen',
-        notes: null,
-        summary: {
-          blocks: [
-            { type: 'paragraph', data: { text: '<b>3 rounds for time:</b>' } },
-            { type: 'paragraph', data: { text: '400-m run' } },
-            { type: 'paragraph', data: { text: '12 pull-ups' } },
-          ],
-        },
-        summaryText: '3 rounds for time:\n400-m run\n12 pull-ups',
-        parts: [
+        summary,
+        exercises: [
+          { id: 'e-run', name: 'Run', videoUrl: null, isActive: true },
           {
-            id: 'p-1',
-            title: null,
-            workoutTypeId: 't-time',
-            workoutType: { id: 't-time', name: 'For time', code: 'FOR_TIME' },
-            scoreType: 'TIME',
-            variants: [
-              {
-                ...noStructure,
-                level: 'RX',
-                rounds: 3,
-                items: [
-                  {
-                    ...noItem,
-                    exerciseId: 'e-run',
-                    exercise: { id: 'e-run', name: 'Run' },
-                    measure: 'DISTANCE',
-                    quantity: 400,
-                  },
-                  {
-                    ...noItem,
-                    exerciseId: 'e-pull',
-                    exercise: { id: 'e-pull', name: 'Pull-up' },
-                    measure: 'REPS',
-                    quantity: 12,
-                  },
-                ],
-              },
-            ],
+            id: 'e-pull',
+            name: 'Pull-up',
+            videoUrl: pullUp.videoUrl,
+            isActive: true,
           },
         ],
       };
@@ -160,7 +66,6 @@ test.describe('J15 workouts', () => {
         body: api.calls('POST', '/api/workouts').length ? [saved] : [],
       }));
       api.on('GET', '/api/exercises', { body: [run] });
-      api.on('GET', '/api/workout-types', { body: [forTime] });
       api.on('POST', '/api/workouts/import-pdf', { body: draft });
       api.on('POST', '/api/exercises', { status: 201, body: pullUp });
       api.on('POST', '/api/workouts', { status: 201, body: saved });
@@ -184,30 +89,23 @@ test.describe('J15 workouts', () => {
         page.getByLabel(t('workouts.form.title'), { exact: false }).first(),
       ).toHaveValue('Helen');
       await expect(
-        page.getByLabel(t('workouts.form.structure.rounds'), { exact: true }),
-      ).toHaveValue('3');
-
-      // The RX column as printed is the summary, in its editor.
-      await expect(page.getByTestId('workout-summary')).toContainText(
-        '3 rounds for time:',
-      );
-      await expect(page.getByTestId('workout-summary')).toContainText(
-        '12 pull-ups',
-      );
+        page.getByLabel(t('workouts.form.summary'), { exact: true }),
+      ).toHaveValue(summary);
 
       // The PDF named a movement the catalogue lacks: it is created from here.
-      const pending = page.getByTestId('pending-exercises');
-      await expect(pending).toContainText('Pull-up');
-      await pending
+      const exercises = page.getByTestId('workout-exercises');
+      await exercises
         .getByRole('button', {
-          name: t('workouts.import.createExercise', { name: 'Pull-up' }),
+          name: t('workouts.form.exercises.create', { name: 'Pull-up' }),
         })
         .click();
-      await expect(pending).toBeHidden();
+      await expect(
+        exercises.getByRole('link', {
+          name: t('workouts.exercises.list.watchVideo', { name: 'Pull-up' }),
+        }),
+      ).toBeVisible();
       expect(api.last('POST', '/api/exercises')?.body).toEqual({
         name: 'Pull-up',
-        modality: 'GYMNASTICS',
-        defaultMeasure: 'REPS',
       });
       // Nothing was saved by reading the PDF.
       expect(api.calls('POST', '/api/workouts')).toHaveLength(0);
@@ -219,48 +117,32 @@ test.describe('J15 workouts', () => {
       await expect
         .poll(() => api.calls('POST', '/api/workouts').length)
         .toBe(1);
-      expect(api.last('POST', '/api/workouts')?.body).toMatchObject({
+      expect(api.last('POST', '/api/workouts')?.body).toEqual({
         date: '2026-11-09',
         title: 'Helen',
-        summary: {
-          blocks: [
-            { data: { text: '<b>3 rounds for time:</b>' } },
-            { data: { text: '400-m run' } },
-            { data: { text: '12 pull-ups' } },
-          ],
-        },
-        parts: [
-          {
-            workoutTypeId: 't-time',
-            scoreType: 'TIME',
-            variants: [
-              {
-                level: 'RX',
-                rounds: 3,
-                items: [
-                  { exerciseId: 'e-run', measure: 'DISTANCE', quantity: 400 },
-                  { exerciseId: 'e-pull', measure: 'REPS', quantity: 12 },
-                ],
-              },
-            ],
-          },
-        ],
+        summary,
+        exerciseIds: ['e-run', 'e-pull'],
       });
-      await expect(page.getByTestId('day-2026-11-09')).toContainText(
-        '12 pull-ups',
-      );
+
+      // The week shows the summary and the exercises, the video linked.
+      const day = page.getByTestId('day-2026-11-09');
+      await expect(day.getByTestId('workout-summary-text')).toHaveText(summary);
+      await expect(
+        day.getByRole('link', {
+          name: t('workouts.exercises.list.watchVideo', { name: 'Pull-up' }),
+        }),
+      ).toHaveAttribute('href', pullUp.videoUrl);
     },
   );
 
   test(
-    'the sidebar leads to Workouts and its tabs to exercises and types',
+    'the sidebar leads to Workouts and its tab to the exercises',
     { tag: '@desktop' },
     async ({ page, api, signInAs }) => {
       await signInAs('TRAINER');
       mockStaffHome(api);
       api.on('GET', '/api/workouts', { body: [] });
       api.on('GET', '/api/exercises', { body: [run, pullUp] });
-      api.on('GET', '/api/workout-types', { body: [forTime] });
       const sections = page.getByRole('navigation', {
         name: t('workouts.nav.label'),
       });
@@ -270,6 +152,7 @@ test.describe('J15 workouts', () => {
         .getByRole('link', { name: t('nav.workouts') })
         .click();
       await expect(page).toHaveURL(/\/workouts$/);
+      await expect(sections.getByRole('link')).toHaveCount(2);
 
       await sections
         .getByRole('link', { name: t('workouts.nav.exercises') })
@@ -277,14 +160,6 @@ test.describe('J15 workouts', () => {
       await expect(page).toHaveURL(/\/workouts\/exercises$/);
       await expect(
         page.getByRole('link', { name: 'Pull-up', exact: true }),
-      ).toBeVisible();
-
-      await sections
-        .getByRole('link', { name: t('workouts.nav.types') })
-        .click();
-      await expect(page).toHaveURL(/\/workouts\/types$/);
-      await expect(
-        page.getByRole('link', { name: 'For time', exact: true }),
       ).toBeVisible();
     },
   );

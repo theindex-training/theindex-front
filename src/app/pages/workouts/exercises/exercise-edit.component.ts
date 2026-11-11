@@ -9,14 +9,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { youtubeVideoId } from '../../../utils/youtube.util';
 import { PageHeaderComponent } from '../../../components/page-header/page-header.component';
-import { EnumLabelPipe } from '../../../i18n/enum-label.pipe';
 import { LanguageService } from '../../../i18n/language.service';
 import { apiErrorMessage, UiMessage } from '../../../i18n/ui-message';
 import { UiMessagePipe } from '../../../i18n/ui-message.pipe';
 import {
   Exercise,
-  EXERCISE_MEASURES,
-  EXERCISE_MODALITIES,
   ExercisesService,
 } from '../../../services/exercises.service';
 import {
@@ -34,7 +31,6 @@ import {
     ReactiveFormsModule,
     TranslocoPipe,
     UiMessagePipe,
-    EnumLabelPipe,
     PageHeaderComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -51,8 +47,6 @@ import {
 })
 export class ExerciseEditComponent implements OnInit {
   readonly form: ExerciseForm;
-  readonly modalities = EXERCISE_MODALITIES;
-  readonly measures = EXERCISE_MEASURES;
 
   /** Null on the create page. */
   exerciseId: string | null = null;

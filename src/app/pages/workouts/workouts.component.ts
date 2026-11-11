@@ -13,20 +13,12 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
 import { IconComponent } from '../../components/icon/icon.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
-import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 import { LanguageService } from '../../i18n/language.service';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
 import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
-import {
-  Workout,
-  WorkoutPart,
-  WorkoutVariant,
-  WorkoutsService,
-} from '../../services/workouts.service';
+import { Workout, WorkoutsService } from '../../services/workouts.service';
 import { addDays, dayKeyToDate, localDayKey } from '../../utils/calendar.util';
-import { itemLine, structurePhrases } from './workout-format';
-import { hasSummaryText } from './workout-summary';
 import { WorkoutsNavComponent } from './workouts-nav.component';
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -44,8 +36,8 @@ interface WeekDay {
 }
 
 /**
- * The workouts of one week, Monday to Sunday, a day at a time: each with its type, score and
- * summary (the text people read), and where a day is still empty. `?week=YYYY-MM-DD` (any day of the week) picks the week; without it, this one.
+ * The workouts of one week, Monday to Sunday, a day at a time: each with its summary and the
+ * exercises it uses (linked to their videos), and where a day is still empty. `?week=YYYY-MM-DD` (any day of the week) picks the week; without it, this one.
  */
 @Component({
   selector: 'app-workouts',
@@ -54,13 +46,12 @@ interface WeekDay {
     RouterLink,
     TranslocoPipe,
     UiMessagePipe,
-    EnumLabelPipe,
     PageHeaderComponent,
     WorkoutsNavComponent,
     SkeletonListComponent,
     EmptyStateComponent,
-    IconComponent,
     ChipComponent,
+    IconComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './workouts.component.html',
@@ -182,31 +173,5 @@ export class WorkoutsComponent implements OnInit {
 
   dayLabel(day: string): string {
     return this.format.custom(dayKeyToDate(day), 'EEEE, d MMMM');
-  }
-
-  private readonly t = (key: string, params?: Record<string, unknown>) =>
-    this.language.t(`workouts.format.${key}`, params);
-
-  /** "3 rounds · cap 15:00": how the level is organised. */
-  structure(variant: WorkoutVariant): string {
-    return structurePhrases(variant, this.t).join(' · ');
-  }
-
-  lines(variant: WorkoutVariant): string[] {
-    return variant.items.map((item) => itemLine(item, this.t));
-  }
-
-  hasSummary(workout: Workout): boolean {
-    return hasSummaryText(workout.summary);
-  }
-
-  /** The RX level of the first part: what the page shows when there is no summary. */
-  rxOf(workout: Workout): WorkoutVariant | undefined {
-    const variants = workout.parts[0]?.variants ?? [];
-    return variants.find((v) => v.level === 'RX') ?? variants[0];
-  }
-
-  scored(part: WorkoutPart): boolean {
-    return part.scoreType !== 'NONE';
   }
 }

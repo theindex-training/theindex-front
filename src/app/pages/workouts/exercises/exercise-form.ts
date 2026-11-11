@@ -7,8 +7,6 @@ import {
 import {
   CreateExercisePayload,
   Exercise,
-  ExerciseMeasure,
-  ExerciseModality,
 } from '../../../services/exercises.service';
 import { trimmedLength } from '../../../utils/form-validators.util';
 import { youtubeVideoId } from '../../../utils/youtube.util';
@@ -23,8 +21,6 @@ export type ExerciseForm = FormGroup<{
   name: FormControl<string>;
   /** Other spellings, separated by commas. */
   aliases: FormControl<string>;
-  modality: FormControl<ExerciseModality>;
-  defaultMeasure: FormControl<ExerciseMeasure>;
   isActive: FormControl<boolean>;
   description: FormControl<string>;
   videoUrl: FormControl<string>;
@@ -66,8 +62,6 @@ export function buildExerciseForm(fb: FormBuilder): ExerciseForm {
       trimmedLength(1, EXERCISE_NAME_MAX),
     ]),
     aliases: nn.control('', [aliasList]),
-    modality: nn.control<ExerciseModality>('WEIGHTLIFTING'),
-    defaultMeasure: nn.control<ExerciseMeasure>('REPS'),
     isActive: nn.control(true),
     description: nn.control('', [trimmedLength(0, EXERCISE_DESCRIPTION_MAX)]),
     videoUrl: nn.control('', [youtubeLink]),
@@ -78,8 +72,6 @@ export function fillExerciseForm(form: ExerciseForm, exercise: Exercise): void {
   form.setValue({
     name: exercise.name,
     aliases: exercise.aliases.join(', '),
-    modality: exercise.modality,
-    defaultMeasure: exercise.defaultMeasure,
     isActive: exercise.isActive,
     description: exercise.description ?? '',
     videoUrl: exercise.videoUrl ?? '',
@@ -92,8 +84,6 @@ export function exercisePayload(form: ExerciseForm): CreateExercisePayload {
   return {
     name: raw.name.trim(),
     aliases: splitAliases(raw.aliases),
-    modality: raw.modality,
-    defaultMeasure: raw.defaultMeasure,
     isActive: raw.isActive,
     description: raw.description.trim() || null,
     videoUrl: raw.videoUrl.trim() || null,

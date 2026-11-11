@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 
-/** Switches between the sections of the workouts area (workouts, exercises, workout types). */
+/** Switches between the sections of the workouts area (workouts, exercises). */
 @Component({
   selector: 'app-workouts-nav',
   standalone: true,
@@ -27,13 +27,6 @@ import { TranslocoPipe } from '@jsverse/transloco';
         routerLinkActive="is-active"
         ariaCurrentWhenActive="page"
         >{{ 'workouts.nav.exercises' | transloco }}</a
-      >
-      <a
-        class="section-nav__link"
-        routerLink="/workouts/types"
-        routerLinkActive="is-active"
-        ariaCurrentWhenActive="page"
-        >{{ 'workouts.nav.types' | transloco }}</a
       >
     </nav>
   `,

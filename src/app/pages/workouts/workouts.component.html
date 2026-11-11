@@ -85,41 +85,37 @@
                   >{{ 'workouts.list.edit' | transloco }}</a
                 >
               </div>
-              @if (workout.notes) {
-                <p class="text-muted">{{ workout.notes }}</p>
-              }
 
-              @if (workout.parts[0]; as part) {
-                <p class="wod__part-title">
-                  <app-chip [tone]="scored(part) ? 'accent' : 'neutral'">{{
-                    part.workoutType.name
-                  }}</app-chip>
-                  <span class="text-muted">{{
-                    'workouts.list.score'
-                      | transloco
-                        : { score: (part.scoreType | enumLabel: 'scoreType') }
-                  }}</span>
-                </p>
-              }
-
-              @if (hasSummary(workout)) {
-                <div class="wod__summary" data-testid="workout-summary-text">
-                  @for (block of workout.summary.blocks; track $index) {
-                    <p [innerHTML]="block.data.text"></p>
+              <p
+                class="wod__summary"
+                data-testid="workout-summary-text"
+                [textContent]="workout.summary"
+              ></p>
+              @if (workout.exercises.length) {
+                <ul
+                  class="wod__exercises"
+                  [attr.aria-label]="'workouts.list.exercises' | transloco"
+                >
+                  @for (exercise of workout.exercises; track exercise.id) {
+                    <li>
+                      @if (exercise.videoUrl) {
+                        <a
+                          class="wod__exercise"
+                          [href]="exercise.videoUrl"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          [attr.aria-label]="
+                            'workouts.exercises.list.watchVideo'
+                              | transloco: { name: exercise.name }
+                          "
+                          >{{ exercise.name }}</a
+                        >
+                      } @else {
+                        <span class="wod__exercise">{{ exercise.name }}</span>
+                      }
+                    </li>
                   }
-                </div>
-              } @else if (rxOf(workout); as variant) {
-                <!-- Saved before workouts had a summary: the RX exercises instead. -->
-                <div class="wod__summary">
-                  @if (structure(variant); as structureText) {
-                    <p class="wod__structure">{{ structureText }}</p>
-                  }
-                  <ul class="wod__items">
-                    @for (line of lines(variant); track $index) {
-                      <li>{{ line }}</li>
-                    }
-                  </ul>
-                </div>
+                </ul>
               }
             </article>
           } @empty {

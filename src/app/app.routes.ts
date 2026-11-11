@@ -442,36 +442,6 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] },
       },
       {
-        path: 'workouts/types/new',
-        title: 'workouts.types.create.title',
-        loadComponent: () =>
-          import('./pages/workouts/types/workout-type-edit.component').then(
-            (m) => m.WorkoutTypeEditComponent,
-          ),
-        canActivate: [roleGuard],
-        data: { roles: ['ADMIN', 'TRAINER'] },
-      },
-      {
-        path: 'workouts/types/:id/edit',
-        title: 'workouts.types.edit.title',
-        loadComponent: () =>
-          import('./pages/workouts/types/workout-type-edit.component').then(
-            (m) => m.WorkoutTypeEditComponent,
-          ),
-        canActivate: [roleGuard],
-        data: { roles: ['ADMIN', 'TRAINER'] },
-      },
-      {
-        path: 'workouts/types',
-        title: 'workouts.types.list.title',
-        loadComponent: () =>
-          import('./pages/workouts/types/workout-types.component').then(
-            (m) => m.WorkoutTypesComponent,
-          ),
-        canActivate: [roleGuard],
-        data: { roles: ['ADMIN', 'TRAINER'] },
-      },
-      {
         path: 'workouts/new',
         title: 'workouts.form.createTitle',
         loadComponent: () =>

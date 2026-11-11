@@ -5,11 +5,10 @@ import {
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ExercisesService } from './exercises.service';
-import { WorkoutTypesService } from './workout-types.service';
 import { WorkoutPayload, WorkoutsService } from './workouts.service';
 
-/** The three services of the workouts area: the requests they send. */
-describe('workouts, exercises and workout types services', () => {
+/** The services of the workouts area: the requests they send. */
+describe('workouts and exercises services', () => {
   let http: HttpTestingController;
 
   beforeEach(() => {
@@ -32,7 +31,7 @@ describe('workouts, exercises and workout types services', () => {
 
   it('ExercisesService: list with filters, get, create, update, delete', () => {
     const service = TestBed.inject(ExercisesService);
-    const payload = { name: 'Pull-up', modality: 'GYMNASTICS' as const };
+    const payload = { name: 'Pull-up' };
 
     service.list().subscribe();
     service.list({ active: false, q: 'swing' }).subscribe();
@@ -41,6 +40,7 @@ describe('workouts, exercises and workout types services', () => {
     service.create(payload).subscribe();
     service.update('e1', { isActive: false }).subscribe();
     service.delete('e1').subscribe();
+    service.addAlias('e1', 'KB swing').subscribe();
 
     expect(sent()).toEqual([
       ['GET', '/api/exercises', null],
@@ -50,24 +50,7 @@ describe('workouts, exercises and workout types services', () => {
       ['POST', '/api/exercises', payload],
       ['PATCH', '/api/exercises/e1', { isActive: false }],
       ['DELETE', '/api/exercises/e1', null],
-    ]);
-  });
-
-  it('WorkoutTypesService: list, get, create, update, delete', () => {
-    const service = TestBed.inject(WorkoutTypesService);
-
-    service.list().subscribe();
-    service.getById('t1').subscribe();
-    service.create({ name: 'Chipper', scoreType: 'TIME' }).subscribe();
-    service.update('t1', { description: '' }).subscribe();
-    service.delete('t1').subscribe();
-
-    expect(sent()).toEqual([
-      ['GET', '/api/workout-types', null],
-      ['GET', '/api/workout-types/t1', null],
-      ['POST', '/api/workout-types', { name: 'Chipper', scoreType: 'TIME' }],
-      ['PATCH', '/api/workout-types/t1', { description: '' }],
-      ['DELETE', '/api/workout-types/t1', null],
+      ['POST', '/api/exercises/e1/aliases', { alias: 'KB swing' }],
     ]);
   });
 
@@ -76,9 +59,8 @@ describe('workouts, exercises and workout types services', () => {
     const payload: WorkoutPayload = {
       date: '2026-11-09',
       title: 'Helen',
-      notes: null,
-      summary: { blocks: [{ type: 'paragraph', data: { text: 'Helen' } }] },
-      parts: [],
+      summary: '3 rounds for time:\n400-m run',
+      exerciseIds: ['e1'],
     };
 
     service.list().subscribe();

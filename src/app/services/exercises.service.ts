@@ -4,28 +4,8 @@ import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
 import { buildHttpParams } from '../utils/http-params.util';
 
-/** CrossFit's three modalities, plus everything else (theindex-api `ExerciseModality`). */
-export type ExerciseModality =
-  'WEIGHTLIFTING' | 'GYMNASTICS' | 'MONOSTRUCTURAL' | 'OTHER';
-
-/** What an amount of a movement is counted in: reps, metres, seconds or calories. */
-export type ExerciseMeasure = 'REPS' | 'DISTANCE' | 'TIME' | 'CALORIES';
-
-export const EXERCISE_MODALITIES: ExerciseModality[] = [
-  'WEIGHTLIFTING',
-  'GYMNASTICS',
-  'MONOSTRUCTURAL',
-  'OTHER',
-];
-export const EXERCISE_MEASURES: ExerciseMeasure[] = [
-  'REPS',
-  'DISTANCE',
-  'TIME',
-  'CALORIES',
-];
-
 /**
- * A movement workouts are built from (theindex-api `exercises`, ADMIN and TRAINER). `aliases`
+ * A movement workouts list (theindex-api `exercises`, ADMIN and TRAINER). `aliases`
  * are other spellings the PDF import recognises; no two exercises may share a spelling (409).
  * The starter library has the crossfit.com movements, each with its YouTube video.
  */
@@ -33,8 +13,6 @@ export interface Exercise {
   id: string;
   name: string;
   aliases: string[];
-  modality: ExerciseModality;
-  defaultMeasure: ExerciseMeasure;
   isActive: boolean;
   /** Written by the trainers; the starter library leaves it empty. */
   description: string | null;
@@ -47,8 +25,6 @@ export interface Exercise {
 export interface CreateExercisePayload {
   name: string;
   aliases?: string[];
-  modality: ExerciseModality;
-  defaultMeasure?: ExerciseMeasure;
   isActive?: boolean;
   /** Empty or null removes it. */
   description?: string | null;
@@ -83,6 +59,14 @@ export class ExercisesService {
 
   update(id: string, payload: UpdateExercisePayload): Observable<Exercise> {
     return this.http.patch<Exercise>(`${this.baseUrl}/${id}`, payload);
+  }
+
+  /**
+   * Adds another spelling (e.g. a lesson plan's) to the exercise's other names, so the next PDF
+   * import finds it. One it already answers to changes nothing; another exercise's is 409.
+   */
+  addAlias(id: string, alias: string): Observable<Exercise> {
+    return this.http.post<Exercise>(`${this.baseUrl}/${id}/aliases`, { alias });
   }
 
   /** Permanent; the API refuses (409) while a workout uses the exercise. */

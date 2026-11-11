@@ -19,18 +19,6 @@ export const ENUM_VALUES = {
   ],
   cashSourceType: ['SUBSCRIPTION', 'SETTLEMENT', 'MANUAL'],
   articleStatus: ['DRAFT', 'PUBLISHED', 'UNPUBLISHED'],
-  exerciseModality: ['WEIGHTLIFTING', 'GYMNASTICS', 'MONOSTRUCTURAL', 'OTHER'],
-  exerciseMeasure: ['REPS', 'DISTANCE', 'TIME', 'CALORIES'],
-  scoreType: [
-    'TIME',
-    'ROUNDS_REPS',
-    'REPS',
-    'LOAD',
-    'CALORIES',
-    'DISTANCE',
-    'NONE',
-  ],
-  workoutLevel: ['RX', 'INTERMEDIATE', 'BEGINNER'],
 } as const satisfies Record<string, readonly string[]>;
 
 export type EnumGroup = keyof typeof ENUM_VALUES;

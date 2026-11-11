@@ -93,12 +93,6 @@
               {{ 'workouts.exercises.fields.aliases' | transloco }}
             </th>
             <th scope="col">
-              {{ 'workouts.exercises.fields.modality' | transloco }}
-            </th>
-            <th scope="col">
-              {{ 'workouts.exercises.fields.measureShort' | transloco }}
-            </th>
-            <th scope="col">
               {{ 'workouts.exercises.fields.video' | transloco }}
             </th>
             <th scope="col">{{ 'common.status' | transloco }}</th>
@@ -121,10 +115,6 @@
               </td>
               <td [class.text-muted]="!exercise.aliases.length">
                 {{ exercise.aliases.join(', ') || ('common.dash' | transloco) }}
-              </td>
-              <td>{{ exercise.modality | enumLabel: 'exerciseModality' }}</td>
-              <td>
-                {{ exercise.defaultMeasure | enumLabel: 'exerciseMeasure' }}
               </td>
               <td>
                 @if (exercise.videoUrl) {
@@ -180,9 +170,9 @@
             [title]="exercise.name"
             [dimmed]="!exercise.isActive"
           >
-            <span listRowMeta>{{
-              exercise.modality | enumLabel: 'exerciseModality'
-            }}</span>
+            @if (exercise.aliases.length) {
+              <span listRowMeta>{{ exercise.aliases.join(', ') }}</span>
+            }
             @if (!exercise.isActive) {
               <app-chip listRowTrailing tone="neutral">{{
                 'common.inactive' | transloco

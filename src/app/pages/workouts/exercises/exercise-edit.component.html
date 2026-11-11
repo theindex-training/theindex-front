@@ -80,41 +80,6 @@
 
         <div class="form-row">
           <div class="form-field">
-            <label class="form-field__label" for="exercise-modality">{{
-              'workouts.exercises.fields.modality' | transloco
-            }}</label>
-            <select id="exercise-modality" formControlName="modality">
-              @for (modality of modalities; track modality) {
-                <option [value]="modality">
-                  {{ modality | enumLabel: 'exerciseModality' }}
-                </option>
-              }
-            </select>
-          </div>
-
-          <div class="form-field">
-            <label class="form-field__label" for="exercise-measure">{{
-              'workouts.exercises.fields.measure' | transloco
-            }}</label>
-            <select
-              id="exercise-measure"
-              formControlName="defaultMeasure"
-              aria-describedby="exercise-measure-help"
-            >
-              @for (measure of measures; track measure) {
-                <option [value]="measure">
-                  {{ measure | enumLabel: 'exerciseMeasure' }}
-                </option>
-              }
-            </select>
-            <span class="form-field__hint" id="exercise-measure-help">{{
-              'workouts.exercises.fields.measureHint' | transloco
-            }}</span>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-field">
             <label class="form-field__label" for="exercise-video">
               {{ 'workouts.exercises.fields.videoUrl' | transloco }}
               <span class="form-field__optional">{{

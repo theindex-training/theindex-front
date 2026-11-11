@@ -40,7 +40,7 @@
             type="file"
             accept="application/pdf,.pdf"
             data-testid="workout-pdf"
-            [disabled]="importing || submitting || deleting"
+            [disabled]="busy"
             (change)="importPdf($event)"
           />
           {{
@@ -67,57 +67,6 @@
               <li>{{ warning }}</li>
             }
           </ul>
-        </div>
-      }
-      @if (pending.length) {
-        <div class="notice notice--warning" data-testid="pending-exercises">
-          <p>{{ 'workouts.import.unknown' | transloco }}</p>
-          <ul class="wk-pending">
-            @for (name of pending; track name; let i = $index) {
-              <li class="wk-pending__row">
-                <strong class="wk-pending__name">{{ name }}</strong>
-                <label
-                  class="visually-hidden"
-                  [for]="'pending-modality-' + i"
-                  >{{
-                    'workouts.import.modalityFor' | transloco: { name }
-                  }}</label
-                >
-                <select
-                  [id]="'pending-modality-' + i"
-                  [value]="modalityFor(name)"
-                  (change)="setModality(name, $event)"
-                >
-                  @for (modality of modalities; track modality) {
-                    <option
-                      [value]="modality"
-                      [selected]="modality === modalityFor(name)"
-                    >
-                      {{ modality | enumLabel: 'exerciseModality' }}
-                    </option>
-                  }
-                </select>
-                <button
-                  class="btn btn--primary"
-                  type="button"
-                  [disabled]="!!creatingExercise"
-                  (click)="createPending(name)"
-                >
-                  {{
-                    (creatingExercise === name
-                      ? 'workouts.import.creating'
-                      : 'workouts.import.createExercise'
-                    ) | transloco: { name }
-                  }}
-                </button>
-              </li>
-            }
-          </ul>
-          @if (createExerciseError) {
-            <p class="text-danger" role="alert">
-              {{ createExerciseError | uiMessage }}
-            </p>
-          }
         </div>
       }
     </section>
@@ -179,18 +128,24 @@
           </div>
           <div class="form-row">
             <div class="form-field">
-              <span class="form-field__label" id="workout-summary-label">{{
+              <label class="form-field__label" for="workout-summary">{{
                 'workouts.form.summary' | transloco
-              }}</span>
-              <app-summary-editor
-                [content]="workout?.summary ?? null"
-                [label]="'workouts.form.summary' | transloco"
-                describedBy="workout-summary-help"
-                [invalid]="summaryInvalid"
-              />
-              @if (summaryInvalid) {
+              }}</label>
+              <textarea
+                id="workout-summary"
+                class="wk-summary"
+                rows="10"
+                formControlName="summary"
+                [placeholder]="'workouts.form.summaryPlaceholder' | transloco"
+                aria-describedby="workout-summary-help"
+                [attr.aria-invalid]="showError(form.controls.summary)"
+              ></textarea>
+              @if (showError(form.controls.summary)) {
                 <span class="form-field__error" id="workout-summary-help">{{
-                  'workouts.form.summaryError' | transloco
+                  (form.controls.summary.hasError('required')
+                    ? 'workouts.form.summaryRequired'
+                    : 'workouts.form.summaryTooLong'
+                  ) | transloco
                 }}</span>
               } @else {
                 <span class="form-field__hint" id="workout-summary-help">{{
@@ -199,114 +154,199 @@
               }
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-field">
-              <label class="form-field__label" for="workout-notes">
-                {{ 'workouts.form.notes' | transloco }}
-                <span class="form-field__optional">{{
-                  'common.optional' | transloco
-                }}</span>
-              </label>
-              <textarea
-                id="workout-notes"
-                rows="2"
-                formControlName="notes"
-                aria-describedby="workout-notes-help"
-                [attr.aria-invalid]="showError(form.controls.notes)"
-              ></textarea>
-              @if (showError(form.controls.notes)) {
-                <span class="form-field__error" id="workout-notes-help">{{
-                  'workouts.form.notesError' | transloco
-                }}</span>
-              } @else {
-                <span class="form-field__hint" id="workout-notes-help">{{
-                  'workouts.form.notesHint' | transloco
-                }}</span>
-              }
-            </div>
-          </div>
         </div>
       </div>
 
       <section
-        class="panel wk-part"
-        [formGroup]="part"
-        aria-labelledby="part-0-title"
-        data-testid="part-0"
+        class="panel wk-exercises"
+        aria-labelledby="wk-exercises-title"
+        data-testid="workout-exercises"
       >
-        <div class="wk-part__intro">
-          <h2 class="panel__title" id="part-0-title">
-            {{ 'workouts.form.rx.title' | transloco }}
+        <div>
+          <h2 class="panel__title" id="wk-exercises-title">
+            {{ 'workouts.form.exercises.title' | transloco }}
+            <span class="form-field__optional">{{
+              'common.optional' | transloco
+            }}</span>
           </h2>
-          <p class="text-muted">{{ 'workouts.form.rx.intro' | transloco }}</p>
+          <p class="text-muted">
+            {{ 'workouts.form.exercises.intro' | transloco }}
+          </p>
         </div>
 
-        @if (hiddenSections) {
-          <p class="notice notice--warning" data-testid="hidden-sections">
-            {{
-              'workouts.form.rx.hiddenSections'
-                | transloco: { count: hiddenSections }
-            }}
+        @if (listed.length) {
+          <ol class="wk-list">
+            @for (entry of listed; track $index; let i = $index) {
+              <li
+                class="wk-list__item"
+                [class.wk-list__item--pending]="entry.kind === 'pending'"
+                [attr.data-testid]="'listed-' + i"
+              >
+                <div class="wk-list__main">
+                  @if (entry.kind === 'exercise') {
+                    <span class="wk-list__name">{{ entry.exercise.name }}</span>
+                    @if (entry.exercise.videoUrl) {
+                      <a
+                        [href]="entry.exercise.videoUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        [attr.aria-label]="
+                          'workouts.exercises.list.watchVideo'
+                            | transloco: { name: entry.exercise.name }
+                        "
+                        >{{ 'workouts.exercises.list.watch' | transloco }}</a
+                      >
+                    }
+                    @if (!entry.exercise.isActive) {
+                      <app-chip tone="neutral">{{
+                        'common.inactive' | transloco
+                      }}</app-chip>
+                    }
+                  } @else {
+                    <span class="wk-list__name">{{
+                      'workouts.form.exercises.fromPdf'
+                        | transloco: { name: entry.name }
+                    }}</span>
+                  }
+                  <div class="wk-list__actions">
+                    <button
+                      class="icon-btn"
+                      type="button"
+                      [disabled]="i === 0"
+                      [attr.aria-label]="
+                        'workouts.form.exercises.moveUp'
+                          | transloco: { n: i + 1 }
+                      "
+                      (click)="move(i, -1)"
+                    >
+                      <app-icon name="chevron-up" />
+                    </button>
+                    <button
+                      class="icon-btn"
+                      type="button"
+                      [disabled]="i === listed.length - 1"
+                      [attr.aria-label]="
+                        'workouts.form.exercises.moveDown'
+                          | transloco: { n: i + 1 }
+                      "
+                      (click)="move(i, 1)"
+                    >
+                      <app-icon name="chevron-down" />
+                    </button>
+                    <button
+                      class="icon-btn icon-btn--danger"
+                      type="button"
+                      [attr.aria-label]="
+                        'workouts.form.exercises.remove'
+                          | transloco: { n: i + 1 }
+                      "
+                      (click)="removeAt(i)"
+                    >
+                      <app-icon name="trash" />
+                    </button>
+                  </div>
+                </div>
+
+                @if (entry.kind === 'pending') {
+                  <div class="wk-list__resolve">
+                    <p class="wk-list__note">
+                      {{ 'workouts.form.exercises.notInList' | transloco }}
+                    </p>
+                    <div class="wk-list__link">
+                      <label class="visually-hidden" [for]="'link-' + i">{{
+                        'workouts.form.exercises.linkLabel'
+                          | transloco: { name: entry.name }
+                      }}</label>
+                      <select
+                        [id]="'link-' + i"
+                        [disabled]="resolving !== null"
+                        (change)="setLinkChoice(i, $event)"
+                      >
+                        <option value="">
+                          {{ 'workouts.form.exercises.sameAs' | transloco }}
+                        </option>
+                        @for (exercise of linkable; track exercise.id) {
+                          <option
+                            [value]="exercise.id"
+                            [selected]="linkChoice[i] === exercise.id"
+                          >
+                            {{ exercise.name }}
+                          </option>
+                        }
+                      </select>
+                      <button
+                        class="btn btn--secondary"
+                        type="button"
+                        [disabled]="resolving !== null || !linkChoice[i]"
+                        (click)="linkPending(i)"
+                      >
+                        {{ 'workouts.form.exercises.link' | transloco }}
+                      </button>
+                      <button
+                        class="btn btn--primary"
+                        type="button"
+                        [disabled]="resolving !== null"
+                        (click)="createPending(i)"
+                      >
+                        {{
+                          (resolving === i
+                            ? 'workouts.form.exercises.working'
+                            : 'workouts.form.exercises.create'
+                          ) | transloco: { name: entry.name }
+                        }}
+                      </button>
+                    </div>
+                  </div>
+                }
+              </li>
+            }
+          </ol>
+        } @else {
+          <p class="text-muted" data-testid="no-exercises">
+            {{ 'workouts.form.exercises.none' | transloco }}
           </p>
         }
 
-        <div class="form-grid">
-          <div class="form-row">
-            <div class="form-field">
-              <label class="form-field__label" for="part-0-type">{{
-                'workouts.form.part.type' | transloco
-              }}</label>
-              <select
-                id="part-0-type"
-                formControlName="workoutTypeId"
-                (change)="typeChosen(part)"
-                aria-describedby="part-0-type-help"
-                [attr.aria-invalid]="showError(part.controls.workoutTypeId)"
-              >
-                @for (type of types; track type.id) {
-                  <option [value]="type.id">{{ type.name }}</option>
-                }
-              </select>
-              @if (showError(part.controls.workoutTypeId)) {
-                <span class="form-field__error" id="part-0-type-help">{{
-                  'workouts.form.part.typeError' | transloco
-                }}</span>
-              } @else {
-                <span class="form-field__hint" id="part-0-type-help">{{
-                  typeOf(part)?.description ||
-                    ('workouts.form.part.typeHint' | transloco)
-                }}</span>
-              }
-            </div>
-            <div class="form-field">
-              <label class="form-field__label" for="part-0-score">{{
-                'workouts.form.part.score' | transloco
-              }}</label>
-              <select
-                id="part-0-score"
-                formControlName="scoreType"
-                aria-describedby="part-0-score-help"
-              >
-                @for (score of scoreTypes; track score) {
-                  <option [value]="score">
-                    {{ score | enumLabel: 'scoreType' }}
-                  </option>
-                }
-              </select>
-              <span class="form-field__hint" id="part-0-score-help">{{
-                'workouts.form.part.scoreHint' | transloco
-              }}</span>
-            </div>
-          </div>
-        </div>
+        @if (resolveError) {
+          <p class="notice notice--danger" role="alert">
+            {{ resolveError | uiMessage }}
+          </p>
+        }
 
-        <app-workout-variant
-          [variant]="rx"
-          [type]="typeOf(part)"
-          [exercises]="exercises"
-          idPrefix="p0-RX"
-          [showErrors]="submitted"
-        />
+        <div class="wk-add">
+          <div class="form-field wk-add__field">
+            <label class="form-field__label" for="workout-add-exercise">{{
+              'workouts.form.exercises.add' | transloco
+            }}</label>
+            <select
+              id="workout-add-exercise"
+              [value]="toAdd"
+              (change)="toAdd = $any($event.target).value"
+              [disabled]="listed.length >= maxExercises"
+            >
+              <option value="">
+                {{ 'workouts.form.exercises.choose' | transloco }}
+              </option>
+              @for (exercise of addable; track exercise.id) {
+                <option
+                  [value]="exercise.id"
+                  [selected]="toAdd === exercise.id"
+                >
+                  {{ exercise.name }}
+                </option>
+              }
+            </select>
+          </div>
+          <button
+            class="btn btn--secondary"
+            type="button"
+            data-testid="add-exercise"
+            [disabled]="!toAdd || listed.length >= maxExercises"
+            (click)="addExercise()"
+          >
+            {{ 'workouts.form.exercises.addButton' | transloco }}
+          </button>
+        </div>
       </section>
 
       @if (errorMessage) {
@@ -322,7 +362,7 @@
             type="button"
             data-testid="workout-delete"
             (click)="deleteWorkout()"
-            [disabled]="deleting || submitting || importing"
+            [disabled]="busy"
           >
             {{
               (deleting ? 'workouts.form.deleting' : 'workouts.form.delete')
@@ -330,11 +370,7 @@
             }}
           </button>
         }
-        <button
-          class="btn btn--primary"
-          type="submit"
-          [disabled]="submitting || deleting || importing"
-        >
+        <button class="btn btn--primary" type="submit" [disabled]="busy">
           {{
             submitting
               ? ('common.saving' | transloco)
