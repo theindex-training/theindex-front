@@ -1,12 +1,14 @@
-import { Page } from '@playwright/test';
+import { readFile } from 'fs/promises';
+import { Download, Page } from '@playwright/test';
 import { mockStaffHome } from '../support/data';
 import { expect, test } from '../support/fixtures';
 import { t } from '../support/i18n';
 
 /**
  * J15: a trainer plans a workout of the day from a lesson-plan PDF. The API reads the PDF (mocked
- * here); the page shows the draft (summary and exercises), creates the exercise the catalogue
- * lacks, and saves the workout only when the form is submitted.
+ * here) and keeps it; the page shows the draft (summary and exercises), creates the exercise the
+ * catalogue lacks, and saves the workout, with its source PDF, only when the form is submitted.
+ * Editing the workout later, the trainer opens that PDF again.
  */
 test.describe('J15 workouts', () => {
   const mainNav = (page: Page) =>
@@ -27,6 +29,12 @@ test.describe('J15 workouts', () => {
     videoUrl: 'https://www.youtube.com/watch?v=lzRo-4pq_AY',
   };
   const summary = '3 rounds for time:\n400-m run\n12 pull-ups';
+  const sourcePdf = {
+    id: 'pdf-1',
+    originalFilename: '261109.pdf',
+    sizeBytes: 300_000,
+    uploadedAt: '2026-11-08T18:00:00.000Z',
+  };
 
   test(
     'opens a day, fills the form from a PDF, creates the missing exercise and saves',
@@ -44,6 +52,7 @@ test.describe('J15 workouts', () => {
           { name: 'Run', exerciseId: 'e-run', exerciseName: 'Run' },
           { name: 'Pull-up', exerciseId: null, exerciseName: null },
         ],
+        sourcePdf,
         warnings: [],
       };
       const saved = {
@@ -60,6 +69,7 @@ test.describe('J15 workouts', () => {
             isActive: true,
           },
         ],
+        sourcePdf,
       };
 
       api.on('GET', '/api/workouts', () => ({
@@ -91,6 +101,10 @@ test.describe('J15 workouts', () => {
       await expect(
         page.getByLabel(t('workouts.form.summary'), { exact: true }),
       ).toHaveValue(summary);
+      // The API kept the PDF; it goes with the workout.
+      const source = page.getByTestId('workout-source-pdf');
+      await expect(source).toContainText('261109.pdf');
+      await expect(source).toContainText(t('workouts.import.sourceUnsaved'));
 
       // The PDF named a movement the catalogue lacks: it is created from here.
       const exercises = page.getByTestId('workout-exercises');
@@ -122,6 +136,7 @@ test.describe('J15 workouts', () => {
         title: 'Helen',
         summary,
         exerciseIds: ['e-run', 'e-pull'],
+        sourcePdfId: 'pdf-1',
       });
 
       // The week shows the summary and the exercises, the video linked.
@@ -145,6 +160,56 @@ test.describe('J15 workouts', () => {
           .getByRole('navigation', { name: t('workouts.nav.label') })
           .getByRole('link', { name: t('workouts.nav.workouts') }),
       ).toHaveAttribute('aria-current', 'page');
+    },
+  );
+
+  test(
+    'editing a workout, the trainer opens the PDF it came from in a new tab',
+    { tag: '@desktop' },
+    async ({ page, api, signInAs }) => {
+      await signInAs('TRAINER');
+      api.on('GET', '/api/exercises', { body: [run] });
+      api.on('GET', '/api/workouts/w-1', {
+        body: {
+          id: 'w-1',
+          date: '2026-11-09',
+          title: 'Helen',
+          summary,
+          exercises: [],
+          sourcePdf,
+        },
+      });
+      // The file is a PDF, not JSON: answered here, at the same network boundary.
+      const pdfBytes = Buffer.from('%PDF-1.4\n%%EOF\n');
+      const pdfRequests: (string | undefined)[] = [];
+      await page.route('**/api/workouts/source-pdfs/pdf-1', (route) => {
+        pdfRequests.push(route.request().headers()['authorization']);
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/pdf',
+          body: pdfBytes,
+        });
+      });
+
+      await page.goto('/workouts/w-1/edit');
+      const source = page.getByTestId('workout-source-pdf');
+      await expect(source).toContainText('261109.pdf');
+      await expect(source).toContainText(t('workouts.import.sourceSaved'));
+
+      // The PDF is shown in a new tab. Headless Chromium has no PDF viewer and saves it as a
+      // download instead, so the test reads what the tab received.
+      const received = new Promise<Download>((resolve) =>
+        page.context().on('page', (tab) => tab.on('download', resolve)),
+      );
+      await source
+        .getByRole('button', { name: t('workouts.import.open') })
+        .click();
+      const download = await received;
+
+      expect(await readFile(await download.path())).toEqual(pdfBytes);
+      // Fetched with the trainer's token: the file is not public.
+      expect(pdfRequests).toEqual([expect.stringMatching(/^Bearer /)]);
+      await expect(page.getByRole('alert')).toHaveCount(0);
     },
   );
 

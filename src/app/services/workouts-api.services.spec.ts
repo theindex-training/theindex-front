@@ -61,6 +61,7 @@ describe('workouts and exercises services', () => {
       title: 'Helen',
       summary: '3 rounds for time:\n400-m run',
       exerciseIds: ['e1'],
+      sourcePdfId: 'pdf-1',
     };
 
     service.list().subscribe();
@@ -92,5 +93,19 @@ describe('workouts and exercises services', () => {
     const body = req.request.body as FormData;
     expect(body).toBeInstanceOf(FormData);
     expect((body.get('file') as File).name).toBe('261109.pdf');
+  });
+
+  it('WorkoutsService: fetches a kept PDF as a blob, by its id', () => {
+    let received: Blob | undefined;
+    TestBed.inject(WorkoutsService)
+      .sourcePdf('pdf-1')
+      .subscribe((blob) => (received = blob));
+
+    const req = http.expectOne('/api/workouts/source-pdfs/pdf-1');
+    expect(req.request.method).toBe('GET');
+    expect(req.request.responseType).toBe('blob');
+    const pdf = new Blob(['%PDF-1.4'], { type: 'application/pdf' });
+    req.flush(pdf);
+    expect(received).toBe(pdf);
   });
 });

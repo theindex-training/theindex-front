@@ -770,10 +770,11 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 2. Phone, admin: Renewals is the first link in the More sheet; the used-up list shows the unpaid chip.
 
 ### J15. Workouts (P1) [desktop, mobile]
-✅ `e2e/journeys/j15-workouts.e2e.ts`, 3 tests (4 runs).
-1. Desktop and phone, trainer: an empty day of the week opens the form on that day; a PDF fills the name, summary and exercises (the API's draft is mocked); the movement the catalogue lacks is created from the form; nothing is saved until "Create workout", which posts the day, name, summary and exercise ids; the week then shows the summary and the exercise with its video link.
-2. Desktop, trainer: the sidebar leads to Workouts, its tab to Exercises.
-3. Desktop, trainee: `/workouts` is out of reach and loads nothing.
+✅ `e2e/journeys/j15-workouts.e2e.ts`, 4 tests (5 runs).
+1. Desktop and phone, trainer: an empty day of the week opens the form on that day; a PDF fills the name, summary and exercises (the API's draft is mocked) and shows the kept PDF as the source; the movement the catalogue lacks is created from the form; nothing is saved until "Create workout", which posts the day, name, summary, exercise ids and `sourcePdfId`; the week then shows the summary and the exercise with its video link.
+2. Desktop, trainer: editing a workout shows its source PDF; "Open the PDF" fetches it with the bearer token into a new tab (a download in headless Chromium, whose bytes are checked).
+3. Desktop, trainer: the sidebar leads to Workouts, its tab to Exercises.
+4. Desktop, trainee: `/workouts` is out of reach and loads nothing.
 
 ---
 

@@ -1372,12 +1372,20 @@
     },
     "import": {
       "title": "Start from a PDF",
-      "intro": "Upload the lesson plan for the day. Its RX workout (the first column at the top) fills the summary and the exercises below for you to check; the other columns are left out. Nothing is saved until you save the workout.",
+      "intro": "Upload the lesson plan for the day. Its RX workout (the first column at the top) fills the summary and the exercises below for you to check; the other columns are left out. The workout is saved only when you save it, with the PDF kept for reference.",
       "choose": "Choose a PDF",
       "reading": "Reading the PDF...",
       "done": "Filled in from {file}. Check it before saving.",
       "error": "Unable to read this PDF right now.",
-      "warnings": "Not everything could be read:"
+      "warnings": "Not everything could be read:",
+      "source": "Source PDF",
+      "sourceUnnamed": "Unnamed PDF",
+      "sourceDetails": "{size} KB · uploaded {date}",
+      "sourceSaved": "Kept with the workout for reference.",
+      "sourceUnsaved": "Kept with the workout once you save it.",
+      "open": "Open the PDF",
+      "opening": "Opening...",
+      "openError": "Unable to open the PDF right now."
     },
     "exercises": {
       "list": {
