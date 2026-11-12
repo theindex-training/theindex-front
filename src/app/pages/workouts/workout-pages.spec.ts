@@ -863,6 +863,23 @@ describe('workouts area pages', () => {
           expect(revoked).toEqual(['blob:pdf-1', 'blob:pdf-2']);
         });
 
+        it('leaving the page while the PDF loads drops the request and closes its tab', async () => {
+          const tab = fakeTab();
+          vi.spyOn(window, 'open').mockReturnValue(tab as unknown as Window);
+          await openForm('/workouts/w1/edit', {
+            ...HELEN,
+            sourcePdf: SAVED_PDF,
+          });
+
+          await page.click('[data-testid="workout-source-pdf-open"]');
+          const pending = pdfRequest('pdf-0');
+          await harness.navigateByUrl('/elsewhere');
+
+          expect(pending.cancelled).toBe(true);
+          expect(tab.close).toHaveBeenCalled();
+          expect(objectUrls).toEqual([]);
+        });
+
         it('closes the tab and says so when the PDF cannot be fetched', async () => {
           const tab = fakeTab();
           vi.spyOn(window, 'open').mockReturnValue(tab as unknown as Window);

@@ -8,7 +8,7 @@ import {
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin, Observable, Subscription } from 'rxjs';
 import { ChipComponent } from '../../components/chip/chip.component';
 import { IconComponent } from '../../components/icon/icon.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -95,6 +95,9 @@ export class WorkoutEditComponent implements OnInit, OnDestroy {
   pdfError: UiMessage | null = null;
   /** The object URL of the PDF last opened, freed when another is opened or the page is left. */
   private pdfUrl: string | null = null;
+  /** A PDF being fetched and the tab waiting for it: dropped, tab closed, when the page is left. */
+  private pendingPdf: { request: Subscription; tab: Window | null } | null =
+    null;
 
   /** The list entry being created or linked (one at a time). */
   resolving: number | null = null;
@@ -166,6 +169,10 @@ export class WorkoutEditComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // A late answer would make an object URL nothing frees and update a destroyed view.
+    this.pendingPdf?.request.unsubscribe();
+    this.pendingPdf?.tab?.close();
+    this.pendingPdf = null;
     this.releasePdfUrl();
   }
 
@@ -351,8 +358,9 @@ export class WorkoutEditComponent implements OnInit, OnDestroy {
     }
     this.openingPdf = true;
     this.pdfError = null;
-    this.workoutsService.sourcePdf(pdf.id).subscribe({
+    const request = this.workoutsService.sourcePdf(pdf.id).subscribe({
       next: (blob) => {
+        this.pendingPdf = null;
         this.releasePdfUrl();
         const url = URL.createObjectURL(blob);
         this.pdfUrl = url;
@@ -365,12 +373,16 @@ export class WorkoutEditComponent implements OnInit, OnDestroy {
         this.changeDetector.detectChanges();
       },
       error: (error) => {
+        this.pendingPdf = null;
         tab?.close();
         this.pdfError = apiErrorMessage(error, 'workouts.import.openError');
         this.openingPdf = false;
         this.changeDetector.detectChanges();
       },
     });
+    if (this.openingPdf) {
+      this.pendingPdf = { request, tab };
+    }
   }
 
   private releasePdfUrl(): void {
