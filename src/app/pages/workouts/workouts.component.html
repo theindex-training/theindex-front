@@ -1,0 +1,157 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="'workouts.list.title' | transloco"
+    [subtitle]="'workouts.list.subtitle' | transloco"
+    [action]="{
+      label: ('workouts.list.new' | transloco),
+      link: '/workouts/new',
+    }"
+  />
+
+  <app-workouts-nav />
+
+  <div class="week-bar">
+    <button
+      class="icon-btn"
+      type="button"
+      [attr.aria-label]="'workouts.list.previousWeek' | transloco"
+      (click)="previousWeek()"
+    >
+      <app-icon name="chevron-left" />
+    </button>
+    <p class="week-bar__label" data-testid="workouts-week" aria-live="polite">
+      {{ weekLabel() }}
+    </p>
+    <button
+      class="icon-btn"
+      type="button"
+      [attr.aria-label]="'workouts.list.nextWeek' | transloco"
+      (click)="nextWeek()"
+    >
+      <app-icon name="chevron-right" />
+    </button>
+    @if (!isThisWeek) {
+      <button class="btn btn--ghost" type="button" (click)="thisWeek()">
+        {{ 'workouts.list.thisWeek' | transloco }}
+      </button>
+    }
+  </div>
+
+  @if (loading) {
+    <app-skeleton-list
+      [label]="'workouts.list.loading' | transloco"
+      [rows]="7"
+    />
+  } @else if (errorMessage) {
+    <app-empty-state
+      tone="danger"
+      [title]="'workouts.list.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="load()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else {
+    <ol class="week" [attr.aria-label]="'workouts.list.weekDays' | transloco">
+      @for (day of days; track day.date) {
+        <li
+          class="day"
+          [class.day--today]="day.isToday"
+          [attr.data-testid]="'day-' + day.date"
+        >
+          <div class="day__header">
+            <h2 class="day__title">{{ dayLabel(day.date) }}</h2>
+            @if (day.isToday) {
+              <app-chip tone="accent">{{
+                'workouts.list.today' | transloco
+              }}</app-chip>
+            }
+          </div>
+
+          @for (workout of day.workouts; track workout.id) {
+            <article class="panel wod">
+              <div class="wod__header">
+                <h3 class="wod__title">
+                  {{ workout.title || ('workouts.list.untitled' | transloco) }}
+                </h3>
+                <a
+                  class="btn btn--secondary"
+                  [routerLink]="['/workouts', workout.id, 'edit']"
+                  [attr.aria-label]="
+                    'workouts.list.editFor'
+                      | transloco: { day: dayLabel(day.date) }
+                  "
+                  >{{ 'workouts.list.edit' | transloco }}</a
+                >
+              </div>
+
+              <p
+                class="wod__summary"
+                data-testid="workout-summary-text"
+                [textContent]="workout.summary"
+              ></p>
+              @if (workout.exercises.length) {
+                <ul
+                  class="wod__exercises"
+                  [attr.aria-label]="'workouts.list.exercises' | transloco"
+                >
+                  @for (exercise of workout.exercises; track exercise.id) {
+                    <li>
+                      @if (exercise.videoUrl) {
+                        <a
+                          class="wod__exercise"
+                          [href]="exercise.videoUrl"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          [attr.aria-label]="
+                            'workouts.exercises.list.watchVideo'
+                              | transloco: { name: exercise.name }
+                          "
+                          >{{ exercise.name }}</a
+                        >
+                      } @else {
+                        <span class="wod__exercise">{{ exercise.name }}</span>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+            </article>
+            @if ($last) {
+              <a
+                class="btn btn--ghost day__add"
+                data-testid="workout-add-another"
+                routerLink="/workouts/new"
+                [queryParams]="{ date: day.date }"
+                [attr.aria-label]="
+                  'workouts.list.addAnotherFor'
+                    | transloco: { day: dayLabel(day.date) }
+                "
+              >
+                <app-icon name="plus" />
+                {{ 'workouts.list.addAnother' | transloco }}
+              </a>
+            }
+          } @empty {
+            <div class="day__empty">
+              <span class="text-muted">{{
+                'workouts.list.noWorkout' | transloco
+              }}</span>
+              <a
+                class="btn btn--ghost"
+                routerLink="/workouts/new"
+                [queryParams]="{ date: day.date }"
+                [attr.aria-label]="
+                  'workouts.list.addFor'
+                    | transloco: { day: dayLabel(day.date) }
+                "
+                >{{ 'workouts.list.add' | transloco }}</a
+              >
+            </div>
+          }
+        </li>
+      }
+    </ol>
+  }
+</section>

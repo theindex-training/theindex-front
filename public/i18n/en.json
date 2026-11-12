@@ -65,7 +65,8 @@
     "profile": "Profile",
     "stats": "Stats",
     "records": "Records",
-    "content": "Content"
+    "content": "Content",
+    "workouts": "Workouts"
   },
   "enums": {
     "role": {
@@ -1291,6 +1292,148 @@
     "unauthorized": {
       "title": "Access restricted",
       "text": "You do not have permission to access the administrative areas yet."
+    }
+  },
+  "workouts": {
+    "nav": {
+      "label": "Workouts sections",
+      "workouts": "Workouts",
+      "exercises": "Exercises"
+    },
+    "list": {
+      "title": "Workouts",
+      "subtitle": "The workouts of the day, a week at a time. Trainees don't see workouts yet.",
+      "new": "New workout",
+      "previousWeek": "Previous week",
+      "nextWeek": "Next week",
+      "thisWeek": "This week",
+      "week": "{from} – {to}",
+      "weekDays": "Days of the week",
+      "today": "Today",
+      "untitled": "Workout",
+      "edit": "Edit",
+      "editFor": "Edit the workout for {day}",
+      "exercises": "Exercises",
+      "noWorkout": "No workout yet",
+      "add": "Add workout",
+      "addFor": "Add a workout for {day}",
+      "addAnother": "Add another workout",
+      "addAnotherFor": "Add another workout for {day}",
+      "loading": "Loading workouts",
+      "loadError": "Couldn't load workouts",
+      "loadErrorMessage": "Unable to load workouts right now."
+    },
+    "form": {
+      "createTitle": "New workout",
+      "editTitle": "Edit workout",
+      "createSubtitle": "Write the workout, list its exercises, or start from a lesson-plan PDF.",
+      "editSubtitle": "Change the day, the name, the summary or the exercises.",
+      "backToList": "Back to workouts",
+      "loading": "Loading the workout form...",
+      "loadError": "Unable to load the workout form right now.",
+      "invalid": "Some fields need attention. Check the messages in red.",
+      "pending": "Some exercises from the PDF aren't in the exercise list yet. Create them, link them to an exercise, or remove them.",
+      "saveError": "Unable to save this workout right now.",
+      "deleteConfirm": "Delete this workout? This can't be undone.",
+      "deleteError": "Unable to delete this workout right now.",
+      "delete": "Delete workout",
+      "deleting": "Deleting...",
+      "create": "Create workout",
+      "date": "Day",
+      "dateError": "Choose the day of the workout.",
+      "dateHint": "The day the workout is for. A day can have several workouts.",
+      "title": "Name",
+      "titleError": "The name must be at most 120 characters.",
+      "titleHint": "Up to 120 characters, e.g. Helen or Competitors.",
+      "summary": "Summary",
+      "summaryHint": "The workout as people read it, e.g. as written in the lesson plan. Line breaks are kept. Up to 3000 characters.",
+      "summaryRequired": "Write the workout.",
+      "summaryTooLong": "The summary must be at most 3000 characters.",
+      "summaryPlaceholder": "3 rounds for time:\n400-m run\n21 KB swings (35/53 lb)\n12 pull-ups",
+      "exercises": {
+        "title": "Exercises",
+        "intro": "The movements this workout uses, in order. Trainees will see them with their videos.",
+        "none": "No exercises listed.",
+        "moveUp": "Move exercise {n} up",
+        "moveDown": "Move exercise {n} down",
+        "remove": "Remove exercise {n}",
+        "fromPdf": "“{name}” (from the PDF)",
+        "notInList": "Not in the exercise list yet: create it, or link it to an exercise it is another name for.",
+        "linkLabel": "Exercise that “{name}” is another name for",
+        "sameAs": "Same as…",
+        "link": "Link",
+        "create": "Create “{name}”",
+        "working": "Saving...",
+        "resolveError": "Unable to save this exercise right now.",
+        "add": "Add an exercise",
+        "choose": "Choose an exercise",
+        "addButton": "Add"
+      }
+    },
+    "import": {
+      "title": "Start from a PDF",
+      "intro": "Upload the lesson plan for the day. Its RX workout (the first column at the top) fills the summary and the exercises below for you to check; the other columns are left out. Nothing is saved until you save the workout.",
+      "choose": "Choose a PDF",
+      "reading": "Reading the PDF...",
+      "done": "Filled in from {file}. Check it before saving.",
+      "error": "Unable to read this PDF right now.",
+      "warnings": "Not everything could be read:"
+    },
+    "exercises": {
+      "list": {
+        "title": "Exercises",
+        "subtitle": "The movements workouts are built from.",
+        "new": "New exercise",
+        "search": "Search exercises",
+        "count": "{shown} of {total, plural, one {# exercise} other {# exercises}}",
+        "loading": "Loading exercises",
+        "loadError": "Couldn't load exercises",
+        "loadErrorMessage": "Unable to load exercises right now.",
+        "emptyTitle": "No exercises yet",
+        "emptyMessage": "Add the movements you programme: squats, pull-ups, runs...",
+        "noMatchesTitle": "No matches",
+        "noMatchesMessage": "No exercise matches the search and the filter.",
+        "tableLabel": "Exercises table",
+        "editColumn": "Edit",
+        "watch": "Watch",
+        "watchVideo": "Watch the video of {name}"
+      },
+      "fields": {
+        "name": "Name",
+        "nameHint": "Up to 80 characters, singular, e.g. Pull-up.",
+        "nameError": "Enter a name of up to 80 characters.",
+        "aliases": "Other names",
+        "aliasesHint": "Separated by commas, e.g. KB swing, American swing. The PDF import recognises them.",
+        "aliasesError": "Up to 20 names of up to 80 characters each, separated by commas.",
+        "isActive": "Active (offered when building workouts)",
+        "description": "Description",
+        "descriptionHint": "Up to 2000 characters: how the movement is done, points of performance, common faults.",
+        "descriptionError": "The description must be at most 2000 characters.",
+        "videoUrl": "Video link",
+        "videoUrlHint": "A YouTube link, e.g. https://www.youtube.com/watch?v=rMvwVtlqjTE or https://youtu.be/rMvwVtlqjTE.",
+        "videoUrlError": "Enter a link to a YouTube video, up to 300 characters.",
+        "openVideo": "Open the video",
+        "video": "Video"
+      },
+      "backToList": "Back to exercises",
+      "loadingOne": "Loading exercise...",
+      "errors": {
+        "load": "Unable to load this exercise.",
+        "save": "Unable to save this exercise right now.",
+        "delete": "Unable to delete this exercise right now."
+      },
+      "create": {
+        "title": "New exercise",
+        "subtitle": "Add a movement to build workouts from.",
+        "submit": "Create exercise"
+      },
+      "edit": {
+        "title": "Edit exercise",
+        "subtitle": "Rename it, add other names or make it inactive.",
+        "delete": "Delete exercise",
+        "deleting": "Deleting...",
+        "deleteConfirm": "Delete “{name}”? An exercise used in workouts can't be deleted, only made inactive."
+      }
     }
   }
 }

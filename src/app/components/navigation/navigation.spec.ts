@@ -23,6 +23,7 @@ describe('buildNavigation', () => {
       'Register attendance',
       'Attendance history',
       'Settlements',
+      'Workouts',
       'Cash register',
     ]);
     expect(labels(nav.manage)).toEqual([
@@ -45,6 +46,7 @@ describe('buildNavigation', () => {
     expect(labels(nav.moreMain)).toEqual([
       'Renewals',
       'Attendance history',
+      'Workouts',
       'Cash register',
     ]);
     expect(english(nav.sheetLabel)).toBe('More');
@@ -62,7 +64,11 @@ describe('buildNavigation', () => {
     expect(all).not.toContain('Cash register');
     expect(all).not.toContain('Trainers');
     expect(all).not.toContain('Content');
-    expect(labels(nav.moreMain)).toEqual(['Renewals', 'Attendance history']);
+    expect(labels(nav.moreMain)).toEqual([
+      'Renewals',
+      'Attendance history',
+      'Workouts',
+    ]);
   });
 
   it('gives trainees their own three tabs and an Account sheet', () => {
