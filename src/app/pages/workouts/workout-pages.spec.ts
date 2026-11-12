@@ -146,12 +146,31 @@ describe('workouts area pages', () => {
       expect(monday.querySelector('a')?.getAttribute('href')).toBe(
         '/workouts/w1/edit',
       );
+      // A day can have several workouts: one more is added from the day itself.
+      const another = monday.querySelector(
+        '[data-testid="workout-add-another"]',
+      );
+      expect(another?.getAttribute('href')).toBe(
+        '/workouts/new?date=2026-11-09',
+      );
+      expect(another?.getAttribute('aria-label')).toBe(
+        'Add another workout for Monday, 9 November',
+      );
 
       const tuesday = page.query('[data-testid="day-2026-11-10"]')!;
       expect(tuesday.textContent).toContain(texts.list.noWorkout);
       expect(tuesday.querySelector('a')?.getAttribute('href')).toBe(
         '/workouts/new?date=2026-11-10',
       );
+      expect(
+        tuesday.querySelector('[data-testid="workout-add-another"]'),
+      ).toBeNull();
+
+      // The Workouts tab is the current one, `?week=` and all.
+      const current = page.queryAll('nav a[aria-current="page"]');
+      expect(current.map((a) => a.textContent.trim())).toEqual([
+        texts.nav.workouts,
+      ]);
     });
 
     it('moves a week at a time and keeps the week in the address', async () => {

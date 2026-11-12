@@ -1301,6 +1301,8 @@
       "noWorkout": "No workout yet",
       "add": "Add workout",
       "addFor": "Add a workout for {day}",
+      "addAnother": "Add another workout",
+      "addAnotherFor": "Add another workout for {day}",
       "loading": "Loading workouts",
       "loadError": "Couldn't load workouts",
       "loadErrorMessage": "Unable to load workouts right now."

@@ -132,6 +132,19 @@ test.describe('J15 workouts', () => {
           name: t('workouts.exercises.list.watchVideo', { name: 'Pull-up' }),
         }),
       ).toHaveAttribute('href', pullUp.videoUrl);
+      // The day can take another workout, and the Workouts tab stays current with `?week=`.
+      await expect(
+        day.getByRole('link', {
+          name: t('workouts.list.addAnotherFor', {
+            day: 'Monday, 9 November',
+          }),
+        }),
+      ).toHaveAttribute('href', '/workouts/new?date=2026-11-09');
+      await expect(
+        page
+          .getByRole('navigation', { name: t('workouts.nav.label') })
+          .getByRole('link', { name: t('workouts.nav.workouts') }),
+      ).toHaveAttribute('aria-current', 'page');
     },
   );
 

@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  IsActiveMatchOptions,
+  RouterLink,
+  RouterLinkActive,
+} from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 
 /** Switches between the sections of the workouts area (workouts, exercises). */
@@ -17,7 +21,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
         class="section-nav__link"
         routerLink="/workouts"
         routerLinkActive="is-active"
-        [routerLinkActiveOptions]="{ exact: true }"
+        [routerLinkActiveOptions]="workoutsActive"
         ariaCurrentWhenActive="page"
         >{{ 'workouts.nav.workouts' | transloco }}</a
       >
@@ -63,4 +67,15 @@ import { TranslocoPipe } from '@jsverse/transloco';
     }
   `,
 })
-export class WorkoutsNavComponent {}
+export class WorkoutsNavComponent {
+  /**
+   * The week list is `/workouts` with or without `?week=`; `/workouts/exercises` and the form
+   * pages are not it.
+   */
+  readonly workoutsActive: IsActiveMatchOptions = {
+    paths: 'exact',
+    queryParams: 'ignored',
+    matrixParams: 'ignored',
+    fragment: 'ignored',
+  };
+}

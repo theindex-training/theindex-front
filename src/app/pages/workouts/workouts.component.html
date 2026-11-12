@@ -118,6 +118,21 @@
                 </ul>
               }
             </article>
+            @if ($last) {
+              <a
+                class="btn btn--ghost day__add"
+                data-testid="workout-add-another"
+                routerLink="/workouts/new"
+                [queryParams]="{ date: day.date }"
+                [attr.aria-label]="
+                  'workouts.list.addAnotherFor'
+                    | transloco: { day: dayLabel(day.date) }
+                "
+              >
+                <app-icon name="plus" />
+                {{ 'workouts.list.addAnother' | transloco }}
+              </a>
+            }
           } @empty {
             <div class="day__empty">
               <span class="text-muted">{{
