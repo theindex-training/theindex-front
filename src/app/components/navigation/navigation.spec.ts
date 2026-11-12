@@ -71,11 +71,21 @@ describe('buildNavigation', () => {
     ]);
   });
 
-  it('gives trainees their own three tabs and an Account sheet', () => {
+  it('gives trainees their own four tabs and an Account sheet', () => {
     const nav = buildNavigation('TRAINEE');
 
-    expect(labels(nav.main)).toEqual(['Profile', 'Stats', 'Records']);
-    expect(labels(nav.tabs)).toEqual(['Profile', 'Stats', 'Records']);
+    expect(labels(nav.main)).toEqual([
+      'Profile',
+      'Schedule',
+      'Stats',
+      'Records',
+    ]);
+    expect(labels(nav.tabs)).toEqual([
+      'Profile',
+      'Schedule',
+      'Stats',
+      'Records',
+    ]);
     expect(nav.manage).toEqual([]);
     expect(nav.moreMain).toEqual([]);
     expect(english(nav.sheetLabel)).toBe('Account');

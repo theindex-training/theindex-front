@@ -20,6 +20,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - The article list and editor (backlog item 10) came with §14 and journey J12: 72 spec files, 695 unit tests, 43 E2E tests. Six deliberate breaks: autosave sending every field, an emptied optional field sent as `""`, the list `meta` kept, a 409 not stopping the autosave and an image caption lost on save were caught at once; a slug sent after the first publish slipped through, so it got the "published meanwhile" test, which catches it.
 - The publishing actions (backlog item 11) came with §15 and journey J13: 73 spec files, 721 unit tests, 45 E2E tests. Ten deliberate breaks were each caught: no save before publishing, Unpublish without its confirmation, "unpublished changes" lost when the draft moved on while publishing, the 400's problems not listed, the preview tab's `opener` kept, Update enabled with nothing to update, Discard not rebuilding the editor, the body always sent, blocks compared with their key order, and the saved blocks not updated after a save (the last one got its own test first).
 - The renewals page (a feature) came with §16 and journey J14: 75 spec files, 729 unit tests, 47 E2E tests. Three deliberate breaks (the punch tab showing the time lists, the subscription count dropped from the plan, days left shown as days since the end) were each caught.
+- Bookings (a feature: the trainee Schedule tab) came with journey J17 and `trainee-schedule.component.spec.ts`. One deliberate break (Book offered on every training not booked yet, instead of the API's `canBook`) was caught.
 - The weekly schedules (a feature: gym templates and weeks) came with journey J16 and its own specs (`pages/schedules/*.spec.ts`): 823 unit tests, 57 E2E tests. One deliberate break (days before `editableFrom` editable) was caught.
 - The workouts area (a feature: workouts, exercises, workout types, PDF import) came with journey J15 and its own specs (`pages/workouts/*.spec.ts`, `services/workouts-api.services.spec.ts`): 81 spec files, 816 unit tests, 51 E2E tests. One deliberate break (the women's amount dropped from the payload) was caught.
 
@@ -782,6 +783,12 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 1. Desktop and phone, admin: the gym page links to its weekly template; a training added on Wednesday with a new training time posts the hours, weekday and trainer, and the form says first that the time is new.
 2. Desktop and phone, trainer: Schedule is the first tab of the workouts area; "Create from the template" posts the gym and week; Monday and today have no actions; a training added on Thursday posts the new hours, the day, the trainer and the day's workout, and shows them.
 3. Desktop, trainee: `/workouts/schedule` is out of reach and loads nothing.
+
+### J17. Bookings (P1) [desktop, mobile]
+✅ `e2e/journeys/j17-bookings.e2e.ts`, 3 tests (4 runs).
+1. Desktop and phone, trainee: the menu leads to Schedule, which asks for the gym's week; booking a training posts its id and shows it booked with the new count; cancelling another (after the confirm) sends the DELETE and offers Book again.
+2. Desktop, trainee: a week the staff haven't created says it isn't out.
+3. Desktop, trainer: `/schedule` is out of reach and loads nothing.
 
 ---
 

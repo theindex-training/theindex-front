@@ -427,7 +427,18 @@ export class SchedulesComponent implements OnInit {
 
   removeSlot(view: ScheduleSlotView): void {
     const slot = this.findSlot(view.id);
-    if (!slot || !window.confirm(this.confirmText(slot))) {
+    if (!slot) {
+      return;
+    }
+    // The API refuses it too; say so without asking first.
+    if (slot.bookedCount > 0) {
+      this.editing = null;
+      this.actionError = i18nMessage('schedules.week.cannotRemoveBooked', {
+        count: slot.bookedCount,
+      });
+      return;
+    }
+    if (!window.confirm(this.confirmText(slot))) {
       return;
     }
     this.removingId = slot.id;

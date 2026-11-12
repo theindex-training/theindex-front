@@ -1,0 +1,211 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="'traineeSchedule.title' | transloco"
+    [subtitle]="'traineeSchedule.subtitle' | transloco"
+  />
+
+  @if (setupError) {
+    <app-empty-state
+      tone="danger"
+      [title]="'traineeSchedule.loadError' | transloco"
+      [message]="setupError | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="loadGyms()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else if (!ready) {
+    <app-skeleton-list
+      [label]="'traineeSchedule.loading' | transloco"
+      [rows]="7"
+    />
+  } @else if (!gyms.length) {
+    <app-empty-state
+      icon="dumbbell"
+      [title]="'traineeSchedule.noGymsTitle' | transloco"
+      [message]="'traineeSchedule.noGymsMessage' | transloco"
+    />
+  } @else {
+    <div class="schedule-toolbar">
+      @if (gyms.length > 1) {
+        <app-segmented-control
+          [label]="'traineeSchedule.gym' | transloco"
+          [options]="gymOptions"
+          [translateLabels]="false"
+          [value]="gymId"
+          (valueChange)="selectGym($event)"
+        />
+      }
+      <div class="week-bar">
+        <button
+          class="icon-btn"
+          type="button"
+          [attr.aria-label]="'workouts.list.previousWeek' | transloco"
+          (click)="previousWeek()"
+        >
+          <app-icon name="chevron-left" />
+        </button>
+        <p
+          class="week-bar__label"
+          data-testid="trainee-schedule-week"
+          aria-live="polite"
+        >
+          {{ weekLabel() }}
+        </p>
+        <button
+          class="icon-btn"
+          type="button"
+          [attr.aria-label]="'workouts.list.nextWeek' | transloco"
+          (click)="nextWeek()"
+        >
+          <app-icon name="chevron-right" />
+        </button>
+        @if (!isThisWeek) {
+          <button class="btn btn--ghost" type="button" (click)="thisWeek()">
+            {{ 'workouts.list.thisWeek' | transloco }}
+          </button>
+        }
+      </div>
+    </div>
+    <p class="text-muted">{{ 'traineeSchedule.rules' | transloco }}</p>
+
+    @if (loading) {
+      <app-skeleton-list
+        [label]="'traineeSchedule.loading' | transloco"
+        [rows]="7"
+      />
+    } @else if (errorMessage) {
+      <app-empty-state
+        tone="danger"
+        [title]="'traineeSchedule.loadError' | transloco"
+        [message]="errorMessage | uiMessage"
+      >
+        <button class="btn btn--secondary" type="button" (click)="load(false)">
+          {{ 'common.tryAgain' | transloco }}
+        </button>
+      </app-empty-state>
+    } @else if (schedule && !schedule.week) {
+      <app-empty-state
+        icon="calendar"
+        [title]="'traineeSchedule.notOutTitle' | transloco"
+        [message]="'traineeSchedule.notOutMessage' | transloco"
+      />
+    } @else if (schedule) {
+      @if (actionError) {
+        <p class="notice notice--danger" role="alert">
+          {{ actionError | uiMessage }}
+        </p>
+      }
+      <ol class="week" [attr.aria-label]="'workouts.list.weekDays' | transloco">
+        @for (day of days; track day.date) {
+          <li
+            class="day"
+            [class.day--today]="day.isToday"
+            [attr.data-testid]="'trainee-day-' + day.date"
+          >
+            <div class="day__header">
+              <h2 class="day__title">{{ day.title }}</h2>
+              @if (day.isToday) {
+                <app-chip tone="accent">{{
+                  'workouts.list.today' | transloco
+                }}</app-chip>
+              }
+            </div>
+            @if (day.trainings.length) {
+              <ul
+                class="slots"
+                [attr.aria-label]="
+                  'schedules.days.trainingsOf' | transloco: { day: day.title }
+                "
+              >
+                @for (training of day.trainings; track training.id) {
+                  <li
+                    class="slot"
+                    [class.slot--mine]="training.bookedByMe"
+                    [attr.data-testid]="'trainee-training-' + training.id"
+                  >
+                    <span class="slot__time num">{{
+                      range(training.trainingTime)
+                    }}</span>
+                    <span class="slot__trainer">{{
+                      training.trainer.name
+                    }}</span>
+                    @if (training.workout) {
+                      <span class="slot__workout">{{
+                        training.workout.title ||
+                          ('workouts.list.untitled' | transloco)
+                      }}</span>
+                    }
+                    <span
+                      class="slot__count text-muted"
+                      data-testid="trainee-training-count"
+                      >{{
+                        'schedules.days.booked'
+                          | transloco: { count: training.bookedCount }
+                      }}</span
+                    >
+                    <span class="slot__actions">
+                      @if (training.bookedByMe) {
+                        <app-chip tone="success">{{
+                          'traineeSchedule.booked' | transloco
+                        }}</app-chip>
+                      }
+                      @if (training.canBook) {
+                        <button
+                          class="btn btn--primary"
+                          type="button"
+                          [disabled]="!!busyId"
+                          [attr.aria-label]="
+                            'traineeSchedule.bookFor'
+                              | transloco: { training: describe(training) }
+                          "
+                          (click)="book(training)"
+                        >
+                          {{
+                            (busyId === training.id
+                              ? 'traineeSchedule.booking'
+                              : 'traineeSchedule.book'
+                            ) | transloco
+                          }}
+                        </button>
+                      } @else if (training.canCancel) {
+                        <button
+                          class="btn btn--ghost"
+                          type="button"
+                          [disabled]="!!busyId"
+                          [attr.aria-label]="
+                            'traineeSchedule.cancelFor'
+                              | transloco: { training: describe(training) }
+                          "
+                          (click)="cancel(training)"
+                        >
+                          {{
+                            (busyId === training.id
+                              ? 'traineeSchedule.cancelling'
+                              : 'traineeSchedule.cancel'
+                            ) | transloco
+                          }}
+                        </button>
+                      } @else if (!isPast(training)) {
+                        <span class="text-muted">{{
+                          (training.bookedByMe
+                            ? 'traineeSchedule.cancelClosed'
+                            : 'traineeSchedule.closed'
+                          ) | transloco
+                        }}</span>
+                      }
+                    </span>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="day__empty text-muted">
+                {{ 'schedules.days.noTrainings' | transloco }}
+              </p>
+            }
+          </li>
+        }
+      </ol>
+    }
+  }
+</section>

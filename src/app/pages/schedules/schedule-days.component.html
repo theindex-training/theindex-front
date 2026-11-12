@@ -61,6 +61,12 @@
                     slot.workout.title || ('workouts.list.untitled' | transloco)
                   }}</span>
                 }
+                @if (slot.bookedCount) {
+                  <span class="slot__count text-muted">{{
+                    'schedules.days.booked'
+                      | transloco: { count: slot.bookedCount }
+                  }}</span>
+                }
                 @if (day.editable) {
                   <span class="slot__actions">
                     <button

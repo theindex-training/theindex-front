@@ -69,7 +69,15 @@ const weekSlot = (
   time: typeof MORNING,
   by: typeof VELCHO,
   workout: { id: string; title: string | null } | null = null,
-) => ({ id, date, weekday: 0, trainingTime: time, trainer: by, workout });
+) => ({
+  id,
+  date,
+  weekday: 0,
+  trainingTime: time,
+  trainer: by,
+  workout,
+  bookedCount: 0,
+});
 /** The week of 9-15 Nov 2026, seen on Friday 13 Nov: the 14th is the first editable day. */
 const WEEK = {
   gym: { id: 'gym-c', name: 'Center' },
@@ -529,6 +537,34 @@ describe('schedule pages', () => {
       http.expectOne('/api/schedules?gymId=gym-c&week=2026-11-09').flush(WEEK);
       await page.settle();
       expect(page.query(form)).toBeNull();
+    });
+
+    it("shows each training's bookings, and refuses to remove a booked one without asking the API", async () => {
+      signInAs('TRAINER');
+      await openSchedule('/workouts/schedule');
+      await showWeek({
+        ...WEEK,
+        slots: WEEK.slots.map((s) =>
+          s.id === 's-sat' ? { ...s, bookedCount: 2 } : s,
+        ),
+      });
+      const confirm = vi.spyOn(window, 'confirm');
+
+      expect(slotLines('2026-11-14')).toEqual([
+        '07:10 – 08:10 Velcho Sokolov Helen 2 booked',
+      ]);
+      expect(slotLines('2026-11-12')).toEqual(['07:10 – 08:10 Velcho Sokolov']);
+      button(
+        day('2026-11-14'),
+        'Remove Saturday, 14 November 07:10 – 08:10 Velcho Sokolov',
+      )!.click();
+      await page.settle();
+
+      expect(confirm).not.toHaveBeenCalled();
+      expect(page.alert()).toBe(
+        "This training has 2 bookings, so it can't be removed.",
+      );
+      http.expectNone('/api/schedules/slots/s-sat');
     });
 
     it('removes a training once confirmed', async () => {

@@ -44,6 +44,8 @@ export interface ScheduleSlot {
   trainer: ScheduleTrainer;
   /** A workout of the same day, when the trainer chose one. */
   workout: { id: string; title: string | null } | null;
+  /** Trainees who booked it (a plan to come, not attendance). */
+  bookedCount: number;
 }
 
 export interface ScheduleWeek {
