@@ -18,6 +18,46 @@
   margin: 0;
 }
 
+.wk-source {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+}
+
+.wk-source__icon {
+  --icon-size: 1.5rem;
+  color: var(--accent-text);
+}
+
+.wk-source__text {
+  display: grid;
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.wk-source__label {
+  color: var(--muted);
+  font-family: var(--font-heading);
+  font-size: var(--text-xs);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+}
+
+.wk-source__name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.wk-source__meta {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
 .wk-import,
 .wk-exercises {
   display: grid;

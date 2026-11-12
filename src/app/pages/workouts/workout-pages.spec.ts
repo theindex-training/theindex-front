@@ -47,6 +47,14 @@ const HELEN = {
   title: 'Helen',
   summary: '3 rounds for time:\n400-m run\n12 pull-ups',
   exercises: [listed(RUN), listed(PULL_UP)],
+  sourcePdf: null,
+};
+/** A PDF the API kept: the saved workout's source. */
+const SAVED_PDF = {
+  id: 'pdf-0',
+  originalFilename: 'Helen 261109.pdf',
+  sizeBytes: 250_000,
+  uploadedAt: '2026-11-08T18:00:00.000Z',
 };
 
 describe('workouts area pages', () => {
@@ -472,6 +480,7 @@ describe('workouts area pages', () => {
         title: 'Mini Helen',
         summary: '3 rounds for time:\n400-m run\n\n12 pull-ups',
         exerciseIds: ['e-run', 'e-pull'],
+        sourcePdfId: null,
       });
       req.flush({ ...HELEN, date: '2026-11-10' });
       await page.settle();
@@ -518,6 +527,7 @@ describe('workouts area pages', () => {
         title: 'Helen',
         summary: HELEN.summary,
         exerciseIds: ['e-pull'],
+        sourcePdfId: null,
       });
       req.flush(HELEN);
       await page.settle();
@@ -582,8 +592,16 @@ describe('workouts area pages', () => {
           { name: 'Wall ball', exerciseId: null, exerciseName: null },
           { name: 'Pull-up', exerciseId: 'e-pull', exerciseName: 'Pull-up' },
         ],
+        sourcePdf: {
+          id: 'pdf-1',
+          originalFilename: '261109.pdf',
+          sizeBytes: 300_000,
+          uploadedAt: '2026-11-12T10:00:00.000Z',
+        },
         warnings: [],
       };
+      const sourceBlock = () =>
+        page.query('[data-testid="workout-source-pdf"]')?.textContent ?? '';
 
       async function upload(): Promise<File> {
         const file = new File(['%PDF-1.4'], '261109.pdf', {
@@ -627,6 +645,10 @@ describe('workouts area pages', () => {
           '“Wall ball” (from the PDF)',
           'Pull-up',
         ]);
+        // The API kept the PDF: it goes with the workout when it is saved.
+        expect(sourceBlock()).toContain('261109.pdf');
+        expect(sourceBlock()).toContain('293 KB · uploaded 12 Nov 2026');
+        expect(sourceBlock()).toContain(texts.import.sourceUnsaved);
 
         // Saving waits until every movement has an exercise.
         await page.submit('form');
@@ -667,6 +689,7 @@ describe('workouts area pages', () => {
           title: 'Helen',
           summary: DRAFT.summary,
           exerciseIds: ['e-run', 'e-wb', 'e-pull'],
+          sourcePdfId: 'pdf-1',
         });
         save.flush(HELEN);
         await page.settle();
@@ -719,6 +742,163 @@ describe('workouts area pages', () => {
         importReq.flush({ ...DRAFT, exercises: [] });
         await page.settle();
         expect(save.disabled).toBe(false);
+      });
+
+      it('a saved workout shows its PDF and keeps it; a new PDF replaces it, or clears it when the API could not keep it', async () => {
+        await openForm('/workouts/w1/edit', { ...HELEN, sourcePdf: SAVED_PDF });
+
+        expect(sourceBlock()).toContain('Helen 261109.pdf');
+        expect(sourceBlock()).toContain('244 KB · uploaded 8 Nov 2026');
+        expect(sourceBlock()).toContain(texts.import.sourceSaved);
+
+        // Saved as it is, the workout keeps its PDF.
+        await page.submit('form');
+        const keep = http.expectOne('/api/workouts/w1');
+        expect(keep.request.body).toMatchObject({ sourcePdfId: 'pdf-0' });
+        keep.flush(null, { status: 500, statusText: 'Error' });
+        await page.settle();
+
+        // Another PDF: the workout now comes from it.
+        await upload();
+        http.expectOne('/api/workouts/import-pdf').flush(DRAFT);
+        await page.settle();
+        expect(sourceBlock()).toContain('261109.pdf');
+        expect(sourceBlock()).not.toContain('Helen 261109.pdf');
+        expect(sourceBlock()).toContain(texts.import.sourceUnsaved);
+
+        // One the API could not keep (its warning says why): no source any more.
+        await upload();
+        http.expectOne('/api/workouts/import-pdf').flush({
+          ...DRAFT,
+          exercises: [],
+          sourcePdf: null,
+          warnings: ['The PDF was not kept: file storage is not configured.'],
+        });
+        await page.settle();
+        expect(page.query('[data-testid="workout-source-pdf"]')).toBeNull();
+        await page.submit('form');
+        const save = http.expectOne('/api/workouts/w1');
+        expect(save.request.body).toMatchObject({ sourcePdfId: null });
+        save.flush(HELEN);
+        await page.settle();
+        http.expectOne('/api/workouts?from=2026-11-09&to=2026-11-15').flush([]);
+      });
+
+      describe('opening the PDF', () => {
+        function fakeTab() {
+          return {
+            opener: {} as unknown,
+            location: { href: '' },
+            close: vi.fn(),
+          };
+        }
+        const objectUrls: string[] = [];
+        const revoked: string[] = [];
+
+        beforeEach(() => {
+          objectUrls.length = 0;
+          revoked.length = 0;
+          // jsdom has no object URLs.
+          Object.defineProperty(URL, 'createObjectURL', {
+            configurable: true,
+            value: (blob: Blob) => {
+              objectUrls.push(`blob:pdf-${objectUrls.length + 1}`);
+              expect(blob.type).toBe('application/pdf');
+              return objectUrls[objectUrls.length - 1];
+            },
+          });
+          Object.defineProperty(URL, 'revokeObjectURL', {
+            configurable: true,
+            value: (url: string) => revoked.push(url),
+          });
+        });
+
+        const pdfRequest = (id: string) => {
+          const req = http.expectOne(`/api/workouts/source-pdfs/${id}`);
+          expect(req.request.method).toBe('GET');
+          expect(req.request.responseType).toBe('blob');
+          return req;
+        };
+        const pdfBlob = () =>
+          new Blob(['%PDF-1.4'], { type: 'application/pdf' });
+
+        it('opens a tab in the click, then shows the PDF in it; the next open frees the last file', async () => {
+          const tab = fakeTab();
+          const open = vi
+            .spyOn(window, 'open')
+            .mockReturnValue(tab as unknown as Window);
+          await openForm('/workouts/w1/edit', {
+            ...HELEN,
+            sourcePdf: SAVED_PDF,
+          });
+
+          await page.click('[data-testid="workout-source-pdf-open"]');
+          expect(open).toHaveBeenCalledWith('', '_blank');
+          expect(tab.opener).toBeNull();
+          expect(
+            page.query<HTMLButtonElement>(
+              '[data-testid="workout-source-pdf-open"]',
+            )?.textContent,
+          ).toContain(texts.import.opening);
+          pdfRequest('pdf-0').flush(pdfBlob());
+          await page.settle();
+
+          expect(tab.location.href).toBe('blob:pdf-1');
+          expect(page.query('[role="alert"]')).toBeNull();
+
+          // A PDF imported but not saved yet opens too.
+          await upload();
+          http.expectOne('/api/workouts/import-pdf').flush(DRAFT);
+          await page.settle();
+          const next = fakeTab();
+          open.mockReturnValue(next as unknown as Window);
+          await page.click('[data-testid="workout-source-pdf-open"]');
+          pdfRequest('pdf-1').flush(pdfBlob());
+          await page.settle();
+          expect(next.location.href).toBe('blob:pdf-2');
+          expect(revoked).toEqual(['blob:pdf-1']);
+
+          // Leaving the page frees it too.
+          await harness.navigateByUrl('/elsewhere');
+          expect(revoked).toEqual(['blob:pdf-1', 'blob:pdf-2']);
+        });
+
+        it('leaving the page while the PDF loads drops the request and closes its tab', async () => {
+          const tab = fakeTab();
+          vi.spyOn(window, 'open').mockReturnValue(tab as unknown as Window);
+          await openForm('/workouts/w1/edit', {
+            ...HELEN,
+            sourcePdf: SAVED_PDF,
+          });
+
+          await page.click('[data-testid="workout-source-pdf-open"]');
+          const pending = pdfRequest('pdf-0');
+          await harness.navigateByUrl('/elsewhere');
+
+          expect(pending.cancelled).toBe(true);
+          expect(tab.close).toHaveBeenCalled();
+          expect(objectUrls).toEqual([]);
+        });
+
+        it('closes the tab and says so when the PDF cannot be fetched', async () => {
+          const tab = fakeTab();
+          vi.spyOn(window, 'open').mockReturnValue(tab as unknown as Window);
+          await openForm('/workouts/w1/edit', {
+            ...HELEN,
+            sourcePdf: SAVED_PDF,
+          });
+
+          await page.click('[data-testid="workout-source-pdf-open"]');
+          pdfRequest('pdf-0').flush(new Blob(['{}']), {
+            status: 404,
+            statusText: 'Not Found',
+          });
+          await page.settle();
+
+          expect(tab.close).toHaveBeenCalled();
+          expect(page.alert()).toBe(texts.import.openError);
+          expect(objectUrls).toEqual([]);
+        });
       });
 
       it('shows the import warnings, and why a PDF could not be read', async () => {

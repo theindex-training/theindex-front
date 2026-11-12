@@ -12,6 +12,7 @@ import {
   WorkoutDraft,
   WorkoutExercise,
   WorkoutPayload,
+  WorkoutSourcePdf,
 } from '../../services/workouts.service';
 import { trimmedLength } from '../../utils/form-validators.util';
 
@@ -136,10 +137,14 @@ export function listedFrom(exercise: Exercise): WorkoutExercise {
   };
 }
 
-/** What is sent: text trimmed (an empty name as null), the summary normalized, the ids in order. */
+/**
+ * What is sent: text trimmed (an empty name as null), the summary normalized, the ids in order,
+ * and the PDF the workout comes from (null for none).
+ */
 export function workoutPayload(
   form: WorkoutForm,
   list: ListedExercise[],
+  sourcePdf: WorkoutSourcePdf | null = null,
 ): WorkoutPayload {
   const raw = form.getRawValue();
   return {
@@ -149,5 +154,6 @@ export function workoutPayload(
     exerciseIds: list.flatMap((entry) =>
       entry.kind === 'exercise' ? [entry.exercise.id] : [],
     ),
+    sourcePdfId: sourcePdf?.id ?? null,
   };
 }

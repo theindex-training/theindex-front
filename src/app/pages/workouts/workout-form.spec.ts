@@ -40,6 +40,12 @@ const HELEN: Workout = {
       isActive: true,
     },
   ],
+  sourcePdf: {
+    id: 'pdf-1',
+    originalFilename: '261109.pdf',
+    sizeBytes: 250_000,
+    uploadedAt: '2026-11-08T18:00:00.000Z',
+  },
 };
 
 describe('normalizeSummary', () => {
@@ -77,11 +83,12 @@ describe('workout form', () => {
     const list = listFromWorkout(HELEN);
 
     expect(form.valid).toBe(true);
-    expect(workoutPayload(form, list)).toEqual({
+    expect(workoutPayload(form, list, HELEN.sourcePdf)).toEqual({
       date: '2026-11-09',
       title: 'Helen',
       summary: '3 rounds for time:\n400-m run\n21 KB swings',
       exerciseIds: ['e-run', 'e-swing'],
+      sourcePdfId: 'pdf-1',
     });
   });
 
@@ -89,11 +96,13 @@ describe('workout form', () => {
     const form = buildWorkoutForm(fb, '2026-11-10');
     form.patchValue({ title: '   ', summary: '  Fran  \r\n21-15-9  \n\n' });
 
+    // Typed by hand: no source PDF.
     expect(workoutPayload(form, [])).toEqual({
       date: '2026-11-10',
       title: null,
       summary: 'Fran\n21-15-9',
       exerciseIds: [],
+      sourcePdfId: null,
     });
   });
 
@@ -119,6 +128,7 @@ describe('workout form', () => {
         },
         { name: 'Box jump', exerciseId: 'e-new', exerciseName: 'Box Jump' },
       ],
+      sourcePdf: null,
       warnings: [],
     };
     const form = buildWorkoutForm(fb, '2026-11-01');
@@ -178,6 +188,7 @@ describe('workout form', () => {
         title: null,
         summary: '',
         exercises: [],
+        sourcePdf: null,
         warnings: ['The RX workout could not be read'],
       },
       [],

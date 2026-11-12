@@ -54,6 +54,46 @@
           </p>
         }
       </div>
+      @if (sourcePdf) {
+        <div class="wk-source" data-testid="workout-source-pdf">
+          <app-icon class="wk-source__icon" name="file-text" />
+          <div class="wk-source__text">
+            <span class="wk-source__label">{{
+              'workouts.import.source' | transloco
+            }}</span>
+            <span class="wk-source__name">{{
+              sourcePdf.originalFilename ||
+                ('workouts.import.sourceUnnamed' | transloco)
+            }}</span>
+            <span class="wk-source__meta">{{
+              sourcePdfDetails(sourcePdf)
+            }}</span>
+            <span class="wk-source__meta">{{
+              (sourcePdfUnsaved
+                ? 'workouts.import.sourceUnsaved'
+                : 'workouts.import.sourceSaved'
+              ) | transloco
+            }}</span>
+          </div>
+          <button
+            class="btn btn--secondary"
+            type="button"
+            data-testid="workout-source-pdf-open"
+            [disabled]="openingPdf"
+            (click)="openSourcePdf()"
+          >
+            {{
+              (openingPdf ? 'workouts.import.opening' : 'workouts.import.open')
+                | transloco
+            }}
+          </button>
+        </div>
+      }
+      @if (pdfError) {
+        <p class="notice notice--danger" role="alert">
+          {{ pdfError | uiMessage }}
+        </p>
+      }
       @if (importError) {
         <p class="notice notice--danger" role="alert">
           {{ importError | uiMessage }}
