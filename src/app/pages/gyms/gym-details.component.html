@@ -36,6 +36,23 @@
         </div>
       </dl>
 
+      @if (isAdmin) {
+        <section class="panel-section">
+          <h2 class="panel__title">
+            {{ 'schedules.template.title' | transloco }}
+          </h2>
+          <p class="text-muted">
+            {{ 'schedules.template.gymHint' | transloco }}
+          </p>
+          <a
+            class="btn btn--secondary"
+            data-testid="gym-schedule-template"
+            [routerLink]="['/gyms', gym.id, 'schedule']"
+            >{{ 'schedules.template.open' | transloco }}</a
+          >
+        </section>
+      }
+
       <div class="form-actions">
         <a class="btn btn--ghost" [routerLink]="['/gyms', gym.id, 'delete']">{{
           'gyms.details.deactivate' | transloco

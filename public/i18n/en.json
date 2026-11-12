@@ -1297,6 +1297,7 @@
   "workouts": {
     "nav": {
       "label": "Workouts sections",
+      "schedule": "Schedule",
       "workouts": "Workouts",
       "exercises": "Exercises"
     },
@@ -1442,6 +1443,76 @@
         "deleting": "Deleting...",
         "deleteConfirm": "Delete “{name}”? An exercise used in workouts can't be deleted, only made inactive."
       }
+    }
+  },
+  "schedules": {
+    "slot": {
+      "trainingTime": "Training time",
+      "chooseTime": "Choose a training time",
+      "newTime": "New training time…",
+      "trainingTimeError": "Choose a training time.",
+      "trainingTimeHint": "From the training times, or a new one.",
+      "trainer": "Trainer",
+      "chooseTrainer": "Choose a trainer",
+      "inactiveTrainer": "{name} (inactive)",
+      "trainerError": "Choose a trainer.",
+      "workout": "Workout",
+      "noWorkout": "No workout",
+      "workoutHint": "The day's workout this training follows.",
+      "noWorkoutsThatDay": "No workout for this day yet.",
+      "startTime": "Start",
+      "endTime": "End",
+      "timeError": "Enter a time, e.g. 07:10.",
+      "timeHint": "24-hour time, e.g. 07:10.",
+      "endBeforeStart": "The end must be after the start.",
+      "endHint": "After the start.",
+      "existingTime": "{range} is already a training time; it will be used.",
+      "newTimeNotice": "{range} is a new training time: it is added to the training times when you save.",
+      "save": "Save training",
+      "saveError": "Unable to save this training right now.",
+      "removeError": "Unable to remove this training right now."
+    },
+    "days": {
+      "weekdays": "Days of the week",
+      "trainingsOf": "Trainings on {day}",
+      "editFor": "Edit {slot}",
+      "removeFor": "Remove {slot}",
+      "noTrainings": "No trainings",
+      "add": "Add a training",
+      "addFor": "Add a training on {day}"
+    },
+    "template": {
+      "title": "Weekly template",
+      "titleFor": "Weekly template: {gym}",
+      "subtitle": "The gym's usual week. Each week's schedule starts as a copy of it; changing it later changes no week already created.",
+      "backToGym": "Back to the gym",
+      "loading": "Loading the template",
+      "loadError": "Couldn't load the template",
+      "loadErrorMessage": "Unable to load the template right now.",
+      "count": "{count, plural, =0 {No trainings yet} one {# training a week} other {# trainings a week}}",
+      "confirmRemove": "Remove the {time} training with {trainer} on {day} from the template?",
+      "gymHint": "The trainings of a usual week, which each week's schedule starts from.",
+      "open": "Open the weekly template"
+    },
+    "week": {
+      "title": "Schedule",
+      "subtitle": "The gyms' trainings, a week at a time, each week created from the gym's template.",
+      "gym": "Gym",
+      "loading": "Loading the schedule",
+      "loadError": "Couldn't load the schedule",
+      "loadErrorMessage": "Unable to load the schedule right now.",
+      "noGymsTitle": "No active gyms",
+      "noGymsMessage": "Add a gym before making schedules.",
+      "notCreatedTitle": "No schedule for this week yet",
+      "createMessage": "Create it from the {gym} weekly template ({count, plural, one {# training} other {# trainings}}). You can change it afterwards; the template stays as it is.",
+      "create": "Create from the template",
+      "creating": "Creating...",
+      "createError": "Unable to create this week right now.",
+      "noTemplateMessage": "This gym has no weekly template yet. An admin sets it up on the gym's page.",
+      "overMessage": "This week is over, so its schedule can no longer be created.",
+      "setUpTemplate": "Set up the template",
+      "lockedHint": "Trainings of today and earlier days can no longer be changed.",
+      "confirmRemove": "Remove the {time} training with {trainer} on {day}?"
     }
   }
 }

@@ -1,0 +1,158 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="'schedules.week.title' | transloco"
+    [subtitle]="'schedules.week.subtitle' | transloco"
+  />
+
+  <app-workouts-nav />
+
+  @if (setupError) {
+    <app-empty-state
+      tone="danger"
+      [title]="'schedules.week.loadError' | transloco"
+      [message]="setupError | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="loadSetup()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else if (!ready) {
+    <app-skeleton-list
+      [label]="'schedules.week.loading' | transloco"
+      [rows]="7"
+    />
+  } @else if (!gyms.length) {
+    <app-empty-state
+      icon="dumbbell"
+      [title]="'schedules.week.noGymsTitle' | transloco"
+      [message]="'schedules.week.noGymsMessage' | transloco"
+    />
+  } @else {
+    <div class="schedule-toolbar">
+      @if (gyms.length > 1) {
+        <app-segmented-control
+          [label]="'schedules.week.gym' | transloco"
+          [options]="gymOptions"
+          [translateLabels]="false"
+          [value]="gymId"
+          (valueChange)="selectGym($event)"
+        />
+      }
+      <div class="week-bar">
+        <button
+          class="icon-btn"
+          type="button"
+          [attr.aria-label]="'workouts.list.previousWeek' | transloco"
+          (click)="previousWeek()"
+        >
+          <app-icon name="chevron-left" />
+        </button>
+        <p
+          class="week-bar__label"
+          data-testid="schedule-week"
+          aria-live="polite"
+        >
+          {{ weekLabel() }}
+        </p>
+        <button
+          class="icon-btn"
+          type="button"
+          [attr.aria-label]="'workouts.list.nextWeek' | transloco"
+          (click)="nextWeek()"
+        >
+          <app-icon name="chevron-right" />
+        </button>
+        @if (!isThisWeek) {
+          <button class="btn btn--ghost" type="button" (click)="thisWeek()">
+            {{ 'workouts.list.thisWeek' | transloco }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (loading) {
+      <app-skeleton-list
+        [label]="'schedules.week.loading' | transloco"
+        [rows]="7"
+      />
+    } @else if (errorMessage) {
+      <app-empty-state
+        tone="danger"
+        [title]="'schedules.week.loadError' | transloco"
+        [message]="errorMessage | uiMessage"
+      >
+        <button class="btn btn--secondary" type="button" (click)="load()">
+          {{ 'common.tryAgain' | transloco }}
+        </button>
+      </app-empty-state>
+    } @else if (schedule && !schedule.week) {
+      @if (actionError) {
+        <p class="notice notice--danger" role="alert">
+          {{ actionError | uiMessage }}
+        </p>
+      }
+      @if (notCreatedReason; as reason) {
+        <app-empty-state
+          icon="calendar"
+          [title]="'schedules.week.notCreatedTitle' | transloco"
+          [message]="reason | uiMessage"
+        >
+          @if (isAdmin && !isOver) {
+            <a
+              class="btn btn--secondary"
+              [routerLink]="['/gyms', gymId, 'schedule']"
+              >{{ 'schedules.week.setUpTemplate' | transloco }}</a
+            >
+          }
+        </app-empty-state>
+      } @else {
+        <app-empty-state
+          icon="calendar"
+          [title]="'schedules.week.notCreatedTitle' | transloco"
+          [message]="
+            'schedules.week.createMessage'
+              | transloco: { gym: gymName, count: templateCount }
+          "
+        >
+          <button
+            class="btn btn--primary"
+            type="button"
+            data-testid="schedule-create-week"
+            [disabled]="creating"
+            (click)="createWeek()"
+          >
+            {{
+              (creating ? 'schedules.week.creating' : 'schedules.week.create')
+                | transloco
+            }}
+          </button>
+        </app-empty-state>
+      }
+    } @else if (schedule) {
+      @if (hasLockedDays) {
+        <p class="text-muted">{{ 'schedules.week.lockedHint' | transloco }}</p>
+      }
+      @if (actionError) {
+        <p class="notice notice--danger" role="alert">
+          {{ actionError | uiMessage }}
+        </p>
+      }
+      <app-schedule-days
+        [label]="'workouts.list.weekDays' | transloco"
+        [days]="days"
+        [editing]="editing"
+        [trainingTimes]="trainingTimes"
+        [trainers]="trainers"
+        [workouts]="workouts"
+        [saving]="saving"
+        [formError]="formError"
+        [removingId]="removingId"
+        (add)="startAdd($event)"
+        (edit)="startEdit($event)"
+        (cancelEdit)="closeForm()"
+        (save)="saveSlot($event)"
+        (remove)="removeSlot($event)"
+      />
+    }
+  }
+</section>

@@ -173,6 +173,16 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] },
       },
       {
+        path: 'gyms/:id/schedule',
+        title: 'schedules.template.title',
+        loadComponent: () =>
+          import('./pages/schedules/schedule-template.component').then(
+            (m) => m.ScheduleTemplateComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
+      },
+      {
         path: 'gyms/:id',
         title: 'gyms.details.title',
         loadComponent: () =>
@@ -437,6 +447,16 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/workouts/exercises/exercises.component').then(
             (m) => m.ExercisesComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
+        path: 'workouts/schedule',
+        title: 'schedules.week.title',
+        loadComponent: () =>
+          import('./pages/schedules/schedules.component').then(
+            (m) => m.SchedulesComponent,
           ),
         canActivate: [roleGuard],
         data: { roles: ['ADMIN', 'TRAINER'] },

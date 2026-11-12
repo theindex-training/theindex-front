@@ -1,0 +1,129 @@
+<ol class="week" [attr.aria-label]="label">
+  @for (day of days; track day.key) {
+    <li
+      class="day"
+      [class.day--today]="day.isToday"
+      [attr.data-testid]="'schedule-day-' + day.key"
+    >
+      <div class="day__header">
+        <h2 class="day__title">{{ day.title }}</h2>
+        @if (day.isToday) {
+          <app-chip tone="accent">{{
+            'workouts.list.today' | transloco
+          }}</app-chip>
+        }
+      </div>
+
+      @if (day.slots.length) {
+        <ul
+          class="slots"
+          [attr.aria-label]="
+            'schedules.days.trainingsOf' | transloco: { day: day.title }
+          "
+        >
+          @for (slot of day.slots; track slot.id) {
+            @if (isEditing(day.key, slot.id)) {
+              <li>
+                <app-schedule-slot-form
+                  [slot]="slot"
+                  [trainingTimes]="trainingTimes"
+                  [trainers]="trainers"
+                  [workouts]="workoutsOf(day.key)"
+                  [saving]="saving"
+                  [error]="formError"
+                  [label]="
+                    'schedules.days.editFor'
+                      | transloco: { slot: describe(day, slot) }
+                  "
+                  (save)="
+                    save.emit({
+                      dayKey: day.key,
+                      slotId: slot.id,
+                      result: $event,
+                    })
+                  "
+                  (cancelled)="cancelEdit.emit()"
+                />
+              </li>
+            } @else {
+              <li class="slot" [attr.data-testid]="'schedule-slot-' + slot.id">
+                <span class="slot__time num">{{
+                  range(slot.trainingTime)
+                }}</span>
+                <span class="slot__trainer">{{ slot.trainer.name }}</span>
+                @if (!slot.trainer.isActive) {
+                  <app-chip tone="neutral">{{
+                    'common.inactive' | transloco
+                  }}</app-chip>
+                }
+                @if (slot.workout) {
+                  <span class="slot__workout">{{
+                    slot.workout.title || ('workouts.list.untitled' | transloco)
+                  }}</span>
+                }
+                @if (day.editable) {
+                  <span class="slot__actions">
+                    <button
+                      class="icon-btn"
+                      type="button"
+                      [disabled]="saving || !!removingId"
+                      [attr.aria-label]="
+                        'schedules.days.editFor'
+                          | transloco: { slot: describe(day, slot) }
+                      "
+                      (click)="edit.emit({ dayKey: day.key, slotId: slot.id })"
+                    >
+                      <app-icon name="pencil" />
+                    </button>
+                    <button
+                      class="icon-btn icon-btn--danger"
+                      type="button"
+                      [disabled]="saving || !!removingId"
+                      [attr.aria-label]="
+                        'schedules.days.removeFor'
+                          | transloco: { slot: describe(day, slot) }
+                      "
+                      (click)="remove.emit(slot)"
+                    >
+                      <app-icon name="trash" />
+                    </button>
+                  </span>
+                }
+              </li>
+            }
+          }
+        </ul>
+      } @else if (!isEditing(day.key, null)) {
+        <p class="day__empty text-muted">
+          {{ 'schedules.days.noTrainings' | transloco }}
+        </p>
+      }
+
+      @if (isEditing(day.key, null)) {
+        <app-schedule-slot-form
+          [trainingTimes]="trainingTimes"
+          [trainers]="trainers"
+          [workouts]="workoutsOf(day.key)"
+          [saving]="saving"
+          [error]="formError"
+          [label]="'schedules.days.addFor' | transloco: { day: day.title }"
+          (save)="save.emit({ dayKey: day.key, slotId: null, result: $event })"
+          (cancelled)="cancelEdit.emit()"
+        />
+      } @else if (day.editable) {
+        <button
+          class="btn btn--ghost day__add"
+          type="button"
+          [disabled]="saving || !!removingId"
+          [attr.aria-label]="
+            'schedules.days.addFor' | transloco: { day: day.title }
+          "
+          (click)="add.emit(day.key)"
+        >
+          <app-icon name="plus" />
+          {{ 'schedules.days.add' | transloco }}
+        </button>
+      }
+    </li>
+  }
+</ol>

@@ -1,0 +1,60 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="
+      template
+        ? ('schedules.template.titleFor'
+          | transloco: { gym: template.gym.name })
+        : ('schedules.template.title' | transloco)
+    "
+    [subtitle]="'schedules.template.subtitle' | transloco"
+    [back]="{
+      label: ('schedules.template.backToGym' | transloco),
+      link: ['/gyms', gymId],
+    }"
+  />
+
+  @if (loading) {
+    <app-skeleton-list
+      [label]="'schedules.template.loading' | transloco"
+      [rows]="7"
+    />
+  } @else if (errorMessage) {
+    <app-empty-state
+      tone="danger"
+      [title]="'schedules.template.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="load()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else {
+    <p
+      class="text-muted"
+      aria-live="polite"
+      data-testid="schedule-template-count"
+    >
+      {{ 'schedules.template.count' | transloco: { count: slotCount } }}
+    </p>
+    @if (actionError) {
+      <p class="notice notice--danger" role="alert">
+        {{ actionError | uiMessage }}
+      </p>
+    }
+    <app-schedule-days
+      [label]="'schedules.days.weekdays' | transloco"
+      [days]="days"
+      [editing]="editing"
+      [trainingTimes]="trainingTimes"
+      [trainers]="trainers"
+      [saving]="saving"
+      [formError]="formError"
+      [removingId]="removingId"
+      (add)="startAdd($event)"
+      (edit)="startEdit($event)"
+      (cancelEdit)="closeForm()"
+      (save)="saveSlot($event)"
+      (remove)="removeSlot($event)"
+    />
+  }
+</section>
