@@ -1,3 +1,4 @@
+import { HomeGymFieldComponent } from '../../components/home-gym-field/home-gym-field.component';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
@@ -31,6 +32,7 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-trainee-create',
   standalone: true,
   imports: [
+    HomeGymFieldComponent,
     UiMessagePipe,
     TranslocoPipe,
     CommonModule,
@@ -46,6 +48,7 @@ export class TraineeCreateComponent implements OnInit {
     nickname: FormControl<string | null>;
     phone: FormControl<string | null>;
     gymSubscriptionId: FormControl<string | null>;
+    preferredGymId: FormControl<string>;
   }>;
 
   gymSubscriptions: GymSubscription[] = [];
@@ -70,6 +73,7 @@ export class TraineeCreateComponent implements OnInit {
       ]),
       phone: this.formBuilder.control<string | null>(null),
       gymSubscriptionId: this.formBuilder.control<string | null>(null),
+      preferredGymId: this.formBuilder.nonNullable.control(''),
     });
   }
 
@@ -101,6 +105,7 @@ export class TraineeCreateComponent implements OnInit {
       phone: this.normalizeOptional(raw.phone),
       gymSubscriptionId: raw.gymSubscriptionId,
       isActive: true,
+      preferredGymId: raw.preferredGymId || null,
     };
 
     this.submitting = true;

@@ -60,6 +60,7 @@ const TRAINER = {
   name: 'Petar Petrov',
   nickname: 'Pepi',
   accountId: null,
+  primaryGymId: 'g1',
   isActive: true,
 };
 const TRAINEE = {
@@ -69,6 +70,7 @@ const TRAINEE = {
   phone: '+359888123456',
   accountId: null,
   gymSubscriptionId: 'gs1',
+  preferredGymId: 'g2',
   isActive: true,
 };
 const GYM_CARDS = [
@@ -144,6 +146,18 @@ describe('catalog pages', () => {
       http.expectOne(loadUrl).flush(body);
     }
     await page.settle();
+    await flushHomeGyms();
+  }
+
+  /** The trainee and trainer forms load the gyms for their home gym field once they show. */
+  async function flushHomeGyms() {
+    const requests = http.match('/api/gym-locations?includeInactive=true');
+    requests.forEach((request) =>
+      request.flush([GYM, { ...GYM, id: 'g2', name: 'North' }]),
+    );
+    if (requests.length) {
+      await page.settle();
+    }
   }
 
   const value = (selector: string) =>
@@ -540,10 +554,16 @@ describe('catalog pages', () => {
             '#trainer-name': ' Petar Petrov ',
             '#trainer-nickname': ' Pepi ',
           },
+          pick: { '#trainer-primary-gym': 'g2' },
           request: {
             method: 'POST',
             url: '/api/trainers',
-            body: { name: 'Petar Petrov', nickname: 'Pepi', isActive: true },
+            body: {
+              name: 'Petar Petrov',
+              nickname: 'Pepi',
+              isActive: true,
+              primaryGymId: 'g2',
+            },
           },
           listUrl: '/trainers',
         },
@@ -556,7 +576,12 @@ describe('catalog pages', () => {
           request: {
             method: 'POST',
             url: '/api/trainers',
-            body: { name: 'Petar', nickname: null, isActive: true },
+            body: {
+              name: 'Petar',
+              nickname: null,
+              isActive: true,
+              primaryGymId: null,
+            },
           },
           listUrl: '/trainers',
         },
@@ -570,7 +595,8 @@ describe('catalog pages', () => {
           request: {
             method: 'PATCH',
             url: '/api/trainers/tr1',
-            body: { name: 'Petar Petrov', nickname: null },
+            // The primary gym is sent back as it was.
+            body: { name: 'Petar Petrov', nickname: null, primaryGymId: 'g1' },
           },
           listUrl: '/trainers',
         },
@@ -585,7 +611,10 @@ describe('catalog pages', () => {
             '#trainee-nickname': 'Vanko',
             '#trainee-phone': ' +359 888 ',
           },
-          pick: { '#trainee-gym-subscription': 'gs2' },
+          pick: {
+            '#trainee-gym-subscription': 'gs2',
+            '#trainee-preferred-gym': 'g1',
+          },
           request: {
             method: 'POST',
             url: '/api/trainees',
@@ -595,6 +624,7 @@ describe('catalog pages', () => {
               phone: '+359 888',
               gymSubscriptionId: 'gs2',
               isActive: true,
+              preferredGymId: 'g1',
             },
           },
           listUrl: '/trainees',
@@ -615,6 +645,7 @@ describe('catalog pages', () => {
               phone: null,
               gymSubscriptionId: null,
               isActive: true,
+              preferredGymId: null,
             },
           },
           listUrl: '/trainees',
@@ -637,6 +668,7 @@ describe('catalog pages', () => {
               nickname: 'Vanko',
               phone: null,
               gymSubscriptionId: 'gs1',
+              preferredGymId: 'g2',
             },
           },
           listUrl: '/trainees',
@@ -761,6 +793,42 @@ describe('catalog pages', () => {
         '/api/trainees/t1': TRAINEE,
       });
       expect(page.queryAll('#trainee-gym-subscription option').length).toBe(4);
+    });
+
+    it("offers the active gyms as a trainee's preferred gym, keeps an inactive one and clears it", async () => {
+      await harness.navigateByUrl('/trainees/t1/edit');
+      page = driver(
+        () => harness.routeNativeElement!,
+        () => harness.fixture.whenStable(),
+      );
+      http
+        .expectOne('/api/gym-subscriptions?includeInactive=true')
+        .flush(GYM_CARDS);
+      http.expectOne('/api/trainees/t1').flush(TRAINEE);
+      await page.settle();
+      http
+        .expectOne('/api/gym-locations?includeInactive=true')
+        .flush([
+          GYM,
+          { ...GYM, id: 'g2', name: 'North', isActive: false },
+          { ...GYM, id: 'g3', name: 'Old', isActive: false },
+        ]);
+      await page.settle();
+
+      const options = page
+        .queryAll<HTMLOptionElement>('#trainee-preferred-gym option')
+        .map((o) => o.textContent.trim());
+      expect(options).toEqual(['No gym', 'Center', 'North (inactive)']);
+      expect(
+        page.query<HTMLSelectElement>('#trainee-preferred-gym')!.value,
+      ).toBe('g2');
+
+      await page.select('#trainee-preferred-gym', '');
+      await page.submit();
+      const req = http.expectOne('/api/trainees/t1');
+      expect(req.request.body).toMatchObject({ preferredGymId: null });
+      req.flush({});
+      await page.settle();
     });
 
     it('still lets you create a trainee when the gym cards fail to load', async () => {

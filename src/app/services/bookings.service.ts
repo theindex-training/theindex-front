@@ -8,6 +8,8 @@ import { buildHttpParams } from '../utils/http-params.util';
 export interface BookingGym {
   id: string;
   name: string;
+  /** The trainee's preferred gym (set on their profile by the staff). */
+  preferred: boolean;
 }
 
 /** A training of a created week as a trainee sees it (theindex-api `bookings`). */

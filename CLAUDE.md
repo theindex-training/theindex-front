@@ -150,6 +150,11 @@ Trainees book trainings of the weeks staff created (theindex-api `/api/bookings`
 - Each training shows its time, trainer, workout title, how many booked (never who), a green bar and "Booked" chip when it is the trainee's, and **Book** or **Cancel booking** only when the API's `canBook` / `canCancel` say so (booking closes 30 minutes before, cancelling 1 hour before); otherwise "Booking closed" / "Too late to cancel", and nothing once it started. Cancel asks with `window.confirm`. A failed action shows the API's message and reloads the week.
 - Staff: week slots show "N booked" when there are bookings. Remove refuses a booked training with a notice (no request; the API refuses too), and the API refuses a new training time for one (shown in the form).
 
+## Home gyms
+A trainee's optional **preferred gym** and a trainer's optional **primary gym** (theindex-api `preferredGymId` / `primaryGymId`) are set on the trainee and trainer create/edit forms with `app-home-gym-field` (`components/home-gym-field`: loads the gyms itself, offers the active ones plus the profile's own if inactive, '' is none and is sent as `null`). They are the default gym everywhere a page picks one:
+- Schedule pages (`schedule-gym.ts` `initialGymId`): `?gym=` first, then the home gym (a trainer's from the active trainers list and the token's `trainerProfileId`; a trainee's from `preferred` in `GET /api/bookings/gyms`), then the gym picked last on the device, then the first.
+- Register attendance: the selected trainer's primary gym (when active), else the first gym; until a gym is picked by hand it follows the trainer select.
+
 ## Content area (`/content`)
 The back office of the public site `theindex.training` (the sibling repo `theindex-training/theindex-web`; its `docs/decision-record.md` is the reference for the content features and their backlog).
 - ADMIN only: every `content/...` route has `roleGuard` + `data: { roles: ['ADMIN'] }`, and the "Content" nav item (Manage group) has `roles: ['ADMIN']`.

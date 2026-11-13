@@ -15,8 +15,8 @@ import { TraineeScheduleComponent } from './trainee-schedule.component';
 const texts = en.traineeSchedule;
 
 const GYMS = [
-  { id: 'gym-c', name: 'Center' },
-  { id: 'gym-n', name: 'North' },
+  { id: 'gym-c', name: 'Center', preferred: false },
+  { id: 'gym-n', name: 'North', preferred: false },
 ];
 const training = (
   id: string,
@@ -176,6 +176,26 @@ describe('TraineeScheduleComponent', () => {
     http
       .expectOne('/api/bookings/schedule?gymId=gym-c&week=2026-11-09')
       .flush(WEEK);
+    await page.settle();
+  });
+
+  it('opens the preferred gym first, over the one picked last', async () => {
+    localStorage.setItem(SCHEDULE_GYM_KEY, 'gym-c');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/schedule');
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
+    await page.settle();
+    http
+      .expectOne('/api/bookings/gyms')
+      .flush([GYMS[0], { ...GYMS[1], preferred: true }]);
+    await page.settle();
+
+    http
+      .expectOne('/api/bookings/schedule?gymId=gym-n&week=2026-11-09')
+      .flush({ ...WEEK, gym: GYMS[1] });
     await page.settle();
   });
 

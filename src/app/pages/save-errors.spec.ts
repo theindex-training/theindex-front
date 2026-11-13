@@ -300,6 +300,12 @@ describe('a failed save shows the error and gives the button back', () => {
         http.expectOne(url).flush(body);
       }
       await page.settle();
+      // The trainee and trainer forms load the gyms for their home gym field once they show.
+      const gyms = http.match('/api/gym-locations?includeInactive=true');
+      gyms.forEach((request) => request.flush([GYM]));
+      if (gyms.length) {
+        await page.settle();
+      }
 
       for (const [selector, value] of Object.entries(testCase.fill ?? {})) {
         await page.type(selector, value);

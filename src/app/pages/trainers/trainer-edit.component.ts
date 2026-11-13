@@ -1,3 +1,4 @@
+import { HomeGymFieldComponent } from '../../components/home-gym-field/home-gym-field.component';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
@@ -28,6 +29,7 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-trainer-edit',
   standalone: true,
   imports: [
+    HomeGymFieldComponent,
     UiMessagePipe,
     TranslocoPipe,
     CommonModule,
@@ -41,6 +43,7 @@ export class TrainerEditComponent implements OnInit {
   readonly form: FormGroup<{
     name: FormControl<string>;
     nickname: FormControl<string | null>;
+    primaryGymId: FormControl<string>;
   }>;
 
   trainer: TrainerProfile | null = null;
@@ -63,6 +66,7 @@ export class TrainerEditComponent implements OnInit {
       nickname: this.formBuilder.control<string | null>(null, [
         trimmedLength(1, 50),
       ]),
+      primaryGymId: this.formBuilder.nonNullable.control(''),
     });
   }
 
@@ -80,6 +84,7 @@ export class TrainerEditComponent implements OnInit {
         this.form.patchValue({
           name: trainer.name,
           nickname: trainer.nickname,
+          primaryGymId: trainer.primaryGymId ?? '',
         });
         this.loading = false;
         this.changeDetector.detectChanges();
@@ -105,6 +110,7 @@ export class TrainerEditComponent implements OnInit {
     const payload: UpdateTrainerPayload = {
       name: raw.name.trim(),
       nickname: this.normalizeOptional(raw.nickname),
+      primaryGymId: raw.primaryGymId || null,
     };
 
     this.submitting = true;
