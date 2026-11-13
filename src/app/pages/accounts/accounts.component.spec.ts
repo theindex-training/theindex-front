@@ -115,6 +115,25 @@ describe('AccountsComponent', () => {
     expect(tableRows()[0]).toContain('Trainer: Petar');
   });
 
+  it('cancels a pending load when the filter changes, so an older answer never shows', async () => {
+    const first = expectList('unlinked');
+    const linked = page
+      .queryAll<HTMLInputElement>('input[type="radio"]')
+      .find((radio) =>
+        radio.parentElement!.textContent.includes(
+          en.accountsAdmin.filter.linked,
+        ),
+      )!;
+    linked.click();
+    await page.settle();
+
+    expect(first.cancelled).toBe(true);
+    expectList('linked').flush([account('a3')]);
+    await page.settle();
+    expect(tableRows()).toHaveLength(1);
+    expect(tableRows()[0]).toContain('Person a3');
+  });
+
   it('searches the loaded accounts by name, email or phone', async () => {
     expectList('unlinked').flush([
       account('a1'),

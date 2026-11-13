@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { Subscription } from 'rxjs';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
 import { ChipComponent } from '../../components/chip/chip.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
@@ -68,6 +69,8 @@ export class AccountsComponent implements OnInit {
   loading = true;
   errorMessage: UiMessage | null = null;
 
+  /** The pending load: a new one cancels it, so an older answer never replaces a newer one. */
+  private loadSubscription: Subscription | null = null;
   private readonly i18n = inject(LanguageService);
   readonly format = inject(LocaleFormatService);
 
@@ -83,7 +86,8 @@ export class AccountsComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.errorMessage = null;
-    this.accountsService.list(this.link).subscribe({
+    this.loadSubscription?.unsubscribe();
+    this.loadSubscription = this.accountsService.list(this.link).subscribe({
       next: (accounts) => {
         this.accounts = accounts;
         this.applySearch();
