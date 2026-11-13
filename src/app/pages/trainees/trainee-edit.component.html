@@ -105,6 +105,14 @@
             </select>
           </div>
         </div>
+        <div class="form-row">
+          <app-home-gym-field
+            fieldId="trainee-preferred-gym"
+            [control]="form.controls.preferredGymId"
+            [label]="'trainees.fields.preferredGym' | transloco"
+            [hint]="'trainees.fields.preferredGymHint' | transloco"
+          />
+        </div>
       </div>
 
       @if (errorMessage) {

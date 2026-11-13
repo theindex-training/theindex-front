@@ -11,6 +11,8 @@ export interface TraineeProfile {
   phone: string | null;
   accountId: string | null;
   gymSubscriptionId: string | null;
+  /** The gym the trainee usually trains in: the default gym of their pages. */
+  preferredGymId?: string | null;
   isActive: boolean;
   createdAt?: string;
 }
@@ -21,6 +23,7 @@ export interface CreateTraineePayload {
   phone?: string | null;
   isActive?: boolean;
   gymSubscriptionId?: string | null;
+  preferredGymId?: string | null;
 }
 
 export interface TraineeTrainingInsights {
@@ -58,6 +61,7 @@ export interface UpdateTraineePayload {
   phone?: string | null;
   isActive?: boolean;
   gymSubscriptionId?: string | null;
+  preferredGymId?: string | null;
 }
 
 @Injectable({

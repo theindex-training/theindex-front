@@ -609,6 +609,44 @@ describe('AttendanceRegisterComponent', () => {
     expect(select('trainerId').value).toBe('trainer-other');
   });
 
+  describe('default gym', () => {
+    const withGyms = [
+      { ...trainer('trainer-other', 'Maria'), primaryGymId: 'gym-2' },
+      { ...trainer('trainer-1', 'Petar'), primaryGymId: 'gym-closed' },
+      trainer('trainer-3', 'Ivo'),
+    ];
+
+    it("starts at the signed-in trainer's primary gym", async () => {
+      signInAs('TRAINER', { trainerProfileId: 'trainer-other' });
+      await render('ok', withGyms);
+
+      expect(select('locationId').value).toBe('gym-2');
+    });
+
+    it('falls back to the first active gym without a primary gym, or with an inactive one', async () => {
+      signInAs('TRAINER', { trainerProfileId: 'trainer-1' });
+      await render('ok', withGyms);
+
+      expect(select('locationId').value).toBe('gym-1');
+    });
+
+    it('follows the chosen trainer until a gym is picked by hand', async () => {
+      signInAs('ADMIN');
+      await render('ok', withGyms);
+      expect(select('locationId').value).toBe('gym-2');
+
+      await page.select('select[formcontrolname="trainerId"]', 'trainer-3');
+      expect(select('locationId').value).toBe('gym-1');
+      await page.select('select[formcontrolname="trainerId"]', 'trainer-other');
+      expect(select('locationId').value).toBe('gym-2');
+
+      await page.select('select[formcontrolname="locationId"]', 'gym-1');
+      await page.select('select[formcontrolname="trainerId"]', 'trainer-3');
+      await page.select('select[formcontrolname="trainerId"]', 'trainer-other');
+      expect(select('locationId').value).toBe('gym-1');
+    });
+  });
+
   it('sends nothing while a required session field is empty', async () => {
     signInAs('ADMIN');
     await render('ok', []);

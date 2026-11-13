@@ -164,7 +164,9 @@
       "nicknameError": "Прякорът трябва да е от 1 до 50 символа.",
       "nicknameHint": "До 50 символа.",
       "namePlaceholder": "Антон",
-      "nicknamePlaceholder": "Тони"
+      "nicknamePlaceholder": "Тони",
+      "preferredGym": "Предпочитана зала",
+      "preferredGymHint": "Залата, с която се отваря разписанието на трениращия."
     },
     "backToList": "Към трениращите",
     "loadingOne": "Зареждане на трениращия...",
@@ -470,6 +472,10 @@
       "warning": "Деактивираната зала не може да се избира за нови тренировки, но съществуващите записи остават непроменени.",
       "inactive": "Залата е неактивна",
       "error": "В момента залата не може да бъде деактивирана."
+    },
+    "homeGym": {
+      "none": "Без зала",
+      "inactive": "{name} (неактивна)"
     }
   },
   "gymSubscriptions": {
@@ -572,7 +578,9 @@
       "nicknameError": "Прякорът трябва да е от 1 до 50 символа.",
       "nicknameHint": "До 50 символа.",
       "namePlaceholder": "Велчо",
-      "nicknamePlaceholder": "В"
+      "nicknamePlaceholder": "В",
+      "primaryGym": "Основна зала",
+      "primaryGymHint": "Залата, с която се отварят разписанието и отбелязването на присъствие на треньора."
     },
     "backToList": "Към треньорите",
     "loadingOne": "Зареждане на треньора...",

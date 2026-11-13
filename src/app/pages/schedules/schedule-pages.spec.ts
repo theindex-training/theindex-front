@@ -226,6 +226,26 @@ describe('schedule pages', () => {
       );
     });
 
+    it('without a gym in the address, a trainer gets their primary gym, even over the one picked last', async () => {
+      signInAs('TRAINER', { trainerProfileId: VASKO.id });
+      localStorage.setItem(SCHEDULE_GYM_KEY, 'gym-c');
+      await open('/workouts/schedule');
+      http.expectOne('/api/gym-locations').flush(GYMS);
+      http.expectOne('/api/training-times').flush(TIMES);
+      http.expectOne('/api/trainers?active=true').flush([
+        { ...VELCHO, accountId: null, primaryGymId: 'gym-c' },
+        { ...VASKO, accountId: null, primaryGymId: 'gym-n' },
+      ]);
+      await page.settle();
+
+      http
+        .expectOne('/api/schedules?gymId=gym-n&week=2026-11-09')
+        .flush({ ...NOT_CREATED, gym: { id: 'gym-n', name: 'North' } });
+      await page.settle();
+      http.expectOne('/api/schedule-templates/gym-n').flush(TEMPLATE);
+      await page.settle();
+    });
+
     it('without a gym in the address, opens the one picked last on this device, and remembers a new pick', async () => {
       signInAs('TRAINER');
       localStorage.setItem(SCHEDULE_GYM_KEY, 'gym-n');

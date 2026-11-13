@@ -164,7 +164,9 @@
       "nicknameError": "Nickname must be 1–50 characters.",
       "nicknameHint": "Up to 50 characters.",
       "namePlaceholder": "Anton",
-      "nicknamePlaceholder": "Toni"
+      "nicknamePlaceholder": "Toni",
+      "preferredGym": "Preferred gym",
+      "preferredGymHint": "The gym their Schedule opens with."
     },
     "backToList": "Back to trainees",
     "loadingOne": "Loading trainee...",
@@ -470,6 +472,10 @@
       "warning": "Deactivating a gym hides it from new schedules, but existing references remain unchanged.",
       "inactive": "Gym inactive",
       "error": "Unable to deactivate this gym right now."
+    },
+    "homeGym": {
+      "none": "No gym",
+      "inactive": "{name} (inactive)"
     }
   },
   "gymSubscriptions": {
@@ -572,7 +578,9 @@
       "nicknameError": "Nickname must be 1–50 characters.",
       "nicknameHint": "Up to 50 characters.",
       "namePlaceholder": "Velcho",
-      "nicknamePlaceholder": "V"
+      "nicknamePlaceholder": "V",
+      "primaryGym": "Primary gym",
+      "primaryGymHint": "The gym their Schedule and Register attendance open with."
     },
     "backToList": "Back to trainers",
     "loadingOne": "Loading trainer...",

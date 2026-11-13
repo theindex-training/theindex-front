@@ -123,6 +123,7 @@ export class TraineeScheduleComponent implements OnInit {
           initialGymId(
             this.gyms.map((g) => g.id),
             params.get('gym'),
+            this.gyms.find((g) => g.preferred)?.id ?? null,
           ) ?? '';
         const week = params.get('week') ?? '';
         const start = mondayOf(DATE_PATTERN.test(week) ? week : this.today());

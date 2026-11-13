@@ -2,15 +2,20 @@
 export const SCHEDULE_GYM_KEY = 'scheduleGym';
 
 /**
- * The gym a schedule page opens with: the one in the address when it is listed, else the one
- * picked last on this device, else the first.
+ * The gym a page opens with: the one in the address when it is listed, else the user's home gym
+ * (a trainer's primary gym, a trainee's preferred gym), else the one picked last on this device,
+ * else the first.
  */
 export function initialGymId(
   gymIds: string[],
   fromAddress: string | null,
+  homeGym: string | null = null,
 ): string | null {
   if (fromAddress && gymIds.includes(fromAddress)) {
     return fromAddress;
+  }
+  if (homeGym && gymIds.includes(homeGym)) {
+    return homeGym;
   }
   const remembered = readRememberedGym();
   if (remembered && gymIds.includes(remembered)) {

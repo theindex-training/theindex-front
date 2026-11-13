@@ -153,4 +153,14 @@ describe('schedule gym', () => {
     expect(initialGymId(ids, null)).toBe('gym-a');
     expect(initialGymId([], null)).toBeNull();
   });
+
+  it("puts the user's home gym before the one picked last, and after the address", () => {
+    const ids = ['gym-a', 'gym-b', 'gym-c'];
+    rememberGym('gym-c');
+
+    expect(initialGymId(ids, null, 'gym-b')).toBe('gym-b');
+    expect(initialGymId(ids, 'gym-a', 'gym-b')).toBe('gym-a');
+    // A home gym that isn't listed (inactive) is skipped.
+    expect(initialGymId(ids, null, 'gym-x')).toBe('gym-c');
+  });
 });
