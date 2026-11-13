@@ -11,6 +11,7 @@ import { ChipComponent, ChipTone } from '../../components/chip/chip.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { ListRowComponent } from '../../components/list-row/list-row.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { TrainingWorkoutComponent } from '../trainee-schedule/training-workout.component';
 import { LanguageService } from '../../i18n/language.service';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
 import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
@@ -25,9 +26,9 @@ import { formatTimeWithoutSeconds } from '../../utils/time-display';
 import { timeRange } from './schedule-slot-form.component';
 
 /**
- * One training of a week for staff (`/workouts/schedule/:id`): when and where, the trainer and
- * workout, and the trainees who booked it, each a link to their page with what their
- * subscriptions have left. The figures are projected (as if they come and attendance is saved)
+ * One training of a week for staff (`/workouts/schedule/:id`): when and where, the trainer, the
+ * trainees who booked it, each a link to their page with what their subscriptions have left,
+ * then its workout as trainees see it (`app-training-workout`). The figures are projected (as if they come and attendance is saved)
  * until attendance is saved for the training. From the training's day on, "Register attendance"
  * opens that page filled in with the training and the booked trainees.
  */
@@ -43,6 +44,7 @@ import { timeRange } from './schedule-slot-form.component';
     EmptyStateComponent,
     ListRowComponent,
     ChipComponent,
+    TrainingWorkoutComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './schedule-training.component.html',

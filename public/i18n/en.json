@@ -1538,8 +1538,6 @@
       "time": "Time",
       "gym": "Gym",
       "trainer": "Trainer",
-      "workout": "Workout",
-      "noWorkout": "None chosen",
       "bookings": "Bookings",
       "registerHint": "Opens Register attendance with this training filled in and the booked trainees ticked. Nothing is saved until you review it.",
       "registerFromDay": "Attendance can be registered from the day of the training.",
@@ -1552,7 +1550,9 @@
       "leftAfter": "{count, plural, one {# left after it} other {# left after it}}",
       "noneLeft": "None left",
       "noBookingsTitle": "No bookings yet",
-      "noBookingsMessage": "Trainees who book this training will show here."
+      "noBookingsMessage": "Trainees who book this training will show here.",
+      "noWorkoutTitle": "No workout for this training",
+      "noWorkoutMessage": "The day's workout is chosen when editing the training on the Schedule."
     }
   },
   "traineeSchedule": {

@@ -795,7 +795,7 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 
 ### J18. Training bookings (P1) [desktop, mobile]
 ✅ `e2e/journeys/j18-training-bookings.e2e.ts`, 2 tests (3 runs).
-1. Desktop and phone, trainer: today's (read-only) training on the Schedule tab opens its page; it lists who booked, each linking to the trainee, with what they would have left after it and the projection notice; Register attendance opens filled in (the notice, the booked trainees ticked); after unticking one, Review posts the trainer, gym, trainees, day and start, and nothing is saved.
+1. Desktop and phone, trainer: today's (read-only) training on the Schedule tab opens its page; it lists who booked, each linking to the trainee, with what they would have left after it and the projection notice, then shows the workout as trainees see it (summary, an exercise's video button); Register attendance opens filled in (the notice, the booked trainees ticked); after unticking one, Review posts the trainer, gym, trainees, day and start, and nothing is saved.
 2. Desktop, trainee: `/workouts/schedule/:id` is out of reach and loads nothing.
 
 ---

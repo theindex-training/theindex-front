@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
 import { buildHttpParams } from '../utils/http-params.util';
+import { TrainingWorkout } from './bookings.service';
 
 /** A training time as a schedule slot gives it (Postgres `time`, e.g. '07:10:00'). */
 export interface ScheduleTrainingTime {
@@ -90,7 +91,9 @@ export interface TrainingBookingRow {
 }
 
 /** `GET /api/schedules/slots/:id`: one training for staff, with who booked it. */
-export interface ScheduleTraining extends ScheduleSlot {
+export interface ScheduleTraining extends Omit<ScheduleSlot, 'workout'> {
+  /** The whole workout, as trainees see it on their training page; null when none is chosen. */
+  workout: (TrainingWorkout & { id: string }) | null;
   gym: { id: string; name: string };
   /** Monday of the training's week, YYYY-MM-DD. */
   weekStart: string;

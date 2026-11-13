@@ -129,9 +129,9 @@ describe('TraineeTrainingComponent', () => {
     ]);
     // The summary keeps its line breaks (white-space: pre-line).
     expect(
-      page.query('[data-testid="trainee-workout-summary"]')!.textContent,
+      page.query('[data-testid="training-workout-summary"]')!.textContent,
     ).toBe('21-15-9\nThrusters 43/30 kg\nPull-ups');
-    const exercises = page.queryAll('[data-testid^="trainee-exercise-"]');
+    const exercises = page.queryAll('[data-testid^="training-exercise-"]');
     expect(exercises.map((e) => e.querySelector('h4')!.textContent)).toEqual([
       'Thruster',
       'Pull-up',
@@ -149,7 +149,7 @@ describe('TraineeTrainingComponent', () => {
   it('plays an exercise video in place, from youtube-nocookie.com', async () => {
     await open();
     const thruster = page.query(
-      '[data-testid="trainee-exercise-ex-thruster"]',
+      '[data-testid="training-exercise-ex-thruster"]',
     )!;
     const play = thruster.querySelector<HTMLButtonElement>(
       '[data-testid="exercise-video-play"]',
@@ -204,7 +204,9 @@ describe('TraineeTrainingComponent', () => {
       `${texts.yourBooking}: ${schedule.booked}`,
     ]);
     expect(actionButton()!.textContent.trim()).toBe(schedule.cancel);
-    expect(page.queryAll('[data-testid^="trainee-exercise-"]')).toHaveLength(2);
+    expect(page.queryAll('[data-testid^="training-exercise-"]')).toHaveLength(
+      2,
+    );
     expect(page.query('h1')!.textContent.trim()).toBe('Fran');
   });
 
@@ -280,7 +282,9 @@ describe('TraineeTrainingComponent', () => {
 
     expect(page.query('h1')!.textContent.trim()).toBe(texts.title);
     expect(page.text()).toContain(texts.noWorkoutTitle);
-    expect(page.queryAll('[data-testid^="trainee-exercise-"]')).toHaveLength(0);
+    expect(page.queryAll('[data-testid^="training-exercise-"]')).toHaveLength(
+      0,
+    );
   });
 
   it("shows the API's message when the training can't be loaded", async () => {

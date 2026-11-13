@@ -53,6 +53,20 @@ test.describe('J18 training bookings', () => {
   });
   const training = {
     ...slot,
+    // The whole workout, as trainees see it.
+    workout: {
+      id: 'w-fran',
+      title: 'Fran',
+      summary: '21-15-9\nThrusters\nPull-ups',
+      exercises: [
+        {
+          id: 'ex-thruster',
+          name: 'Thruster',
+          description: 'Front squat into a push press.',
+          videoUrl: 'https://www.youtube.com/watch?v=L219ltL15zk',
+        },
+      ],
+    },
     gym: { id: 'gym-c', name: 'Center' },
     weekStart: '2026-11-09',
     startsAt: '2026-11-13T16:00:00Z',
@@ -136,6 +150,16 @@ test.describe('J18 training bookings', () => {
       await expect(page.getByTestId('schedule-training-projection')).toHaveText(
         t('schedules.training.projectionNote'),
       );
+
+      // The workout as trainees see it: the summary, then the exercises with their videos.
+      await expect(page.getByTestId('training-workout-summary')).toHaveText(
+        '21-15-9\nThrusters\nPull-ups',
+      );
+      await expect(
+        page.getByTestId('training-exercise-ex-thruster').getByRole('button', {
+          name: t('traineeTraining.playVideo', { name: 'Thruster' }),
+        }),
+      ).toBeVisible();
 
       await page.getByTestId('schedule-training-register').click();
       await expect(page).toHaveURL(/\/attendance\/new\?/);

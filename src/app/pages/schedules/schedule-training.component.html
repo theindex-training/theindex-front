@@ -58,18 +58,6 @@
           </dd>
         </div>
         <div>
-          <dt>{{ 'schedules.training.workout' | transloco }}</dt>
-          <dd>
-            @if (training.workout; as workout) {
-              <a [routerLink]="['/workouts', workout.id, 'edit']">{{
-                workout.title || ('workouts.list.untitled' | transloco)
-              }}</a>
-            } @else {
-              {{ 'schedules.training.noWorkout' | transloco }}
-            }
-          </dd>
-        </div>
-        <div>
           <dt>{{ 'schedules.training.bookings' | transloco }}</dt>
           <dd data-testid="schedule-training-count">
             {{
@@ -161,6 +149,12 @@
         </ul>
       }
     </section>
+
+    <app-training-workout
+      [workout]="training.workout"
+      [emptyTitle]="'schedules.training.noWorkoutTitle' | transloco"
+      [emptyMessage]="'schedules.training.noWorkoutMessage' | transloco"
+    />
   }
 </section>
 

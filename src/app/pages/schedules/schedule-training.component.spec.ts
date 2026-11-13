@@ -45,7 +45,20 @@ const TRAINING: ScheduleTraining = {
   weekday: 5,
   trainingTime: { id: 'tt-18', startTime: '18:00:00', endTime: '19:00:00' },
   trainer: { id: 'trainer-v', name: 'Velcho', nickname: null, isActive: true },
-  workout: { id: 'w-fran', title: 'Fran' },
+  workout: {
+    id: 'w-fran',
+    title: 'Fran',
+    summary: '21-15-9\nThrusters 43/30 kg\nPull-ups',
+    exercises: [
+      {
+        id: 'ex-thruster',
+        name: 'Thruster',
+        description: 'Front squat\ninto a push press.',
+        videoUrl: 'https://www.youtube.com/watch?v=L219ltL15zk',
+      },
+      { id: 'ex-pull', name: 'Pull-up', description: null, videoUrl: null },
+    ],
+  },
   bookedCount: 5,
   gym: { id: 'gym-c', name: 'Center' },
   weekStart: '2026-11-09',
@@ -208,9 +221,10 @@ describe('ScheduleTrainingComponent', () => {
       `${texts.time}: 18:00 – 19:00`,
       `${texts.gym}: Center`,
       `${texts.trainer}: Velcho`,
-      `${texts.workout}: Fran`,
       `${texts.bookings}: 5 booked`,
     ]);
+    // No link to the workout's form: the page shows the workout itself.
+    expect(page.query('a[href^="/workouts/w-fran"]')).toBeNull();
     expect(
       page
         .query('[data-testid="schedule-training-booked"] .section-header__sub')!
@@ -235,6 +249,32 @@ describe('ScheduleTrainingComponent', () => {
     expect(page.query('app-page-header a')!.getAttribute('href')).toBe(
       '/workouts/schedule?gym=gym-c&week=2026-11-09',
     );
+  });
+
+  it('shows the workout as trainees see it: the summary with its line breaks, then the exercises in order', async () => {
+    at('2026-11-13T11:00:00Z');
+    await open();
+
+    const workout = page.query('[data-testid="training-workout"]')!;
+    expect(workout.querySelector('h2')!.textContent.trim()).toBe(
+      en.traineeTraining.workoutTitle,
+    );
+    expect(
+      page.query('[data-testid="training-workout-summary"]')!.textContent,
+    ).toBe('21-15-9\nThrusters 43/30 kg\nPull-ups');
+    const exercises = page.queryAll('[data-testid^="training-exercise-"]');
+    expect(exercises.map((e) => e.querySelector('h4')!.textContent)).toEqual([
+      'Thruster',
+      'Pull-up',
+    ]);
+    expect(exercises[0].querySelector('p')!.textContent).toBe(
+      'Front squat\ninto a push press.',
+    );
+    // The video as its play button, the exercise without one as text only.
+    expect(
+      exercises[0].querySelector('[data-testid="exercise-video-play"]'),
+    ).not.toBeNull();
+    expect(exercises[1].querySelector('app-exercise-video')).toBeNull();
   });
 
   it('says when a saved attendance used the last training or was unpaid', async () => {
@@ -307,7 +347,11 @@ describe('ScheduleTrainingComponent', () => {
     await open({ ...TRAINING, workout: null, bookedCount: 0, trainees: [] });
 
     expect(page.query('h1')!.textContent.trim()).toBe(texts.title);
-    expect(details()).toContain(`${texts.workout}: ${texts.noWorkout}`);
+    expect(page.queryAll('[data-testid^="training-exercise-"]')).toEqual([]);
+    expect(
+      page.query('[data-testid="training-workout"]')!.textContent,
+    ).toContain(texts.noWorkoutTitle);
+    expect(page.text()).toContain(texts.noWorkoutMessage);
     expect(page.text()).toContain(texts.noBookingsTitle);
     expect(
       page.query('[data-testid="schedule-training-projection"]'),
