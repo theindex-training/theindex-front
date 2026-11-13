@@ -67,32 +67,48 @@
                       | transloco: { count: slot.bookedCount }
                   }}</span>
                 }
-                @if (day.editable) {
+                @if (day.editable || showDetails) {
                   <span class="slot__actions">
-                    <button
-                      class="icon-btn"
-                      type="button"
-                      [disabled]="saving || !!removingId"
-                      [attr.aria-label]="
-                        'schedules.days.editFor'
-                          | transloco: { slot: describe(day, slot) }
-                      "
-                      (click)="edit.emit({ dayKey: day.key, slotId: slot.id })"
-                    >
-                      <app-icon name="pencil" />
-                    </button>
-                    <button
-                      class="icon-btn icon-btn--danger"
-                      type="button"
-                      [disabled]="saving || !!removingId"
-                      [attr.aria-label]="
-                        'schedules.days.removeFor'
-                          | transloco: { slot: describe(day, slot) }
-                      "
-                      (click)="remove.emit(slot)"
-                    >
-                      <app-icon name="trash" />
-                    </button>
+                    @if (showDetails) {
+                      <a
+                        class="icon-btn"
+                        [routerLink]="['/workouts/schedule', slot.id]"
+                        [attr.aria-label]="
+                          'schedules.days.detailsFor'
+                            | transloco: { slot: describe(day, slot) }
+                        "
+                      >
+                        <app-icon name="users" />
+                      </a>
+                    }
+                    @if (day.editable) {
+                      <button
+                        class="icon-btn"
+                        type="button"
+                        [disabled]="saving || !!removingId"
+                        [attr.aria-label]="
+                          'schedules.days.editFor'
+                            | transloco: { slot: describe(day, slot) }
+                        "
+                        (click)="
+                          edit.emit({ dayKey: day.key, slotId: slot.id })
+                        "
+                      >
+                        <app-icon name="pencil" />
+                      </button>
+                      <button
+                        class="icon-btn icon-btn--danger"
+                        type="button"
+                        [disabled]="saving || !!removingId"
+                        [attr.aria-label]="
+                          'schedules.days.removeFor'
+                            | transloco: { slot: describe(day, slot) }
+                        "
+                        (click)="remove.emit(slot)"
+                      >
+                        <app-icon name="trash" />
+                      </button>
+                    }
                   </span>
                 }
               </li>

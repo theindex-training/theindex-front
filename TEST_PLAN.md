@@ -24,6 +24,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - Bookings (a feature: the trainee Schedule tab) came with journey J17 and `trainee-schedule.component.spec.ts`. One deliberate break (Book offered on every training not booked yet, instead of the API's `canBook`) was caught.
 - The training page (a feature: `/schedule/:id`, a training's workout for trainees, booked there) came with `trainee-training.component.spec.ts`, J17 reworked (Book now opens the page) and the list spec updated. One deliberate break (the booking's answer replacing the page's training, so the workout was lost) was caught.
 - The weekly schedules (a feature: gym templates and weeks) came with journey J16 and its own specs (`pages/schedules/*.spec.ts`): 823 unit tests, 57 E2E tests. One deliberate break (days before `editableFrom` editable) was caught.
+- Who booked a training (a feature: the staff's training page and Register attendance opened from it) came with journey J18, `schedule-training.component.spec.ts`, Details links in `schedule-pages.spec.ts` and an "opened from a training" block in `attendance-register.component.spec.ts`. One deliberate break (the chosen gym not kept when the trainer changes) was caught.
 - The workouts area (a feature: workouts, exercises, workout types, PDF import) came with journey J15 and its own specs (`pages/workouts/*.spec.ts`, `services/workouts-api.services.spec.ts`): 81 spec files, 816 unit tests, 51 E2E tests. One deliberate break (the women's amount dropped from the payload) was caught.
 
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
@@ -791,6 +792,11 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 1. Desktop and phone, trainee: the menu leads to Schedule, which asks for the gym's week; Book opens the training's page (no request), which shows the workout (summary, exercises, a video button); Book there posts the id and shows it booked with the new count; back to the week, the training is booked and offers Details; cancelling another from the list (after the confirm) sends the DELETE and offers Book again.
 2. Desktop, trainee: a week the staff haven't created says it isn't out.
 3. Desktop, trainer: `/schedule` is out of reach and loads nothing.
+
+### J18. Training bookings (P1) [desktop, mobile]
+✅ `e2e/journeys/j18-training-bookings.e2e.ts`, 2 tests (3 runs).
+1. Desktop and phone, trainer: today's (read-only) training on the Schedule tab opens its page; it lists who booked, each linking to the trainee, with what they would have left after it and the projection notice; Register attendance opens filled in (the notice, the booked trainees ticked); after unticking one, Review posts the trainer, gym, trainees, day and start, and nothing is saved.
+2. Desktop, trainee: `/workouts/schedule/:id` is out of reach and loads nothing.
 
 ---
 

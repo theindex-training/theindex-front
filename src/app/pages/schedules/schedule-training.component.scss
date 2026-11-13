@@ -1,0 +1,36 @@
+.training__hint {
+  margin: 0;
+}
+
+// The chips sit on the second line on phones, so the name keeps the row's width, and at the
+// end of the row from 768px (the system's table/list breakpoint).
+.training__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+
+.training__trailing {
+  display: none;
+}
+
+.training__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+@media (min-width: 768px) {
+  .training__meta > .training__chips {
+    display: none;
+  }
+
+  .training__trailing {
+    display: flex;
+  }
+
+  .training__trailing .training__chips {
+    justify-content: flex-end;
+  }
+}

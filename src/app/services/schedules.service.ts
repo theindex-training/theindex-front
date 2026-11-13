@@ -60,6 +60,45 @@ export interface ScheduleWeek {
   slots: ScheduleSlot[];
 }
 
+/** How close a booked trainee is to the end of what they paid for (the attendance preview's). */
+export type TrainingBookingLevel = 'UNPAID' | 'LAST' | 'LOW' | 'OK';
+
+/**
+ * A trainee who booked a training, with what is left of their subscriptions. Until attendance is
+ * saved for the training (`attendanceSaved: false`) the figures are projected: what would be left
+ * if they come and attendance is saved for it. Once saved, they are what is left now.
+ */
+export interface TrainingBookingRow {
+  traineeId: string;
+  name: string;
+  nickname: string | null;
+  isActive: boolean;
+  bookedAt: string;
+  attendanceSaved: boolean;
+  paymentStatus: 'PAID' | 'UNPAID';
+  level: TrainingBookingLevel;
+  /** The subscription that pays (or would pay); null when unpaid. */
+  subscription: {
+    type: 'PUNCH' | 'TIME';
+    planTitle: string;
+    /** PUNCH: trainings left over all active punch subscriptions. */
+    remainingCredits: number | null;
+    /** TIME: when the paid period ends, and the days from today until then. */
+    endsAt: string | null;
+    daysLeft: number | null;
+  } | null;
+}
+
+/** `GET /api/schedules/slots/:id`: one training for staff, with who booked it. */
+export interface ScheduleTraining extends ScheduleSlot {
+  gym: { id: string; name: string };
+  /** Monday of the training's week, YYYY-MM-DD. */
+  weekStart: string;
+  startsAt: string;
+  /** Needing attention first (unpaid, last, low), then by name: the API's order. */
+  trainees: TrainingBookingRow[];
+}
+
 /**
  * A slot's training time: an existing one by id, or hours the API matches to an existing
  * training time or creates one for.
@@ -151,6 +190,11 @@ export class SchedulesService {
       `${this.weeksUrl}/${weekId}/slots`,
       payload,
     );
+  }
+
+  /** One training with the trainees who booked it and what they have left. */
+  training(id: string): Observable<ScheduleTraining> {
+    return this.http.get<ScheduleTraining>(`${this.weeksUrl}/slots/${id}`);
   }
 
   updateSlot(id: string, payload: SlotChanges): Observable<ScheduleSlot> {

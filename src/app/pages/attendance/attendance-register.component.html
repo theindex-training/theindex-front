@@ -99,6 +99,18 @@
           </ul>
         </section>
       } @else {
+        @if (fromTraining) {
+          <p
+            class="notice"
+            role="status"
+            data-testid="attendance-from-training"
+          >
+            {{
+              'attendance.register.fromTraining'
+                | transloco: { count: fromTraining.ticked }
+            }}
+          </p>
+        }
         <fieldset class="panel session">
           <legend class="visually-hidden">
             {{ 'attendance.register.session' | transloco }}
