@@ -97,7 +97,12 @@ test.describe('J18 training bookings', () => {
           weekStart: '2026-11-09',
           weekEnd: '2026-11-15',
           editableFrom: '2026-11-14',
-          week: { id: 'week-1', createdAt: '2026-11-08T10:00:00Z' },
+          week: {
+            id: 'week-1',
+            createdAt: '2026-11-08T10:00:00Z',
+            status: 'PUBLISHED',
+            publishedAt: '2026-11-08T11:00:00Z',
+          },
           slots: [slot],
         },
       });

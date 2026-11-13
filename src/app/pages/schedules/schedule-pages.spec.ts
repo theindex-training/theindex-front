@@ -84,7 +84,12 @@ const WEEK = {
   weekStart: '2026-11-09',
   weekEnd: '2026-11-15',
   editableFrom: '2026-11-14',
-  week: { id: 'week-1', createdAt: '2026-11-08T10:00:00Z' },
+  week: {
+    id: 'week-1',
+    createdAt: '2026-11-08T10:00:00Z',
+    status: 'PUBLISHED',
+    publishedAt: '2026-11-08T11:00:00Z',
+  },
   slots: [
     weekSlot('s-thu', '2026-11-12', MORNING, VELCHO),
     weekSlot('s-fri', '2026-11-13', EVENING, VASKO),
@@ -95,6 +100,11 @@ const WEEK = {
   ],
 };
 const NOT_CREATED = { ...WEEK, week: null, slots: [] };
+/** The same week as created from the template, before anyone published it. */
+const DRAFT = {
+  ...WEEK,
+  week: { ...WEEK.week, status: 'DRAFT', publishedAt: null },
+};
 const WORKOUT_SAT = {
   id: 'w-sat',
   date: '2026-11-14',
@@ -222,7 +232,7 @@ describe('schedule pages', () => {
         page.query('[data-testid="schedule-week"]')!.textContent,
       ).toContain('16 Nov – 22 Nov 2026');
       expect(page.text()).toContain(
-        'Create it from the North weekly template (3 trainings).',
+        "Create a draft from the North weekly template (3 trainings). Trainees won't see it until you review it and publish it",
       );
     });
 
@@ -274,7 +284,7 @@ describe('schedule pages', () => {
       await page.settle();
     });
 
-    it('creates a week from the template with one button, then shows it', async () => {
+    it('creates a draft week from the template, then shows it as a draft to review', async () => {
       signInAs('TRAINER');
       await openSchedule('/workouts/schedule');
       http
@@ -292,14 +302,133 @@ describe('schedule pages', () => {
         gymId: 'gym-c',
         week: '2026-11-09',
       });
-      create.flush(WEEK);
+      create.flush(DRAFT);
       await page.settle();
-      await showWeek();
+      await showWeek(DRAFT);
 
       expect(page.queryAll('[data-testid^="schedule-day-"]')).toHaveLength(7);
       expect(slotLines('2026-11-14')).toEqual([
         '07:10 – 08:10 Velcho Sokolov Helen',
       ]);
+      expect(
+        page.query('[data-testid="schedule-draft"]')?.textContent,
+      ).toContain(texts.week.draftTitle);
+      expect(page.query('[data-testid="schedule-published"]')).toBeNull();
+      expect(page.text()).toContain('Draft with 3 trainings');
+      expect(
+        page.query<HTMLButtonElement>('[data-testid="schedule-publish"]')
+          ?.disabled,
+      ).toBe(false);
+    });
+
+    it('a published week says so and offers no publish or discard', async () => {
+      signInAs('TRAINER');
+      await openSchedule('/workouts/schedule');
+      await showWeek();
+
+      expect(page.text()).toContain(texts.week.publishedHint);
+      expect(page.query('[data-testid="schedule-draft"]')).toBeNull();
+      expect(page.query('[data-testid="schedule-publish"]')).toBeNull();
+      expect(page.query('[data-testid="schedule-discard-draft"]')).toBeNull();
+    });
+
+    it('publishes the draft once confirmed, and then shows it as published', async () => {
+      signInAs('TRAINER');
+      await openSchedule('/workouts/schedule');
+      await showWeek(DRAFT);
+      const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(false);
+
+      await page.click('[data-testid="schedule-publish"]');
+      expect(confirm).toHaveBeenCalledWith(
+        "Publish the Center schedule for 9 Nov – 15 Nov 2026 (3 trainings)? Trainees will see it and can book its trainings. It can't go back to a draft.",
+      );
+      http.expectNone('/api/schedules/week-1/publish');
+
+      confirm.mockReturnValueOnce(true);
+      await page.click('[data-testid="schedule-publish"]');
+      const publish = http.expectOne('/api/schedules/week-1/publish');
+      expect(publish.request.method).toBe('POST');
+      expect(publish.request.body).toEqual({});
+      expect(
+        page.query<HTMLButtonElement>('[data-testid="schedule-publish"]')
+          ?.textContent,
+      ).toContain(texts.week.publishing);
+      publish.flush(WEEK);
+      await page.settle();
+
+      expect(page.query('[data-testid="schedule-draft"]')).toBeNull();
+      expect(page.query('[data-testid="schedule-publish"]')).toBeNull();
+      expect(page.text()).toContain(texts.week.publishedHint);
+      expect(slotLines('2026-11-14')).toEqual([
+        '07:10 – 08:10 Velcho Sokolov Helen',
+      ]);
+    });
+
+    it("keeps the draft and shows the API's message when publishing fails", async () => {
+      signInAs('TRAINER');
+      await openSchedule('/workouts/schedule');
+      await showWeek(DRAFT);
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      await page.click('[data-testid="schedule-publish"]');
+      flushError(
+        http.expectOne('/api/schedules/week-1/publish'),
+        'This week is already published',
+        409,
+      );
+      await page.settle();
+
+      expect(page.alert()).toBe('This week is already published');
+      expect(page.query('[data-testid="schedule-draft"]')).not.toBeNull();
+    });
+
+    it('waits for an open training form before publishing', async () => {
+      signInAs('TRAINER');
+      await openSchedule('/workouts/schedule');
+      await showWeek(DRAFT);
+
+      button(
+        day('2026-11-14'),
+        'Add a training on Saturday, 14 November',
+      )!.click();
+      await page.settle();
+
+      const publish = page.query<HTMLButtonElement>(
+        '[data-testid="schedule-publish"]',
+      )!;
+      expect(publish.disabled).toBe(true);
+      expect(page.text()).toContain(texts.week.finishEditing);
+    });
+
+    it('discards the draft once confirmed, and offers the template again', async () => {
+      signInAs('TRAINER');
+      await openSchedule('/workouts/schedule');
+      await showWeek(DRAFT);
+      const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(false);
+
+      await page.click('[data-testid="schedule-discard-draft"]');
+      expect(confirm).toHaveBeenCalledWith(
+        'Discard the Center draft for 9 Nov – 15 Nov 2026? Its trainings and the changes made to them are deleted; you can create the week from the template again.',
+      );
+      http.expectNone('/api/schedules/week-1');
+
+      confirm.mockReturnValueOnce(true);
+      await page.click('[data-testid="schedule-discard-draft"]');
+      const discard = http.expectOne('/api/schedules/week-1');
+      expect(discard.request.method).toBe('DELETE');
+      discard.flush({ deleted: true });
+      await page.settle();
+      http
+        .expectOne('/api/schedules?gymId=gym-c&week=2026-11-09')
+        .flush(NOT_CREATED);
+      await page.settle();
+      http.expectOne('/api/schedule-templates/gym-c').flush(TEMPLATE);
+      await page.settle();
+
+      expect(page.text()).toContain(texts.week.notCreatedTitle);
+      expect(
+        page.query('[data-testid="schedule-create-week"]')?.textContent,
+      ).toContain(texts.week.create);
     });
 
     it("shows the API's reason when the week can't be created", async () => {

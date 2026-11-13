@@ -24,3 +24,79 @@
   text-align: center;
   text-transform: uppercase;
 }
+
+.draft-notice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.draft-notice p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.draft-notice .draft-notice__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: var(--heading-tracking);
+  text-transform: uppercase;
+}
+
+// The draft's actions stay in reach while reviewing the week (above the tab bar on mobile), as
+// Register attendance's save bar does.
+.publish-bar {
+  position: sticky;
+  bottom: calc(
+    var(--tab-bar-height, 4rem) + env(safe-area-inset-bottom) + var(--space-3)
+  );
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.publish-bar__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  padding-left: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+
+.publish-bar__text {
+  flex: 1 1 12rem;
+  margin: 0;
+  color: var(--muted);
+}
+
+// Phones: the text on its own line, then the two buttons side by side.
+@media (max-width: 767.98px) {
+  .publish-bar__inner {
+    gap: var(--space-2);
+    padding-left: var(--space-3);
+  }
+
+  .publish-bar__text {
+    flex-basis: 100%;
+    font-size: var(--text-sm);
+  }
+
+  .publish-bar__inner .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: normal;
+  }
+}
+
+@media (min-width: 1024px) {
+  .publish-bar {
+    bottom: var(--space-4);
+  }
+}
