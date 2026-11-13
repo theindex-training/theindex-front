@@ -107,6 +107,7 @@ export class SchedulesComponent implements OnInit {
   actionError: UiMessage | null = null;
 
   readonly isAdmin: boolean;
+  private readonly trainerProfileId: string | null;
 
   constructor(
     private readonly schedules: SchedulesService,
@@ -123,6 +124,15 @@ export class SchedulesComponent implements OnInit {
     auth: AuthService,
   ) {
     this.isAdmin = auth.getUserRole() === 'ADMIN';
+    this.trainerProfileId = auth.getTrainerProfileId();
+  }
+
+  /** The signed-in trainer's primary gym, the page's default gym. */
+  private get primaryGymId(): string | null {
+    return (
+      this.trainers.find((t) => t.id === this.trainerProfileId)?.primaryGymId ??
+      null
+    );
   }
 
   ngOnInit(): void {
@@ -169,6 +179,7 @@ export class SchedulesComponent implements OnInit {
           initialGymId(
             this.gyms.map((g) => g.id),
             params.get('gym'),
+            this.primaryGymId,
           ) ?? '';
         const week = params.get('week') ?? '';
         const start = mondayOf(DATE_PATTERN.test(week) ? week : this.today());
@@ -427,7 +438,18 @@ export class SchedulesComponent implements OnInit {
 
   removeSlot(view: ScheduleSlotView): void {
     const slot = this.findSlot(view.id);
-    if (!slot || !window.confirm(this.confirmText(slot))) {
+    if (!slot) {
+      return;
+    }
+    // The API refuses it too; say so without asking first.
+    if (slot.bookedCount > 0) {
+      this.editing = null;
+      this.actionError = i18nMessage('schedules.week.cannotRemoveBooked', {
+        count: slot.bookedCount,
+      });
+      return;
+    }
+    if (!window.confirm(this.confirmText(slot))) {
       return;
     }
     this.removingId = slot.id;

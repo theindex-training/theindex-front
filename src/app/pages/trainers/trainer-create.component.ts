@@ -1,3 +1,4 @@
+import { HomeGymFieldComponent } from '../../components/home-gym-field/home-gym-field.component';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
@@ -26,6 +27,7 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
   selector: 'app-trainer-create',
   standalone: true,
   imports: [
+    HomeGymFieldComponent,
     UiMessagePipe,
     TranslocoPipe,
     CommonModule,
@@ -39,6 +41,7 @@ export class TrainerCreateComponent {
   readonly form: FormGroup<{
     name: FormControl<string>;
     nickname: FormControl<string | null>;
+    primaryGymId: FormControl<string>;
   }>;
 
   submitting = false;
@@ -58,6 +61,7 @@ export class TrainerCreateComponent {
       nickname: this.formBuilder.control<string | null>(null, [
         trimmedLength(1, 50),
       ]),
+      primaryGymId: this.formBuilder.nonNullable.control(''),
     });
   }
 
@@ -72,6 +76,7 @@ export class TrainerCreateComponent {
       name: raw.name.trim(),
       nickname: this.normalizeOptional(raw.nickname),
       isActive: true,
+      primaryGymId: raw.primaryGymId || null,
     };
 
     this.submitting = true;

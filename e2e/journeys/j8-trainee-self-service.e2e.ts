@@ -282,6 +282,7 @@ test.describe('J8 trainee self-service', () => {
       const nav = page.getByRole('navigation', { name: t('nav.mainLabel') });
       await expect(nav.getByRole('link')).toHaveText([
         t('nav.profile'),
+        t('nav.schedule'),
         t('nav.stats'),
         t('nav.records'),
       ]);

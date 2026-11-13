@@ -63,6 +63,7 @@
     "trainers": "Trainers",
     "trainingTimes": "Training times",
     "profile": "Profile",
+    "schedule": "Schedule",
     "stats": "Stats",
     "records": "Records",
     "content": "Content",
@@ -163,7 +164,9 @@
       "nicknameError": "Nickname must be 1–50 characters.",
       "nicknameHint": "Up to 50 characters.",
       "namePlaceholder": "Anton",
-      "nicknamePlaceholder": "Toni"
+      "nicknamePlaceholder": "Toni",
+      "preferredGym": "Preferred gym",
+      "preferredGymHint": "The gym their Schedule opens with."
     },
     "backToList": "Back to trainees",
     "loadingOne": "Loading trainee...",
@@ -469,6 +472,10 @@
       "warning": "Deactivating a gym hides it from new schedules, but existing references remain unchanged.",
       "inactive": "Gym inactive",
       "error": "Unable to deactivate this gym right now."
+    },
+    "homeGym": {
+      "none": "No gym",
+      "inactive": "{name} (inactive)"
     }
   },
   "gymSubscriptions": {
@@ -571,7 +578,9 @@
       "nicknameError": "Nickname must be 1–50 characters.",
       "nicknameHint": "Up to 50 characters.",
       "namePlaceholder": "Velcho",
-      "nicknamePlaceholder": "V"
+      "nicknamePlaceholder": "V",
+      "primaryGym": "Primary gym",
+      "primaryGymHint": "The gym their Schedule and Register attendance open with."
     },
     "backToList": "Back to trainers",
     "loadingOne": "Loading trainer...",
@@ -1479,7 +1488,8 @@
       "removeFor": "Remove {slot}",
       "noTrainings": "No trainings",
       "add": "Add a training",
-      "addFor": "Add a training on {day}"
+      "addFor": "Add a training on {day}",
+      "booked": "{count, plural, =0 {No bookings} one {# booked} other {# booked}}"
     },
     "template": {
       "title": "Weekly template",
@@ -1512,7 +1522,33 @@
       "overMessage": "This week is over, so its schedule can no longer be created.",
       "setUpTemplate": "Set up the template",
       "lockedHint": "Trainings of today and earlier days can no longer be changed.",
-      "confirmRemove": "Remove the {time} training with {trainer} on {day}?"
+      "confirmRemove": "Remove the {time} training with {trainer} on {day}?",
+      "cannotRemoveBooked": "This training has {count, plural, one {# booking} other {# bookings}}, so it can't be removed."
     }
+  },
+  "traineeSchedule": {
+    "title": "Schedule",
+    "subtitle": "Book your place in the gym's trainings.",
+    "gym": "Gym",
+    "rules": "Booking closes 30 minutes before a training; you can cancel until 1 hour before.",
+    "loading": "Loading the schedule",
+    "loadError": "Couldn't load the schedule",
+    "loadErrorMessage": "Unable to load the schedule right now.",
+    "noGymsTitle": "No gyms yet",
+    "noGymsMessage": "There is nothing to book yet.",
+    "notOutTitle": "This week's schedule isn't out yet",
+    "notOutMessage": "The trainers publish each week before it starts. Check back soon.",
+    "booked": "Booked",
+    "book": "Book",
+    "bookFor": "Book {training}",
+    "booking": "Booking...",
+    "cancel": "Cancel booking",
+    "cancelFor": "Cancel the booking for {training}",
+    "cancelling": "Cancelling...",
+    "closed": "Booking closed",
+    "cancelClosed": "Too late to cancel",
+    "confirmCancel": "Cancel your booking for {training}?",
+    "bookError": "Unable to book this training right now.",
+    "cancelError": "Unable to cancel this booking right now."
   }
 }

@@ -63,6 +63,14 @@
           }
         </div>
       </div>
+      <div class="form-row">
+        <app-home-gym-field
+          fieldId="trainer-primary-gym"
+          [control]="form.controls.primaryGymId"
+          [label]="'trainers.fields.primaryGym' | transloco"
+          [hint]="'trainers.fields.primaryGymHint' | transloco"
+        />
+      </div>
     </div>
 
     @if (errorMessage) {

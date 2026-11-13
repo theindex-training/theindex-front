@@ -28,6 +28,8 @@ export interface ScheduleSlotView {
   trainingTime: ScheduleTrainingTime;
   trainer: ScheduleTrainer;
   workout?: { id: string; title: string | null } | null;
+  /** Bookings, in a real week (a template has none). */
+  bookedCount?: number;
 }
 
 /** One day of the list: a weekday of a template, or a date of a real week. */

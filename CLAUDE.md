@@ -144,6 +144,17 @@ The gyms' weekly training schedules (theindex-api `schedules`). A training ("slo
   - Days before `editableFrom` (today and earlier, gym-local, from the API) are read-only: no Edit, Remove or Add.
 - Both pages render `app-schedule-days` (`schedule-days.component`, presentational: days with their trainings in the API's order, Edit / Remove icon buttons and "Add a training"; the page keeps which form is open and saves) and the inline `app-schedule-slot-form`: training time (the list, or "New training time…" with start and end; hours that already exist reuse that training time, new ones are created by the API on save, and the form says which), trainer (active ones, plus the slot's own if inactive) and, in a real week, the day's workout (optional). `schedule-slot-form.ts` is its pure model; a change sends only the fields that changed (`changedSlotFields`), so a slot keeps an inactive trainer. Remove asks with `window.confirm`. After a save the page reloads the schedule (and the training times when one may have been created).
 
+## Bookings (`/schedule`, TRAINEE)
+Trainees book trainings of the weeks staff created (theindex-api `/api/bookings`, `BookingsService`; always their own). "Schedule" is a trainee nav item and tab (Profile, Schedule, Stats, Records, then Account). `pages/trainee-schedule/`:
+- The gym control (from `GET /api/bookings/gyms`, since trainees can't list gyms) and the week bar, with `?gym=` / `?week=` and the remembered gym as on the staff Schedule. A week not created yet says it isn't out.
+- Each training shows its time, trainer, workout title, how many booked (never who), a green bar and "Booked" chip when it is the trainee's, and **Book** or **Cancel booking** only when the API's `canBook` / `canCancel` say so (booking closes 30 minutes before, cancelling 1 hour before); otherwise "Booking closed" / "Too late to cancel", and nothing once it started. Cancel asks with `window.confirm`. A failed action shows the API's message and reloads the week.
+- Staff: week slots show "N booked" when there are bookings. Remove refuses a booked training with a notice (no request; the API refuses too), and the API refuses a new training time for one (shown in the form).
+
+## Home gyms
+A trainee's optional **preferred gym** and a trainer's optional **primary gym** (theindex-api `preferredGymId` / `primaryGymId`) are set on the trainee and trainer create/edit forms with `app-home-gym-field` (`components/home-gym-field`: loads the gyms itself, offers the active ones plus the profile's own if inactive, '' is none and is sent as `null`). They are the default gym everywhere a page picks one:
+- Schedule pages (`schedule-gym.ts` `initialGymId`): `?gym=` first, then the home gym (a trainer's from the active trainers list and the token's `trainerProfileId`; a trainee's from `preferred` in `GET /api/bookings/gyms`), then the gym picked last on the device, then the first.
+- Register attendance: the selected trainer's primary gym (when active), else the first gym; until a gym is picked by hand it follows the trainer select.
+
 ## Content area (`/content`)
 The back office of the public site `theindex.training` (the sibling repo `theindex-training/theindex-web`; its `docs/decision-record.md` is the reference for the content features and their backlog).
 - ADMIN only: every `content/...` route has `roleGuard` + `data: { roles: ['ADMIN'] }`, and the "Content" nav item (Manage group) has `roles: ['ADMIN']`.
@@ -249,7 +260,7 @@ Other scales:
 - **Desktop (≥ 1024px):** `app-sidebar`, a sticky `--nav-bg` column with brand, main items, the "Manage" group, theme and language switches and `app-user-block`. The active item gets `--nav-surface` plus a small `--nav-accent` marker, and `aria-current="page"` via `routerLinkActive` + `ariaCurrentWhenActive`.
 - **Mobile (< 1024px):** a compact sticky top bar with `app-brand`, plus `app-tab-bar`, fixed to the bottom and padded for `env(safe-area-inset-*)` (`viewport-fit=cover` is set in `index.html`).
   - Staff tabs: Home, Trainees, Register (accent square, the primary action), Settle, More.
-  - Trainees: Profile, Stats, Records, Account. They have no primary action, so no accent tab.
+  - Trainees: Profile, Schedule, Stats, Records, Account. They have no primary action, so no accent tab.
   - The last tab opens `app-nav-sheet`, a native `<dialog>` opened with `showModal()`. It contains the remaining items as tiles, the theme and language switches and account actions. It gets focus containment and Escape for free, closes on backdrop tap, on navigation and when the window grows to desktop, and returns focus to the tab. The More/Account tab shows as active when the current page lives in the sheet.
   - Page content gets bottom padding for the tab bar, so it never ends up underneath it.
 - The breakpoint is in two places: `main-layout.component.scss` and `DESKTOP_QUERY` in `main-layout.component.ts`.
