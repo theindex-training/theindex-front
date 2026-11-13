@@ -141,14 +141,14 @@ test.describe('J17 bookings', () => {
       await expect(
         page.getByRole('heading', { level: 1, name: 'Helen' }),
       ).toBeVisible();
-      await expect(page.getByTestId('trainee-workout-summary')).toHaveText(
+      await expect(page.getByTestId('training-workout-summary')).toHaveText(
         '3 rounds for time:\n400 m run\n21 kettlebell swings',
       );
-      await expect(page.getByTestId('trainee-exercise-ex-run')).toContainText(
+      await expect(page.getByTestId('training-exercise-ex-run')).toContainText(
         'Out of the door and around the block.',
       );
       await expect(
-        page.getByTestId('trainee-exercise-ex-swing').getByRole('button', {
+        page.getByTestId('training-exercise-ex-swing').getByRole('button', {
           name: t('traineeTraining.playVideo', { name: 'Kettlebell Swing' }),
         }),
       ).toBeVisible();

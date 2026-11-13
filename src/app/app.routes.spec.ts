@@ -70,6 +70,7 @@ const SHELL_ACCESS: Record<string, string[] | null> = {
   'workouts/exercises/:id/edit': STAFF,
   'workouts/exercises': STAFF,
   'workouts/schedule': STAFF,
+  'workouts/schedule/:id': STAFF,
   'workouts/new': STAFF,
   'workouts/:id/edit': STAFF,
   workouts: STAFF,

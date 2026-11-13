@@ -406,6 +406,36 @@ describe('schedule pages', () => {
       expect(dayText('2026-11-15')).toContain(texts.days.noTrainings);
     });
 
+    it('links every training, today and earlier days too, to its page with who booked it', async () => {
+      signInAs('TRAINER');
+      await openSchedule('/workouts/schedule');
+      await showWeek();
+
+      const details = page
+        .queryAll<HTMLAnchorElement>('a[aria-label^="Details of"]')
+        .map((a) => [a.getAttribute('aria-label'), a.getAttribute('href')]);
+      expect(details).toEqual([
+        [
+          'Details of Thursday, 12 November 07:10 – 08:10 Velcho Sokolov',
+          '/workouts/schedule/s-thu',
+        ],
+        [
+          'Details of Friday, 13 November 17:00 – 18:00 Vasko',
+          '/workouts/schedule/s-fri',
+        ],
+        [
+          'Details of Saturday, 14 November 07:10 – 08:10 Velcho Sokolov',
+          '/workouts/schedule/s-sat',
+        ],
+      ]);
+
+      page
+        .query<HTMLAnchorElement>('a[href="/workouts/schedule/s-fri"]')!
+        .click();
+      await page.settle();
+      expect(router.url).toBe('/workouts/schedule/s-fri');
+    });
+
     it("adds a training with a new training time and the day's workout", async () => {
       signInAs('TRAINER');
       await openSchedule('/workouts/schedule');
@@ -646,6 +676,8 @@ describe('schedule pages', () => {
       ]);
       expect(dayText('2')).toContain(texts.days.noTrainings);
       expect(slotLines('3')).toEqual(['07:10 – 08:10 Velcho Sokolov']);
+      // A template's trainings have no page of their own.
+      expect(page.queryAll('a[aria-label^="Details of"]')).toEqual([]);
       // No workout field in a template.
       button(day('2'), 'Add a training on Tuesday')!.click();
       await page.settle();

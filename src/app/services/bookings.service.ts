@@ -43,17 +43,20 @@ export interface TrainingExercise {
   videoUrl: string | null;
 }
 
+/** A training's whole workout, as its page shows it (trainees' and staff's). */
+export interface TrainingWorkout {
+  title: string | null;
+  /** Plain text; its line breaks matter. */
+  summary: string;
+  /** In the workout's order. */
+  exercises: TrainingExercise[];
+}
+
 /** One training with its gym and its whole workout (`GET /api/bookings/trainings/:slotId`). */
 export interface TrainingDetails extends Omit<BookableTraining, 'workout'> {
   gym: { id: string; name: string };
   /** null until the staff pick the day's workout for this training. */
-  workout: {
-    title: string | null;
-    /** Plain text; its line breaks matter. */
-    summary: string;
-    /** In the workout's order. */
-    exercises: TrainingExercise[];
-  } | null;
+  workout: TrainingWorkout | null;
 }
 
 export interface BookingWeek {

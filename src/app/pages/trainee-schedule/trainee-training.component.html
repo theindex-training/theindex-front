@@ -137,58 +137,10 @@
       }
     </section>
 
-    <section
-      class="page-stack"
-      aria-labelledby="training-workout-title"
-      data-testid="trainee-training-workout"
-    >
-      <div class="section-header">
-        <h2 class="workout__title" id="training-workout-title">
-          {{ 'traineeTraining.workoutTitle' | transloco }}
-        </h2>
-      </div>
-      @if (training.workout; as workout) {
-        <div class="panel workout">
-          <p
-            class="workout__summary"
-            data-testid="trainee-workout-summary"
-            [textContent]="workout.summary"
-          ></p>
-        </div>
-        @if (workout.exercises.length) {
-          <h3 class="exercises__title">
-            {{ 'traineeTraining.exercises' | transloco }}
-          </h3>
-          <ol class="exercises">
-            @for (exercise of workout.exercises; track exercise.id) {
-              <li
-                class="panel exercise"
-                [attr.data-testid]="'trainee-exercise-' + exercise.id"
-              >
-                <h4 class="exercise__name">{{ exercise.name }}</h4>
-                @if (exercise.description) {
-                  <p
-                    class="exercise__description"
-                    [textContent]="exercise.description"
-                  ></p>
-                }
-                @if (exercise.videoUrl) {
-                  <app-exercise-video
-                    [name]="exercise.name"
-                    [url]="exercise.videoUrl"
-                  />
-                }
-              </li>
-            }
-          </ol>
-        }
-      } @else {
-        <app-empty-state
-          icon="dumbbell"
-          [title]="'traineeTraining.noWorkoutTitle' | transloco"
-          [message]="'traineeTraining.noWorkoutMessage' | transloco"
-        />
-      }
-    </section>
+    <app-training-workout
+      [workout]="training.workout"
+      [emptyTitle]="'traineeTraining.noWorkoutTitle' | transloco"
+      [emptyMessage]="'traineeTraining.noWorkoutMessage' | transloco"
+    />
   }
 </section>

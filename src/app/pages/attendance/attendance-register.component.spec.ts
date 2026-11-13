@@ -647,6 +647,89 @@ describe('AttendanceRegisterComponent', () => {
     });
   });
 
+  describe('opened from a training', () => {
+    const fromTraining = () =>
+      page.query('[data-testid="attendance-from-training"]');
+
+    it('fills in the training and ticks who booked it, then reviews it as usual', async () => {
+      signInAs('ADMIN');
+      await router.navigateByUrl(
+        '/attendance/new?date=2026-11-13&time=18:30&trainer=trainer-1&gym=gym-2&trainees=t-ivan,t-georgi',
+      );
+      await render();
+
+      expect(select('trainerId').value).toBe('trainer-1');
+      expect(select('locationId').value).toBe('gym-2');
+      expect(page.query<HTMLInputElement>('input[type="date"]')!.value).toBe(
+        '2026-11-13',
+      );
+      expect(select('trainedTime').value).toBe('18:30');
+      expect(checkbox('Ivan Petrov').checked).toBe(true);
+      expect(checkbox('Georgi Dimitrov').checked).toBe(true);
+      expect(checkbox('Ivelina Koleva').checked).toBe(false);
+      expect(fromTraining()!.textContent.trim()).toBe(
+        'Filled in from the training: 2 booked trainees are ticked. ' +
+          "Untick anyone who didn't come and add who came without booking.",
+      );
+
+      // The chosen gym stays when the trainer changes.
+      await page.select('select[formcontrolname="trainerId"]', 'trainer-other');
+      expect(select('locationId').value).toBe('gym-2');
+      await page.select('select[formcontrolname="trainerId"]', 'trainer-1');
+      await tick('Georgi Dimitrov');
+
+      // Nothing is saved before the review: the usual preview, then save.
+      expect(await review()).toEqual({
+        trainerId: 'trainer-1',
+        locationId: 'gym-2',
+        traineeIds: ['t-ivan'],
+        trainedDate: '2026-11-13',
+        trainedTime: '18:30',
+      });
+      http.expectNone('/api/attendance/batch');
+    });
+
+    it('keeps the defaults for what the page does not offer: an inactive trainer, gym or trainee, an unknown time', async () => {
+      signInAs('TRAINER', { trainerProfileId: 'trainer-other' });
+      await router.navigateByUrl(
+        '/attendance/new?date=2026-11-13&time=07:10&trainer=trainer-old&gym=gym-closed&trainees=t-gone,t-unknown,t-ivelina',
+      );
+      await render();
+
+      expect(select('trainerId').value).toBe('trainer-other');
+      expect(select('locationId').value).toBe('gym-1');
+      expect(page.query<HTMLInputElement>('input[type="date"]')!.value).toBe(
+        '2026-11-13',
+      );
+      expect(select('trainedTime').value).toBe('');
+      expect(checkbox('Ivelina Koleva').checked).toBe(true);
+      expect(checkbox('Ivan Petrov').checked).toBe(false);
+      expect(fromTraining()!.textContent).toContain(
+        '1 booked trainee is ticked',
+      );
+    });
+
+    it('says so when no booked trainee could be ticked', async () => {
+      signInAs('ADMIN');
+      await router.navigateByUrl(
+        '/attendance/new?date=2026-11-13&time=18:30&trainer=trainer-1&gym=gym-1',
+      );
+      await render();
+
+      expect(page.queryAll('input[type="checkbox"]:checked')).toEqual([]);
+      expect(fromTraining()!.textContent.trim()).toBe(
+        'Filled in from the training. No booked trainees to tick: pick who came.',
+      );
+    });
+
+    it('shows no note when opened on its own', async () => {
+      signInAs('ADMIN');
+      await render();
+
+      expect(fromTraining()).toBeNull();
+    });
+  });
+
   it('sends nothing while a required session field is empty', async () => {
     signInAs('ADMIN');
     await render('ok', []);

@@ -21,7 +21,7 @@ import {
 import { dayKeyToDate } from '../../utils/calendar.util';
 import { timeRange } from '../schedules/schedule-slot-form.component';
 import { mondayOf } from '../workouts/workouts.component';
-import { ExerciseVideoComponent } from './exercise-video.component';
+import { TrainingWorkoutComponent } from './training-workout.component';
 
 /**
  * A trainee's training (`/schedule/:id`): when and where, the trainer, how many booked and the
@@ -37,7 +37,7 @@ import { ExerciseVideoComponent } from './exercise-video.component';
     PageHeaderComponent,
     EmptyStateComponent,
     StatusDotComponent,
-    ExerciseVideoComponent,
+    TrainingWorkoutComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainee-training.component.html',

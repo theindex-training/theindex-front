@@ -5,6 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ChipComponent } from '../../components/chip/chip.component';
 import { IconComponent } from '../../components/icon/icon.component';
@@ -54,14 +55,15 @@ export interface SlotSave extends SlotEditing {
 }
 
 /**
- * The days of a schedule, Monday to Sunday, each with its trainings in order and, on the days
- * that can change, Edit, Remove and "Add a training" (an inline form). Presentational: the page
+ * The days of a schedule, Monday to Sunday, each with its trainings in order, Details in a real
+ * week and, on the days that can change, Edit, Remove and "Add a training" (an inline form). Presentational: the page
  * keeps the data, which form is open, and saves.
  */
 @Component({
   selector: 'app-schedule-days',
   standalone: true,
   imports: [
+    RouterLink,
     TranslocoPipe,
     ChipComponent,
     IconComponent,
@@ -82,6 +84,11 @@ export class ScheduleDaysComponent {
   @Input() formError: UiMessage | null = null;
   /** The training being removed, whose Remove button waits. */
   @Input() removingId: string | null = null;
+  /**
+   * A real week: every training (read-only days too) links to its page, with who booked it.
+   * A template has no such page.
+   */
+  @Input() showDetails = false;
   /** Names the day list, e.g. "Days of the week". */
   @Input({ required: true }) label = '';
 

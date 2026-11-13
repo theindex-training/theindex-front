@@ -16,7 +16,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import {
   AttendanceBatchPreview,
@@ -96,6 +96,12 @@ export class AttendanceRegisterComponent implements OnInit {
   @ViewChild('summaryTitle') private summaryTitle?: ElementRef<HTMLElement>;
   errorMessage: UiMessage | null = null;
 
+  /**
+   * Set when the page was opened from a training (`/workouts/schedule/:id`): how many of its
+   * booked trainees were ticked.
+   */
+  fromTraining: { ticked: number } | null = null;
+
   trainers: TrainerProfile[] = [];
   gymLocations: GymLocation[] = [];
   trainingTimes: TrainingTime[] = [];
@@ -114,6 +120,7 @@ export class AttendanceRegisterComponent implements OnInit {
     private readonly attendanceService: AttendanceService,
     private readonly authService: AuthService,
     private readonly router: Router,
+    private readonly route: ActivatedRoute,
     private readonly changeDetector: ChangeDetectorRef,
     private readonly i18n: LanguageService,
     private readonly format: LocaleFormatService,
@@ -152,6 +159,7 @@ export class AttendanceRegisterComponent implements OnInit {
         this.filteredTrainees = [...this.trainees];
         this.preselectCurrentTrainer();
         this.preselectDefaultLocation();
+        this.prefillFromTraining();
         this.loading = false;
         this.changeDetector.detectChanges();
       },
@@ -392,6 +400,52 @@ export class AttendanceRegisterComponent implements OnInit {
       return primary;
     }
     return this.gymLocations[0]?.id ?? '';
+  }
+
+  /**
+   * Opened from a training, the address carries it: `date`, `time` (its start, HH:mm), `trainer`,
+   * `gym` and `trainees` (comma-separated ids of who booked). Each value is used only when the page
+   * offers it (an active trainer, gym or trainee, a listed training time); the rest keeps the
+   * defaults. Nothing is saved: the usual review and save follow.
+   */
+  private prefillFromTraining(): void {
+    const params = this.route.snapshot.queryParamMap;
+    if (!params.has('date')) {
+      return;
+    }
+    const { trainerId, locationId, trainedDate, trainedTime } =
+      this.form.controls;
+
+    const trainer = params.get('trainer');
+    if (trainer && this.trainers.some((t) => t.id === trainer)) {
+      trainerId.setValue(trainer);
+    }
+    const gym = params.get('gym');
+    if (gym && this.gymLocations.some((g) => g.id === gym)) {
+      locationId.setValue(gym);
+      // Chosen, so changing the trainer no longer moves it to their primary gym.
+      locationId.markAsDirty();
+    }
+    const date = params.get('date') ?? '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      trainedDate.setValue(date);
+    }
+    const time = params.get('time');
+    if (
+      time &&
+      this.trainingTimes.some(
+        (t) => formatTimeWithoutSeconds(t.startTime) === time,
+      )
+    ) {
+      trainedTime.setValue(time);
+    }
+    const booked = new Set((params.get('trainees') ?? '').split(','));
+    for (const trainee of this.trainees) {
+      if (booked.has(trainee.id)) {
+        this.selectedTraineeIds.add(trainee.id);
+      }
+    }
+    this.fromTraining = { ticked: this.selectedTraineeIds.size };
   }
 
   private preselectCurrentTrainer(): void {

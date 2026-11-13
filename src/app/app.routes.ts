@@ -482,6 +482,16 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] },
       },
       {
+        path: 'workouts/schedule/:id',
+        title: 'schedules.training.title',
+        loadComponent: () =>
+          import('./pages/schedules/schedule-training.component').then(
+            (m) => m.ScheduleTrainingComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
         path: 'workouts/new',
         title: 'workouts.form.createTitle',
         loadComponent: () =>
