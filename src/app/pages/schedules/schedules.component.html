@@ -129,6 +129,22 @@
         </app-empty-state>
       }
     } @else if (schedule) {
+      @if (isDraft) {
+        <div
+          class="notice notice--warning draft-notice"
+          role="status"
+          data-testid="schedule-draft"
+        >
+          <p class="draft-notice__title">
+            {{ 'schedules.week.draftTitle' | transloco }}
+          </p>
+          <p>{{ 'schedules.week.draftMessage' | transloco }}</p>
+        </div>
+      } @else {
+        <p class="text-muted" data-testid="schedule-published">
+          {{ 'schedules.week.publishedHint' | transloco }}
+        </p>
+      }
       @if (hasLockedDays) {
         <p class="text-muted">{{ 'schedules.week.lockedHint' | transloco }}</p>
       }
@@ -154,6 +170,55 @@
         (save)="saveSlot($event)"
         (remove)="removeSlot($event)"
       />
+      @if (isDraft) {
+        <div class="publish-bar">
+          @if (draftError) {
+            <p class="notice notice--danger" role="alert">
+              {{ draftError | uiMessage }}
+            </p>
+          }
+          <div class="publish-bar__inner">
+            <p class="publish-bar__text" aria-live="polite">
+              @if (editing) {
+                {{ 'schedules.week.finishEditing' | transloco }}
+              } @else {
+                {{
+                  'schedules.week.draftCount'
+                    | transloco: { count: schedule.slots.length }
+                }}
+              }
+            </p>
+            <button
+              class="btn btn--danger"
+              type="button"
+              data-testid="schedule-discard-draft"
+              [disabled]="busy"
+              (click)="discardDraft()"
+            >
+              {{
+                (discarding
+                  ? 'schedules.week.discarding'
+                  : 'schedules.week.discard'
+                ) | transloco
+              }}
+            </button>
+            <button
+              class="btn btn--primary"
+              type="button"
+              data-testid="schedule-publish"
+              [disabled]="busy || !!editing"
+              (click)="publishWeek()"
+            >
+              {{
+                (publishing
+                  ? 'schedules.week.publishing'
+                  : 'schedules.week.publish'
+                ) | transloco
+              }}
+            </button>
+          </div>
+        </div>
+      }
     }
   }
 </section>

@@ -49,6 +49,12 @@ export interface ScheduleSlot {
   bookedCount: number;
 }
 
+/**
+ * A week created from the template is a DRAFT only staff see; once PUBLISHED, trainees see it and
+ * can book its trainings (for good: a published week can't go back to draft).
+ */
+export type ScheduleWeekStatus = 'DRAFT' | 'PUBLISHED';
+
 export interface ScheduleWeek {
   gym: { id: string; name: string };
   /** Monday, YYYY-MM-DD. */
@@ -57,7 +63,13 @@ export interface ScheduleWeek {
   /** The first day that can still change (tomorrow, gym-local); earlier days are read-only. */
   editableFrom: string;
   /** null until a trainer or admin creates the week from the gym's template. */
-  week: { id: string; createdAt: string } | null;
+  week: {
+    id: string;
+    createdAt: string;
+    status: ScheduleWeekStatus;
+    /** null for a draft (and for weeks published before drafts existed). */
+    publishedAt: string | null;
+  } | null;
   slots: ScheduleSlot[];
 }
 
@@ -180,9 +192,22 @@ export class SchedulesService {
     return this.http.get<ScheduleWeek>(this.weeksUrl, { params });
   }
 
-  /** Creates a gym's week from its template; `week` is any day of it. */
+  /** Creates a gym's week from its template as a draft; `week` is any day of it. */
   createWeek(gymId: string, week: string): Observable<ScheduleWeek> {
     return this.http.post<ScheduleWeek>(this.weeksUrl, { gymId, week });
+  }
+
+  /** Shows a draft week to trainees and opens its booking; answers the week. */
+  publishWeek(weekId: string): Observable<ScheduleWeek> {
+    return this.http.post<ScheduleWeek>(
+      `${this.weeksUrl}/${weekId}/publish`,
+      {},
+    );
+  }
+
+  /** Discards a draft week with its trainings (the API refuses a published one). */
+  discardWeek(weekId: string): Observable<{ deleted: boolean }> {
+    return this.http.delete<{ deleted: boolean }>(`${this.weeksUrl}/${weekId}`);
   }
 
   addSlot(

@@ -59,8 +59,10 @@ const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
  * The gyms' real weeks (ADMIN and TRAINER): pick a gym and a week; a week not created yet is
- * created from the gym's template with one button, then its trainings can change from tomorrow
- * on. `?gym=` and `?week=` (any day of the week) keep the choice in the address.
+ * created from the gym's template as a draft, which only staff see. Staff review and change it,
+ * then publish it (trainees see it from then on) or discard it. Trainings can change from
+ * tomorrow on, in a draft as in a published week. `?gym=` and `?week=` (any day of the week)
+ * keep the choice in the address.
  */
 @Component({
   selector: 'app-schedules',
@@ -105,6 +107,12 @@ export class SchedulesComponent implements OnInit {
   removingId: string | null = null;
   /** A failed create or removal, shown above the days. */
   actionError: UiMessage | null = null;
+
+  /** Publishing or discarding the draft shown. */
+  publishing = false;
+  discarding = false;
+  /** A failed publish or discard, shown in the draft's action bar. */
+  draftError: UiMessage | null = null;
 
   readonly isAdmin: boolean;
   private readonly trainerProfileId: string | null;
@@ -220,6 +228,7 @@ export class SchedulesComponent implements OnInit {
     this.loading = true;
     this.errorMessage = null;
     this.actionError = null;
+    this.draftError = null;
     this.editing = null;
     const gymId = this.gymId;
     const start = this.weekStart;
@@ -379,6 +388,87 @@ export class SchedulesComponent implements OnInit {
       error: (error) => {
         this.creating = false;
         this.actionError = apiErrorMessage(error, 'schedules.week.createError');
+        this.changeDetector.detectChanges();
+      },
+    });
+  }
+
+  /** The week shown is a draft: staff only, until it is published. */
+  get isDraft(): boolean {
+    return this.schedule?.week?.status === 'DRAFT';
+  }
+
+  /** Something is being saved, removed, published or discarded. */
+  get busy(): boolean {
+    return (
+      this.saving || !!this.removingId || this.publishing || this.discarding
+    );
+  }
+
+  /** Shows the draft to trainees, after asking; the page then shows the published week. */
+  publishWeek(): void {
+    const schedule = this.schedule;
+    if (!schedule?.week || this.editing || this.busy) {
+      return;
+    }
+    const confirmed = window.confirm(
+      this.language.t('schedules.week.confirmPublish', {
+        gym: schedule.gym.name,
+        week: this.weekLabel(),
+        count: schedule.slots.length,
+      }),
+    );
+    if (!confirmed) {
+      return;
+    }
+    const { gym, weekStart } = schedule;
+    this.publishing = true;
+    this.draftError = null;
+    this.schedules.publishWeek(schedule.week.id).subscribe({
+      next: (published) => {
+        this.publishing = false;
+        if (gym.id === this.gymId && weekStart === this.weekStart) {
+          this.schedule = published;
+        }
+        this.changeDetector.detectChanges();
+      },
+      error: (error) => {
+        this.publishing = false;
+        this.draftError = apiErrorMessage(error, 'schedules.week.publishError');
+        this.changeDetector.detectChanges();
+      },
+    });
+  }
+
+  /** Throws the draft away, after asking; the week can then be created again. */
+  discardDraft(): void {
+    const schedule = this.schedule;
+    if (!schedule?.week || this.busy) {
+      return;
+    }
+    const confirmed = window.confirm(
+      this.language.t('schedules.week.confirmDiscard', {
+        gym: schedule.gym.name,
+        week: this.weekLabel(),
+      }),
+    );
+    if (!confirmed) {
+      return;
+    }
+    const { gym, weekStart } = schedule;
+    this.discarding = true;
+    this.draftError = null;
+    this.editing = null;
+    this.schedules.discardWeek(schedule.week.id).subscribe({
+      next: () => {
+        this.discarding = false;
+        if (gym.id === this.gymId && weekStart === this.weekStart) {
+          this.load();
+        }
+      },
+      error: (error) => {
+        this.discarding = false;
+        this.draftError = apiErrorMessage(error, 'schedules.week.discardError');
         this.changeDetector.detectChanges();
       },
     });

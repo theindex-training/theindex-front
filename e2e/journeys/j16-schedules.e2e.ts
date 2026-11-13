@@ -130,7 +130,7 @@ test.describe('J16 schedules', () => {
   );
 
   test(
-    "a trainer creates this week's schedule from the template and adds a training",
+    "a trainer creates this week's schedule as a draft from the template, adds a training and publishes it",
     { tag: ['@desktop', '@mobile'] },
     async ({ page, api, signInAs }) => {
       await page.clock.setFixedTime(NOW);
@@ -139,6 +139,8 @@ test.describe('J16 schedules', () => {
       const created = () => api.calls('POST', '/api/schedules').length > 0;
       const added = () =>
         api.calls('POST', '/api/schedules/week-1/slots').length > 0;
+      const published = () =>
+        api.calls('POST', '/api/schedules/week-1/publish').length > 0;
       const weekSlot = (id: string, date: string, extra: object = {}) => ({
         id,
         date,
@@ -153,7 +155,14 @@ test.describe('J16 schedules', () => {
         weekStart: '2026-11-09',
         weekEnd: '2026-11-15',
         editableFrom: '2026-11-11',
-        week: created() ? { id: 'week-1', createdAt: NOW } : null,
+        week: created()
+          ? {
+              id: 'week-1',
+              createdAt: NOW,
+              status: published() ? 'PUBLISHED' : 'DRAFT',
+              publishedAt: published() ? NOW : null,
+            }
+          : null,
         slots: created()
           ? [
               weekSlot('s-mon', '2026-11-09'),
@@ -188,6 +197,9 @@ test.describe('J16 schedules', () => {
         status: 201,
         body: weekSlot('s-new', '2026-11-12'),
       });
+      api.on('POST', '/api/schedules/week-1/publish', () => ({
+        body: week(),
+      }));
 
       // Schedule is the first tab of the workouts area.
       await page.goto('/workouts');
@@ -205,6 +217,10 @@ test.describe('J16 schedules', () => {
       await expect
         .poll(() => api.last('POST', '/api/schedules')?.body)
         .toEqual({ gymId: 'gym-c', week: '2026-11-09' });
+      // A draft: trainees don't see it until it is published.
+      await expect(page.getByTestId('schedule-draft')).toContainText(
+        t('schedules.week.draftTitle'),
+      );
 
       // Monday and Tuesday (today) are read-only; Wednesday can change.
       const monday = page.getByTestId('schedule-day-2026-11-09');
@@ -252,6 +268,22 @@ test.describe('J16 schedules', () => {
       const thursdayDay = page.getByTestId('schedule-day-2026-11-12');
       await expect(thursdayDay.getByText('12:30 – 13:30')).toBeVisible();
       await expect(thursdayDay.getByText('Helen')).toBeVisible();
+
+      // Reviewed: publish it for trainees.
+      page.once('dialog', (dialog) => void dialog.accept());
+      await page
+        .getByRole('button', { name: t('schedules.week.publish') })
+        .click();
+      await expect
+        .poll(() => api.calls('POST', '/api/schedules/week-1/publish').length)
+        .toBe(1);
+      await expect(page.getByTestId('schedule-published')).toHaveText(
+        t('schedules.week.publishedHint'),
+      );
+      await expect(page.getByTestId('schedule-draft')).toHaveCount(0);
+      await expect(
+        page.getByRole('button', { name: t('schedules.week.publish') }),
+      ).toHaveCount(0);
     },
   );
 
