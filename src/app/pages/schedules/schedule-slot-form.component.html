@@ -1,0 +1,177 @@
+<form
+  class="panel slot-form"
+  data-testid="schedule-slot-form"
+  [formGroup]="form"
+  [attr.aria-label]="label"
+  (ngSubmit)="submit()"
+>
+  <div class="form-grid">
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-field__label" [for]="id + '-time'">{{
+          'schedules.slot.trainingTime' | transloco
+        }}</label>
+        <select
+          formControlName="trainingTimeId"
+          [id]="id + '-time'"
+          [attr.aria-describedby]="id + '-time-help'"
+          [attr.aria-invalid]="showError('trainingTimeId')"
+        >
+          <option value="" disabled>
+            {{ 'schedules.slot.chooseTime' | transloco }}
+          </option>
+          @for (time of sortedTimes; track time.id) {
+            <option [value]="time.id">{{ range(time) }}</option>
+          }
+          <option [value]="newTime">
+            {{ 'schedules.slot.newTime' | transloco }}
+          </option>
+        </select>
+        @if (showError('trainingTimeId')) {
+          <span class="form-field__error" [id]="id + '-time-help'">{{
+            'schedules.slot.trainingTimeError' | transloco
+          }}</span>
+        } @else {
+          <span class="form-field__hint" [id]="id + '-time-help'">{{
+            'schedules.slot.trainingTimeHint' | transloco
+          }}</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label class="form-field__label" [for]="id + '-trainer'">{{
+          'schedules.slot.trainer' | transloco
+        }}</label>
+        <select
+          formControlName="trainerId"
+          [id]="id + '-trainer'"
+          [attr.aria-describedby]="id + '-trainer-help'"
+          [attr.aria-invalid]="showError('trainerId')"
+        >
+          <option value="" disabled>
+            {{ 'schedules.slot.chooseTrainer' | transloco }}
+          </option>
+          @for (trainer of trainerOptions; track trainer.id) {
+            <option [value]="trainer.id">
+              {{
+                trainer.isActive
+                  ? trainer.name
+                  : ('schedules.slot.inactiveTrainer'
+                    | transloco: { name: trainer.name })
+              }}
+            </option>
+          }
+        </select>
+        @if (showError('trainerId')) {
+          <span class="form-field__error" [id]="id + '-trainer-help'">{{
+            'schedules.slot.trainerError' | transloco
+          }}</span>
+        }
+      </div>
+
+      @if (workouts) {
+        <div class="form-field">
+          <label class="form-field__label" [for]="id + '-workout'"
+            >{{ 'schedules.slot.workout' | transloco }}
+            <span class="form-field__optional">{{
+              'common.optional' | transloco
+            }}</span></label
+          >
+          <select
+            formControlName="workoutId"
+            [id]="id + '-workout'"
+            [attr.aria-describedby]="id + '-workout-help'"
+          >
+            <option value="">
+              {{ 'schedules.slot.noWorkout' | transloco }}
+            </option>
+            @for (workout of workouts; track workout.id) {
+              <option [value]="workout.id">{{ workoutLabel(workout) }}</option>
+            }
+          </select>
+          <span class="form-field__hint" [id]="id + '-workout-help'">{{
+            (workouts.length
+              ? 'schedules.slot.workoutHint'
+              : 'schedules.slot.noWorkoutsThatDay'
+            ) | transloco
+          }}</span>
+        </div>
+      }
+    </div>
+
+    @if (isNewTime) {
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-field__label" [for]="id + '-start'">{{
+            'schedules.slot.startTime' | transloco
+          }}</label>
+          <input
+            type="time"
+            formControlName="startTime"
+            [id]="id + '-start'"
+            [attr.aria-describedby]="id + '-start-help'"
+            [attr.aria-invalid]="showTimeError('startTime')"
+          />
+          @if (showTimeError('startTime')) {
+            <span class="form-field__error" [id]="id + '-start-help'">{{
+              'schedules.slot.timeError' | transloco
+            }}</span>
+          } @else {
+            <span class="form-field__hint" [id]="id + '-start-help'">{{
+              'schedules.slot.timeHint' | transloco
+            }}</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-field__label" [for]="id + '-end'">{{
+            'schedules.slot.endTime' | transloco
+          }}</label>
+          <input
+            type="time"
+            formControlName="endTime"
+            [id]="id + '-end'"
+            [attr.aria-describedby]="id + '-end-help'"
+            [attr.aria-invalid]="
+              showTimeError('endTime') || showTimeError('endBeforeStart')
+            "
+          />
+          @if (showTimeError('endTime')) {
+            <span class="form-field__error" [id]="id + '-end-help'">{{
+              'schedules.slot.timeError' | transloco
+            }}</span>
+          } @else if (showTimeError('endBeforeStart')) {
+            <span class="form-field__error" [id]="id + '-end-help'">{{
+              'schedules.slot.endBeforeStart' | transloco
+            }}</span>
+          } @else {
+            <span class="form-field__hint" [id]="id + '-end-help'">{{
+              'schedules.slot.endHint' | transloco
+            }}</span>
+          }
+        </div>
+      </div>
+      @if (newTimeNotice(); as notice) {
+        <p
+          class="notice notice--warning"
+          role="status"
+          data-testid="schedule-new-time"
+        >
+          {{ notice }}
+        </p>
+      }
+    }
+  </div>
+
+  @if (error) {
+    <p class="notice notice--danger" role="alert">{{ error | uiMessage }}</p>
+  }
+
+  <div class="form-actions">
+    <button class="btn btn--ghost" type="button" (click)="cancelled.emit()">
+      {{ 'common.cancel' | transloco }}
+    </button>
+    <button class="btn btn--primary" type="submit" [disabled]="saving">
+      {{ (saving ? 'common.saving' : 'schedules.slot.save') | transloco }}
+    </button>
+  </div>
+</form>

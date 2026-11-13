@@ -1,0 +1,26 @@
+.schedule-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+// As on the workouts week (workouts.component.scss).
+.week-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.week-bar__label {
+  margin: 0;
+  min-width: 11rem;
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: var(--heading-tracking);
+  text-align: center;
+  text-transform: uppercase;
+}

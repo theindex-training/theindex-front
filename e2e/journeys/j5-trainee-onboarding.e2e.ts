@@ -1,4 +1,4 @@
-import { mockStaffHome, plan, trainee } from '../support/data';
+import { gym, mockStaffHome, plan, trainee } from '../support/data';
 import { expect, test } from '../support/fixtures';
 import { t } from '../support/i18n';
 
@@ -20,6 +20,9 @@ test(
     let subscriptions: object[] = [];
     api.on('GET', '/api/gym-subscriptions', {
       body: [{ id: 'gs1', name: 'Multisport', isActive: true }],
+    });
+    api.on('GET', '/api/gym-locations', {
+      body: [gym('g1', 'Center'), gym('g2', 'North')],
     });
     api.on('GET', '/api/trainees', () => ({
       body: created ? [...existing, created] : existing,
@@ -110,6 +113,9 @@ test(
       .getByLabel(t('trainees.fields.gymSubscription'))
       .selectOption({ label: 'Multisport' });
     await page
+      .getByLabel(t('trainees.fields.preferredGym'))
+      .selectOption({ label: 'North' });
+    await page
       .getByRole('button', { name: t('trainees.create.submit') })
       .click();
 
@@ -120,6 +126,7 @@ test(
       phone: null,
       gymSubscriptionId: 'gs1',
       isActive: true,
+      preferredGymId: 'g2',
     });
 
     // 2. Find them and open the profile.

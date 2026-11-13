@@ -9,6 +9,8 @@ export interface TrainerProfile {
   name: string;
   nickname: string | null;
   accountId: string | null;
+  /** The gym the trainer mainly leads trainings in: the default gym of their pages. */
+  primaryGymId?: string | null;
   isActive: boolean;
   createdAt?: string;
 }
@@ -16,12 +18,14 @@ export interface TrainerProfile {
 export interface CreateTrainerPayload {
   name: string;
   nickname?: string | null;
+  primaryGymId?: string | null;
   isActive?: boolean;
 }
 
 export interface UpdateTrainerPayload {
   name?: string;
   nickname?: string | null;
+  primaryGymId?: string | null;
   isActive?: boolean;
 }
 

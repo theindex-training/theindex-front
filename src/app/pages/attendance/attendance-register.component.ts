@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   ElementRef,
   OnInit,
   ChangeDetectionStrategy,
@@ -14,6 +15,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import {
@@ -115,6 +117,7 @@ export class AttendanceRegisterComponent implements OnInit {
     private readonly changeDetector: ChangeDetectorRef,
     private readonly i18n: LanguageService,
     private readonly format: LocaleFormatService,
+    private readonly destroyRef: DestroyRef,
   ) {
     this.form = this.formBuilder.group({
       trainerId: this.formBuilder.nonNullable.control('', [
@@ -366,11 +369,29 @@ export class AttendanceRegisterComponent implements OnInit {
     return `${formatTimeWithoutSeconds(trainingTime.startTime)} - ${formatTimeWithoutSeconds(trainingTime.endTime)}`;
   }
 
+  /**
+   * The selected trainer's primary gym, else the first gym. Until the user picks a gym, it follows
+   * the trainer: choosing another trainer moves to their primary gym.
+   */
   private preselectDefaultLocation(): void {
-    const firstLocation = this.gymLocations[0];
-    if (firstLocation) {
-      this.form.controls.locationId.setValue(firstLocation.id);
+    const location = this.form.controls.locationId;
+    location.setValue(this.defaultLocationId());
+    this.form.controls.trainerId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (location.pristine) {
+          location.setValue(this.defaultLocationId());
+        }
+      });
+  }
+
+  private defaultLocationId(): string {
+    const trainerId = this.form.controls.trainerId.value;
+    const primary = this.trainers.find((t) => t.id === trainerId)?.primaryGymId;
+    if (primary && this.gymLocations.some((g) => g.id === primary)) {
+      return primary;
     }
+    return this.gymLocations[0]?.id ?? '';
   }
 
   private preselectCurrentTrainer(): void {

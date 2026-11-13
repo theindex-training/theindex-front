@@ -98,6 +98,7 @@ const STAFF_TAB_ROUTES = [
 
 const TRAINEE_MAIN: NavItem[] = [
   { label: 'nav.profile', route: '/my-profile', icon: 'user' },
+  { label: 'nav.schedule', route: '/schedule', icon: 'calendar' },
   { label: 'nav.stats', route: '/stats', icon: 'chart' },
   { label: 'nav.records', route: '/records', icon: 'trophy' },
 ];
@@ -111,7 +112,7 @@ function visibleTo(items: NavItem[], role: string | null): NavItem[] {
 /** Navigation for a role. Role checks here only shape the UI; routes are still guarded by roleGuard. */
 export function buildNavigation(role: string | null): Navigation {
   if (role === 'TRAINEE') {
-    // Trainees have three destinations, so all fit in the tab bar; the fourth tab holds theme and account.
+    // Trainees have four destinations, so all fit in the tab bar; the fifth tab holds theme and account.
     return {
       main: TRAINEE_MAIN,
       manage: [],

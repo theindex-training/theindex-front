@@ -69,6 +69,16 @@ export const routes: Routes = [
         data: { roles: ['TRAINEE'] },
       },
       {
+        path: 'schedule',
+        title: 'traineeSchedule.title',
+        loadComponent: () =>
+          import('./pages/trainee-schedule/trainee-schedule.component').then(
+            (m) => m.TraineeScheduleComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['TRAINEE'] },
+      },
+      {
         path: 'stats',
         title: 'nav.stats',
         loadComponent: () =>
@@ -171,6 +181,16 @@ export const routes: Routes = [
           ),
         canActivate: [roleGuard],
         data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
+        path: 'gyms/:id/schedule',
+        title: 'schedules.template.title',
+        loadComponent: () =>
+          import('./pages/schedules/schedule-template.component').then(
+            (m) => m.ScheduleTemplateComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
       },
       {
         path: 'gyms/:id',
@@ -437,6 +457,16 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/workouts/exercises/exercises.component').then(
             (m) => m.ExercisesComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
+        path: 'workouts/schedule',
+        title: 'schedules.week.title',
+        loadComponent: () =>
+          import('./pages/schedules/schedules.component').then(
+            (m) => m.SchedulesComponent,
           ),
         canActivate: [roleGuard],
         data: { roles: ['ADMIN', 'TRAINER'] },

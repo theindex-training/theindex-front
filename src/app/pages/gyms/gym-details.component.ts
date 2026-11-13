@@ -11,6 +11,7 @@ import {
   GymLocationsService,
 } from '../../services/gym-locations.service';
 
+import { AuthService } from '../../services/auth.service';
 import { displayValue } from '../../utils/display.util';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
@@ -36,12 +37,17 @@ export class GymDetailsComponent implements OnInit {
   gym: GymLocation | null = null;
   loading = true;
   errorMessage: UiMessage | null = null;
+  /** Only admins change a gym's weekly template. */
+  readonly isAdmin: boolean;
 
   constructor(
     private readonly gymsService: GymLocationsService,
     private readonly route: ActivatedRoute,
     private readonly changeDetector: ChangeDetectorRef,
-  ) {}
+    auth: AuthService,
+  ) {
+    this.isAdmin = auth.getUserRole() === 'ADMIN';
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');

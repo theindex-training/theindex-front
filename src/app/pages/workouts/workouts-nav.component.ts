@@ -6,7 +6,7 @@ import {
 } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 
-/** Switches between the sections of the workouts area (workouts, exercises). */
+/** Switches between the sections of the workouts area (schedule, workouts, exercises). */
 @Component({
   selector: 'app-workouts-nav',
   standalone: true,
@@ -17,6 +17,13 @@ import { TranslocoPipe } from '@jsverse/transloco';
       class="section-nav"
       [attr.aria-label]="'workouts.nav.label' | transloco"
     >
+      <a
+        class="section-nav__link"
+        routerLink="/workouts/schedule"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+        >{{ 'workouts.nav.schedule' | transloco }}</a
+      >
       <a
         class="section-nav__link"
         routerLink="/workouts"

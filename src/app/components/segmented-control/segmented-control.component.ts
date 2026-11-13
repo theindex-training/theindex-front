@@ -9,7 +9,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 
 export interface SegmentedOption<T extends string = string> {
   value: T;
-  /** Translation key, e.g. 'common.active'. */
+  /** Translation key, e.g. 'common.active' (or plain text with `translateLabels` off). */
   label: string;
 }
 
@@ -32,6 +32,8 @@ export class SegmentedControlComponent<T extends string = string> {
   @Input({ required: true }) label = '';
   @Input({ required: true }) options: SegmentedOption<T>[] = [];
   @Input({ required: true }) value!: T;
+  /** false when the labels are already text (e.g. gym names), not translation keys. */
+  @Input() translateLabels = true;
   @Output() readonly valueChange = new EventEmitter<T>();
 
   readonly name = `segmented-${nextId++}`;
