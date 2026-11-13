@@ -140,7 +140,7 @@
     <app-training-workout
       [workout]="training.workout"
       [emptyTitle]="'traineeTraining.noWorkoutTitle' | transloco"
-      [emptyMessage]="'traineeTraining.noWorkoutMessage' | transloco"
+      [emptyMessage]="noWorkoutMessage(training)"
     />
   }
 </section>

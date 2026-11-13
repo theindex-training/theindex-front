@@ -111,6 +111,21 @@ export class TraineeTrainingComponent implements OnInit {
     return `${this.dayLabel(training.date)} ${timeRange(training.trainingTime)}`;
   }
 
+  /**
+   * Why the training shows no workout: not out yet, with when it comes out (20:00 the day before,
+   * from the API), or not chosen by the staff.
+   */
+  noWorkoutMessage(training: TrainingDetails): string {
+    const releasesAt = new Date(training.workoutReleasesAt);
+    if (releasesAt.getTime() > Date.now()) {
+      return this.language.t('traineeTraining.workoutComesOut', {
+        day: this.format.custom(releasesAt, 'EEEE, d MMMM'),
+        time: this.format.clock(releasesAt),
+      });
+    }
+    return this.language.t('traineeTraining.noWorkoutMessage');
+  }
+
   /** A training that has started: no actions and no "closed" note any more. */
   isPast(training: TrainingDetails): boolean {
     return new Date(training.startsAt).getTime() <= Date.now();

@@ -20,8 +20,13 @@ export interface BookableTraining {
   weekday: number;
   trainingTime: { startTime: string; endTime: string };
   trainer: { name: string; nickname: string | null };
-  /** The day's workout it follows, by its title only. */
+  /** The day's workout it follows, by its title only; null until it is out (see below). */
   workout: { title: string | null } | null;
+  /**
+   * When trainees get the workouts of this training's day: 20:00 gym-local the day before. Until
+   * then the API answers `workout: null`, whether or not the staff chose one.
+   */
+  workoutReleasesAt: string;
   startsAt: string;
   /** How many trainees booked it; trainees never see who. */
   bookedCount: number;
@@ -55,7 +60,7 @@ export interface TrainingWorkout {
 /** One training with its gym and its whole workout (`GET /api/bookings/trainings/:slotId`). */
 export interface TrainingDetails extends Omit<BookableTraining, 'workout'> {
   gym: { id: string; name: string };
-  /** null until the staff pick the day's workout for this training. */
+  /** null until the staff pick the day's workout for this training, and until it is out. */
   workout: TrainingWorkout | null;
 }
 
