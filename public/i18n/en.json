@@ -1602,6 +1602,7 @@
     "exercises": "Exercises",
     "noWorkoutTitle": "The workout isn't out yet",
     "noWorkoutMessage": "The trainers add the workout before the training. Check back later.",
+    "workoutComesOut": "The day's workout comes out on {day} at {time}. Check back then.",
     "playVideo": "Play the video: {name}",
     "videoTitle": "Video: {name}",
     "openVideo": "Open on YouTube"

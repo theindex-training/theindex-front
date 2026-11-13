@@ -36,6 +36,7 @@ const TRAINING = {
   trainer: { name: 'Velcho Sokolov', nickname: null },
   gym: { id: 'gym-c', name: 'Center' },
   workout: WORKOUT,
+  workoutReleasesAt: '2026-11-12T18:00:00Z',
   startsAt: '2026-11-13T16:00:00Z',
   bookedCount: 3,
   bookedByMe: false,
@@ -285,6 +286,24 @@ describe('TraineeTrainingComponent', () => {
     expect(page.queryAll('[data-testid^="training-exercise-"]')).toHaveLength(
       0,
     );
+  });
+
+  it('says when a workout that is not out yet comes out (20:00 the day before)', async () => {
+    // Seen at 00:30 on Friday: Saturday's workout comes out at 20:00 on Friday (18:00Z).
+    await open({
+      ...TRAINING,
+      date: '2026-11-14',
+      weekday: 6,
+      startsAt: '2026-11-14T16:00:00Z',
+      workout: null,
+      workoutReleasesAt: '2026-11-13T18:00:00Z',
+    });
+
+    expect(page.text()).toContain(texts.noWorkoutTitle);
+    expect(page.text()).toContain(
+      "The day's workout comes out on Friday, 13 November at 20:00. Check back then.",
+    );
+    expect(page.text()).not.toContain(texts.noWorkoutMessage);
   });
 
   it("shows the API's message when the training can't be loaded", async () => {
