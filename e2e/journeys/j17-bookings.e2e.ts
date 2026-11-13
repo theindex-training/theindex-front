@@ -4,8 +4,9 @@ import { expect, test } from '../support/fixtures';
 import { t } from '../support/i18n';
 
 /**
- * J17: a trainee books a training of this week's schedule from the Schedule tab and cancels
- * another, seeing only how many booked. The API decides what can be booked or cancelled.
+ * J17: a trainee opens a training of this week's schedule from the Schedule tab, sees its workout
+ * and books it there, then cancels another booking from the list, seeing only how many booked.
+ * The API decides what can be booked or cancelled.
  */
 test.describe('J17 bookings', () => {
   /** Tuesday 10 Nov 2026, 10:00 in Sofia. */
@@ -48,6 +49,28 @@ test.describe('J17 bookings', () => {
     canBook: false,
     canCancel: true,
   });
+  const wednesdayDetails = {
+    ...wednesday,
+    gym: gyms[0],
+    workout: {
+      title: 'Helen',
+      summary: '3 rounds for time:\n400 m run\n21 kettlebell swings',
+      exercises: [
+        {
+          id: 'ex-run',
+          name: 'Run',
+          description: 'Out of the door and around the block.',
+          videoUrl: null,
+        },
+        {
+          id: 'ex-swing',
+          name: 'Kettlebell Swing',
+          description: null,
+          videoUrl: 'https://www.youtube.com/watch?v=mKDIuUbH94Q',
+        },
+      ],
+    },
+  };
   const week = {
     gym: gyms[0],
     weekStart: '2026-11-09',
@@ -60,7 +83,7 @@ test.describe('J17 bookings', () => {
     page.getByRole('navigation', { name: t('nav.mainLabel') });
 
   test(
-    'books a training and cancels another',
+    'books a training from its page and cancels another from the list',
     { tag: ['@desktop', '@mobile'] },
     async ({ page, api, signInAs }) => {
       await page.clock.setFixedTime(NOW);
@@ -68,6 +91,9 @@ test.describe('J17 bookings', () => {
       mockTraineeHome(api);
       api.on('GET', '/api/bookings/gyms', { body: gyms });
       api.on('GET', '/api/bookings/schedule', { body: week });
+      api.on('GET', '/api/bookings/trainings/t-wed', {
+        body: wednesdayDetails,
+      });
       api.on('POST', '/api/bookings', {
         status: 201,
         body: {
@@ -102,6 +128,31 @@ test.describe('J17 bookings', () => {
         t('schedules.days.booked', { count: 6 }),
       );
       await wed
+        .getByRole('link', {
+          name: t('traineeSchedule.bookFor', {
+            training: 'Wednesday, 11 November 18:00 – 19:00',
+          }),
+        })
+        .click();
+      await expect(page).toHaveURL(/\/schedule\/t-wed$/);
+      expect(api.calls('POST', '/api/bookings')).toHaveLength(0);
+
+      // The training's page: the workout, then Book.
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'Helen' }),
+      ).toBeVisible();
+      await expect(page.getByTestId('trainee-workout-summary')).toHaveText(
+        '3 rounds for time:\n400 m run\n21 kettlebell swings',
+      );
+      await expect(page.getByTestId('trainee-exercise-ex-run')).toContainText(
+        'Out of the door and around the block.',
+      );
+      await expect(
+        page.getByTestId('trainee-exercise-ex-swing').getByRole('button', {
+          name: t('traineeTraining.playVideo', { name: 'Kettlebell Swing' }),
+        }),
+      ).toBeVisible();
+      await page
         .getByRole('button', {
           name: t('traineeSchedule.bookFor', {
             training: 'Wednesday, 11 November 18:00 – 19:00',
@@ -111,12 +162,49 @@ test.describe('J17 bookings', () => {
       await expect
         .poll(() => api.last('POST', '/api/bookings')?.body)
         .toEqual({ slotId: 't-wed' });
+      // From now on the API answers the week with Wednesday booked.
+      api.on('GET', '/api/bookings/schedule', {
+        body: {
+          ...week,
+          slots: [
+            {
+              ...wednesday,
+              bookedCount: 7,
+              bookedByMe: true,
+              canBook: false,
+              canCancel: true,
+            },
+            thursday,
+          ],
+        },
+      });
+      await expect(
+        page.getByText(t('traineeTraining.bookedNotice')),
+      ).toBeVisible();
+      await expect(page.getByTestId('trainee-training-count')).toHaveText(
+        t('schedules.days.booked', { count: 7 }),
+      );
+      await expect(
+        page.getByRole('button', {
+          name: t('traineeSchedule.cancelFor', {
+            training: 'Wednesday, 11 November 18:00 – 19:00',
+          }),
+        }),
+      ).toBeVisible();
+
+      // Back to the week, which shows Wednesday booked now.
+      await page.getByRole('link', { name: t('traineeTraining.back') }).click();
+      await expect(page).toHaveURL(/\/schedule\?gym=gym-c&week=2026-11-09$/);
       await expect(
         wed.getByText(t('traineeSchedule.booked'), { exact: true }),
       ).toBeVisible();
-      await expect(wed.getByTestId('trainee-training-count')).toHaveText(
-        t('schedules.days.booked', { count: 7 }),
-      );
+      await expect(
+        wed.getByRole('link', {
+          name: t('traineeSchedule.detailsFor', {
+            training: 'Wednesday, 11 November 18:00 – 19:00',
+          }),
+        }),
+      ).toBeVisible();
 
       page.once('dialog', (dialog) => void dialog.accept());
       await page
@@ -133,7 +221,7 @@ test.describe('J17 bookings', () => {
       await expect(
         page
           .getByTestId('trainee-training-t-thu')
-          .getByRole('button', { name: /^Book/ }),
+          .getByRole('link', { name: /^Book/ }),
       ).toBeVisible();
     },
   );

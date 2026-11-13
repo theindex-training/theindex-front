@@ -34,6 +34,28 @@ export interface BookableTraining {
   canCancel: boolean;
 }
 
+/** An exercise of a training's workout, as a trainee sees it. */
+export interface TrainingExercise {
+  id: string;
+  name: string;
+  description: string | null;
+  /** `https://www.youtube.com/watch?v=<id>`, or null. */
+  videoUrl: string | null;
+}
+
+/** One training with its gym and its whole workout (`GET /api/bookings/trainings/:slotId`). */
+export interface TrainingDetails extends Omit<BookableTraining, 'workout'> {
+  gym: { id: string; name: string };
+  /** null until the staff pick the day's workout for this training. */
+  workout: {
+    title: string | null;
+    /** Plain text; its line breaks matter. */
+    summary: string;
+    /** In the workout's order. */
+    exercises: TrainingExercise[];
+  } | null;
+}
+
 export interface BookingWeek {
   gym: BookingGym;
   /** Monday, YYYY-MM-DD. */
@@ -64,6 +86,13 @@ export class BookingsService {
     return this.http.get<BookingWeek>(`${this.baseUrl}/schedule`, {
       params,
     });
+  }
+
+  /** One training, booked or not, with its whole workout. */
+  training(slotId: string): Observable<TrainingDetails> {
+    return this.http.get<TrainingDetails>(
+      `${this.baseUrl}/trainings/${slotId}`,
+    );
   }
 
   book(slotId: string): Observable<BookableTraining> {

@@ -1,11 +1,12 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, UrlTree } from '@angular/router';
 import { IconComponent } from '../icon/icon.component';
 
 export interface PageHeaderAction {
   /** Visible on desktop; the accessible name of the floating button on mobile. */
   label: string;
-  link: string | unknown[];
+  /** A UrlTree keeps query parameters (a string's "?" would be encoded). */
+  link: string | unknown[] | UrlTree;
 }
 
 /**

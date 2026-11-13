@@ -22,6 +22,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - The renewals page (a feature) came with §16 and journey J14: 75 spec files, 729 unit tests, 47 E2E tests. Three deliberate breaks (the punch tab showing the time lists, the subscription count dropped from the plan, days left shown as days since the end) were each caught.
 - Home gyms (a feature: a trainee's preferred gym and a trainer's primary gym as the default gym of the Schedule pages and Register attendance) came with specs in `catalog-pages.spec.ts`, the schedule specs and `attendance-register.component.spec.ts`, and J5 now picks a preferred gym. One deliberate break (the remembered gym before the home gym) was caught.
 - Bookings (a feature: the trainee Schedule tab) came with journey J17 and `trainee-schedule.component.spec.ts`. One deliberate break (Book offered on every training not booked yet, instead of the API's `canBook`) was caught.
+- The training page (a feature: `/schedule/:id`, a training's workout for trainees, booked there) came with `trainee-training.component.spec.ts`, J17 reworked (Book now opens the page) and the list spec updated. One deliberate break (the booking's answer replacing the page's training, so the workout was lost) was caught.
 - The weekly schedules (a feature: gym templates and weeks) came with journey J16 and its own specs (`pages/schedules/*.spec.ts`): 823 unit tests, 57 E2E tests. One deliberate break (days before `editableFrom` editable) was caught.
 - The workouts area (a feature: workouts, exercises, workout types, PDF import) came with journey J15 and its own specs (`pages/workouts/*.spec.ts`, `services/workouts-api.services.spec.ts`): 81 spec files, 816 unit tests, 51 E2E tests. One deliberate break (the women's amount dropped from the payload) was caught.
 
@@ -787,7 +788,7 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 
 ### J17. Bookings (P1) [desktop, mobile]
 ✅ `e2e/journeys/j17-bookings.e2e.ts`, 3 tests (4 runs).
-1. Desktop and phone, trainee: the menu leads to Schedule, which asks for the gym's week; booking a training posts its id and shows it booked with the new count; cancelling another (after the confirm) sends the DELETE and offers Book again.
+1. Desktop and phone, trainee: the menu leads to Schedule, which asks for the gym's week; Book opens the training's page (no request), which shows the workout (summary, exercises, a video button); Book there posts the id and shows it booked with the new count; back to the week, the training is booked and offers Details; cancelling another from the list (after the confirm) sends the DELETE and offers Book again.
 2. Desktop, trainee: a week the staff haven't created says it isn't out.
 3. Desktop, trainer: `/schedule` is out of reach and loads nothing.
 

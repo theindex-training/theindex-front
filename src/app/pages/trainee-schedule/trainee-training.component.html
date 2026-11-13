@@ -1,0 +1,194 @@
+<section class="page-stack page-narrow">
+  <app-page-header
+    [title]="training?.workout?.title || ('traineeTraining.title' | transloco)"
+    [subtitle]="training ? describe(training) : ''"
+    [back]="{
+      label: 'traineeTraining.back' | transloco,
+      link: backLink,
+    }"
+  />
+
+  @if (loading) {
+    <p class="notice" role="status">
+      {{ 'traineeTraining.loading' | transloco }}
+    </p>
+  } @else if (errorMessage && !training) {
+    <app-empty-state
+      tone="danger"
+      [title]="'traineeTraining.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="load()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else if (training) {
+    <section
+      class="panel"
+      aria-labelledby="training-booking-title"
+      data-testid="trainee-training-booking"
+    >
+      <h2 class="panel__title" id="training-booking-title">
+        {{ 'traineeTraining.bookingTitle' | transloco }}
+      </h2>
+      <dl class="detail-list">
+        <div>
+          <dt>{{ 'traineeTraining.day' | transloco }}</dt>
+          <dd>{{ dayLabel(training.date) }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'traineeTraining.time' | transloco }}</dt>
+          <dd class="num">{{ range(training.trainingTime) }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'traineeTraining.gym' | transloco }}</dt>
+          <dd>{{ training.gym.name }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'traineeTraining.trainer' | transloco }}</dt>
+          <dd>{{ training.trainer.name }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'traineeTraining.bookings' | transloco }}</dt>
+          <dd data-testid="trainee-training-count">
+            {{
+              'schedules.days.booked'
+                | transloco: { count: training.bookedCount }
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>{{ 'traineeTraining.yourBooking' | transloco }}</dt>
+          <dd data-testid="trainee-training-status">
+            @if (training.bookedByMe) {
+              <app-status-dot tone="success">{{
+                'traineeSchedule.booked' | transloco
+              }}</app-status-dot>
+            } @else {
+              <app-status-dot>{{
+                'traineeTraining.notBooked' | transloco
+              }}</app-status-dot>
+            }
+          </dd>
+        </div>
+      </dl>
+
+      @if (actionDone) {
+        <p class="notice notice--success" role="status">
+          {{ actionDone | uiMessage }}
+        </p>
+      }
+      @if (actionError) {
+        <p class="notice notice--danger" role="alert">
+          {{ actionError | uiMessage }}
+        </p>
+      }
+
+      @if (!isPast(training)) {
+        <p class="text-muted rules">
+          {{ 'traineeSchedule.rules' | transloco }}
+        </p>
+      }
+      @if (training.canBook || training.canCancel || !isPast(training)) {
+        <div class="form-actions">
+          @if (training.canBook) {
+            <button
+              class="btn btn--primary"
+              type="button"
+              [disabled]="busy"
+              [attr.aria-label]="
+                'traineeSchedule.bookFor'
+                  | transloco: { training: describe(training) }
+              "
+              (click)="book()"
+            >
+              {{
+                (busy ? 'traineeSchedule.booking' : 'traineeSchedule.book')
+                  | transloco
+              }}
+            </button>
+          } @else if (training.canCancel) {
+            <button
+              class="btn btn--danger"
+              type="button"
+              [disabled]="busy"
+              [attr.aria-label]="
+                'traineeSchedule.cancelFor'
+                  | transloco: { training: describe(training) }
+              "
+              (click)="cancel()"
+            >
+              {{
+                (busy ? 'traineeSchedule.cancelling' : 'traineeSchedule.cancel')
+                  | transloco
+              }}
+            </button>
+          } @else if (!isPast(training)) {
+            <p class="text-muted closed">
+              {{
+                (training.bookedByMe
+                  ? 'traineeSchedule.cancelClosed'
+                  : 'traineeSchedule.closed'
+                ) | transloco
+              }}
+            </p>
+          }
+        </div>
+      }
+    </section>
+
+    <section
+      class="page-stack"
+      aria-labelledby="training-workout-title"
+      data-testid="trainee-training-workout"
+    >
+      <div class="section-header">
+        <h2 class="workout__title" id="training-workout-title">
+          {{ 'traineeTraining.workoutTitle' | transloco }}
+        </h2>
+      </div>
+      @if (training.workout; as workout) {
+        <div class="panel workout">
+          <p
+            class="workout__summary"
+            data-testid="trainee-workout-summary"
+            [textContent]="workout.summary"
+          ></p>
+        </div>
+        @if (workout.exercises.length) {
+          <h3 class="exercises__title">
+            {{ 'traineeTraining.exercises' | transloco }}
+          </h3>
+          <ol class="exercises">
+            @for (exercise of workout.exercises; track exercise.id) {
+              <li
+                class="panel exercise"
+                [attr.data-testid]="'trainee-exercise-' + exercise.id"
+              >
+                <h4 class="exercise__name">{{ exercise.name }}</h4>
+                @if (exercise.description) {
+                  <p
+                    class="exercise__description"
+                    [textContent]="exercise.description"
+                  ></p>
+                }
+                @if (exercise.videoUrl) {
+                  <app-exercise-video
+                    [name]="exercise.name"
+                    [url]="exercise.videoUrl"
+                  />
+                }
+              </li>
+            }
+          </ol>
+        }
+      } @else {
+        <app-empty-state
+          icon="dumbbell"
+          [title]="'traineeTraining.noWorkoutTitle' | transloco"
+          [message]="'traineeTraining.noWorkoutMessage' | transloco"
+        />
+      }
+    </section>
+  }
+</section>
