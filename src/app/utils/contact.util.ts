@@ -1,7 +1,8 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 /** The API's phone rule (theindex-api `common/utils/contact.util.ts`): 6 to 15 digits, optional +. */
-export const PHONE_PATTERN = /^\s*\+?(?:[\s()\-./]*\d){6,15}[\s()\-./]*$/;
+// No two repetitions match the same characters, so a long run of spaces can't backtrack.
+export const PHONE_PATTERN = /^(?:\s*\+)?[\s()\-./]*(?:\d[\s()\-./]*){6,15}$/;
 export const PHONE_MAX_LENGTH = 30;
 export const SOCIAL_LINK_MAX_LENGTH = 200;
 
@@ -15,7 +16,7 @@ export function phoneValidator(): ValidatorFn {
     if (!value.trim()) {
       return null;
     }
-    return PHONE_PATTERN.test(value) && value.length <= PHONE_MAX_LENGTH
+    return value.length <= PHONE_MAX_LENGTH && PHONE_PATTERN.test(value)
       ? null
       : { phone: true };
   };
