@@ -22,6 +22,13 @@
           <dt>{{ 'trainers.fields.nickname' | transloco }}</dt>
           <dd>{{ formatNickname() }}</dd>
         </div>
+        @if (trainer.phone) {
+          <div>
+            <dt>{{ 'contact.phone' | transloco }}</dt>
+            <dd class="num">{{ trainer.phone }}</dd>
+          </div>
+        }
+        <app-social-links [profile]="trainer" />
         <div>
           <dt>{{ 'trainers.fields.account' | transloco }}</dt>
           <dd>

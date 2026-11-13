@@ -1,0 +1,73 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="'myDetails.title' | transloco"
+    [subtitle]="'myDetails.subtitle' | transloco"
+  />
+
+  @if (loading) {
+    <p class="notice" role="status">{{ 'myDetails.loading' | transloco }}</p>
+  } @else if (loadError) {
+    <p class="notice notice--danger" role="alert">
+      {{ loadError | uiMessage }}
+    </p>
+    <div>
+      <button class="btn btn--secondary" type="button" (click)="load()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
+    </div>
+  } @else if (profile) {
+    <form class="panel" [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <dl class="detail-list">
+        <div>
+          <dt>{{ 'myDetails.name' | transloco }}</dt>
+          <dd data-testid="my-details-name">{{ profile.name }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'myDetails.email' | transloco }}</dt>
+          <dd>{{ profile.email }}</dd>
+        </div>
+      </dl>
+      <p class="form-field__hint">{{ 'myDetails.fixedHint' | transloco }}</p>
+
+      <div class="form-grid">
+        <app-contact-fields
+          idPrefix="my-details"
+          [form]="form"
+          [gyms]="gyms"
+          [gymSubscriptions]="gymSubscriptions"
+          [showGymSubscription]="isTrainee"
+          [homeGym]="isTrainee ? 'preferred' : 'primary'"
+        />
+      </div>
+
+      @if (profile.consentAt) {
+        <p class="text-muted" data-testid="my-details-consent">
+          {{
+            'myDetails.consent'
+              | transloco: { date: format.date(profile.consentAt) }
+          }}
+        </p>
+      }
+
+      @if (errorMessage) {
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
+      }
+      @if (successMessage) {
+        <p class="notice notice--success" role="status">
+          {{ successMessage | uiMessage }}
+        </p>
+      }
+
+      <div class="form-actions">
+        <a class="btn btn--ghost" routerLink="/change-password">{{
+          'common.changePassword' | transloco
+        }}</a>
+        <button class="btn btn--primary" type="submit" [disabled]="saving">
+          {{ (saving ? 'common.saving' : 'common.saveChanges') | transloco }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

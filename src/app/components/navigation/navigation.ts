@@ -80,6 +80,12 @@ const STAFF_MANAGE: NavItem[] = [
     icon: 'trainer',
     roles: ['ADMIN'],
   },
+  {
+    label: 'nav.accounts',
+    route: '/accounts',
+    icon: 'user-plus',
+    roles: ['ADMIN'],
+  },
   { label: 'nav.trainingTimes', route: '/training-times', icon: 'clock' },
   {
     label: 'nav.content',

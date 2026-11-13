@@ -30,6 +30,7 @@ import { PlanCreateComponent } from './pages/plans/plan-create.component';
 const STAFF = ['ADMIN', 'TRAINER'];
 const ADMIN = ['ADMIN'];
 const TRAINEE = ['TRAINEE'];
+const WITH_PROFILE = ['TRAINEE', 'TRAINER'];
 
 /**
  * Who may open each page inside the app shell. `null` = any signed-in user (no roleGuard).
@@ -44,6 +45,9 @@ const SHELL_ACCESS: Record<string, string[] | null> = {
   stats: TRAINEE,
   records: TRAINEE,
   'change-password': null,
+  'my-details': WITH_PROFILE,
+  accounts: ADMIN,
+  'accounts/:id': ADMIN,
   'plans/new': STAFF,
   'plans/:id/edit': STAFF,
   'plans/:id/delete': STAFF,
@@ -104,11 +108,14 @@ const shell = routes.find((route) => route.path === '' && route.children)!;
 const shellPages = shell.children!.filter((route) => !route.redirectTo);
 
 describe('route table', () => {
-  it('guards the app shell with authGuard and the login page with loginGuard', () => {
+  it('guards the app shell with authGuard, and the login and register pages with loginGuard', () => {
     expect(guardsOf(shell)).toEqual([authGuard]);
-    expect(guardsOf(routes.find((route) => route.path === 'login')!)).toEqual([
-      loginGuard,
-    ]);
+    for (const path of ['login', 'register']) {
+      const route = routes.find((entry) => entry.path === path)!;
+      expect(guardsOf(route)).toEqual([loginGuard]);
+      // Outside the shell: people without an account open it.
+      expect(shell.children!.some((child) => child.path === path)).toBe(false);
+    }
   });
 
   it('puts the full-screen article editor outside the shell, for admins, with the leave guard', () => {
@@ -232,6 +239,7 @@ describe('routing (real routes)', () => {
     expect(await open('/content')).toBe('/unauthorized');
     expect(await open('/content/categories/new')).toBe('/unauthorized');
     expect(await open('/content/articles/a-1')).toBe('/unauthorized');
+    expect(await open('/accounts')).toBe('/unauthorized');
     expect(await open('/settlements')).toBe('/settlements');
     expect(await open('/renewals')).toBe('/renewals');
   });

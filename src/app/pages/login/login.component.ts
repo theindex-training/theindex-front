@@ -5,7 +5,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { LanguageSwitchComponent } from '../../components/language-switch/language-switch.component';
 import { UiButtonComponent } from '../../components/ui-button/ui-button.component';
 import { UiInputComponent } from '../../components/ui-input/ui-input.component';
@@ -13,7 +13,7 @@ import { AccountSecurityService } from '../../services/account-security.service'
 import { AuthService } from '../../services/auth.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
-import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
+import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 
 @Component({
   selector: 'app-login',
@@ -23,6 +23,7 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     LanguageSwitchComponent,
+    RouterLink,
     UiMessagePipe,
     TranslocoPipe,
     ReactiveFormsModule,
@@ -92,7 +93,11 @@ export class LoginComponent {
       },
       error: (error: unknown) => {
         this.isSubmitting = false;
-        this.authErrorMessage = apiErrorMessage(error, 'auth.login.error');
+        // 403: the password is right, but no admin has connected the account to a profile yet.
+        this.authErrorMessage =
+          (error as { status?: number } | null)?.status === 403
+            ? i18nMessage('auth.login.notLinked')
+            : apiErrorMessage(error, 'auth.login.error');
         this.changeDetector.detectChanges();
       },
     });

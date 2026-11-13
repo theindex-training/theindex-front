@@ -60,4 +60,20 @@ describe('UserBlockComponent', () => {
     expect(localStorage.getItem('accessToken')).toBeNull();
     expect(TestBed.inject(Router).url).toBe('/login');
   });
+
+  it('links trainees and trainers to My details, but not admins', async () => {
+    const myDetails = (el: HTMLElement) =>
+      Array.from(el.querySelectorAll('a')).find(
+        (a) => a.textContent?.trim() === en.common.myDetails,
+      );
+
+    for (const role of ['TRAINEE', 'TRAINER'] as const) {
+      signInAs(role);
+      const { el } = await render();
+      expect(myDetails(el)?.getAttribute('href')).toBe('/my-details');
+    }
+
+    signInAs('ADMIN');
+    expect(myDetails((await render()).el)).toBeUndefined();
+  });
 });

@@ -1,0 +1,365 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="title || ('accountsAdmin.details.title' | transloco)"
+    [subtitle]="account?.email ?? ''"
+    [back]="{
+      label: ('accountsAdmin.backToList' | transloco),
+      link: '/accounts',
+    }"
+  />
+
+  @if (loading) {
+    <p class="notice" role="status">
+      {{ 'accountsAdmin.details.loading' | transloco }}
+    </p>
+  } @else if (loadError) {
+    <p class="notice notice--danger" role="alert">
+      {{ loadError | uiMessage }}
+    </p>
+  } @else if (account) {
+    @if (successMessage) {
+      <p class="notice notice--success" role="status">
+        {{ successMessage | uiMessage }}
+      </p>
+    }
+
+    <div class="panel">
+      <h2 class="panel__title">
+        {{ 'accountsAdmin.details.account' | transloco }}
+      </h2>
+      <dl class="detail-list">
+        <div>
+          <dt>{{ 'accountsAdmin.fields.email' | transloco }}</dt>
+          <dd>{{ value(account.email) }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'accountsAdmin.fields.role' | transloco }}</dt>
+          <dd>{{ account.role | enumLabel: 'role' }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'common.status' | transloco }}</dt>
+          <dd>
+            <app-status-dot
+              [tone]="account.status === 'ACTIVE' ? 'success' : 'neutral'"
+              >{{ account.status | enumLabel: 'accountStatus' }}</app-status-dot
+            >
+          </dd>
+        </div>
+        <div>
+          <dt>{{ 'accountsAdmin.fields.created' | transloco }}</dt>
+          <dd>{{ format.dateTime(account.createdAt) }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'accountsAdmin.fields.consent' | transloco }}</dt>
+          <dd data-testid="account-consent">
+            {{
+              account.consentAt
+                ? ('accountsAdmin.details.consentGiven'
+                  | transloco: { date: format.dateTime(account.consentAt) })
+                : ('accountsAdmin.details.consentNone' | transloco)
+            }}
+          </dd>
+        </div>
+      </dl>
+
+      @if (account.registration; as reg) {
+        <section class="panel-section">
+          <h2 class="panel__title">
+            {{ 'accountsAdmin.details.registered' | transloco }}
+          </h2>
+          <dl class="detail-list" data-testid="account-registration">
+            <div>
+              <dt>{{ 'accountsAdmin.fields.name' | transloco }}</dt>
+              <dd>{{ reg.name }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'contact.phone' | transloco }}</dt>
+              <dd class="num">{{ reg.phone }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'contact.gymSubscription' | transloco }}</dt>
+              <dd>{{ value(reg.gymSubscription?.name) }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'contact.preferredGym' | transloco }}</dt>
+              <dd>{{ value(reg.preferredGym?.name) }}</dd>
+            </div>
+            @for (network of networks; track network) {
+              <div>
+                <dt>{{ 'contact.networks.' + network | transloco }}</dt>
+                <dd>
+                  @if (socialUrl(network, reg[network]); as url) {
+                    <a [href]="url" target="_blank" rel="noopener noreferrer">{{
+                      reg[network]
+                    }}</a>
+                  } @else {
+                    {{ value(reg[network]) }}
+                  }
+                </dd>
+              </div>
+            }
+          </dl>
+        </section>
+      }
+    </div>
+
+    @if (account.profile; as profile) {
+      <div class="panel" data-testid="account-profile">
+        <h2 class="panel__title">
+          {{ 'accountsAdmin.details.connectedTo' | transloco }}
+        </h2>
+        <dl class="detail-list">
+          <div>
+            <dt>{{ 'accountsAdmin.fields.profileType' | transloco }}</dt>
+            <dd>
+              {{ 'accountsAdmin.connect.' + profile.type | transloco }}
+            </dd>
+          </div>
+          <div>
+            <dt>{{ 'accountsAdmin.fields.name' | transloco }}</dt>
+            <dd>
+              {{ profile.name }}
+              @if (profile.nickname) {
+                <span class="text-muted">{{
+                  'common.quoted' | transloco: { text: profile.nickname }
+                }}</span>
+              }
+            </dd>
+          </div>
+        </dl>
+        <div class="form-actions">
+          <a class="btn btn--primary" [routerLink]="profileLink">{{
+            'accountsAdmin.details.openProfile' | transloco
+          }}</a>
+        </div>
+      </div>
+    } @else if (account.role === 'ADMIN') {
+      <p class="notice">{{ 'accountsAdmin.details.adminNote' | transloco }}</p>
+    }
+
+    @if (canConnect) {
+      <form
+        class="panel"
+        [formGroup]="form"
+        (ngSubmit)="connect()"
+        novalidate
+        data-testid="account-connect"
+      >
+        <h2 class="panel__title">
+          {{ 'accountsAdmin.connect.title' | transloco }}
+        </h2>
+        <p class="text-muted">
+          {{ 'accountsAdmin.connect.intro' | transloco }}
+        </p>
+
+        <div class="form-grid">
+          <div class="form-row">
+            <app-segmented-control
+              [label]="'accountsAdmin.connect.typeLabel' | transloco"
+              [options]="typeOptions"
+              [value]="profileType"
+              (valueChange)="setType($event)"
+            />
+            <app-segmented-control
+              [label]="'accountsAdmin.connect.modeLabel' | transloco"
+              [options]="modeOptions"
+              [value]="mode"
+              (valueChange)="setMode($event)"
+            />
+          </div>
+
+          @if (mode === 'existing') {
+            <div class="form-row">
+              <div class="form-field">
+                <label class="form-field__label" for="account-link-profile">{{
+                  (profileType === 'trainee'
+                    ? 'accountsAdmin.connect.pickTrainee'
+                    : 'accountsAdmin.connect.pickTrainer'
+                  ) | transloco
+                }}</label>
+                @if (candidates === null) {
+                  <p class="notice" role="status">
+                    {{ 'accountsAdmin.connect.loadingProfiles' | transloco }}
+                  </p>
+                } @else {
+                  <select
+                    id="account-link-profile"
+                    formControlName="profileId"
+                    aria-describedby="account-link-profile-help"
+                    [attr.aria-invalid]="invalid('profileId')"
+                    (change)="pickProfile()"
+                  >
+                    <option value="">
+                      {{ 'accountsAdmin.connect.choose' | transloco }}
+                    </option>
+                    @if (suggested.length) {
+                      <optgroup
+                        [label]="'accountsAdmin.connect.suggested' | transloco"
+                      >
+                        @for (profile of suggested; track profile.id) {
+                          <option [value]="profile.id">
+                            {{ candidateLabel(profile) }}
+                          </option>
+                        }
+                      </optgroup>
+                    }
+                    @if (others.length) {
+                      <optgroup
+                        [label]="
+                          (suggested.length
+                            ? 'accountsAdmin.connect.others'
+                            : 'accountsAdmin.connect.all'
+                          ) | transloco
+                        "
+                      >
+                        @for (profile of others; track profile.id) {
+                          <option [value]="profile.id">
+                            {{ candidateLabel(profile) }}
+                          </option>
+                        }
+                      </optgroup>
+                    }
+                  </select>
+                  @if (candidatesError) {
+                    <span
+                      class="form-field__error"
+                      id="account-link-profile-help"
+                      >{{ candidatesError | uiMessage }}</span
+                    >
+                  } @else if (invalid('profileId')) {
+                    <span
+                      class="form-field__error"
+                      id="account-link-profile-help"
+                      >{{
+                        'accountsAdmin.connect.pickRequired' | transloco
+                      }}</span
+                    >
+                  } @else {
+                    <span
+                      class="form-field__hint"
+                      id="account-link-profile-help"
+                      >{{
+                        (candidates.length
+                          ? 'accountsAdmin.connect.pickHint'
+                          : 'accountsAdmin.connect.noProfiles'
+                        ) | transloco
+                      }}</span
+                    >
+                  }
+                }
+              </div>
+            </div>
+          }
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-field__label" for="account-link-name">{{
+                'accountsAdmin.fields.name' | transloco
+              }}</label>
+              <input
+                id="account-link-name"
+                type="text"
+                formControlName="name"
+                aria-describedby="account-link-name-help"
+                [attr.aria-invalid]="invalid('name')"
+              />
+              @if (invalid('name')) {
+                <span class="form-field__error" id="account-link-name-help">{{
+                  'accountsAdmin.connect.nameError' | transloco
+                }}</span>
+              } @else {
+                <span class="form-field__hint" id="account-link-name-help">{{
+                  'accountsAdmin.connect.nameHint' | transloco
+                }}</span>
+              }
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label" for="account-link-nickname"
+                >{{ 'accountsAdmin.fields.nickname' | transloco }}
+                <span class="form-field__optional">{{
+                  'common.optional' | transloco
+                }}</span></label
+              >
+              <input
+                id="account-link-nickname"
+                type="text"
+                formControlName="nickname"
+                aria-describedby="account-link-nickname-help"
+                [attr.aria-invalid]="invalid('nickname')"
+              />
+              @if (invalid('nickname')) {
+                <span
+                  class="form-field__error"
+                  id="account-link-nickname-help"
+                  >{{ 'accountsAdmin.connect.nicknameError' | transloco }}</span
+                >
+              } @else {
+                <span
+                  class="form-field__hint"
+                  id="account-link-nickname-help"
+                  >{{ 'accountsAdmin.connect.nicknameHint' | transloco }}</span
+                >
+              }
+            </div>
+          </div>
+
+          <app-contact-fields
+            idPrefix="account-link"
+            [form]="contact"
+            [gyms]="gyms"
+            [gymSubscriptions]="gymSubscriptions"
+            [showGymSubscription]="profileType === 'trainee'"
+            [homeGym]="profileType === 'trainee' ? 'preferred' : 'primary'"
+            [phoneRequired]="false"
+          />
+        </div>
+
+        @if (errorMessage) {
+          <p class="notice notice--danger" role="alert">
+            {{ errorMessage | uiMessage }}
+          </p>
+        }
+
+        <div class="form-actions">
+          <button
+            class="btn btn--primary"
+            type="submit"
+            [disabled]="connecting || deleting"
+          >
+            {{
+              (connecting
+                ? 'accountsAdmin.connect.connecting'
+                : 'accountsAdmin.connect.submit'
+              ) | transloco
+            }}
+          </button>
+        </div>
+      </form>
+
+      <div class="panel">
+        <h2 class="panel__title">
+          {{ 'accountsAdmin.delete.title' | transloco }}
+        </h2>
+        <p class="notice notice--warning">
+          {{ 'accountsAdmin.delete.warning' | transloco }}
+        </p>
+        <div class="form-actions">
+          <button
+            class="btn btn--danger"
+            type="button"
+            [disabled]="deleting || connecting"
+            (click)="deletePermanently()"
+          >
+            {{
+              (deleting
+                ? 'accountsAdmin.delete.deleting'
+                : 'accountsAdmin.delete.submit'
+              ) | transloco
+            }}
+          </button>
+        </div>
+      </div>
+    }
+  }
+</section>

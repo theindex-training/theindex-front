@@ -14,6 +14,17 @@
   </div>
 
   <div class="user__actions">
+    @if (hasProfile) {
+      <a class="user__action" routerLink="/my-details">
+        @if (layout === 'list') {
+          <app-icon name="user" />
+        }
+        {{ 'common.myDetails' | transloco }}
+      </a>
+      @if (layout === 'inline') {
+        <span class="user__separator" aria-hidden="true">·</span>
+      }
+    }
     <a class="user__action" routerLink="/change-password">
       @if (layout === 'list') {
         <app-icon name="key" />

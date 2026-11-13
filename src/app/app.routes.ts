@@ -19,6 +19,15 @@ export const routes: Routes = [
     canActivate: [loginGuard],
   },
   {
+    path: 'register',
+    title: 'register.title',
+    loadComponent: () =>
+      import('./pages/register/register.component').then(
+        (m) => m.RegisterComponent,
+      ),
+    canActivate: [loginGuard],
+  },
+  {
     path: 'unauthorized',
     title: 'system.unauthorized.title',
     loadComponent: () =>
@@ -105,6 +114,36 @@ export const routes: Routes = [
           ),
         canActivate: [roleGuard],
         data: { roles: ['TRAINEE'] },
+      },
+      {
+        path: 'my-details',
+        title: 'myDetails.title',
+        loadComponent: () =>
+          import('./pages/my-details/my-details.component').then(
+            (m) => m.MyDetailsComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['TRAINEE', 'TRAINER'] },
+      },
+      {
+        path: 'accounts/:id',
+        title: 'accountsAdmin.details.title',
+        loadComponent: () =>
+          import('./pages/accounts/account-details.component').then(
+            (m) => m.AccountDetailsComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
+      },
+      {
+        path: 'accounts',
+        title: 'nav.accounts',
+        loadComponent: () =>
+          import('./pages/accounts/accounts.component').then(
+            (m) => m.AccountsComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
       },
       {
         path: 'change-password',
