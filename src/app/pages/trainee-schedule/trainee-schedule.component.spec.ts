@@ -87,6 +87,7 @@ describe('TraineeScheduleComponent', () => {
         provideHttpClientTesting(),
         provideRouter([
           { path: 'schedule', component: TraineeScheduleComponent },
+          { path: 'schedule/:id', children: [] },
           { path: '**', children: [] },
         ]),
       ],
@@ -123,31 +124,58 @@ describe('TraineeScheduleComponent', () => {
     page.query(`[data-testid="trainee-training-${id}"]`)!;
   const rowText = (id: string) =>
     Array.from(row(id).querySelectorAll(':scope > span'))
-      .map((part) => (part.textContent ?? '').replace(/\s+/g, ' ').trim())
+      // The actions (chip, note, links, button) are laid out apart: read them one by one.
+      .map((part) =>
+        (part.children.length ? Array.from(part.children) : [part])
+          .map((item) => (item.textContent ?? '').replace(/\s+/g, ' ').trim())
+          .join(' '),
+      )
       .filter(Boolean)
       .join(' | ');
   const buttonIn = (id: string) => row(id).querySelector('button');
+  const linkIn = (id: string) => row(id).querySelector('a');
 
   it('shows each training with its count and what the trainee can do', async () => {
     await open();
 
+    // Past: only its page (with the workout) is left.
     expect(rowText('t-thu')).toBe(
-      '18:00 – 23:00 | Velcho Sokolov | 5 booked | Booked',
+      `18:00 – 23:00 | Velcho Sokolov | 5 booked | Booked ${texts.details}`,
     );
     expect(buttonIn('t-thu')).toBeNull();
     expect(rowText('t-soon')).toBe(
-      `00:45 – 23:00 | Velcho Sokolov | 1 booked | ${texts.closed}`,
+      `00:45 – 23:00 | Velcho Sokolov | 1 booked | ${texts.closed} ${texts.details}`,
     );
+    expect(linkIn('t-soon')!.getAttribute('aria-label')).toBe(
+      'Details of Friday, 13 November 00:45 – 23:00',
+    );
+    // Open: Book leads to the training's page, where the trainee books.
     expect(rowText('t-fri')).toBe(
       `18:00 – 23:00 | Velcho Sokolov | Helen | 3 booked | ${texts.book}`,
     );
-    expect(buttonIn('t-fri')!.getAttribute('aria-label')).toBe(
+    expect(buttonIn('t-fri')).toBeNull();
+    expect(linkIn('t-fri')!.getAttribute('aria-label')).toBe(
       'Book Friday, 13 November 18:00 – 23:00',
     );
+    expect(linkIn('t-fri')!.getAttribute('href')).toBe('/schedule/t-fri');
+    // Booked: its page, and Cancel booking right here.
     expect(rowText('t-sat')).toBe(
-      `07:10 – 23:00 | Velcho Sokolov | 2 booked | Booked ${texts.cancel}`,
+      `07:10 – 23:00 | Velcho Sokolov | 2 booked | Booked ${texts.details} ${texts.cancel}`,
     );
+    expect(linkIn('t-sat')!.getAttribute('href')).toBe('/schedule/t-sat');
     expect(page.text()).toContain(texts.rules);
+  });
+
+  it('a booking that is too late to cancel says so and keeps its page', async () => {
+    await open('/schedule', {
+      ...WEEK,
+      slots: [{ ...MINE, canCancel: false }],
+    });
+
+    expect(rowText('t-sat')).toBe(
+      `07:10 – 23:00 | Velcho Sokolov | 2 booked | Booked ${texts.cancelClosed} ${texts.details}`,
+    );
+    expect(buttonIn('t-sat')).toBeNull();
   });
 
   it('opens the gym picked last on this device and remembers a new pick', async () => {
@@ -199,26 +227,14 @@ describe('TraineeScheduleComponent', () => {
     await page.settle();
   });
 
-  it('books a training and shows it booked', async () => {
+  it("Book opens the training's page and books nothing yet", async () => {
     await open();
 
-    buttonIn('t-fri')!.click();
-    await page.settle();
-    const request = http.expectOne('/api/bookings');
-    expect(request.request.method).toBe('POST');
-    expect(request.request.body).toEqual({ slotId: 't-fri' });
-    request.flush({
-      ...OPEN,
-      bookedCount: 4,
-      bookedByMe: true,
-      canBook: false,
-      canCancel: true,
-    });
+    linkIn('t-fri')!.click();
     await page.settle();
 
-    expect(rowText('t-fri')).toBe(
-      `18:00 – 23:00 | Velcho Sokolov | Helen | 4 booked | Booked ${texts.cancel}`,
-    );
+    expect(router.url).toBe('/schedule/t-fri');
+    http.expectNone('/api/bookings');
   });
 
   it('cancels a booking once confirmed', async () => {
@@ -251,26 +267,27 @@ describe('TraineeScheduleComponent', () => {
     );
   });
 
-  it("shows the API's reason when booking fails, and the week as it is now", async () => {
+  it("shows the API's reason when cancelling fails, and the week as it is now", async () => {
     await open();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
 
-    buttonIn('t-fri')!.click();
+    buttonIn('t-sat')!.click();
     await page.settle();
     const failed = apiError(
-      'Booking for this training has closed (30 minutes before it starts)',
+      'A booking can be cancelled only until 1 hour before the training',
     );
-    http.expectOne('/api/bookings').flush(failed.body, failed.options);
+    http.expectOne('/api/bookings/t-sat').flush(failed.body, failed.options);
     await page.settle();
     http.expectOne('/api/bookings/schedule?gymId=gym-c&week=2026-11-09').flush({
       ...WEEK,
-      slots: [PAST, CLOSED, { ...OPEN, canBook: false }, MINE],
+      slots: [PAST, CLOSED, OPEN, { ...MINE, canCancel: false }],
     });
     await page.settle();
 
     expect(page.alert()).toBe(
-      'Booking for this training has closed (30 minutes before it starts)',
+      'A booking can be cancelled only until 1 hour before the training',
     );
-    expect(rowText('t-fri')).toContain(texts.closed);
+    expect(rowText('t-sat')).toContain(texts.cancelClosed);
   });
 
   it("says when the week's schedule isn't out yet", async () => {

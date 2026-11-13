@@ -1312,7 +1312,7 @@
     },
     "list": {
       "title": "Workouts",
-      "subtitle": "The workouts of the day, a week at a time. Trainees don't see workouts yet.",
+      "subtitle": "The workouts of the day, a week at a time. Trainees see a training's workout when they open it in their Schedule.",
       "new": "New workout",
       "previousWeek": "Previous week",
       "nextWeek": "Next week",
@@ -1541,6 +1541,8 @@
     "booked": "Booked",
     "book": "Book",
     "bookFor": "Book {training}",
+    "details": "Details",
+    "detailsFor": "Details of {training}",
     "booking": "Booking...",
     "cancel": "Cancel booking",
     "cancelFor": "Cancel the booking for {training}",
@@ -1550,5 +1552,29 @@
     "confirmCancel": "Cancel your booking for {training}?",
     "bookError": "Unable to book this training right now.",
     "cancelError": "Unable to cancel this booking right now."
+  },
+  "traineeTraining": {
+    "title": "Training",
+    "back": "Back to the schedule",
+    "loading": "Loading the training...",
+    "loadError": "Couldn't load the training",
+    "loadErrorMessage": "Unable to load the training right now.",
+    "bookingTitle": "Booking",
+    "day": "Day",
+    "time": "Time",
+    "gym": "Gym",
+    "trainer": "Trainer",
+    "bookings": "Bookings",
+    "yourBooking": "Your booking",
+    "notBooked": "Not booked",
+    "bookedNotice": "You're booked for this training.",
+    "cancelledNotice": "Your booking is cancelled.",
+    "workoutTitle": "Workout",
+    "exercises": "Exercises",
+    "noWorkoutTitle": "The workout isn't out yet",
+    "noWorkoutMessage": "The trainers add the workout before the training. Check back later.",
+    "playVideo": "Play the video: {name}",
+    "videoTitle": "Video: {name}",
+    "openVideo": "Open on YouTube"
   }
 }

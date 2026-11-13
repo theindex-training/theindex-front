@@ -1,0 +1,68 @@
+.rules,
+.closed {
+  margin: 0;
+}
+
+.workout {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.workout__title,
+.exercises__title,
+.exercise__name {
+  margin: 0;
+}
+
+.exercises__title {
+  font-size: var(--text-lg);
+}
+
+// The summary and descriptions are plain text whose line breaks matter.
+.workout__summary,
+.exercise__description {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.workout__summary {
+  font-size: var(--text-lg);
+}
+
+.exercises {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: exercise;
+}
+
+.exercise {
+  display: grid;
+  gap: var(--space-3);
+  counter-increment: exercise;
+}
+
+.exercise__name {
+  font-size: var(--text-lg);
+
+  &::before {
+    content: counter(exercise) '. ';
+    color: var(--accent-text);
+  }
+}
+
+// From 768px, the video sits beside the name and description.
+@media (min-width: 768px) {
+  .exercise:has(app-exercise-video) {
+    grid-template-columns: 1fr minmax(0, 22rem);
+    grid-template-rows: auto 1fr;
+    align-items: start;
+
+    app-exercise-video {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+    }
+  }
+}

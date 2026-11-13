@@ -2,6 +2,7 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 export type IconName =
   | 'home'
+  | 'play'
   | 'users'
   | 'check'
   | 'history'

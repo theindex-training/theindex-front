@@ -151,48 +151,52 @@
                         }}</app-chip>
                       }
                       @if (training.canBook) {
-                        <button
+                        <a
                           class="btn btn--primary"
-                          type="button"
-                          [disabled]="!!busyId"
+                          [routerLink]="['/schedule', training.id]"
                           [attr.aria-label]="
                             'traineeSchedule.bookFor'
                               | transloco: { training: describe(training) }
                           "
-                          (click)="book(training)"
+                          >{{ 'traineeSchedule.book' | transloco }}</a
                         >
-                          {{
-                            (busyId === training.id
-                              ? 'traineeSchedule.booking'
-                              : 'traineeSchedule.book'
+                      } @else {
+                        @if (!training.canCancel && !isPast(training)) {
+                          <span class="text-muted">{{
+                            (training.bookedByMe
+                              ? 'traineeSchedule.cancelClosed'
+                              : 'traineeSchedule.closed'
                             ) | transloco
-                          }}
-                        </button>
-                      } @else if (training.canCancel) {
-                        <button
-                          class="btn btn--ghost"
-                          type="button"
-                          [disabled]="!!busyId"
+                          }}</span>
+                        }
+                        <a
+                          class="btn btn--secondary"
+                          [routerLink]="['/schedule', training.id]"
                           [attr.aria-label]="
-                            'traineeSchedule.cancelFor'
+                            'traineeSchedule.detailsFor'
                               | transloco: { training: describe(training) }
                           "
-                          (click)="cancel(training)"
+                          >{{ 'traineeSchedule.details' | transloco }}</a
                         >
-                          {{
-                            (busyId === training.id
-                              ? 'traineeSchedule.cancelling'
-                              : 'traineeSchedule.cancel'
-                            ) | transloco
-                          }}
-                        </button>
-                      } @else if (!isPast(training)) {
-                        <span class="text-muted">{{
-                          (training.bookedByMe
-                            ? 'traineeSchedule.cancelClosed'
-                            : 'traineeSchedule.closed'
-                          ) | transloco
-                        }}</span>
+                        @if (training.canCancel) {
+                          <button
+                            class="btn btn--ghost"
+                            type="button"
+                            [disabled]="!!busyId"
+                            [attr.aria-label]="
+                              'traineeSchedule.cancelFor'
+                                | transloco: { training: describe(training) }
+                            "
+                            (click)="cancel(training)"
+                          >
+                            {{
+                              (busyId === training.id
+                                ? 'traineeSchedule.cancelling'
+                                : 'traineeSchedule.cancel'
+                              ) | transloco
+                            }}
+                          </button>
+                        }
                       }
                     </span>
                   </li>

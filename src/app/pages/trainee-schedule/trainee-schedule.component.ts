@@ -6,7 +6,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ChipComponent } from '../../components/chip/chip.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
@@ -42,14 +42,17 @@ interface TraineeDay {
 }
 
 /**
- * A trainee's Schedule (`/schedule`): a gym's week as the staff created it, with Book and Cancel
- * on each training while the rules allow (the API decides: booking closes 30 minutes before a
- * training, cancelling 1 hour before) and how many booked. `?gym=` and `?week=` keep the choice.
+ * A trainee's Schedule (`/schedule`): a gym's week as the staff created it, with how many booked
+ * and the trainee's own bookings. Each training opens its page (`/schedule/:id`, with the workout),
+ * as Book while booking is open (the trainee books there) and as Details otherwise; a booking can
+ * be cancelled right here while the rules allow (the API decides: booking closes 30 minutes before
+ * a training, cancelling 1 hour before). `?gym=` and `?week=` keep the choice.
  */
 @Component({
   selector: 'app-trainee-schedule',
   standalone: true,
   imports: [
+    RouterLink,
     TranslocoPipe,
     UiMessagePipe,
     PageHeaderComponent,
@@ -74,7 +77,7 @@ export class TraineeScheduleComponent implements OnInit {
   loading = true;
   errorMessage: UiMessage | null = null;
 
-  /** The training whose Book or Cancel is on its way. */
+  /** The training whose Cancel is on its way. */
   busyId: string | null = null;
   actionError: UiMessage | null = null;
 
@@ -254,14 +257,6 @@ export class TraineeScheduleComponent implements OnInit {
     return new Date(training.startsAt).getTime() <= Date.now();
   }
 
-  book(training: BookableTraining): void {
-    this.act(
-      training,
-      this.bookings.book(training.id),
-      'traineeSchedule.bookError',
-    );
-  }
-
   cancel(training: BookableTraining): void {
     const question = this.language.t('traineeSchedule.confirmCancel', {
       training: this.describe(training),
@@ -278,7 +273,7 @@ export class TraineeScheduleComponent implements OnInit {
 
   private act(
     training: BookableTraining,
-    request: ReturnType<BookingsService['book']>,
+    request: ReturnType<BookingsService['cancel']>,
     fallbackKey: string,
   ): void {
     this.busyId = training.id;
