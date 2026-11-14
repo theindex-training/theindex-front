@@ -1,0 +1,199 @@
+<main class="login">
+  <div class="login__panel login__panel--brand">
+    <app-language-switch class="login__language" [compact]="true" />
+    <div class="login__brand">
+      <img
+        class="login__logo"
+        src="brand/the-index-logo-red.png"
+        alt="The Index"
+        width="640"
+        height="270"
+      />
+      <h1>{{ 'register.welcome' | transloco }}</h1>
+      <p class="login__copy">{{ 'register.copy' | transloco }}</p>
+      <ul class="login__highlights">
+        <li>{{ 'register.stepCreate' | transloco }}</li>
+        <li>{{ 'register.stepConnect' | transloco }}</li>
+        <li>{{ 'register.stepSignIn' | transloco }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="login__panel">
+    <div class="login__card register__card">
+      @if (registeredEmail !== null) {
+        <div class="register__done" data-testid="register-done">
+          <h2>{{ 'register.doneTitle' | transloco }}</h2>
+          <p class="notice notice--success" role="status">
+            {{ 'register.doneMessage' | transloco: { email: registeredEmail } }}
+          </p>
+          <p>{{ 'register.doneNext' | transloco }}</p>
+          <a class="btn btn--primary" routerLink="/login">{{
+            'register.toSignIn' | transloco
+          }}</a>
+        </div>
+      } @else {
+        <div class="login__header">
+          <h2>{{ 'register.title' | transloco }}</h2>
+          <p>{{ 'register.intro' | transloco }}</p>
+        </div>
+
+        <form
+          class="form-grid"
+          novalidate
+          [formGroup]="form"
+          (ngSubmit)="handleSubmit()"
+        >
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-field__label" for="register-name">{{
+                'register.name' | transloco
+              }}</label>
+              <input
+                id="register-name"
+                type="text"
+                autocomplete="name"
+                formControlName="name"
+                aria-describedby="register-name-help"
+                [attr.aria-invalid]="invalid('name')"
+              />
+              @if (invalid('name')) {
+                <span class="form-field__error" id="register-name-help">{{
+                  'register.nameError' | transloco
+                }}</span>
+              } @else {
+                <span class="form-field__hint" id="register-name-help">{{
+                  'register.nameHint' | transloco
+                }}</span>
+              }
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label" for="register-email">{{
+                'register.email' | transloco
+              }}</label>
+              <input
+                id="register-email"
+                type="email"
+                autocomplete="email"
+                formControlName="email"
+                aria-describedby="register-email-help"
+                [attr.aria-invalid]="invalid('email')"
+              />
+              @if (invalid('email')) {
+                <span class="form-field__error" id="register-email-help">{{
+                  emailError | transloco
+                }}</span>
+              } @else {
+                <span class="form-field__hint" id="register-email-help">{{
+                  'register.emailHint' | transloco
+                }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-field__label" for="register-password">{{
+                'register.password' | transloco
+              }}</label>
+              <input
+                id="register-password"
+                type="password"
+                autocomplete="new-password"
+                formControlName="password"
+                aria-describedby="register-password-help"
+                [attr.aria-invalid]="invalid('password')"
+              />
+              @if (invalid('password')) {
+                <span class="form-field__error" id="register-password-help">{{
+                  passwordError | transloco
+                }}</span>
+              } @else {
+                <span class="form-field__hint" id="register-password-help">{{
+                  'register.passwordHint' | transloco
+                }}</span>
+              }
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label" for="register-confirm">{{
+                'register.confirmPassword' | transloco
+              }}</label>
+              <input
+                id="register-confirm"
+                type="password"
+                autocomplete="new-password"
+                formControlName="confirmPassword"
+                aria-describedby="register-confirm-help"
+                [attr.aria-invalid]="!!confirmError"
+              />
+              @if (confirmError) {
+                <span class="form-field__error" id="register-confirm-help">{{
+                  confirmError | transloco
+                }}</span>
+              } @else {
+                <span class="form-field__hint" id="register-confirm-help">{{
+                  'register.confirmHint' | transloco
+                }}</span>
+              }
+            </div>
+          </div>
+
+          <app-contact-fields
+            idPrefix="register"
+            [form]="contact"
+            [gyms]="gyms"
+            [gymSubscriptions]="gymSubscriptions"
+          />
+
+          <div class="form-field">
+            <label class="form-field form-field--check register__consent">
+              <input
+                id="register-consent"
+                type="checkbox"
+                formControlName="acceptTerms"
+                aria-describedby="register-consent-help"
+                [attr.aria-invalid]="invalid('acceptTerms')"
+              />
+              <span>{{ 'register.consent' | transloco }}</span>
+            </label>
+            @if (invalid('acceptTerms')) {
+              <span class="form-field__error" id="register-consent-help">{{
+                'register.consentRequired' | transloco
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="register-consent-help">{{
+                'register.consentHint' | transloco
+              }}</span>
+            }
+          </div>
+
+          @if (errorMessage) {
+            <p class="notice notice--danger" role="alert">
+              {{ errorMessage | uiMessage }}
+            </p>
+          }
+
+          <div class="form-actions">
+            <button
+              class="btn btn--primary"
+              type="submit"
+              [disabled]="submitting"
+            >
+              {{
+                (submitting ? 'register.submitting' : 'register.submit')
+                  | transloco
+              }}
+            </button>
+          </div>
+        </form>
+
+        <p class="login__footer">
+          {{ 'register.haveAccount' | transloco }}
+          <a routerLink="/login">{{ 'register.signIn' | transloco }}</a>
+        </p>
+      }
+    </div>
+  </div>
+</main>

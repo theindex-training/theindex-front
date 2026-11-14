@@ -1,0 +1,181 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="'nav.accounts' | transloco"
+    [subtitle]="'accountsAdmin.list.subtitle' | transloco"
+  />
+
+  <div class="list-toolbar">
+    <app-search-field
+      class="list-toolbar__search"
+      [label]="'accountsAdmin.list.searchLabel' | transloco"
+      [placeholder]="'accountsAdmin.list.searchPlaceholder' | transloco"
+      [value]="searchTerm"
+      (valueChange)="searchTerm = $event; applySearch()"
+    />
+    <app-segmented-control
+      [label]="'accountsAdmin.filter.label' | transloco"
+      [options]="linkOptions"
+      [value]="link"
+      (valueChange)="link = $event; load()"
+    />
+    @if (!loading && !errorMessage && accounts.length) {
+      <p
+        class="list-toolbar__count"
+        data-testid="list-count"
+        aria-live="polite"
+      >
+        {{
+          'accountsAdmin.list.count'
+            | transloco: { shown: filtered.length, total: accounts.length }
+        }}
+      </p>
+    }
+  </div>
+
+  @if (loading) {
+    <app-skeleton-list
+      [label]="'accountsAdmin.list.loading' | transloco"
+      [rows]="5"
+    />
+  } @else if (errorMessage) {
+    <app-empty-state
+      tone="danger"
+      [title]="'accountsAdmin.list.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="load()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else if (!accounts.length) {
+    <app-empty-state
+      icon="user-plus"
+      [title]="emptyTitleKey | transloco"
+      [message]="'accountsAdmin.list.emptyMessage' | transloco"
+    >
+      @if (link !== 'all') {
+        <button
+          class="btn btn--secondary"
+          type="button"
+          (click)="link = 'all'; load()"
+        >
+          {{ 'common.showAll' | transloco }}
+        </button>
+      }
+    </app-empty-state>
+  } @else if (!filtered.length) {
+    <app-empty-state
+      [title]="'accountsAdmin.list.noMatchesTitle' | transloco"
+      [message]="
+        'accountsAdmin.list.noMatches' | transloco: { term: searchTerm.trim() }
+      "
+    >
+      <button
+        class="btn btn--secondary"
+        type="button"
+        (click)="searchTerm = ''; applySearch()"
+      >
+        {{ 'common.clearSearch' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else {
+    <div
+      class="data-table-wrap responsive-table"
+      tabindex="0"
+      role="region"
+      [attr.aria-label]="'accountsAdmin.list.tableLabel' | transloco"
+    >
+      <table class="data-table">
+        <caption class="visually-hidden">
+          {{
+            'nav.accounts' | transloco
+          }}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'accountsAdmin.fields.person' | transloco }}</th>
+            <th scope="col">{{ 'contact.phone' | transloco }}</th>
+            <th scope="col">
+              {{ 'accountsAdmin.fields.created' | transloco }}
+            </th>
+            <th scope="col">
+              {{ 'accountsAdmin.fields.profile' | transloco }}
+            </th>
+            <th scope="col" class="cell-fit">
+              <span class="visually-hidden">{{
+                'accountsAdmin.list.detailsColumn' | transloco
+              }}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (account of filtered; track account.id) {
+            <tr>
+              <td>
+                <div class="person-cell">
+                  <app-avatar [name]="name(account)" />
+                  <div class="person-cell__text">
+                    <a
+                      class="cell-link"
+                      [routerLink]="['/accounts', account.id]"
+                      >{{ name(account) }}</a
+                    >
+                    <span class="person-cell__sub">{{ account.email }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="num">{{ phone(account) }}</td>
+              <td class="num">{{ format.date(account.createdAt) }}</td>
+              <td>
+                @if (account.profile) {
+                  <span class="linked-mark">{{ profileLabel(account) }}</span>
+                } @else {
+                  <app-chip
+                    [tone]="account.role === 'ADMIN' ? 'neutral' : 'warning'"
+                    >{{ profileLabel(account) }}</app-chip
+                  >
+                }
+              </td>
+              <td class="cell-fit">
+                <!-- Mouse shortcut only; the name link is the accessible link for the row. -->
+                <a
+                  class="row-chevron"
+                  [routerLink]="['/accounts', account.id]"
+                  tabindex="-1"
+                  aria-hidden="true"
+                >
+                  <app-icon name="chevron-right" />
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <ul
+      class="list-card responsive-list"
+      [attr.aria-label]="'nav.accounts' | transloco"
+    >
+      @for (account of filtered; track account.id) {
+        <li>
+          <app-list-row
+            [link]="['/accounts', account.id]"
+            [title]="name(account)"
+            [avatarName]="name(account)"
+          >
+            <span listRowMeta>{{ account.email }}</span>
+            <span listRowMeta class="num">{{ phone(account) }}</span>
+            @if (!account.profile) {
+              <app-chip
+                listRowTrailing
+                [tone]="account.role === 'ADMIN' ? 'neutral' : 'warning'"
+                >{{ profileLabel(account) }}</app-chip
+              >
+            }
+          </app-list-row>
+        </li>
+      }
+    </ul>
+  }
+</section>

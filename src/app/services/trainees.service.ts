@@ -13,6 +13,10 @@ export interface TraineeProfile {
   gymSubscriptionId: string | null;
   /** The gym the trainee usually trains in: the default gym of their pages. */
   preferredGymId?: string | null;
+  /** Social network profiles: a handle or a link, as typed. */
+  instagram?: string | null;
+  facebook?: string | null;
+  tiktok?: string | null;
   isActive: boolean;
   createdAt?: string;
 }

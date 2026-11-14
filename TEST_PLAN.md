@@ -25,6 +25,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - The training page (a feature: `/schedule/:id`, a training's workout for trainees, booked there) came with `trainee-training.component.spec.ts`, J17 reworked (Book now opens the page) and the list spec updated. One deliberate break (the booking's answer replacing the page's training, so the workout was lost) was caught.
 - The weekly schedules (a feature: gym templates and weeks) came with journey J16 and its own specs (`pages/schedules/*.spec.ts`): 823 unit tests, 57 E2E tests. One deliberate break (days before `editableFrom` editable) was caught.
 - Who booked a training (a feature: the staff's training page and Register attendance opened from it) came with journey J18, `schedule-training.component.spec.ts`, Details links in `schedule-pages.spec.ts` and an "opened from a training" block in `attendance-register.component.spec.ts`. One deliberate break (the chosen gym not kept when the trainer changes) was caught.
+- Self-registration and connecting accounts (a feature: `/register`, `/accounts`, `/accounts/:id`, `/my-details`) came with journey J19 and its own specs (`register.component.spec.ts`, `pages/accounts/*.spec.ts`, `my-details.component.spec.ts`, `contact-form.spec.ts`, `contact.util.spec.ts`, `services/self-registration.services.spec.ts`), plus the login 403, the route table, the nav and the user block. Two deliberate breaks (registering without the consent, a trainer sending a gym subscription from My details) were each caught.
 - The workouts area (a feature: workouts, exercises, workout types, PDF import) came with journey J15 and its own specs (`pages/workouts/*.spec.ts`, `services/workouts-api.services.spec.ts`): 81 spec files, 816 unit tests, 51 E2E tests. One deliberate break (the women's amount dropped from the payload) was caught.
 
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
@@ -797,6 +798,11 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 ✅ `e2e/journeys/j18-training-bookings.e2e.ts`, 2 tests (3 runs).
 1. Desktop and phone, trainer: today's (read-only) training on the Schedule tab opens its page; it lists who booked, each linking to the trainee, with what they would have left after it and the projection notice, then shows the workout as trainees see it (summary, an exercise's video button); Register attendance opens filled in (the notice, the booked trainees ticked); after unticking one, Review posts the trainer, gym, trainees, day and start, and nothing is saved.
 2. Desktop, trainee: `/workouts/schedule/:id` is out of reach and loads nothing.
+
+### J19. Self-registration (P1) [desktop, mobile]
+✅ `e2e/journeys/j19-self-registration.e2e.ts`, 2 tests (4 runs).
+1. Desktop and phone, visitor: Sign in → Create one → the form; without the consent nothing is sent; with it, the exact body is posted and the card says what happens next; signing in before an admin connects the account shows the translated "not connected yet" message and stays on Sign in.
+2. Desktop and phone, admin: Accounts asks for `link=unlinked`; the waiting account opens on Existing profile with only the list (no fields or Connect); picking the trainee who already exists keeps what they registered, shows the profile's nickname, counts two differences and shows the profile's phone under the field; Use it takes it, and Connect posts every field with the `profileId`; the page links to the trainee.
 
 ---
 

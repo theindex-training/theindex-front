@@ -1,3 +1,4 @@
+import { SocialLinksComponent } from '../../components/social-links/social-links.component';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
@@ -75,6 +76,7 @@ import { LocaleFormatService } from '../../i18n/locale-format.service';
   selector: 'app-trainee-details',
   standalone: true,
   imports: [
+    SocialLinksComponent,
     UiMessagePipe,
     TranslocoPipe,
     EnumLabelPipe,

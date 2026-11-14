@@ -38,7 +38,8 @@
     "deactivating": "Deactivating...",
     "missingId": "The link is missing an ID.",
     "dash": "—",
-    "quoted": "“{text}”"
+    "quoted": "“{text}”",
+    "myDetails": "My details"
   },
   "nav": {
     "mainLabel": "Main",
@@ -67,7 +68,8 @@
     "stats": "Stats",
     "records": "Records",
     "content": "Content",
-    "workouts": "Workouts"
+    "workouts": "Workouts",
+    "accounts": "Accounts"
   },
   "enums": {
     "role": {
@@ -1267,7 +1269,9 @@
       "passwordLength": "Password must be at least 3 characters.",
       "error": "Unable to sign in with those credentials.",
       "submit": "Sign in",
-      "footer": "Need access? Contact admin"
+      "noAccount": "No account yet?",
+      "createAccount": "Create one",
+      "notLinked": "Your account isn't connected to your profile yet. An admin will connect it soon; then you can sign in."
     }
   },
   "stats": {
@@ -1619,5 +1623,176 @@
     "playVideo": "Play the video: {name}",
     "videoTitle": "Video: {name}",
     "openVideo": "Open on YouTube"
+  },
+  "register": {
+    "title": "Create an account",
+    "welcome": "Join The Index",
+    "copy": "Create your account to book trainings and follow your progress.",
+    "stepCreate": "Create your account",
+    "stepConnect": "We connect it to your profile at the gym",
+    "stepSignIn": "Sign in and book your trainings",
+    "intro": "Fill in your details. Fields marked (optional) can stay empty.",
+    "name": "Full name",
+    "nameHint": "2–100 characters, as the gym knows you.",
+    "nameError": "Enter your name, 2–100 characters.",
+    "email": "Email",
+    "emailHint": "You sign in with it.",
+    "emailRequired": "Enter your email.",
+    "emailInvalid": "Enter a valid email address.",
+    "password": "Password",
+    "passwordHint": "8–128 characters.",
+    "passwordRequired": "Enter a password.",
+    "passwordLength": "Use 8–128 characters.",
+    "confirmPassword": "Confirm password",
+    "confirmHint": "Type the password again.",
+    "confirmRequired": "Repeat the password.",
+    "mismatch": "Passwords do not match.",
+    "consent": "I agree that The Index stores and uses my personal data for my membership and may send me emails.",
+    "consentHint": "Required to create an account.",
+    "consentRequired": "You need to agree to create an account.",
+    "submit": "Create account",
+    "submitting": "Creating account...",
+    "error": "Couldn't create your account. Try again.",
+    "haveAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "doneTitle": "Account created",
+    "doneMessage": "Your account {email} is ready.",
+    "doneNext": "An admin will connect it to your profile at the gym. Once that's done, you can sign in with your email and password.",
+    "toSignIn": "Go to sign in"
+  },
+  "contact": {
+    "phone": "Phone",
+    "phoneHint": "6–15 digits, e.g. +359 88 123 4567.",
+    "phoneRequired": "Enter a phone number.",
+    "phoneError": "Enter 6–15 digits, optionally starting with +.",
+    "gymSubscription": "Gym subscription",
+    "gymSubscriptionHint": "A card used to access the gym, if any (e.g. MultiSport).",
+    "noGymSubscription": "None",
+    "preferredGym": "Preferred gym",
+    "preferredGymHint": "The gym usually trained in; the schedule opens on it.",
+    "primaryGym": "Primary gym",
+    "primaryGymHint": "The gym where most trainings are led; the schedule opens on it.",
+    "noGym": "None",
+    "unavailable": "The current one (no longer offered)",
+    "socialTitle": "Social profiles",
+    "socialHint": "A handle (@name) or a link.",
+    "socialPlaceholder": "@name",
+    "socialError": "Up to 200 characters.",
+    "networks": {
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "tiktok": "TikTok"
+    },
+    "difference": {
+      "inProfile": "In the profile: {value}",
+      "use": "Use it",
+      "useLabel": "Use the profile’s value: {value}"
+    }
+  },
+  "accountsAdmin": {
+    "backToList": "Back to accounts",
+    "notConnected": "Not connected",
+    "profileOf": {
+      "trainee": "Trainee: {name}",
+      "trainer": "Trainer: {name}"
+    },
+    "filter": {
+      "label": "Connection",
+      "unlinked": "Not connected",
+      "linked": "Connected",
+      "all": "All"
+    },
+    "fields": {
+      "person": "Person",
+      "created": "Created",
+      "profile": "Profile",
+      "email": "Email",
+      "role": "Role",
+      "consent": "Consent",
+      "name": "Name",
+      "nickname": "Nickname",
+      "profileType": "Type"
+    },
+    "list": {
+      "subtitle": "People who created an account wait here until you connect it to their profile.",
+      "searchLabel": "Search accounts",
+      "searchPlaceholder": "Name, email or phone",
+      "count": "{shown} of {total, plural, one {# account} other {# accounts}}",
+      "loading": "Loading accounts",
+      "loadError": "Couldn't load accounts",
+      "loadErrorMessage": "Try again in a moment.",
+      "empty": {
+        "unlinked": "No accounts waiting",
+        "linked": "No connected accounts",
+        "all": "No accounts yet"
+      },
+      "emptyMessage": "New accounts appear here when people register.",
+      "noMatchesTitle": "No matches",
+      "noMatches": "No account matches “{term}”.",
+      "tableLabel": "Accounts table",
+      "detailsColumn": "Details"
+    },
+    "details": {
+      "title": "Account",
+      "loading": "Loading the account...",
+      "loadError": "Couldn't load the account.",
+      "account": "Account",
+      "registered": "What they registered",
+      "consentGiven": "Agreed on {date}",
+      "consentNone": "Not asked (created by an admin)",
+      "connectedTo": "Connected profile",
+      "openProfile": "Open the profile",
+      "adminNote": "Admin accounts aren't connected to profiles."
+    },
+    "connect": {
+      "title": "Connect to a profile",
+      "intro": "Pick who this person is. The fields show what they registered, and the profile’s own values where they left something empty; where the two differ, the profile’s value is shown under the field. The profile keeps what you save, and they can sign in right after.",
+      "typeLabel": "Profile type",
+      "trainee": "Trainee",
+      "trainer": "Trainer",
+      "modeLabel": "Profile",
+      "newProfile": "New profile",
+      "existingProfile": "Existing profile",
+      "pickTrainee": "Trainee",
+      "pickTrainer": "Trainer",
+      "loadingProfiles": "Loading profiles...",
+      "choose": "Choose…",
+      "suggested": "Suggested",
+      "others": "Others",
+      "all": "All",
+      "pickHint": "Active profiles without an account; suggestions share the phone or a name.",
+      "noProfiles": "No active profile without an account. Create a new one instead.",
+      "pickRequired": "Choose a profile.",
+      "profilesError": "Couldn't load the profiles.",
+      "nameHint": "2–100 characters.",
+      "nameError": "Enter a name, 2–100 characters.",
+      "nicknameHint": "Only staff see it; 1–50 characters.",
+      "nicknameError": "Use 1–50 characters.",
+      "submit": "Connect account",
+      "connecting": "Connecting...",
+      "success": "Connected to {name}. They can sign in now.",
+      "error": "Couldn't connect the account.",
+      "differences": "{count, plural, one {# field differs} other {# fields differ}} from what the profile stores. The form shows what they registered; the profile’s value is under each field."
+    },
+    "delete": {
+      "title": "Delete account",
+      "warning": "Deletes the account for good, e.g. a duplicate or someone who isn’t a member. The email can register again.",
+      "submit": "Delete permanently",
+      "deleting": "Deleting...",
+      "confirm": "Delete the account {email} for good? This can’t be undone.",
+      "error": "Couldn't delete the account."
+    }
+  },
+  "myDetails": {
+    "title": "My details",
+    "subtitle": "Your contact details and social profiles.",
+    "loading": "Loading your details...",
+    "loadError": "Couldn't load your details.",
+    "name": "Name",
+    "email": "Email",
+    "fixedHint": "Ask an admin to change your name or email.",
+    "consent": "You agreed to the use of your personal data and to receiving emails on {date}.",
+    "saved": "Your details are saved.",
+    "saveError": "Couldn't save your details."
   }
 }

@@ -1,3 +1,4 @@
+import { SocialLinksComponent } from '../../components/social-links/social-links.component';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
@@ -27,6 +28,7 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
   selector: 'app-trainer-details',
   standalone: true,
   imports: [
+    SocialLinksComponent,
     EnumLabelPipe,
     UiMessagePipe,
     TranslocoPipe,

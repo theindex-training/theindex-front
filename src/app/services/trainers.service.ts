@@ -11,6 +11,11 @@ export interface TrainerProfile {
   accountId: string | null;
   /** The gym the trainer mainly leads trainings in: the default gym of their pages. */
   primaryGymId?: string | null;
+  phone?: string | null;
+  /** Social network profiles: a handle or a link, as typed. */
+  instagram?: string | null;
+  facebook?: string | null;
+  tiktok?: string | null;
   isActive: boolean;
   createdAt?: string;
 }

@@ -142,13 +142,13 @@ describe('LoginComponent', () => {
   });
 
   describe('when the login fails', () => {
-    async function failWith(body: object | null) {
+    async function failWith(body: object | null, status = 401) {
       await type('email', 'coach@gym.test');
       await type('password', 'wrong-pass');
       await submit();
       http
         .expectOne('/api/auth/login')
-        .flush(body, { status: 401, statusText: 'Unauthorized' });
+        .flush(body, { status, statusText: 'Error' });
       await settle();
     }
 
@@ -158,6 +158,17 @@ describe('LoginComponent', () => {
       await failWith({ message: 'Invalid credentials' });
 
       expect(alert()).toBe('Invalid credentials');
+      expect(localStorage.getItem('accessToken')).toBeNull();
+      expect(router.url).toBe('/');
+    });
+
+    it('explains, in the chosen language, that a 403 means the account waits to be connected', async () => {
+      await failWith(
+        { message: 'Your account is not connected to a profile yet.' },
+        403,
+      );
+
+      expect(alert()).toBe(en.auth.login.notLinked);
       expect(localStorage.getItem('accessToken')).toBeNull();
       expect(router.url).toBe('/');
     });
@@ -187,6 +198,13 @@ describe('LoginComponent', () => {
       expect(router.url).toBe('/home');
       expect(alert()).toBeUndefined();
     });
+  });
+
+  it('links to the register page for people without an account', () => {
+    const link = Array.from(el.querySelectorAll('a')).find(
+      (a) => a.textContent?.trim() === en.auth.login.createAccount,
+    );
+    expect(link?.getAttribute('href')).toBe('/register');
   });
 
   it('sends a second login request when submitted twice before the first answers', async () => {

@@ -84,7 +84,12 @@
         }}</app-ui-button>
       </form>
 
-      <p class="login__footer">{{ 'auth.login.footer' | transloco }}</p>
+      <p class="login__footer">
+        {{ 'auth.login.noAccount' | transloco }}
+        <a routerLink="/register">{{
+          'auth.login.createAccount' | transloco
+        }}</a>
+      </p>
     </div>
   </div>
 </main>

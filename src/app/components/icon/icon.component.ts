@@ -14,6 +14,7 @@ export type IconName =
   | 'trainer'
   | 'clock'
   | 'user'
+  | 'user-plus'
   | 'chart'
   | 'trophy'
   | 'more'

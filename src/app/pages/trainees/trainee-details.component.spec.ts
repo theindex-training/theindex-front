@@ -147,6 +147,28 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     ]);
   });
 
+  it('shows only the social profiles given, linked to their network', async () => {
+    await open({
+      trainee: {
+        ...TRAINEE,
+        instagram: '@ivan.p',
+        facebook: null,
+        tiktok: 'Ivan P',
+      },
+    });
+
+    expect(page.text()).toContain(en.contact.networks.instagram);
+    expect(page.text()).not.toContain(en.contact.networks.facebook);
+    expect(
+      page.query<HTMLAnchorElement>(
+        'a[href="https://www.instagram.com/ivan.p"]',
+      )?.textContent,
+    ).toBe('@ivan.p');
+    // A handle that can't be a link is shown as text.
+    expect(page.text()).toContain('Ivan P');
+    expect(page.query('a[href*="tiktok"]')).toBeNull();
+  });
+
   it("shows the trainee's trainings in a calendar of the current month by default, and as a list on request", async () => {
     await open({
       trainings: [

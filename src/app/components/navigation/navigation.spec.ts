@@ -31,6 +31,7 @@ describe('buildNavigation', () => {
       'Gyms',
       'Gym subscriptions',
       'Trainers',
+      'Accounts',
       'Training times',
       'Content',
     ]);
@@ -52,7 +53,7 @@ describe('buildNavigation', () => {
     expect(english(nav.sheetLabel)).toBe('More');
   });
 
-  it('hides ADMIN-only items (Cash register, Trainers, Content) from trainers', () => {
+  it('hides ADMIN-only items (Cash register, Trainers, Accounts, Content) from trainers', () => {
     const nav = buildNavigation('TRAINER');
     const all = labels([
       ...nav.main,
@@ -63,6 +64,7 @@ describe('buildNavigation', () => {
 
     expect(all).not.toContain('Cash register');
     expect(all).not.toContain('Trainers');
+    expect(all).not.toContain('Accounts');
     expect(all).not.toContain('Content');
     expect(labels(nav.moreMain)).toEqual([
       'Renewals',
@@ -99,6 +101,7 @@ describe('buildNavigation', () => {
 
     expect(all).not.toContain('Cash register');
     expect(all).not.toContain('Trainers');
+    expect(all).not.toContain('Accounts');
     expect(all).not.toContain('Content');
   });
 });

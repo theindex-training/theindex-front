@@ -1,0 +1,27 @@
+// The login layout (login.component.scss) with a wider card for the longer form.
+.register__card {
+  width: min(44rem, 100%);
+}
+
+.register__consent {
+  align-items: flex-start;
+}
+
+.register__consent span {
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.register__done {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.register__done h2 {
+  margin: 0;
+}
+
+.register__done p {
+  margin: 0;
+}

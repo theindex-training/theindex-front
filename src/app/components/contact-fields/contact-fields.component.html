@@ -1,0 +1,167 @@
+<div class="form-row">
+  <div class="form-field">
+    <label class="form-field__label" [for]="id('phone')"
+      >{{ 'contact.phone' | transloco }}
+      @if (!phoneRequired) {
+        <span class="form-field__optional">{{
+          'common.optional' | transloco
+        }}</span>
+      }
+    </label>
+    <input
+      [id]="id('phone')"
+      type="tel"
+      autocomplete="tel"
+      [formControl]="form.controls.phone"
+      [attr.aria-describedby]="describedBy('phone', id('phone'))"
+      [attr.aria-invalid]="invalid('phone')"
+    />
+    @if (invalid('phone')) {
+      <span class="form-field__error" [id]="id('phone') + '-help'">{{
+        phoneError | transloco
+      }}</span>
+    } @else {
+      <span class="form-field__hint" [id]="id('phone') + '-help'">{{
+        'contact.phoneHint' | transloco
+      }}</span>
+    }
+    @if (difference('phone'); as value) {
+      <app-field-difference
+        [value]="value"
+        [differenceId]="id('phone') + '-diff'"
+        (use)="useDifference('phone')"
+      />
+    }
+  </div>
+
+  @if (showGymSubscription) {
+    <div class="form-field">
+      <label class="form-field__label" [for]="id('gym-subscription')"
+        >{{ 'contact.gymSubscription' | transloco }}
+        <span class="form-field__optional">{{
+          'common.optional' | transloco
+        }}</span></label
+      >
+      <select
+        [id]="id('gym-subscription')"
+        [formControl]="form.controls.gymSubscriptionId"
+        [attr.aria-describedby]="
+          describedBy('gymSubscriptionId', id('gym-subscription'))
+        "
+      >
+        <option value="">
+          {{ 'contact.noGymSubscription' | transloco }}
+        </option>
+        @if (missing(form.controls.gymSubscriptionId.value, gymSubscriptions)) {
+          <option [value]="form.controls.gymSubscriptionId.value">
+            {{ 'contact.unavailable' | transloco }}
+          </option>
+        }
+        @for (option of gymSubscriptions; track option.id) {
+          <option [value]="option.id">{{ option.name }}</option>
+        }
+      </select>
+      <span class="form-field__hint" [id]="id('gym-subscription') + '-help'">{{
+        'contact.gymSubscriptionHint' | transloco
+      }}</span>
+      @if (difference('gymSubscriptionId'); as value) {
+        <app-field-difference
+          [value]="value"
+          [differenceId]="id('gym-subscription') + '-diff'"
+          (use)="useDifference('gymSubscriptionId')"
+        />
+      }
+    </div>
+  }
+</div>
+
+<div class="form-row">
+  <div class="form-field">
+    <label class="form-field__label" [for]="id('home-gym')"
+      >{{
+        (homeGym === 'preferred'
+          ? 'contact.preferredGym'
+          : 'contact.primaryGym'
+        ) | transloco
+      }}
+      <span class="form-field__optional">{{
+        'common.optional' | transloco
+      }}</span></label
+    >
+    <select
+      [id]="id('home-gym')"
+      [formControl]="form.controls.homeGymId"
+      [attr.aria-describedby]="describedBy('homeGymId', id('home-gym'))"
+    >
+      <option value="">{{ 'contact.noGym' | transloco }}</option>
+      @if (missing(form.controls.homeGymId.value, gyms)) {
+        <option [value]="form.controls.homeGymId.value">
+          {{ 'contact.unavailable' | transloco }}
+        </option>
+      }
+      @for (gym of gyms; track gym.id) {
+        <option [value]="gym.id">{{ gym.name }}</option>
+      }
+    </select>
+    <span class="form-field__hint" [id]="id('home-gym') + '-help'">{{
+      (homeGym === 'preferred'
+        ? 'contact.preferredGymHint'
+        : 'contact.primaryGymHint'
+      ) | transloco
+    }}</span>
+    @if (difference('homeGymId'); as value) {
+      <app-field-difference
+        [value]="value"
+        [differenceId]="id('home-gym') + '-diff'"
+        (use)="useDifference('homeGymId')"
+      />
+    }
+  </div>
+</div>
+
+<div
+  class="contact-socials"
+  role="group"
+  [attr.aria-labelledby]="id('socials')"
+>
+  <p class="form-field__label contact-socials__title" [id]="id('socials')">
+    {{ 'contact.socialTitle' | transloco }}
+    <span class="form-field__optional">{{
+      'common.optional' | transloco
+    }}</span>
+  </p>
+  <div class="form-row">
+    @for (network of networks; track network) {
+      <div class="form-field">
+        <label class="form-field__label" [for]="id(network)">{{
+          'contact.networks.' + network | transloco
+        }}</label>
+        <input
+          [id]="id(network)"
+          type="text"
+          autocomplete="off"
+          [formControl]="form.controls[network]"
+          [placeholder]="'contact.socialPlaceholder' | transloco"
+          [attr.aria-describedby]="describedBy(network, id(network))"
+          [attr.aria-invalid]="invalid(network)"
+        />
+        @if (invalid(network)) {
+          <span class="form-field__error" [id]="id(network) + '-help'">{{
+            'contact.socialError' | transloco
+          }}</span>
+        } @else {
+          <span class="form-field__hint" [id]="id(network) + '-help'">{{
+            'contact.socialHint' | transloco
+          }}</span>
+        }
+        @if (difference(network); as value) {
+          <app-field-difference
+            [value]="value"
+            [differenceId]="id(network) + '-diff'"
+            (use)="useDifference(network)"
+          />
+        }
+      </div>
+    }
+  </div>
+</div>
