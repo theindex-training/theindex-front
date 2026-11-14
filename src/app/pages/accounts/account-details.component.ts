@@ -15,6 +15,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { Observable } from 'rxjs';
 import { ContactFieldsComponent } from '../../components/contact-fields/contact-fields.component';
+import { FieldDifferenceComponent } from '../../components/field-difference/field-difference.component';
 import {
   contactForm,
   contactValues,
@@ -52,8 +53,10 @@ import { trimmedLength } from '../../utils/form-validators.util';
 import {
   accountName,
   LinkableProfile,
+  LinkDifferences,
   linkFormValues,
   linkPayload,
+  profileDifferences,
   suggestProfiles,
 } from './accounts';
 
@@ -74,6 +77,7 @@ type ProfileMode = 'new' | 'existing';
     UiMessagePipe,
     EnumLabelPipe,
     ContactFieldsComponent,
+    FieldDifferenceComponent,
     PageHeaderComponent,
     SegmentedControlComponent,
     StatusDotComponent,
@@ -86,9 +90,10 @@ export class AccountDetailsComponent implements OnInit {
     { value: 'trainee', label: 'accountsAdmin.connect.trainee' },
     { value: 'trainer', label: 'accountsAdmin.connect.trainer' },
   ];
+  // Most people already have a profile when they register, so connecting to one comes first.
   readonly modeOptions: SegmentedOption<ProfileMode>[] = [
-    { value: 'new', label: 'accountsAdmin.connect.newProfile' },
     { value: 'existing', label: 'accountsAdmin.connect.existingProfile' },
+    { value: 'new', label: 'accountsAdmin.connect.newProfile' },
   ];
   readonly networks = SOCIAL_NETWORKS;
 
@@ -111,7 +116,9 @@ export class AccountDetailsComponent implements OnInit {
   loadError: UiMessage | null = null;
 
   profileType: ProfileType = 'trainee';
-  mode: ProfileMode = 'new';
+  mode: ProfileMode = 'existing';
+  /** Where the picked profile stores something other than what the person registered. */
+  differences: LinkDifferences = {};
   /** Active profiles of the chosen type without an account, once loaded. */
   candidates: LinkableProfile[] | null = null;
   candidatesError: UiMessage | null = null;
@@ -162,6 +169,9 @@ export class AccountDetailsComponent implements OnInit {
         this.account = account;
         this.loading = false;
         this.fillForm();
+        if (this.canConnect) {
+          this.loadCandidates();
+        }
         this.changeDetector.detectChanges();
       },
       error: (error: unknown) => {
@@ -221,6 +231,31 @@ export class AccountDetailsComponent implements OnInit {
     this.mode = mode;
     this.form.controls.profileId.setValue('');
     this.prepareMode();
+  }
+
+  /** How many fields the picked profile stores differently from what the person registered. */
+  get differenceCount(): number {
+    return Object.keys(this.differences).length;
+  }
+
+  /** The differences shown under the contact fields (the name has its own). */
+  get contactDifferences(): LinkDifferences {
+    const contact = { ...this.differences };
+    delete contact.name;
+    return contact;
+  }
+
+  /** The profile's name, while the name field holds something else; '' otherwise. */
+  get nameDifference(): string {
+    const name = this.differences.name;
+    return name && name.trim() !== this.form.controls.name.value.trim()
+      ? name
+      : '';
+  }
+
+  useProfileName(): void {
+    this.form.controls.name.setValue(this.differences.name ?? '');
+    this.form.controls.name.markAsDirty();
   }
 
   /** A profile was picked: the form starts from its values (and the registration's). */
@@ -320,6 +355,11 @@ export class AccountDetailsComponent implements OnInit {
         ? (this.candidates?.find((c) => c.id === profileId) ?? null)
         : null;
     const values = linkFormValues(
+      this.account.registration,
+      this.profileType,
+      profile,
+    );
+    this.differences = profileDifferences(
       this.account.registration,
       this.profileType,
       profile,

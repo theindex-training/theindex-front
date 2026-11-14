@@ -116,36 +116,136 @@ export interface LinkFormValues {
 }
 
 /**
- * What the connect form starts from: the chosen profile's own values, and what the person
- * registered where the profile has nothing (everything they registered for a new profile). The
- * admin changes anything before connecting. Trainers have no gym subscription.
+ * What the connect form starts from: what the person registered, and the chosen profile's own
+ * values where they registered nothing (most profiles exist before their account). Where both have
+ * a value and they differ, `profileDifferences` says so, so the admin sees both. The nickname is
+ * the profile's: people never give one. Trainers have no gym subscription.
  */
 export function linkFormValues(
   registration: AccountView['registration'],
   profileType: ProfileType,
   profile: LinkableProfile | null,
 ): LinkFormValues {
-  const pick = (
-    own: string | null | undefined,
-    registered: string | null | undefined,
-  ) => (own?.trim() ? own : (registered ?? null));
-  const ownHomeGym =
-    profileType === 'trainee' ? profile?.preferredGymId : profile?.primaryGymId;
+  const own = profileFields(profileType, profile);
+  const registered = registeredFields(profileType, registration);
+  const pick = (field: LinkField) =>
+    hasValue(registered[field]) ? registered[field] : own[field];
   return {
-    name: pick(profile?.name, registration?.name) ?? '',
+    name: pick('name') ?? '',
     nickname: profile?.nickname ?? '',
     contact: {
-      phone: pick(profile?.phone, registration?.phone),
-      gymSubscriptionId:
-        profileType === 'trainee'
-          ? pick(profile?.gymSubscriptionId, registration?.gymSubscription?.id)
-          : null,
-      homeGymId: pick(ownHomeGym, registration?.preferredGym?.id),
-      instagram: pick(profile?.instagram, registration?.instagram),
-      facebook: pick(profile?.facebook, registration?.facebook),
-      tiktok: pick(profile?.tiktok, registration?.tiktok),
+      phone: pick('phone'),
+      gymSubscriptionId: pick('gymSubscriptionId'),
+      homeGymId: pick('homeGymId'),
+      instagram: pick('instagram'),
+      facebook: pick('facebook'),
+      tiktok: pick('tiktok'),
     },
   };
+}
+
+/** The connect form's fields that both a registration and a profile can hold. */
+export type LinkField = 'name' | keyof ContactValues;
+
+/** Per field, the profile's own value where it differs from what the person registered. */
+export type LinkDifferences = Partial<Record<LinkField, string>>;
+
+/**
+ * Where the chosen profile already stores something other than what the person registered: the
+ * profile's value per field. Only fields where both have a value; spelling that doesn't change the
+ * value (case and spaces in a name, phone separators, "@" before a handle) doesn't count.
+ */
+export function profileDifferences(
+  registration: AccountView['registration'],
+  profileType: ProfileType,
+  profile: LinkableProfile | null,
+): LinkDifferences {
+  if (!registration || !profile) {
+    return {};
+  }
+  const own = profileFields(profileType, profile);
+  const registered = registeredFields(profileType, registration);
+  const differences: LinkDifferences = {};
+  for (const field of Object.keys(own) as LinkField[]) {
+    const ownValue = own[field];
+    const registeredValue = registered[field];
+    if (
+      hasValue(ownValue) &&
+      hasValue(registeredValue) &&
+      comparable(field, ownValue) !== comparable(field, registeredValue)
+    ) {
+      differences[field] = ownValue;
+    }
+  }
+  return differences;
+}
+
+/** Whether two values of a field are the same, as `profileDifferences` compares them. */
+export function sameLinkValue(
+  field: LinkField,
+  a: string | null | undefined,
+  b: string | null | undefined,
+): boolean {
+  return comparable(field, a ?? '') === comparable(field, b ?? '');
+}
+
+type FieldValues = Record<LinkField, string | null>;
+
+function profileFields(
+  profileType: ProfileType,
+  profile: LinkableProfile | null,
+): FieldValues {
+  return {
+    name: profile?.name ?? null,
+    phone: profile?.phone ?? null,
+    gymSubscriptionId:
+      profileType === 'trainee' ? (profile?.gymSubscriptionId ?? null) : null,
+    homeGymId:
+      (profileType === 'trainee'
+        ? profile?.preferredGymId
+        : profile?.primaryGymId) ?? null,
+    instagram: profile?.instagram ?? null,
+    facebook: profile?.facebook ?? null,
+    tiktok: profile?.tiktok ?? null,
+  };
+}
+
+function registeredFields(
+  profileType: ProfileType,
+  registration: AccountView['registration'],
+): FieldValues {
+  return {
+    name: registration?.name ?? null,
+    phone: registration?.phone ?? null,
+    gymSubscriptionId:
+      profileType === 'trainee'
+        ? (registration?.gymSubscription?.id ?? null)
+        : null,
+    homeGymId: registration?.preferredGym?.id ?? null,
+    instagram: registration?.instagram ?? null,
+    facebook: registration?.facebook ?? null,
+    tiktok: registration?.tiktok ?? null,
+  };
+}
+
+function hasValue(value: string | null | undefined): value is string {
+  return !!value?.trim();
+}
+
+function comparable(field: LinkField, value: string): string {
+  const text = value.trim();
+  switch (field) {
+    case 'name':
+      return text.replace(/\s+/g, ' ').toLowerCase();
+    case 'phone':
+      return phoneKey(text) ?? text;
+    case 'instagram':
+    case 'facebook':
+    case 'tiktok':
+      return text.toLowerCase().replace(/^@/, '').replace(/\/+$/, '');
+    default:
+      return text;
+  }
 }
 
 /** The request body: every field, as the admin decided (empty clears it on an existing profile). */

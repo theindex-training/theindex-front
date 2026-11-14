@@ -68,7 +68,11 @@ describe('AccountDetailsComponent', () => {
     vi.restoreAllMocks();
   });
 
-  async function open(account: AccountView) {
+  /**
+   * Opens the page. An account that can be connected also loads the active trainees, since
+   * "Existing profile" is the default: `candidates` answers that request.
+   */
+  async function open(account: AccountView, candidates: object[] = []) {
     await harness.navigateByUrl('/accounts/a1', AccountDetailsComponent);
     page = driver(
       () => harness.routeNativeElement!,
@@ -77,6 +81,14 @@ describe('AccountDetailsComponent', () => {
     http.expectOne('/api/auth/register/options').flush(OPTIONS);
     http.expectOne('/api/accounts/a1/details').flush(account);
     await page.settle();
+    if (!account.profile && account.role !== 'ADMIN') {
+      http
+        .expectOne(
+          (r) => r.url === '/api/trainees' && r.params.get('active') === 'true',
+        )
+        .flush(candidates);
+      await page.settle();
+    }
   }
 
   const value = (selector: string) =>
@@ -95,8 +107,30 @@ describe('AccountDetailsComponent', () => {
     await page.settle();
   }
 
-  it('shows what they registered and starts the connect form from it', async () => {
-    await open(waiting());
+  const checked = (groupLabel: string) =>
+    page
+      .queryAll('fieldset')
+      .find(
+        (f) => f.querySelector('legend')?.textContent?.trim() === groupLabel,
+      )!
+      .querySelector('input:checked')!
+      .parentElement!.textContent.trim();
+
+  const differences = () =>
+    page
+      .queryAll('[data-testid="field-difference"]')
+      .map((d) => d.textContent.replace(/\s+/g, ' ').trim());
+
+  it('shows what they registered, and starts on Existing profile with the form filled from the registration', async () => {
+    await open(waiting(), [
+      {
+        id: 't1',
+        name: 'Maria',
+        nickname: null,
+        accountId: null,
+        isActive: true,
+      },
+    ]);
 
     const registered = page.query(
       '[data-testid="account-registration"]',
@@ -111,16 +145,27 @@ describe('AccountDetailsComponent', () => {
       ),
     ).not.toBeNull();
 
+    expect(checked(en.accountsAdmin.connect.modeLabel)).toBe(
+      en.accountsAdmin.connect.existingProfile,
+    );
+    expect(page.query('#account-link-profile')!.textContent).toContain('Maria');
+    expect(value('#account-link-profile')).toBe('');
     expect(value('#account-link-name')).toBe('Ivan Petrov');
     expect(value('#account-link-nickname')).toBe('');
     expect(value('#account-link-phone')).toBe('+359 88 123 4567');
     expect(value('#account-link-gym-subscription')).toBe('gs-1');
     expect(value('#account-link-home-gym')).toBe('gym-1');
     expect(value('#account-link-instagram')).toBe('@ivan');
+    expect(differences()).toEqual([]);
   });
 
   it('connects to a new trainee with what the admin decided, then shows the profile', async () => {
     await open(waiting());
+    await choose(
+      en.accountsAdmin.connect.modeLabel,
+      en.accountsAdmin.connect.newProfile,
+    );
+    expect(page.query('#account-link-profile')).toBeNull();
     await page.type('#account-link-name', ' Ivan P. ');
     await page.type('#account-link-nickname', 'Vanko');
     await page.select('#account-link-home-gym', 'gym-2');
@@ -165,17 +210,80 @@ describe('AccountDetailsComponent', () => {
     expect(page.text()).not.toContain(en.accountsAdmin.delete.submit);
   });
 
-  it('connects to an existing trainer: suggestions first, the form starts from the profile, no gym subscription', async () => {
+  it('an existing trainee: what they registered first, the profile’s differing values shown under their fields', async () => {
+    await open(waiting(), [
+      {
+        id: 't2',
+        name: 'Ivan Georgiev',
+        nickname: 'Vanko',
+        accountId: null,
+        isActive: true,
+        phone: '0888 000 111',
+        gymSubscriptionId: 'gs-1',
+        preferredGymId: 'gym-2',
+        tiktok: '@vanko',
+      },
+    ]);
+    await page.select('#account-link-profile', 't2');
+
+    // The registration wins; the profile fills what they left empty.
+    expect(value('#account-link-name')).toBe('Ivan Petrov');
+    expect(value('#account-link-nickname')).toBe('Vanko');
+    expect(value('#account-link-phone')).toBe('+359 88 123 4567');
+    expect(value('#account-link-home-gym')).toBe('gym-1');
+    expect(value('#account-link-tiktok')).toBe('@vanko');
+
+    expect(
+      page.query('[data-testid="account-link-differences"]')!.textContent,
+    ).toContain('3 fields differ');
+    const inProfile = (v: string) =>
+      `${en.contact.difference.inProfile.replace('{value}', v)} ${en.contact.difference.use}`;
+    expect(differences()).toEqual([
+      inProfile('Ivan Georgiev'),
+      inProfile('0888 000 111'),
+      inProfile('Lozenets'),
+    ]);
+    expect(
+      page.query('#account-link-phone')!.getAttribute('aria-describedby'),
+    ).toBe('account-link-phone-help account-link-phone-diff');
+
+    // "Use it" puts the profile's value in the field, and the note goes.
+    const usePhone = page.query<HTMLButtonElement>(
+      '#account-link-phone-diff button',
+    )!;
+    usePhone.click();
+    await page.settle();
+    expect(value('#account-link-phone')).toBe('0888 000 111');
+    expect(differences()).toEqual([
+      inProfile('Ivan Georgiev'),
+      inProfile('Lozenets'),
+    ]);
+
+    await page.submit('[data-testid="account-connect"]');
+    const req = http.expectOne('/api/accounts/a1/link');
+    expect(req.request.body).toEqual({
+      profileType: 'trainee',
+      profileId: 't2',
+      name: 'Ivan Petrov',
+      nickname: 'Vanko',
+      phone: '0888 000 111',
+      gymSubscriptionId: 'gs-1',
+      homeGymId: 'gym-1',
+      instagram: '@ivan',
+      facebook: null,
+      tiktok: '@vanko',
+    });
+    req.flush(waiting());
+    await page.settle();
+  });
+
+  it('an existing trainer: suggestions first, taken trainers left out, no gym subscription', async () => {
     await open(waiting());
     await choose(
       en.accountsAdmin.connect.typeLabel,
       en.accountsAdmin.connect.trainer,
     );
     expect(page.query('#account-link-gym-subscription')).toBeNull();
-    await choose(
-      en.accountsAdmin.connect.modeLabel,
-      en.accountsAdmin.connect.existingProfile,
-    );
 
     http
       .expectOne(
@@ -195,9 +303,8 @@ describe('AccountDetailsComponent', () => {
           nickname: 'Vanko',
           accountId: null,
           isActive: true,
-          phone: '0888 000 111',
-          primaryGymId: 'gym-2',
-          tiktok: '@vanko',
+          phone: '0881234567',
+          primaryGymId: 'gym-1',
         },
         {
           id: 'tr3',
@@ -218,18 +325,14 @@ describe('AccountDetailsComponent', () => {
     ]);
     expect(groups[0].textContent).toContain('Ivan Petrov');
     expect(groups[1].textContent).toContain('Georgi');
-    // A trainer who already has an account isn't offered.
     expect(page.query('#account-link-profile')!.textContent).not.toContain(
       'Ivan Taken',
     );
 
+    // The same values written differently are no difference.
     await page.select('#account-link-profile', 'tr2');
-    expect(value('#account-link-name')).toBe('Ivan Petrov');
-    expect(value('#account-link-nickname')).toBe('Vanko');
-    expect(value('#account-link-phone')).toBe('0888 000 111');
-    expect(value('#account-link-home-gym')).toBe('gym-2');
-    expect(value('#account-link-instagram')).toBe('@ivan');
-    expect(value('#account-link-tiktok')).toBe('@vanko');
+    expect(page.query('[data-testid="account-link-differences"]')).toBeNull();
+    expect(differences()).toEqual([]);
 
     await page.submit('[data-testid="account-connect"]');
     const req = http.expectOne('/api/accounts/a1/link');
@@ -238,11 +341,11 @@ describe('AccountDetailsComponent', () => {
       profileId: 'tr2',
       name: 'Ivan Petrov',
       nickname: 'Vanko',
-      phone: '0888 000 111',
-      homeGymId: 'gym-2',
+      phone: '+359 88 123 4567',
+      homeGymId: 'gym-1',
       instagram: '@ivan',
       facebook: null,
-      tiktok: '@vanko',
+      tiktok: null,
     });
     req.flush(
       waiting({
@@ -265,23 +368,15 @@ describe('AccountDetailsComponent', () => {
   });
 
   it('asks for a profile before connecting to an existing one, and shows API errors', async () => {
-    await open(waiting());
-    await choose(
-      en.accountsAdmin.connect.modeLabel,
-      en.accountsAdmin.connect.existingProfile,
-    );
-    http
-      .expectOne((r) => r.url === '/api/trainees')
-      .flush([
-        {
-          id: 't1',
-          name: 'Maria',
-          nickname: null,
-          accountId: null,
-          isActive: true,
-        },
-      ]);
-    await page.settle();
+    await open(waiting(), [
+      {
+        id: 't1',
+        name: 'Maria',
+        nickname: null,
+        accountId: null,
+        isActive: true,
+      },
+    ]);
 
     await page.submit('[data-testid="account-connect"]');
     http.expectNone('/api/accounts/a1/link');

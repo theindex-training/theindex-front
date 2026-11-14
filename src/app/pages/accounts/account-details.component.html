@@ -249,6 +249,18 @@
                 }
               </div>
             </div>
+            @if (differenceCount) {
+              <p
+                class="notice notice--warning"
+                role="status"
+                data-testid="account-link-differences"
+              >
+                {{
+                  'accountsAdmin.connect.differences'
+                    | transloco: { count: differenceCount }
+                }}
+              </p>
+            }
           }
 
           <div class="form-row">
@@ -260,7 +272,11 @@
                 id="account-link-name"
                 type="text"
                 formControlName="name"
-                aria-describedby="account-link-name-help"
+                [attr.aria-describedby]="
+                  nameDifference
+                    ? 'account-link-name-help account-link-name-diff'
+                    : 'account-link-name-help'
+                "
                 [attr.aria-invalid]="invalid('name')"
               />
               @if (invalid('name')) {
@@ -271,6 +287,13 @@
                 <span class="form-field__hint" id="account-link-name-help">{{
                   'accountsAdmin.connect.nameHint' | transloco
                 }}</span>
+              }
+              @if (nameDifference; as value) {
+                <app-field-difference
+                  [value]="value"
+                  differenceId="account-link-name-diff"
+                  (use)="useProfileName()"
+                />
               }
             </div>
 
@@ -312,6 +335,7 @@
             [showGymSubscription]="profileType === 'trainee'"
             [homeGym]="profileType === 'trainee' ? 'preferred' : 'primary'"
             [phoneRequired]="false"
+            [differences]="contactDifferences"
           />
         </div>
 

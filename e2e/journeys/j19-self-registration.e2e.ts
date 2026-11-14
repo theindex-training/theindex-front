@@ -116,12 +116,35 @@ test.describe('J19 self-registration', () => {
   );
 
   test(
-    'an admin finds the waiting account and connects it to a new trainee',
+    'an admin connects the waiting account to the trainee who already exists, seeing what differs',
     { tag: ['@desktop', '@mobile'] },
     async ({ page, api, signInAs }) => {
       api.on('GET', '/api/accounts', { body: [WAITING] });
       api.on('GET', '/api/accounts/acc-1/details', { body: WAITING });
       api.on('GET', '/api/auth/register/options', { body: OPTIONS });
+      api.on('GET', '/api/trainees', {
+        body: [
+          {
+            id: 'trainee-9',
+            name: 'Иван Петров',
+            nickname: 'Vanko',
+            phone: '0899 000 111',
+            accountId: null,
+            gymSubscriptionId: null,
+            preferredGymId: 'gym-2',
+            isActive: true,
+          },
+          {
+            id: 'trainee-3',
+            name: 'Maria',
+            nickname: null,
+            phone: null,
+            accountId: null,
+            gymSubscriptionId: null,
+            isActive: true,
+          },
+        ],
+      });
       api.on('POST', '/api/accounts/acc-1/link', (request) => ({
         body: {
           ...WAITING,
@@ -143,11 +166,47 @@ test.describe('J19 self-registration', () => {
       await page.getByRole('link', { name: 'Ivan Petrov' }).first().click();
       await expect(page).toHaveURL(/\/accounts\/acc-1$/);
 
+      // Existing profile is the default; the list is loaded with the page.
       const form = page.getByTestId('account-connect');
       await expect(
-        form.getByLabel(t('accountsAdmin.fields.name'), { exact: true }),
-      ).toHaveValue('Ivan Petrov');
-      await form.getByLabel(t('accountsAdmin.fields.nickname')).fill('Vanko');
+        form.getByRole('radio', {
+          name: t('accountsAdmin.connect.existingProfile'),
+        }),
+      ).toBeChecked();
+      await form
+        .getByRole('combobox', {
+          name: t('accountsAdmin.connect.pickTrainee'),
+          exact: true,
+        })
+        .selectOption('trainee-9');
+
+      // The form shows what they registered; the profile's other values are under the fields.
+      const name = form.getByLabel(t('accountsAdmin.fields.name'), {
+        exact: true,
+      });
+      await expect(name).toHaveValue('Ivan Petrov');
+      await expect(
+        form.getByLabel(t('accountsAdmin.fields.nickname')),
+      ).toHaveValue('Vanko');
+      await expect(form.getByTestId('account-link-differences')).toContainText(
+        t('accountsAdmin.connect.differences', { count: 2 }).slice(0, 10),
+      );
+      await expect(form.getByTestId('field-difference')).toHaveCount(2);
+      await expect(
+        form.getByText(
+          t('contact.difference.inProfile', { value: '0899 000 111' }),
+        ),
+      ).toBeVisible();
+
+      // Keep the registered name, take the profile's phone.
+      await form
+        .getByRole('button', {
+          name: t('contact.difference.useLabel', { value: '0899 000 111' }),
+        })
+        .click();
+      await expect(form.getByLabel(t('contact.phone'))).toHaveValue(
+        '0899 000 111',
+      );
       await form
         .getByRole('button', { name: t('accountsAdmin.connect.submit') })
         .click();
@@ -155,9 +214,10 @@ test.describe('J19 self-registration', () => {
       await expect(page.getByTestId('account-profile')).toBeVisible();
       expect(api.last('POST', '/api/accounts/acc-1/link')?.body).toEqual({
         profileType: 'trainee',
+        profileId: 'trainee-9',
         name: 'Ivan Petrov',
         nickname: 'Vanko',
-        phone: '+359 88 123 4567',
+        phone: '0899 000 111',
         gymSubscriptionId: null,
         homeGymId: 'gym-2',
         instagram: '@ivan',

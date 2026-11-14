@@ -1682,6 +1682,11 @@
       "instagram": "Instagram",
       "facebook": "Facebook",
       "tiktok": "TikTok"
+    },
+    "difference": {
+      "inProfile": "In the profile: {value}",
+      "use": "Use it",
+      "useLabel": "Use the profile’s value: {value}"
     }
   },
   "accountsAdmin": {
@@ -1741,7 +1746,7 @@
     },
     "connect": {
       "title": "Connect to a profile",
-      "intro": "Pick who this person is. The fields start from what they registered and the profile’s own values; the profile keeps what you save. They can sign in right after.",
+      "intro": "Pick who this person is. The fields show what they registered, and the profile’s own values where they left something empty; where the two differ, the profile’s value is shown under the field. The profile keeps what you save, and they can sign in right after.",
       "typeLabel": "Profile type",
       "trainee": "Trainee",
       "trainer": "Trainer",
@@ -1766,7 +1771,8 @@
       "submit": "Connect account",
       "connecting": "Connecting...",
       "success": "Connected to {name}. They can sign in now.",
-      "error": "Couldn't connect the account."
+      "error": "Couldn't connect the account.",
+      "differences": "{count, plural, one {# field differs} other {# fields differ}} from what the profile stores. The form shows what they registered; the profile’s value is under each field."
     },
     "delete": {
       "title": "Delete account",

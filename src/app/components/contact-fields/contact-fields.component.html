@@ -13,7 +13,7 @@
       type="tel"
       autocomplete="tel"
       [formControl]="form.controls.phone"
-      [attr.aria-describedby]="id('phone') + '-help'"
+      [attr.aria-describedby]="describedBy('phone', id('phone'))"
       [attr.aria-invalid]="invalid('phone')"
     />
     @if (invalid('phone')) {
@@ -24,6 +24,13 @@
       <span class="form-field__hint" [id]="id('phone') + '-help'">{{
         'contact.phoneHint' | transloco
       }}</span>
+    }
+    @if (difference('phone'); as value) {
+      <app-field-difference
+        [value]="value"
+        [differenceId]="id('phone') + '-diff'"
+        (use)="useDifference('phone')"
+      />
     }
   </div>
 
@@ -38,7 +45,9 @@
       <select
         [id]="id('gym-subscription')"
         [formControl]="form.controls.gymSubscriptionId"
-        [attr.aria-describedby]="id('gym-subscription') + '-help'"
+        [attr.aria-describedby]="
+          describedBy('gymSubscriptionId', id('gym-subscription'))
+        "
       >
         <option value="">
           {{ 'contact.noGymSubscription' | transloco }}
@@ -55,6 +64,13 @@
       <span class="form-field__hint" [id]="id('gym-subscription') + '-help'">{{
         'contact.gymSubscriptionHint' | transloco
       }}</span>
+      @if (difference('gymSubscriptionId'); as value) {
+        <app-field-difference
+          [value]="value"
+          [differenceId]="id('gym-subscription') + '-diff'"
+          (use)="useDifference('gymSubscriptionId')"
+        />
+      }
     </div>
   }
 </div>
@@ -75,7 +91,7 @@
     <select
       [id]="id('home-gym')"
       [formControl]="form.controls.homeGymId"
-      [attr.aria-describedby]="id('home-gym') + '-help'"
+      [attr.aria-describedby]="describedBy('homeGymId', id('home-gym'))"
     >
       <option value="">{{ 'contact.noGym' | transloco }}</option>
       @if (missing(form.controls.homeGymId.value, gyms)) {
@@ -93,6 +109,13 @@
         : 'contact.primaryGymHint'
       ) | transloco
     }}</span>
+    @if (difference('homeGymId'); as value) {
+      <app-field-difference
+        [value]="value"
+        [differenceId]="id('home-gym') + '-diff'"
+        (use)="useDifference('homeGymId')"
+      />
+    }
   </div>
 </div>
 
@@ -119,7 +142,7 @@
           autocomplete="off"
           [formControl]="form.controls[network]"
           [placeholder]="'contact.socialPlaceholder' | transloco"
-          [attr.aria-describedby]="id(network) + '-help'"
+          [attr.aria-describedby]="describedBy(network, id(network))"
           [attr.aria-invalid]="invalid(network)"
         />
         @if (invalid(network)) {
@@ -130,6 +153,13 @@
           <span class="form-field__hint" [id]="id(network) + '-help'">{{
             'contact.socialHint' | transloco
           }}</span>
+        }
+        @if (difference(network); as value) {
+          <app-field-difference
+            [value]="value"
+            [differenceId]="id(network) + '-diff'"
+            (use)="useDifference(network)"
+          />
         }
       </div>
     }

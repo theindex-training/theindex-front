@@ -5,6 +5,8 @@ import {
   linkFormValues,
   linkPayload,
   matchesAccount,
+  profileDifferences,
+  sameLinkValue,
   suggestProfiles,
 } from './accounts';
 
@@ -122,7 +124,7 @@ describe('accounts helpers', () => {
       });
     });
 
-    it('an existing profile keeps its own values and fills the gaps from the registration', () => {
+    it('an existing profile: what they registered first, the profile fills the gaps', () => {
       expect(
         linkFormValues(registration, 'trainee', {
           id: 't1',
@@ -134,12 +136,12 @@ describe('accounts helpers', () => {
           facebook: 'ivan.fb',
         }),
       ).toEqual({
-        name: 'Ivan P.',
+        name: 'Ivan Petrov',
         nickname: 'Vanko',
         contact: {
           phone: '0888 123 456',
           gymSubscriptionId: 'gs-1',
-          homeGymId: 'gym-2',
+          homeGymId: 'gym-1',
           instagram: '@ivan',
           facebook: 'ivan.fb',
           tiktok: null,
@@ -156,7 +158,104 @@ describe('accounts helpers', () => {
         preferredGymId: 'ignored',
       });
       expect(values.contact.gymSubscriptionId).toBeNull();
-      expect(values.contact.homeGymId).toBe('gym-3');
+      // The registered preferred gym comes first; the primary gym fills a gap.
+      expect(values.contact.homeGymId).toBe('gym-1');
+      expect(
+        linkFormValues({ ...registration, preferredGym: null }, 'trainer', {
+          id: 'tr1',
+          name: 'Petar',
+          nickname: null,
+          primaryGymId: 'gym-3',
+        }).contact.homeGymId,
+      ).toBe('gym-3');
+    });
+  });
+
+  describe('profileDifferences', () => {
+    const registered = {
+      name: 'Ivan Petrov',
+      phone: '+359 88 123 4567',
+      gymSubscription: { id: 'gs-1', name: 'MultiSport' },
+      preferredGym: { id: 'gym-1', name: 'Center' },
+      instagram: '@ivan',
+      facebook: null,
+      tiktok: 'ivan.trains',
+    };
+
+    it("gives the profile's value where both have one and they differ", () => {
+      expect(
+        profileDifferences(registered, 'trainee', {
+          id: 't1',
+          name: 'Ivan Georgiev',
+          nickname: 'Vanko',
+          phone: '0899 000 111',
+          gymSubscriptionId: 'gs-2',
+          preferredGymId: 'gym-2',
+          instagram: 'ivan.ig',
+          facebook: 'ivan.fb',
+          tiktok: null,
+        }),
+      ).toEqual({
+        name: 'Ivan Georgiev',
+        phone: '0899 000 111',
+        gymSubscriptionId: 'gs-2',
+        homeGymId: 'gym-2',
+        instagram: 'ivan.ig',
+      });
+    });
+
+    it('ignores case and spaces in a name, phone separators and "@" before a handle', () => {
+      expect(
+        profileDifferences(registered, 'trainee', {
+          id: 't1',
+          name: '  ivan   PETROV ',
+          nickname: null,
+          phone: '0881234567',
+          gymSubscriptionId: 'gs-1',
+          preferredGymId: 'gym-1',
+          instagram: 'IVAN',
+          tiktok: '@ivan.trains/',
+        }),
+      ).toEqual({});
+    });
+
+    it('has none for a new profile, without a registration, or where only one side has a value', () => {
+      expect(profileDifferences(registered, 'trainee', null)).toEqual({});
+      expect(
+        profileDifferences(null, 'trainee', {
+          id: 't1',
+          name: 'X',
+          nickname: null,
+        }),
+      ).toEqual({});
+      expect(
+        profileDifferences({ ...registered, phone: '' }, 'trainee', {
+          id: 't1',
+          name: 'Ivan Petrov',
+          nickname: null,
+          phone: '0899',
+        }),
+      ).toEqual({});
+    });
+
+    it("compares a trainer's primary gym, never a gym subscription", () => {
+      expect(
+        profileDifferences(registered, 'trainer', {
+          id: 'tr1',
+          name: 'Ivan Petrov',
+          nickname: null,
+          primaryGymId: 'gym-3',
+          gymSubscriptionId: 'gs-9',
+        }),
+      ).toEqual({ homeGymId: 'gym-3' });
+    });
+
+    it('sameLinkValue compares as the differences do', () => {
+      expect(sameLinkValue('phone', '0888 123 456', '+359888123456')).toBe(
+        true,
+      );
+      expect(sameLinkValue('homeGymId', 'gym-1', 'gym-2')).toBe(false);
+      expect(sameLinkValue('instagram', null, '')).toBe(true);
     });
   });
 
