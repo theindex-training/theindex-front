@@ -1666,7 +1666,7 @@
     "phoneRequired": "Enter a phone number.",
     "phoneError": "Enter 6–15 digits, optionally starting with +.",
     "gymSubscription": "Gym subscription",
-    "gymSubscriptionHint": "A card used to pay, if any (e.g. MultiSport).",
+    "gymSubscriptionHint": "A card used to access the gym, if any (e.g. MultiSport).",
     "noGymSubscription": "None",
     "preferredGym": "Preferred gym",
     "preferredGymHint": "The gym usually trained in; the schedule opens on it.",
