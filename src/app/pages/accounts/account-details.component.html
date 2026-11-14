@@ -263,80 +263,87 @@
             }
           }
 
-          <div class="form-row">
-            <div class="form-field">
-              <label class="form-field__label" for="account-link-name">{{
-                'accountsAdmin.fields.name' | transloco
-              }}</label>
-              <input
-                id="account-link-name"
-                type="text"
-                formControlName="name"
-                [attr.aria-describedby]="
-                  nameDifference
-                    ? 'account-link-name-help account-link-name-diff'
-                    : 'account-link-name-help'
-                "
-                [attr.aria-invalid]="invalid('name')"
-              />
-              @if (invalid('name')) {
-                <span class="form-field__error" id="account-link-name-help">{{
-                  'accountsAdmin.connect.nameError' | transloco
-                }}</span>
-              } @else {
-                <span class="form-field__hint" id="account-link-name-help">{{
-                  'accountsAdmin.connect.nameHint' | transloco
-                }}</span>
-              }
-              @if (nameDifference; as value) {
-                <app-field-difference
-                  [value]="value"
-                  differenceId="account-link-name-diff"
-                  (use)="useProfileName()"
+          <!-- Existing profile: only the list until a profile is picked. -->
+          @if (showFields) {
+            <div class="form-row">
+              <div class="form-field">
+                <label class="form-field__label" for="account-link-name">{{
+                  'accountsAdmin.fields.name' | transloco
+                }}</label>
+                <input
+                  id="account-link-name"
+                  type="text"
+                  formControlName="name"
+                  [attr.aria-describedby]="
+                    nameDifference
+                      ? 'account-link-name-help account-link-name-diff'
+                      : 'account-link-name-help'
+                  "
+                  [attr.aria-invalid]="invalid('name')"
                 />
-              }
+                @if (invalid('name')) {
+                  <span class="form-field__error" id="account-link-name-help">{{
+                    'accountsAdmin.connect.nameError' | transloco
+                  }}</span>
+                } @else {
+                  <span class="form-field__hint" id="account-link-name-help">{{
+                    'accountsAdmin.connect.nameHint' | transloco
+                  }}</span>
+                }
+                @if (nameDifference; as value) {
+                  <app-field-difference
+                    [value]="value"
+                    differenceId="account-link-name-diff"
+                    (use)="useProfileName()"
+                  />
+                }
+              </div>
+
+              <div class="form-field">
+                <label class="form-field__label" for="account-link-nickname"
+                  >{{ 'accountsAdmin.fields.nickname' | transloco }}
+                  <span class="form-field__optional">{{
+                    'common.optional' | transloco
+                  }}</span></label
+                >
+                <input
+                  id="account-link-nickname"
+                  type="text"
+                  formControlName="nickname"
+                  aria-describedby="account-link-nickname-help"
+                  [attr.aria-invalid]="invalid('nickname')"
+                />
+                @if (invalid('nickname')) {
+                  <span
+                    class="form-field__error"
+                    id="account-link-nickname-help"
+                    >{{
+                      'accountsAdmin.connect.nicknameError' | transloco
+                    }}</span
+                  >
+                } @else {
+                  <span
+                    class="form-field__hint"
+                    id="account-link-nickname-help"
+                    >{{
+                      'accountsAdmin.connect.nicknameHint' | transloco
+                    }}</span
+                  >
+                }
+              </div>
             </div>
 
-            <div class="form-field">
-              <label class="form-field__label" for="account-link-nickname"
-                >{{ 'accountsAdmin.fields.nickname' | transloco }}
-                <span class="form-field__optional">{{
-                  'common.optional' | transloco
-                }}</span></label
-              >
-              <input
-                id="account-link-nickname"
-                type="text"
-                formControlName="nickname"
-                aria-describedby="account-link-nickname-help"
-                [attr.aria-invalid]="invalid('nickname')"
-              />
-              @if (invalid('nickname')) {
-                <span
-                  class="form-field__error"
-                  id="account-link-nickname-help"
-                  >{{ 'accountsAdmin.connect.nicknameError' | transloco }}</span
-                >
-              } @else {
-                <span
-                  class="form-field__hint"
-                  id="account-link-nickname-help"
-                  >{{ 'accountsAdmin.connect.nicknameHint' | transloco }}</span
-                >
-              }
-            </div>
-          </div>
-
-          <app-contact-fields
-            idPrefix="account-link"
-            [form]="contact"
-            [gyms]="gyms"
-            [gymSubscriptions]="gymSubscriptions"
-            [showGymSubscription]="profileType === 'trainee'"
-            [homeGym]="profileType === 'trainee' ? 'preferred' : 'primary'"
-            [phoneRequired]="false"
-            [differences]="contactDifferences"
-          />
+            <app-contact-fields
+              idPrefix="account-link"
+              [form]="contact"
+              [gyms]="gyms"
+              [gymSubscriptions]="gymSubscriptions"
+              [showGymSubscription]="profileType === 'trainee'"
+              [homeGym]="profileType === 'trainee' ? 'preferred' : 'primary'"
+              [phoneRequired]="false"
+              [differences]="contactDifferences"
+            />
+          }
         </div>
 
         @if (errorMessage) {
@@ -345,20 +352,22 @@
           </p>
         }
 
-        <div class="form-actions">
-          <button
-            class="btn btn--primary"
-            type="submit"
-            [disabled]="connecting || deleting"
-          >
-            {{
-              (connecting
-                ? 'accountsAdmin.connect.connecting'
-                : 'accountsAdmin.connect.submit'
-              ) | transloco
-            }}
-          </button>
-        </div>
+        @if (showFields) {
+          <div class="form-actions">
+            <button
+              class="btn btn--primary"
+              type="submit"
+              [disabled]="connecting || deleting"
+            >
+              {{
+                (connecting
+                  ? 'accountsAdmin.connect.connecting'
+                  : 'accountsAdmin.connect.submit'
+                ) | transloco
+              }}
+            </button>
+          </div>
+        }
       </form>
 
       <div class="panel">

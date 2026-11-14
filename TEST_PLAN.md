@@ -802,7 +802,7 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 ### J19. Self-registration (P1) [desktop, mobile]
 ✅ `e2e/journeys/j19-self-registration.e2e.ts`, 2 tests (4 runs).
 1. Desktop and phone, visitor: Sign in → Create one → the form; without the consent nothing is sent; with it, the exact body is posted and the card says what happens next; signing in before an admin connects the account shows the translated "not connected yet" message and stays on Sign in.
-2. Desktop and phone, admin: Accounts asks for `link=unlinked`; the waiting account opens on Existing profile; picking the trainee who already exists keeps what they registered, shows the profile's nickname, counts two differences and shows the profile's phone under the field; Use it takes it, and Connect posts every field with the `profileId`; the page links to the trainee.
+2. Desktop and phone, admin: Accounts asks for `link=unlinked`; the waiting account opens on Existing profile with only the list (no fields or Connect); picking the trainee who already exists keeps what they registered, shows the profile's nickname, counts two differences and shows the profile's phone under the field; Use it takes it, and Connect posts every field with the `profileId`; the page links to the trainee.
 
 ---
 

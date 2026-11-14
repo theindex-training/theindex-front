@@ -233,6 +233,14 @@ export class AccountDetailsComponent implements OnInit {
     this.prepareMode();
   }
 
+  /**
+   * Whether the fields and Connect show: always for a new profile; for an existing one only once
+   * it is picked, so the admin chooses who it is before reading values and differences.
+   */
+  get showFields(): boolean {
+    return this.mode === 'new' || !!this.form.controls.profileId.value;
+  }
+
   /** How many fields the picked profile stores differently from what the person registered. */
   get differenceCount(): number {
     return Object.keys(this.differences).length;

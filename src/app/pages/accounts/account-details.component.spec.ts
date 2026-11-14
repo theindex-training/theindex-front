@@ -116,6 +116,11 @@ describe('AccountDetailsComponent', () => {
       .querySelector('input:checked')!
       .parentElement!.textContent.trim();
 
+  const connectButton = () =>
+    page
+      .queryAll<HTMLButtonElement>('button')
+      .find((b) => b.textContent?.trim() === en.accountsAdmin.connect.submit);
+
   const differences = () =>
     page
       .queryAll('[data-testid="field-difference"]')
@@ -150,13 +155,29 @@ describe('AccountDetailsComponent', () => {
     );
     expect(page.query('#account-link-profile')!.textContent).toContain('Maria');
     expect(value('#account-link-profile')).toBe('');
+
+    // Only the list until a profile is picked: no fields, differences or Connect.
+    expect(page.query('#account-link-name')).toBeNull();
+    expect(page.query('#account-link-phone')).toBeNull();
+    expect(page.query('[data-testid="account-link-differences"]')).toBeNull();
+    expect(connectButton()).toBeUndefined();
+
+    await page.select('#account-link-profile', 't1');
     expect(value('#account-link-name')).toBe('Ivan Petrov');
     expect(value('#account-link-nickname')).toBe('');
     expect(value('#account-link-phone')).toBe('+359 88 123 4567');
     expect(value('#account-link-gym-subscription')).toBe('gs-1');
     expect(value('#account-link-home-gym')).toBe('gym-1');
     expect(value('#account-link-instagram')).toBe('@ivan');
-    expect(differences()).toEqual([]);
+    // The profile's own name differs from the registered one.
+    expect(differences()).toEqual([
+      `${en.contact.difference.inProfile.replace('{value}', 'Maria')} ${en.contact.difference.use}`,
+    ]);
+    expect(connectButton()).toBeDefined();
+
+    // Back to no profile: the fields go again.
+    await page.select('#account-link-profile', '');
+    expect(page.query('#account-link-name')).toBeNull();
   });
 
   it('connects to a new trainee with what the admin decided, then shows the profile', async () => {
@@ -283,7 +304,6 @@ describe('AccountDetailsComponent', () => {
       en.accountsAdmin.connect.typeLabel,
       en.accountsAdmin.connect.trainer,
     );
-    expect(page.query('#account-link-gym-subscription')).toBeNull();
 
     http
       .expectOne(
@@ -331,6 +351,8 @@ describe('AccountDetailsComponent', () => {
 
     // The same values written differently are no difference.
     await page.select('#account-link-profile', 'tr2');
+    expect(page.query('#account-link-name')).not.toBeNull();
+    expect(page.query('#account-link-gym-subscription')).toBeNull();
     expect(page.query('[data-testid="account-link-differences"]')).toBeNull();
     expect(differences()).toEqual([]);
 
@@ -367,7 +389,7 @@ describe('AccountDetailsComponent', () => {
     ).toBe('/trainers/tr2');
   });
 
-  it('asks for a profile before connecting to an existing one, and shows API errors', async () => {
+  it('shows the API error when connecting fails', async () => {
     await open(waiting(), [
       {
         id: 't1',
@@ -377,10 +399,6 @@ describe('AccountDetailsComponent', () => {
         isActive: true,
       },
     ]);
-
-    await page.submit('[data-testid="account-connect"]');
-    http.expectNone('/api/accounts/a1/link');
-    expect(page.text()).toContain(en.accountsAdmin.connect.pickRequired);
 
     await page.select('#account-link-profile', 't1');
     await page.submit('[data-testid="account-connect"]');

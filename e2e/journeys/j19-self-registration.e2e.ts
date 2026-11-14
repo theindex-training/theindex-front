@@ -173,6 +173,13 @@ test.describe('J19 self-registration', () => {
           name: t('accountsAdmin.connect.existingProfile'),
         }),
       ).toBeChecked();
+      // Only the list until a profile is picked.
+      await expect(
+        form.getByLabel(t('accountsAdmin.fields.name'), { exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        form.getByRole('button', { name: t('accountsAdmin.connect.submit') }),
+      ).toHaveCount(0);
       await form
         .getByRole('combobox', {
           name: t('accountsAdmin.connect.pickTrainee'),
