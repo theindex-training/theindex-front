@@ -1666,7 +1666,7 @@
     "phoneRequired": "Въведете телефон.",
     "phoneError": "Въведете от 6 до 15 цифри, по желание с + отпред.",
     "gymSubscription": "Спортна карта",
-    "gymSubscriptionHint": "Карта, с която се плаща, ако има (напр. MultiSport).",
+    "gymSubscriptionHint": "Карта за достъп до залата, ако има (напр. MultiSport).",
     "noGymSubscription": "Няма",
     "preferredGym": "Предпочитана зала",
     "preferredGymHint": "Залата, в която се тренира обикновено; графикът се отваря с нея.",
