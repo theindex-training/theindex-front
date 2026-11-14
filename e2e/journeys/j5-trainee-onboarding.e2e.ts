@@ -91,7 +91,7 @@ test(
     await expect(page.getByTestId('list-count')).toHaveText(
       t('trainees.list.count', { shown: 2, total: 2 }),
     );
-    expect(api.last('GET', '/api/trainees')?.query).toEqual({});
+    expect(api.last('GET', '/api/trainees')?.query).toEqual({ active: 'true' });
     expect(
       api
         .calls('GET', '/api/gym-subscriptions')

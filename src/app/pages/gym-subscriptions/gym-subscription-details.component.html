@@ -23,27 +23,13 @@
           <dt>{{ 'gymSubscriptions.fields.name' | transloco }}</dt>
           <dd>{{ gymSubscription.name }}</dd>
         </div>
-        <div>
-          <dt>{{ 'common.status' | transloco }}</dt>
-          <dd>
-            <app-status-dot
-              [tone]="gymSubscription.isActive ? 'success' : 'neutral'"
-            >
-              {{
-                gymSubscription.isActive
-                  ? ('gymSubscriptions.status.active' | transloco)
-                  : ('gymSubscriptions.status.inactive' | transloco)
-              }}
-            </app-status-dot>
-          </dd>
-        </div>
       </dl>
 
       <div class="form-actions">
         <a
           class="btn btn--ghost"
           [routerLink]="['/gym-subscriptions', gymSubscription.id, 'delete']"
-          >{{ 'gymSubscriptions.details.deactivate' | transloco }}</a
+          >{{ 'gymSubscriptions.details.delete' | transloco }}</a
         >
         <a
           class="btn btn--primary"

@@ -9,14 +9,7 @@ test.describe('J9 plan catalog', { tag: '@desktop' }, () => {
   const field = (page: Page, key: string) =>
     page.getByLabel(t(key), { exact: true });
 
-  async function filterBy(page: Page, option: string) {
-    await page
-      .getByRole('group', { name: t('common.status') })
-      .getByText(option, { exact: true })
-      .click();
-  }
-
-  test('filters, creates a punch card, switches it to time-based and deactivates it', async ({
+  test('lists the plans, creates a punch card, switches it to time-based and deletes it', async ({
     page,
     api,
     signInAs,
@@ -37,20 +30,13 @@ test.describe('J9 plan catalog', { tag: '@desktop' }, () => {
       return { body: current };
     });
 
-    // The status filter maps to ?active=.
+    // The list asks for the active plans only (deleted ones are gone) and has no status filter.
     await page.goto('/plans');
     await expect(page.getByTestId('list-count')).toHaveText(
       t('plans.list.count', { count: 1 }),
     );
-    expect(api.last('GET', '/api/plans')?.query).toEqual({});
-    await filterBy(page, t('common.active'));
-    await expect
-      .poll(() => api.last('GET', '/api/plans')?.query)
-      .toEqual({ active: 'true' });
-    await filterBy(page, t('common.inactive'));
-    await expect
-      .poll(() => api.last('GET', '/api/plans')?.query)
-      .toEqual({ active: 'false' });
+    expect(api.last('GET', '/api/plans')?.query).toEqual({ active: 'true' });
+    await expect(page.getByRole('main').getByRole('radio')).toHaveCount(0);
 
     // Create a punch card: credits are required.
     await page
@@ -66,6 +52,7 @@ test.describe('J9 plan catalog', { tag: '@desktop' }, () => {
     expect(api.calls('POST', '/api/plans')).toHaveLength(0);
 
     await field(page, 'plans.fields.credits').fill('10');
+    await expect(page.getByRole('checkbox')).toHaveCount(0);
     await page.getByRole('button', { name: t('plans.create.submit') }).click();
     await expect(page).toHaveURL(/\/plans$/);
     expect(api.last('POST', '/api/plans')?.body).toEqual({
@@ -90,19 +77,24 @@ test.describe('J9 plan catalog', { tag: '@desktop' }, () => {
       type: 'TIME',
       title: '10 visits',
       priceCents: 4550,
-      isActive: true,
       credits: null,
       durationDays: 30,
     });
 
-    // Deactivate it.
+    // Delete it: back to the list, and its page now answers "not found".
     await page.goto('/plans/p-new');
-    await page
-      .getByRole('link', { name: t('plans.details.deactivate') })
-      .click();
+    await page.getByRole('link', { name: t('plans.details.delete') }).click();
     await page.getByRole('button', { name: t('plans.delete.submit') }).click();
     await expect(page).toHaveURL(/\/plans$/);
     expect(api.calls('DELETE', '/api/plans/p-new')).toHaveLength(1);
+
+    await page.goto('/plans/p-new');
+    await expect(page.getByRole('alert')).toHaveText(
+      t('plans.errors.notFound'),
+    );
+    await expect(
+      page.getByRole('link', { name: t('plans.details.edit') }),
+    ).toHaveCount(0);
   });
 
   test('shows a failed save and lets the user try again', async ({

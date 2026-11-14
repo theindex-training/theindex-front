@@ -60,7 +60,6 @@ import { displayValue } from '../../utils/display.util';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
-import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import {
   SegmentedControlComponent,
   SegmentedOption,
@@ -71,6 +70,10 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 import { LanguageService } from '../../i18n/language.service';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
+import {
+  recordLoadError,
+  rejectDeleted,
+} from '../../utils/deleted-record.util';
 
 @Component({
   selector: 'app-trainee-details',
@@ -88,7 +91,6 @@ import { LocaleFormatService } from '../../i18n/locale-format.service';
     PageHeaderComponent,
     SkeletonListComponent,
     AvatarComponent,
-    StatusDotComponent,
     SegmentedControlComponent,
   ],
   templateUrl: './trainee-details.component.html',
@@ -297,23 +299,30 @@ export class TraineeDetailsComponent implements OnInit {
   }
 
   private loadTrainee(id: string): void {
-    this.traineesService.getById(id).subscribe({
-      next: (trainee) => {
-        this.trainee = trainee;
-        this.loading = false;
+    this.traineesService
+      .getById(id)
+      .pipe(rejectDeleted())
+      .subscribe({
+        next: (trainee) => {
+          this.trainee = trainee;
+          this.loading = false;
 
-        if (trainee.accountId) {
-          this.loadAccount(trainee.accountId);
-        }
+          if (trainee.accountId) {
+            this.loadAccount(trainee.accountId);
+          }
 
-        this.changeDetector.detectChanges();
-      },
-      error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'trainees.errors.load');
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-    });
+          this.changeDetector.detectChanges();
+        },
+        error: (error) => {
+          this.errorMessage = recordLoadError(
+            error,
+            'trainees.errors.notFound',
+            'trainees.errors.load',
+          );
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+      });
   }
 
   private loadAccount(accountId: string): void {

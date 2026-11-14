@@ -8,18 +8,14 @@ import {
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
-import { ChipComponent, ChipTone } from '../../components/chip/chip.component';
+import { ChipComponent } from '../../components/chip/chip.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { IconComponent } from '../../components/icon/icon.component';
 import { ListRowComponent } from '../../components/list-row/list-row.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { SearchFieldComponent } from '../../components/search-field/search-field.component';
-import {
-  SegmentedControlComponent,
-  SegmentedOption,
-} from '../../components/segmented-control/segmented-control.component';
+import { SegmentedControlComponent } from '../../components/segmented-control/segmented-control.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
-import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import {
   GymSubscription,
   GymSubscriptionsService,
@@ -32,6 +28,11 @@ import {
   TraineesService,
 } from '../../services/trainees.service';
 
+import {
+  ACCOUNT_FILTER_OPTIONS,
+  AccountFilter,
+  matchesAccountFilter,
+} from '../../utils/account-filter.util';
 import { displayValue } from '../../utils/display.util';
 
 @Component({
@@ -50,7 +51,6 @@ import { displayValue } from '../../utils/display.util';
     SearchFieldComponent,
     SegmentedControlComponent,
     SkeletonListComponent,
-    StatusDotComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainees.component.html',
@@ -59,12 +59,10 @@ export class TraineesComponent implements OnInit {
   trainees: TraineeProfile[] = [];
   filteredTrainees: TraineeProfile[] = [];
   gymSubscriptions: GymSubscription[] = [];
-  activeFilter: 'all' | 'active' | 'inactive' = 'all';
-  readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
-    { value: 'all', label: 'common.all' },
-    { value: 'active', label: 'common.active' },
-    { value: 'inactive', label: 'common.inactive' },
-  ];
+  /** Trainees left by the account filter, before the search. */
+  accountTrainees: TraineeProfile[] = [];
+  accountFilter: AccountFilter = 'all';
+  readonly accountOptions = ACCOUNT_FILTER_OPTIONS;
   searchTerm = '';
   loading = true;
   errorMessage: UiMessage | null = null;
@@ -98,14 +96,9 @@ export class TraineesComponent implements OnInit {
     this.loading = true;
     this.errorMessage = null;
 
-    const active =
-      this.activeFilter === 'all'
-        ? undefined
-        : this.activeFilter === 'active'
-          ? true
-          : false;
-
-    this.traineesService.list(active).subscribe({
+    // Deleting a trainee only deactivates it, so the list asks for the active ones: the others
+    // are gone as far as the app is concerned.
+    this.traineesService.list(true).subscribe({
       next: (trainees) => {
         this.trainees = trainees;
         this.applySearch();
@@ -123,15 +116,24 @@ export class TraineesComponent implements OnInit {
     });
   }
 
+  setAccountFilter(filter: AccountFilter): void {
+    this.accountFilter = filter;
+    this.applySearch();
+  }
+
+  /** Applies the account filter, then the search. */
   applySearch(): void {
+    this.accountTrainees = this.trainees.filter((trainee) =>
+      matchesAccountFilter(trainee, this.accountFilter),
+    );
     const query = this.searchTerm.trim().toLowerCase();
 
     if (!query) {
-      this.filteredTrainees = [...this.trainees];
+      this.filteredTrainees = [...this.accountTrainees];
       return;
     }
 
-    this.filteredTrainees = this.trainees.filter((trainee) => {
+    this.filteredTrainees = this.accountTrainees.filter((trainee) => {
       const name = trainee.name.toLowerCase();
       const nickname = (trainee.nickname || '').toLowerCase();
       return name.includes(query) || nickname.includes(query);
@@ -168,20 +170,5 @@ export class TraineesComponent implements OnInit {
         (gymSubscription) => gymSubscription.id === trainee.gymSubscriptionId,
       )?.name || null
     );
-  }
-
-  /** Mobile rows show one chip: "Inactive" for inactive trainees, otherwise their gym card. */
-  trailingChip(
-    trainee: TraineeProfile,
-  ): { label: string; tone: ChipTone } | null {
-    if (!trainee.isActive) {
-      return {
-        label: this.i18n.t('trainees.status.inactive'),
-        tone: 'neutral',
-      };
-    }
-
-    const gymCard = this.gymCardName(trainee);
-    return gymCard ? { label: gymCard, tone: 'accent' } : null;
   }
 }

@@ -103,13 +103,13 @@ const cases: Case[] = [
     busyLabel: en.common.saving,
   },
   {
-    page: 'plan deactivate',
+    page: 'plan delete',
     component: PlanDeleteComponent,
     url: '/plans/p1/delete',
     loads: { '/api/plans/p1': PLAN },
     confirmLabel: en.plans.delete.submit,
     request: { method: 'DELETE', url: '/api/plans/p1' },
-    busyLabel: en.common.deactivating,
+    busyLabel: en.common.deleting,
   },
   {
     page: 'gym create',
@@ -128,13 +128,13 @@ const cases: Case[] = [
     busyLabel: en.common.saving,
   },
   {
-    page: 'gym deactivate',
+    page: 'gym delete',
     component: GymDeleteComponent,
     url: '/gyms/g1/delete',
     loads: { '/api/gym-locations/g1': GYM },
     confirmLabel: en.gyms.delete.submit,
     request: { method: 'DELETE', url: '/api/gym-locations/g1' },
-    busyLabel: en.common.deactivating,
+    busyLabel: en.common.deleting,
   },
   {
     page: 'gym subscription create',
@@ -153,13 +153,13 @@ const cases: Case[] = [
     busyLabel: en.common.saving,
   },
   {
-    page: 'gym subscription deactivate',
+    page: 'gym subscription delete',
     component: GymSubscriptionDeleteComponent,
     url: '/gym-subscriptions/gs1/delete',
     loads: { '/api/gym-subscriptions/gs1': GYM_SUBSCRIPTION },
     confirmLabel: en.gymSubscriptions.delete.submit,
     request: { method: 'DELETE', url: '/api/gym-subscriptions/gs1' },
-    busyLabel: en.common.deactivating,
+    busyLabel: en.common.deleting,
   },
   {
     page: 'training time create',
@@ -206,13 +206,13 @@ const cases: Case[] = [
     busyLabel: en.common.saving,
   },
   {
-    page: 'trainer deactivate',
+    page: 'trainer delete',
     component: TrainerDeleteComponent,
     url: '/trainers/tr1/delete',
     loads: { '/api/trainers/tr1': TRAINER },
     confirmLabel: en.trainers.delete.submit,
     request: { method: 'DELETE', url: '/api/trainers/tr1' },
-    busyLabel: en.common.deactivating,
+    busyLabel: en.common.deleting,
   },
   {
     page: 'trainee create',
@@ -235,13 +235,13 @@ const cases: Case[] = [
     busyLabel: en.common.saving,
   },
   {
-    page: 'trainee deactivate',
+    page: 'trainee delete',
     component: TraineeDeleteComponent,
     url: '/trainees/t1/delete',
     loads: { '/api/trainees/t1': TRAINEE },
     confirmLabel: en.trainees.delete.submit,
     request: { method: 'DELETE', url: '/api/trainees/t1' },
-    busyLabel: en.common.deactivating,
+    busyLabel: en.common.deleting,
   },
 ];
 

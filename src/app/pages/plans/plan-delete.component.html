@@ -26,18 +26,6 @@
           <dt>{{ 'plans.fields.price' | transloco }}</dt>
           <dd>{{ formatPrice(plan.priceCents) }}</dd>
         </div>
-        <div>
-          <dt>{{ 'common.status' | transloco }}</dt>
-          <dd>
-            <app-status-dot [tone]="plan.isActive ? 'success' : 'neutral'">
-              {{
-                plan.isActive
-                  ? ('plans.status.active' | transloco)
-                  : ('plans.status.inactive' | transloco)
-              }}
-            </app-status-dot>
-          </dd>
-        </div>
       </dl>
 
       <p class="notice notice--warning">
@@ -54,15 +42,13 @@
         <button
           class="btn btn--danger-solid"
           type="button"
-          (click)="confirmDeactivate()"
-          [disabled]="submitting || !plan.isActive"
+          (click)="confirmDelete()"
+          [disabled]="submitting"
         >
           {{
-            plan.isActive
-              ? submitting
-                ? ('common.deactivating' | transloco)
-                : ('plans.delete.submit' | transloco)
-              : ('plans.delete.inactive' | transloco)
+            submitting
+              ? ('common.deleting' | transloco)
+              : ('plans.delete.submit' | transloco)
           }}
         </button>
       </div>

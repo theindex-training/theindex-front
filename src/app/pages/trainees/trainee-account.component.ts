@@ -29,10 +29,13 @@ import {
 import { displayValue } from '../../utils/display.util';
 import { IconComponent } from '../../components/icon/icon.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
-import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import {
+  recordLoadError,
+  rejectDeleted,
+} from '../../utils/deleted-record.util';
 
 const accountPasswordValidator: ValidatorFn = (
   control: AbstractControl,
@@ -62,7 +65,6 @@ const accountPasswordValidator: ValidatorFn = (
     ReactiveFormsModule,
     PageHeaderComponent,
     IconComponent,
-    StatusDotComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainee-account.component.html',
@@ -117,23 +119,30 @@ export class TraineeAccountComponent implements OnInit {
       return;
     }
 
-    this.traineesService.getById(id).subscribe({
-      next: (trainee) => {
-        this.trainee = trainee;
+    this.traineesService
+      .getById(id)
+      .pipe(rejectDeleted())
+      .subscribe({
+        next: (trainee) => {
+          this.trainee = trainee;
 
-        if (trainee.accountId) {
-          this.loadExistingAccount(trainee.accountId);
-        } else {
+          if (trainee.accountId) {
+            this.loadExistingAccount(trainee.accountId);
+          } else {
+            this.loading = false;
+            this.changeDetector.detectChanges();
+          }
+        },
+        error: (error) => {
+          this.errorMessage = recordLoadError(
+            error,
+            'trainees.errors.notFound',
+            'trainees.errors.load',
+          );
           this.loading = false;
           this.changeDetector.detectChanges();
-        }
-      },
-      error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'trainees.errors.load');
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-    });
+        },
+      });
   }
 
   handleSubmit(): void {

@@ -41,18 +41,6 @@
             }
           </dd>
         </div>
-        <div>
-          <dt>{{ 'common.status' | transloco }}</dt>
-          <dd>
-            <app-status-dot [tone]="trainer.isActive ? 'success' : 'neutral'">
-              {{
-                trainer.isActive
-                  ? ('trainers.status.active' | transloco)
-                  : ('trainers.status.inactive' | transloco)
-              }}
-            </app-status-dot>
-          </dd>
-        </div>
       </dl>
 
       @if (account) {
@@ -81,7 +69,7 @@
         <a
           class="btn btn--ghost"
           [routerLink]="['/trainers', trainer.id, 'delete']"
-          >{{ 'trainers.details.deactivate' | transloco }}</a
+          >{{ 'trainers.details.delete' | transloco }}</a
         >
         <a
           class="btn btn--secondary"

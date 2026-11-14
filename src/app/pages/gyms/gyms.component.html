@@ -6,12 +6,6 @@
   />
 
   <div class="list-toolbar">
-    <app-segmented-control
-      [label]="'common.status' | transloco"
-      [options]="statusOptions"
-      [value]="activeFilter"
-      (valueChange)="activeFilter = $event; loadGyms()"
-    />
     @if (!loading && !errorMessage && gyms.length) {
       <p
         class="list-toolbar__count"
@@ -36,35 +30,15 @@
       </button>
     </app-empty-state>
   } @else if (!gyms.length) {
-    @if (activeFilter === 'all') {
-      <app-empty-state
-        icon="dumbbell"
-        [title]="'gyms.list.emptyTitle' | transloco"
-        [message]="'gyms.list.emptyMessage' | transloco"
-      >
-        <a class="btn btn--primary" routerLink="/gyms/new">{{
-          'gyms.list.new' | transloco
-        }}</a>
-      </app-empty-state>
-    } @else {
-      <app-empty-state
-        icon="dumbbell"
-        [title]="
-          activeFilter === 'active'
-            ? ('gyms.list.noActive' | transloco)
-            : ('gyms.list.noInactive' | transloco)
-        "
-        [message]="'gyms.list.tryOtherFilter' | transloco"
-      >
-        <button
-          class="btn btn--secondary"
-          type="button"
-          (click)="activeFilter = 'all'; loadGyms()"
-        >
-          {{ 'gyms.list.showAll' | transloco }}
-        </button>
-      </app-empty-state>
-    }
+    <app-empty-state
+      icon="dumbbell"
+      [title]="'gyms.list.emptyTitle' | transloco"
+      [message]="'gyms.list.emptyMessage' | transloco"
+    >
+      <a class="btn btn--primary" routerLink="/gyms/new">{{
+        'gyms.list.new' | transloco
+      }}</a>
+    </app-empty-state>
   } @else {
     <div
       class="data-table-wrap responsive-table"
@@ -82,7 +56,6 @@
           <tr>
             <th scope="col">{{ 'gyms.fields.gym' | transloco }}</th>
             <th scope="col">{{ 'gyms.fields.address' | transloco }}</th>
-            <th scope="col">{{ 'common.status' | transloco }}</th>
             <th scope="col" class="cell-fit">
               <span class="visually-hidden">{{
                 'gyms.list.detailsColumn' | transloco
@@ -99,15 +72,6 @@
                 }}</a>
               </td>
               <td>{{ formatAddress(gym) }}</td>
-              <td>
-                <app-status-dot [tone]="gym.isActive ? 'success' : 'neutral'">
-                  {{
-                    gym.isActive
-                      ? ('gyms.status.active' | transloco)
-                      : ('gyms.status.inactive' | transloco)
-                  }}
-                </app-status-dot>
-              </td>
               <td class="cell-fit">
                 <a
                   class="row-chevron"
@@ -130,17 +94,8 @@
     >
       @for (gym of gyms; track gym.id) {
         <li>
-          <app-list-row
-            [link]="['/gyms', gym.id]"
-            [title]="gym.name"
-            [dimmed]="!gym.isActive"
-          >
+          <app-list-row [link]="['/gyms', gym.id]" [title]="gym.name">
             <span listRowMeta>{{ formatAddress(gym) }}</span>
-            @if (!gym.isActive) {
-              <app-chip listRowTrailing>{{
-                'gyms.status.inactive' | transloco
-              }}</app-chip>
-            }
           </app-list-row>
         </li>
       }

@@ -30,25 +30,13 @@
           <dt>{{ 'plans.list.detailsColumn' | transloco }}</dt>
           <dd>{{ formatPlanDetails(plan) }}</dd>
         </div>
-        <div>
-          <dt>{{ 'common.status' | transloco }}</dt>
-          <dd>
-            <app-status-dot [tone]="plan.isActive ? 'success' : 'neutral'">
-              {{
-                plan.isActive
-                  ? ('plans.status.active' | transloco)
-                  : ('plans.status.inactive' | transloco)
-              }}
-            </app-status-dot>
-          </dd>
-        </div>
       </dl>
 
       <div class="form-actions">
         <a
           class="btn btn--ghost"
           [routerLink]="['/plans', plan.id, 'delete']"
-          >{{ 'plans.details.deactivate' | transloco }}</a
+          >{{ 'plans.details.delete' | transloco }}</a
         >
         <a
           class="btn btn--primary"

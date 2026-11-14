@@ -23,6 +23,10 @@ import { trimmedLength } from '../../utils/form-validators.util';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import {
+  recordLoadError,
+  rejectDeleted,
+} from '../../utils/deleted-record.util';
 
 @Component({
   selector: 'app-gym-edit',
@@ -74,22 +78,29 @@ export class GymEditComponent implements OnInit {
       return;
     }
 
-    this.gymsService.getById(id).subscribe({
-      next: (gym) => {
-        this.gym = gym;
-        this.form.patchValue({
-          name: gym.name,
-          address: gym.address,
-        });
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-      error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'gyms.errors.load');
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-    });
+    this.gymsService
+      .getById(id)
+      .pipe(rejectDeleted())
+      .subscribe({
+        next: (gym) => {
+          this.gym = gym;
+          this.form.patchValue({
+            name: gym.name,
+            address: gym.address,
+          });
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+        error: (error) => {
+          this.errorMessage = recordLoadError(
+            error,
+            'gyms.errors.notFound',
+            'gyms.errors.load',
+          );
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+      });
   }
 
   handleSubmit(): void {

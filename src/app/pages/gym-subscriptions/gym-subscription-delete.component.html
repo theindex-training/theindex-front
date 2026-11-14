@@ -23,20 +23,6 @@
           <dt>{{ 'gymSubscriptions.fields.name' | transloco }}</dt>
           <dd>{{ gymSubscription.name }}</dd>
         </div>
-        <div>
-          <dt>{{ 'common.status' | transloco }}</dt>
-          <dd>
-            <app-status-dot
-              [tone]="gymSubscription.isActive ? 'success' : 'neutral'"
-            >
-              {{
-                gymSubscription.isActive
-                  ? ('gymSubscriptions.status.active' | transloco)
-                  : ('gymSubscriptions.status.inactive' | transloco)
-              }}
-            </app-status-dot>
-          </dd>
-        </div>
       </dl>
 
       <p class="notice notice--warning">
@@ -53,15 +39,13 @@
         <button
           class="btn btn--danger-solid"
           type="button"
-          (click)="confirmDeactivate()"
-          [disabled]="submitting || !gymSubscription.isActive"
+          (click)="confirmDelete()"
+          [disabled]="submitting"
         >
           {{
-            gymSubscription.isActive
-              ? submitting
-                ? ('common.deactivating' | transloco)
-                : ('gymSubscriptions.delete.submit' | transloco)
-              : ('gymSubscriptions.delete.inactive' | transloco)
+            submitting
+              ? ('common.deleting' | transloco)
+              : ('gymSubscriptions.delete.submit' | transloco)
           }}
         </button>
       </div>

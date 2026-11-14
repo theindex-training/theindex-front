@@ -95,7 +95,6 @@ describe('PlanEditComponent', () => {
       type: 'PUNCH',
       title: '12 visits',
       priceCents: 5220,
-      isActive: true,
       credits: 12,
       durationDays: null,
     });
@@ -121,18 +120,21 @@ describe('PlanEditComponent', () => {
       type: 'TIME',
       title: '10 visits',
       priceCents: 4550,
-      isActive: true,
       credits: null,
       durationDays: 30,
     });
   });
 
-  it('can deactivate the plan from the form', async () => {
+  it('has no "Active" checkbox: deleting is the only way to deactivate a plan', async () => {
     await open();
-    await page.check('input[type="checkbox"]', false);
-    await page.submit();
+    expect(page.query('input[type="checkbox"]')).toBeNull();
+  });
 
-    expect(expectPatch().request.body.isActive).toBe(false);
+  it('a deleted (inactive) plan is not found, and its form never shows', async () => {
+    await open('/plans/p1/edit', { ...PUNCH_PLAN, isActive: false });
+
+    expect(page.alert()).toBe(en.plans.errors.notFound);
+    expect(page.query('form')).toBeNull();
   });
 
   it('shows the load error instead of the form', async () => {

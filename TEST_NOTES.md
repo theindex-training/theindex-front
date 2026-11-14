@@ -124,8 +124,8 @@ This file records findings only. Fixes are on hold: as in theindex-api, no fixes
 - **Where:** `trainer-delete` / `trainee-delete` templates. The confirm button is disabled only while saving.
 - **Behavior:** for an already-inactive trainer or trainee, "Deactivate" stays enabled and sends `DELETE` again. Plans, gyms and gym subscriptions disable it and say the record is already inactive.
 - **Why it looks wrong:** inconsistent with the other three pages. Harmless if the API treats the call as a no-op, but that's unverified.
-- **Pinned by:** `catalog-pages.spec.ts` › "an inactive trainer/trainee can still be deactivated again".
-- **Status:** open (found in PR 4).
+- **Pinned by:** `catalog-pages.spec.ts` › "an inactive trainer/trainee can still be deactivated again" (removed).
+- **Status:** **resolved** by the change that turned "Deactivate" into "Delete" (Nov 2026). Deleting stays a soft delete in the API, but the app now treats an inactive trainee, trainer, gym, gym subscription or plan as gone: the lists don't show it, and its details, edit, delete and account pages say it was not found (`utils/deleted-record.util.ts`), so no page offers to delete it again. Covered by `catalog-pages.spec.ts` › "a deleted (inactive) record is not found".
 
 ## S16 — The trainee dashboard never shows its page-level error
 - **Where:** `trainee-dashboard.component.html`: the error state renders only `@if (errorMessage && loading)`. But both code paths set `loading = false` together with `errorMessage`.

@@ -25,6 +25,10 @@ import { PageHeaderComponent } from '../../components/page-header/page-header.co
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import {
+  recordLoadError,
+  rejectDeleted,
+} from '../../utils/deleted-record.util';
 
 const integerValidator: ValidatorFn = (control: AbstractControl) => {
   const value: unknown = control.value;
@@ -70,7 +74,6 @@ export class PlanEditComponent implements OnInit {
     price: FormControl<number>;
     credits: FormControl<number | null>;
     durationDays: FormControl<number | null>;
-    isActive: FormControl<boolean>;
   }>;
 
   plan: Plan | null = null;
@@ -96,7 +99,6 @@ export class PlanEditComponent implements OnInit {
       ]),
       credits: this.formBuilder.control<number | null>(null),
       durationDays: this.formBuilder.control<number | null>(null),
-      isActive: this.formBuilder.nonNullable.control(true),
     });
   }
 
@@ -112,27 +114,33 @@ export class PlanEditComponent implements OnInit {
       this.syncTypeValidators(value);
     });
 
-    this.plansService.getById(id).subscribe({
-      next: (plan) => {
-        this.plan = plan;
-        this.form.patchValue({
-          type: plan.type,
-          title: plan.title,
-          price: this.toEuros(plan.priceCents),
-          credits: plan.credits,
-          durationDays: plan.durationDays,
-          isActive: plan.isActive,
-        });
-        this.syncTypeValidators(plan.type);
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-      error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'plans.errors.load');
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-    });
+    this.plansService
+      .getById(id)
+      .pipe(rejectDeleted())
+      .subscribe({
+        next: (plan) => {
+          this.plan = plan;
+          this.form.patchValue({
+            type: plan.type,
+            title: plan.title,
+            price: this.toEuros(plan.priceCents),
+            credits: plan.credits,
+            durationDays: plan.durationDays,
+          });
+          this.syncTypeValidators(plan.type);
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+        error: (error) => {
+          this.errorMessage = recordLoadError(
+            error,
+            'plans.errors.notFound',
+            'plans.errors.load',
+          );
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+      });
   }
 
   handleSubmit(): void {
@@ -149,7 +157,6 @@ export class PlanEditComponent implements OnInit {
       type: raw.type,
       title: raw.title.trim(),
       priceCents: this.toCents(raw.price),
-      isActive: raw.isActive,
       credits: raw.type === 'PUNCH' ? Number(raw.credits) : null,
       durationDays: raw.type === 'TIME' ? Number(raw.durationDays) : null,
     };

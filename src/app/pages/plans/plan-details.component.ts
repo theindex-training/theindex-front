@@ -9,13 +9,16 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Plan, PlansService } from '../../services/plans.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
-import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
-import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import { i18nMessage, UiMessage } from '../../i18n/ui-message';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
 import { LanguageService } from '../../i18n/language.service';
 import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
+import {
+  recordLoadError,
+  rejectDeleted,
+} from '../../utils/deleted-record.util';
 
 @Component({
   selector: 'app-plan-details',
@@ -27,7 +30,6 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
     CommonModule,
     RouterLink,
     PageHeaderComponent,
-    StatusDotComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './plan-details.component.html',
@@ -53,18 +55,25 @@ export class PlanDetailsComponent implements OnInit {
       return;
     }
 
-    this.plansService.getById(id).subscribe({
-      next: (plan) => {
-        this.plan = plan;
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-      error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'plans.errors.load');
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-    });
+    this.plansService
+      .getById(id)
+      .pipe(rejectDeleted())
+      .subscribe({
+        next: (plan) => {
+          this.plan = plan;
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+        error: (error) => {
+          this.errorMessage = recordLoadError(
+            error,
+            'plans.errors.notFound',
+            'plans.errors.load',
+          );
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+      });
   }
 
   formatPrice(priceCents: number): string {

@@ -18,11 +18,14 @@ import {
 
 import { displayValue } from '../../utils/display.util';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
-import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
-import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import { i18nMessage, UiMessage } from '../../i18n/ui-message';
 import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
+import {
+  recordLoadError,
+  rejectDeleted,
+} from '../../utils/deleted-record.util';
 
 @Component({
   selector: 'app-trainer-details',
@@ -35,7 +38,6 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
     CommonModule,
     RouterLink,
     PageHeaderComponent,
-    StatusDotComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainer-details.component.html',
@@ -61,23 +63,30 @@ export class TrainerDetailsComponent implements OnInit {
       return;
     }
 
-    this.trainersService.getById(id).subscribe({
-      next: (trainer) => {
-        this.trainer = trainer;
-        this.loading = false;
+    this.trainersService
+      .getById(id)
+      .pipe(rejectDeleted())
+      .subscribe({
+        next: (trainer) => {
+          this.trainer = trainer;
+          this.loading = false;
 
-        if (trainer.accountId) {
-          this.loadAccount(trainer.accountId);
-        }
+          if (trainer.accountId) {
+            this.loadAccount(trainer.accountId);
+          }
 
-        this.changeDetector.detectChanges();
-      },
-      error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'trainers.errors.load');
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-    });
+          this.changeDetector.detectChanges();
+        },
+        error: (error) => {
+          this.errorMessage = recordLoadError(
+            error,
+            'trainers.errors.notFound',
+            'trainers.errors.load',
+          );
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+      });
   }
 
   formatNickname(): string {

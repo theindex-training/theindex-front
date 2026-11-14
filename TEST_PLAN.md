@@ -244,11 +244,11 @@ The review below turned up a few traps. Every spec should follow these.
 ### 5. Trainees and accounts (P1)
 
 **`pages/trainees/trainees.component.ts`** (extends the existing spec, which covers display helpers only)
-- [x] The filter maps to the request: All → no `active` param; Active → `active=true`; Inactive → `active=false`.
+- [x] The list asks for `active=true` only (deleted trainees are gone). The filter is All / With account / Without account, applied on the page (`utils/account-filter.util.ts`), with its own empty state and "Show all trainees".
 - [x] Gym cards load from `/api/gym-subscriptions?includeInactive=true`. A failure falls back to `[]`, and the list still renders.
-- [x] Search is client-side, trimmed, case-insensitive, over name or nickname. Changing the filter keeps the term applied. `TraineesService.list` supports `search`, but the page never sends it.
+- [x] Search is client-side, trimmed, case-insensitive, over name or nickname, within the account filter. Changing the filter keeps the term applied. `TraineesService.list` supports `search`, but the page never sends it.
 - [x] The count shows shown / total. "Clear search" restores all rows.
-- [x] Nickname quoting, gym card lookup, trailing chip (existing spec).
+- [x] Nickname quoting and gym card lookup (existing spec).
 
 **`trainee-create` / `trainee-edit`**
 - [x] Validation: name required and 2–100 trimmed; nickname optional, 1–50 trimmed.
@@ -319,16 +319,16 @@ The review below turned up a few traps. Every spec should follow these.
 One table-driven spec per page type (`crud-details.spec.ts`, `crud-forms.spec.ts`, `crud-delete.spec.ts`), with one row per resource. Every row checks:
 - [x] details / edit / delete: a missing `:id` → that resource's `errors.missingId` and no request. A load error → the API message or `errors.load`. A loaded record is shown (details) or patched into the form (edit).
 - [x] create / edit: an invalid form sends nothing and marks fields touched. The payload is exactly as listed below. Success → the list URL.
-- [x] delete/deactivate: `DELETE /api/<resource>/<id>` → the list URL.
+- [x] delete: `DELETE /api/<resource>/<id>` → the list URL. For trainees, trainers, gyms, gym subscriptions and plans the API only deactivates the record (a soft delete); the app treats an inactive one as gone, so its details, edit and delete pages say `errors.notFound`.
 - [x] Every create / edit / delete page shows the API error and gives the button back after a failed save (`pages/save-errors.spec.ts`, the S1 fix).
 
 | Resource | Create/edit payload and validators | List request and filter |
 |---|---|---|
-| Plans | see §3 | All → no param, Active → `active=true`, Inactive → `active=false` |
-| Gyms | `{ name (2–120 trimmed), address (optional, 2–250, blank → null) }`; no notes, no isActive | All/Inactive → `includeInactive=true`, Active → `includeInactive=false`; Inactive also filters `!isActive` on the client |
+| Plans | see §3; create always sends `isActive: true`, edit no `isActive` (no "Active" checkbox) | `active=true`, no filter |
+| Gyms | `{ name (2–120 trimmed), address (optional, 2–250, blank → null) }`; no notes, no isActive | no param (the API answers the active ones), no filter |
 | Gym subscriptions | `{ name (2–120 trimmed) }` | as Gyms |
 | Training times | `{ startTime, endTime }`, both required; no end > start check (S12) | no filter; times shown as `HH:mm` |
-| Trainers | create `{ name (2–100), nickname|null (1–50), isActive: true }`; edit without isActive | filter as Plans plus client-side search as Trainees |
+| Trainers | create `{ name (2–100), nickname|null (1–50), isActive: true }`; edit without isActive | `active=true`, then the account filter and client-side search as Trainees |
 
 - [x] Plans list `formatPlanDetails`: PUNCH → "10 credits" (ICU), TIME → "30 days". A null count shows 0.
 - [x] Trainers list: search, count, nickname label (mirrors §5).
@@ -645,7 +645,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 
 ### J5. New trainee: profile → subscription → app account (P0) [desktop]
 ✅ Done in PR 5: `e2e/journeys/j5-trainee-onboarding.e2e.ts`, 1 test running the whole flow against a stateful fake API.
-1. ADMIN token. `/trainees` → `GET /api/trainees` (filter All, so no param) and `GET /api/gym-subscriptions?includeInactive=true`.
+1. ADMIN token. `/trainees` → `GET /api/trainees?active=true` and `GET /api/gym-subscriptions?includeInactive=true`.
 2. "New trainee" → `GET /api/gym-subscriptions`.
    - Submit empty: errors, no POST.
    - Fill name "  Ivan Petrov ", nickname blank, a gym card.
@@ -722,15 +722,16 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 
 ### J9. Plan catalog management (P1) [desktop]
 ✅ Done in PR 5: `e2e/journeys/j9-plans.e2e.ts`, 2 tests.
-1. ADMIN token. `/plans` → `GET /api/plans`. The Active filter → `GET /api/plans?active=true`; Inactive → `active=false`.
+1. ADMIN token. `/plans` → `GET /api/plans?active=true`; the page has no status filter.
 2. "New plan":
    - type Punch card, so credits are required (an empty value shows an error);
    - title "10 visits", price 45.5, credits 10;
+   - there is no "Active" checkbox;
    - save → `POST /api/plans {type:'PUNCH', title:'10 visits', priceCents:4550, isActive:true, credits:10}` (no `durationDays` key) → the app lands on `/plans`.
 3. Open the plan → `GET /api/plans/<id>`. Edit:
    - switch to Time-based; credits is cleared and duration is required;
-   - set 30 days and save → `PATCH /api/plans/<id> {type:'TIME', title, priceCents, isActive, credits:null, durationDays:30}`.
-4. Deactivate → `DELETE /api/plans/<id>` → `/plans`.
+   - set 30 days and save → `PATCH /api/plans/<id> {type:'TIME', title, priceCents, credits:null, durationDays:30}`.
+4. Delete → `DELETE /api/plans/<id>` → `/plans`. The plan's page then says it was not found (the API answers it inactive).
 5. Variant: the POST → 400. The API message shows in an alert, and the save button is enabled again (S1, fixed in PR 3).
 
 ### J10. Trainings calendar (P1) [desktop, mobile]
@@ -830,7 +831,7 @@ These come from reading the code. Each gets a `// CHARACTERIZATION: possibly uni
 - **S11 / S12 — No range checks.** Settlement generate and training times have no client-side range check (start ≤ end); only the API validates.
 - **S13 — Login can be submitted twice.** The submit button isn't disabled while signing in, so a double click sends two login requests (found while writing §2).
 - **S14 — A whitespace-only phone silently blocks the first password change.** "   " passes `Validators.required`, so no error shows, then the submit handler trims it to nothing and returns without a word (found while writing §2).
-- **S15 — An inactive trainer or trainee can be deactivated again** (found in PR 4). Plans, gyms and gym subscriptions disable the button for an inactive record; these two pages don't.
+- **S15 — An inactive trainer or trainee can be deactivated again** (found in PR 4). Resolved: an inactive record's pages now say "not found" (see `TEST_NOTES.md`).
 - **S16 — The trainee dashboard never shows its page-level error** (found in PR 4). The error block renders only `@if (errorMessage && loading)`, which is never true. With no `traineeProfileId`, the trainee sees "No active subscriptions" instead of the missing-profile message.
 - **Also note, low priority:**
   - `AppComponent` logs `environment.production` and the health response to the console in production.

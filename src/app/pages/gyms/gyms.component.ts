@@ -6,14 +6,8 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
-import {
-  SegmentedControlComponent,
-  SegmentedOption,
-} from '../../components/segmented-control/segmented-control.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
-import { ChipComponent } from '../../components/chip/chip.component';
-import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import { ListRowComponent } from '../../components/list-row/list-row.component';
 import { IconComponent } from '../../components/icon/icon.component';
 import {
@@ -34,11 +28,8 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
     TranslocoPipe,
     RouterLink,
     PageHeaderComponent,
-    SegmentedControlComponent,
     SkeletonListComponent,
     EmptyStateComponent,
-    ChipComponent,
-    StatusDotComponent,
     ListRowComponent,
     IconComponent,
   ],
@@ -47,12 +38,6 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 })
 export class GymsComponent implements OnInit {
   gyms: GymLocation[] = [];
-  activeFilter: 'all' | 'active' | 'inactive' = 'all';
-  readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
-    { value: 'all', label: 'common.all' },
-    { value: 'active', label: 'common.active' },
-    { value: 'inactive', label: 'common.inactive' },
-  ];
   loading = true;
   errorMessage: UiMessage | null = null;
 
@@ -69,14 +54,11 @@ export class GymsComponent implements OnInit {
     this.loading = true;
     this.errorMessage = null;
 
-    const includeInactive = this.activeFilter !== 'active';
-
-    this.gymsService.list(includeInactive).subscribe({
+    // Without includeInactive the API lists the active ones only: deleting a gym deactivates it,
+    // and the app treats it as gone.
+    this.gymsService.list().subscribe({
       next: (gyms) => {
-        this.gyms =
-          this.activeFilter === 'inactive'
-            ? gyms.filter((gym) => !gym.isActive)
-            : gyms;
+        this.gyms = gyms;
         this.loading = false;
         this.changeDetector.detectChanges();
       },

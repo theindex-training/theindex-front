@@ -17,11 +17,7 @@
   } @else if (trainee) {
     <div class="panel">
       <div class="profile">
-        <app-avatar
-          class="profile__avatar"
-          [name]="trainee.name"
-          [muted]="!trainee.isActive"
-        />
+        <app-avatar class="profile__avatar" [name]="trainee.name" />
         <dl class="detail-list profile__details">
           <div>
             <dt>{{ 'trainees.fields.nickname' | transloco }}</dt>
@@ -44,18 +40,6 @@
                   'common.notLinked' | transloco
                 }}</span>
               }
-            </dd>
-          </div>
-          <div>
-            <dt>{{ 'common.status' | transloco }}</dt>
-            <dd>
-              <app-status-dot [tone]="trainee.isActive ? 'success' : 'neutral'">
-                {{
-                  trainee.isActive
-                    ? ('trainees.status.active' | transloco)
-                    : ('trainees.status.inactive' | transloco)
-                }}
-              </app-status-dot>
             </dd>
           </div>
         </dl>
@@ -87,7 +71,7 @@
         <a
           class="btn btn--ghost"
           [routerLink]="['/trainees', trainee.id, 'delete']"
-          >{{ 'trainees.details.deactivate' | transloco }}</a
+          >{{ 'trainees.details.delete' | transloco }}</a
         >
         <a
           class="btn btn--secondary"

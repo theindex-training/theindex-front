@@ -26,18 +26,6 @@
           <dt>{{ 'gyms.fields.notes' | transloco }}</dt>
           <dd>{{ gym.notes || '—' }}</dd>
         </div>
-        <div>
-          <dt>{{ 'common.status' | transloco }}</dt>
-          <dd>
-            <app-status-dot [tone]="gym.isActive ? 'success' : 'neutral'">
-              {{
-                gym.isActive
-                  ? ('gyms.status.active' | transloco)
-                  : ('gyms.status.inactive' | transloco)
-              }}
-            </app-status-dot>
-          </dd>
-        </div>
       </dl>
 
       <p class="notice notice--warning">
@@ -54,15 +42,13 @@
         <button
           class="btn btn--danger-solid"
           type="button"
-          (click)="confirmDeactivate()"
-          [disabled]="submitting || !gym.isActive"
+          (click)="confirmDelete()"
+          [disabled]="submitting"
         >
           {{
-            gym.isActive
-              ? submitting
-                ? ('common.deactivating' | transloco)
-                : ('gyms.delete.submit' | transloco)
-              : ('gyms.delete.inactive' | transloco)
+            submitting
+              ? ('common.deleting' | transloco)
+              : ('gyms.delete.submit' | transloco)
           }}
         </button>
       </div>

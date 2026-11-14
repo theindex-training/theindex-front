@@ -53,7 +53,7 @@ describe('catalog lists', () => {
     await page.settle();
   }
 
-  async function filter(value: 'all' | 'active' | 'inactive') {
+  async function filter(value: 'all' | 'withAccount' | 'withoutAccount') {
     await page.click(`input[type="radio"][value="${value}"]`);
   }
 
@@ -81,27 +81,22 @@ describe('catalog lists', () => {
         priceCents: 6000,
         credits: null,
         durationDays: 1,
-        isActive: false,
+        isActive: true,
       },
     ];
 
-    it('maps the status filter to the active param', async () => {
+    it('loads only active plans (deleted ones are gone), with no status filter', async () => {
       await render(PlansComponent);
-      await flush('/api/plans', plans);
-
-      await filter('active');
-      await flush('/api/plans?active=true', [plans[0]]);
-      await filter('inactive');
-      await flush('/api/plans?active=false', [plans[1]]);
-      await filter('all');
-      await flush('/api/plans', plans);
+      await flush('/api/plans?active=true', plans);
 
       expect(count()).toBe('2 plans');
+      expect(page.query('input[type="radio"]')).toBeNull();
+      expect(page.text()).not.toContain(en.common.status);
     });
 
     it('describes each plan by credits or days, and its price', async () => {
       const component = await render(PlansComponent);
-      await flush('/api/plans', plans);
+      await flush('/api/plans?active=true', plans);
       const format = TestBed.inject(LocaleFormatService);
 
       expect(component.formatPlanDetails(plans[0] as never)).toBe('10 credits');
@@ -115,12 +110,12 @@ describe('catalog lists', () => {
     it('shows the error state and reloads on "Try again"', async () => {
       await render(PlansComponent);
       const error = apiError(undefined, 500);
-      http.expectOne('/api/plans').flush(error.body, error.options);
+      http.expectOne('/api/plans?active=true').flush(error.body, error.options);
       await page.settle();
       expect(page.text()).toContain(en.plans.list.loadErrorMessage);
 
       await page.click('app-empty-state button');
-      await flush('/api/plans', []);
+      await flush('/api/plans?active=true', []);
 
       expect(page.text()).toContain(en.plans.list.emptyTitle);
     });
@@ -135,43 +130,33 @@ describe('catalog lists', () => {
       'Sports card',
       'Old card',
     ],
-  ])('%s', (_, component, url, activeName, inactiveName) => {
+  ])('%s', (_, component, url, firstName, secondName) => {
     const items = [
-      { id: 'a', name: activeName, address: null, notes: null, isActive: true },
+      { id: 'a', name: firstName, address: null, notes: null, isActive: true },
       {
         id: 'b',
-        name: inactiveName,
+        name: secondName,
         address: 'Side St',
         notes: null,
-        isActive: false,
+        isActive: true,
       },
     ];
 
-    it('loads everything for "All", and only active ones for "Active"', async () => {
+    it('loads only active ones (deleted ones are gone), with no status filter', async () => {
       await render(component as Type<unknown>);
-      await flush(`${url}?includeInactive=true`, items);
-      expect(page.text()).toContain(inactiveName);
+      // Without includeInactive the API answers the active ones only.
+      await flush(url, items);
 
-      await filter('active');
-      await flush(`${url}?includeInactive=false`, [items[0]]);
-      expect(page.text()).not.toContain(inactiveName);
-    });
-
-    it('"Inactive" loads everything and keeps only the inactive ones', async () => {
-      await render(component as Type<unknown>);
-      await flush(`${url}?includeInactive=true`, items);
-
-      await filter('inactive');
-      await flush(`${url}?includeInactive=true`, items);
-
-      expect(page.text()).toContain(inactiveName);
-      expect(page.text()).not.toContain(activeName);
+      expect(page.text()).toContain(firstName);
+      expect(page.text()).toContain(secondName);
+      expect(page.query('input[type="radio"]')).toBeNull();
+      expect(page.text()).not.toContain(en.common.status);
     });
   });
 
   it('gyms show a dash for a missing address', async () => {
     const component = await render(GymsComponent);
-    await flush('/api/gym-locations?includeInactive=true', []);
+    await flush('/api/gym-locations', []);
 
     expect(
       component.formatAddress({
@@ -213,19 +198,37 @@ describe('catalog lists', () => {
       },
     ];
 
-    it('maps the status filter to the active param', async () => {
+    it('loads only active trainers, and filters by app account on the page', async () => {
       await render(TrainersComponent);
-      await flush('/api/trainers', trainers);
-
-      await filter('inactive');
-      await flush('/api/trainers?active=false', []);
-      await filter('active');
       await flush('/api/trainers?active=true', trainers);
+      expect(page.text()).not.toContain(en.common.status);
+
+      await filter('withAccount');
+      expect(count()).toBe('1 of 2 trainers');
+      expect(page.text()).not.toContain('Maria Koleva');
+
+      await filter('withoutAccount');
+      expect(count()).toBe('1 of 2 trainers');
+      expect(page.text()).not.toContain('Petar Petrov');
+
+      await filter('all');
+      expect(count()).toBe('2 of 2 trainers');
+    });
+
+    it('says when nobody matches the account filter, with a way back to everyone', async () => {
+      await render(TrainersComponent);
+      await flush('/api/trainers?active=true', [trainers[0]]);
+
+      await filter('withoutAccount');
+      expect(page.text()).toContain(en.trainers.list.noWithoutAccount);
+
+      await page.click('app-empty-state button');
+      expect(count()).toBe('1 of 1 trainer');
     });
 
     it('searches names and nicknames on the page, and clears the search', async () => {
       await render(TrainersComponent);
-      await flush('/api/trainers', trainers);
+      await flush('/api/trainers?active=true', trainers);
       expect(count()).toBe('2 of 2 trainers');
 
       await page.type('input[type="search"]', ' PEPI ');
@@ -241,18 +244,19 @@ describe('catalog lists', () => {
 
     it('keeps the search applied when the filter changes', async () => {
       await render(TrainersComponent);
-      await flush('/api/trainers', trainers);
+      await flush('/api/trainers?active=true', trainers);
       await page.type('input[type="search"]', 'maria');
 
-      await filter('active');
-      await flush('/api/trainers?active=true', trainers);
-
+      await filter('withoutAccount');
       expect(count()).toBe('1 of 2 trainers');
+
+      await filter('withAccount');
+      expect(page.text()).toContain('No trainer matches “maria”.');
     });
 
     it('labels nicknames and linked accounts', async () => {
       const component = await render(TrainersComponent);
-      await flush('/api/trainers', trainers);
+      await flush('/api/trainers?active=true', trainers);
 
       expect(component.nicknameLabel(trainers[0])).toBe('“Pepi”');
       expect(component.nicknameLabel(trainers[1])).toBe(en.common.noNickname);

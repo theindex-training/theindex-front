@@ -39,7 +39,13 @@
     "missingId": "The link is missing an ID.",
     "dash": "—",
     "quoted": "“{text}”",
-    "myDetails": "My details"
+    "myDetails": "My details",
+    "deleting": "Deleting...",
+    "accountFilter": {
+      "label": "App account",
+      "withAccount": "Linked",
+      "withoutAccount": "Not linked"
+    }
   },
   "nav": {
     "mainLabel": "Main",
@@ -133,9 +139,7 @@
       "loadErrorMessage": "Unable to load trainees right now.",
       "emptyTitle": "No trainees yet",
       "emptyMessage": "Add the people who train with you to track their gym cards, subscriptions and attendance.",
-      "noActive": "No active trainees",
-      "noInactive": "No inactive trainees",
-      "tryOtherFilter": "Try a different status filter.",
+      "tryOtherFilter": "Try a different account filter.",
       "showAll": "Show all trainees",
       "noMatchesTitle": "No matches",
       "noMatches": "No trainee matches “{term}”.",
@@ -144,11 +148,9 @@
       "noGymCard": "None",
       "appMark": "App",
       "appMarkHidden": "account linked",
-      "accountColumn": "App account"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
+      "accountColumn": "App account",
+      "noWithAccount": "No trainees with an app account",
+      "noWithoutAccount": "No trainees without an app account"
     },
     "fields": {
       "trainee": "Trainee",
@@ -160,7 +162,6 @@
       "noGymSubscription": "No gym subscription",
       "appAccount": "App account",
       "account": "Account",
-      "profileStatus": "Profile status",
       "nameError": "Enter a name of 2–100 characters.",
       "nameHint": "2–100 characters.",
       "nicknameError": "Nickname must be 1–50 characters.",
@@ -174,7 +175,8 @@
     "loadingOne": "Loading trainee...",
     "errors": {
       "missingId": "Trainee ID is missing.",
-      "load": "Unable to load this trainee."
+      "load": "Unable to load this trainee.",
+      "notFound": "Trainee not found. It may have been deleted."
     },
     "create": {
       "title": "Create trainee",
@@ -188,12 +190,11 @@
       "error": "Unable to update this trainee right now."
     },
     "delete": {
-      "title": "Deactivate trainee",
-      "subtitle": "Disable access for a trainee while keeping their profile.",
-      "warning": "This trainee will no longer be active, but their profile can be reactivated later.",
-      "error": "Unable to deactivate this trainee right now.",
-      "unlinked": "Unlinked",
-      "submit": "Deactivate trainee"
+      "title": "Delete trainee",
+      "subtitle": "Remove this trainee from the app.",
+      "warning": "Deleting cannot be undone. The trainee disappears from every list and can't be picked anymore; their past trainings and payments stay in the history.",
+      "error": "Unable to delete this trainee right now.",
+      "submit": "Delete trainee"
     },
     "details": {
       "title": "Trainee details",
@@ -202,7 +203,6 @@
       "accountInfo": "Account information",
       "role": "Role",
       "email": "Email",
-      "deactivate": "Deactivate trainee",
       "edit": "Edit trainee",
       "manageAccount": "Manage account",
       "createAccount": "Create account",
@@ -230,7 +230,8 @@
       "noExhaustedSubscriptions": "No exhausted subscriptions found for this trainee.",
       "noSubscriptions": "No subscriptions found for this trainee.",
       "confirmDeleteSubscription": "Delete the {plan} subscription from {date}?",
-      "buySubmit": "Buy subscription"
+      "buySubmit": "Buy subscription",
+      "delete": "Delete trainee"
     },
     "account": {
       "pageTitle": "Trainee account",
@@ -336,7 +337,7 @@
   },
   "plans": {
     "list": {
-      "subtitle": "Training plans, pricing and availability.",
+      "subtitle": "Training plans and their prices.",
       "new": "New plan",
       "count": "{count, plural, one {# plan} other {# plans}}",
       "loading": "Loading plans",
@@ -344,17 +345,9 @@
       "loadErrorMessage": "Unable to load plans right now.",
       "emptyTitle": "No plans yet",
       "emptyMessage": "Create the plans trainees can buy: punch cards or time-based passes.",
-      "noActive": "No active plans",
-      "noInactive": "No inactive plans",
-      "tryOtherFilter": "Try a different status filter.",
-      "showAll": "Show all plans",
       "tableLabel": "Plans table",
       "includes": "Includes",
       "detailsColumn": "Details"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
     },
     "fields": {
       "plan": "Plan",
@@ -374,7 +367,6 @@
       "priceEur": "Price (EUR)",
       "priceError": "Enter a price of 0 or more, with up to two decimals.",
       "priceHint": "0 or more, up to two decimals, e.g. 45.50.",
-      "activePlan": "Active plan",
       "creditsCount": "{count, plural, one {# credit} other {# credits}}",
       "daysCount": "{count, plural, one {# day} other {# days}}"
     },
@@ -382,7 +374,8 @@
     "loadingOne": "Loading plan...",
     "errors": {
       "missingId": "Plan ID is missing.",
-      "load": "Unable to load this plan."
+      "load": "Unable to load this plan.",
+      "notFound": "Plan not found. It may have been deleted."
     },
     "create": {
       "title": "Create plan",
@@ -397,18 +390,17 @@
     },
     "details": {
       "title": "Plan details",
-      "subtitle": "Review plan information and manage availability.",
+      "subtitle": "Review the plan's information.",
       "details": "Details",
-      "deactivate": "Deactivate plan",
-      "edit": "Edit plan"
+      "edit": "Edit plan",
+      "delete": "Delete plan"
     },
     "delete": {
-      "title": "Deactivate plan",
-      "subtitle": "Plans are archived by marking them inactive.",
-      "warning": "Deactivating a plan hides it from new sign-ups, but existing subscriptions remain unchanged.",
-      "inactive": "Plan inactive",
-      "error": "Unable to deactivate this plan right now.",
-      "submit": "Deactivate plan"
+      "title": "Delete plan",
+      "subtitle": "Remove this plan from the app.",
+      "warning": "Deleting cannot be undone. The plan disappears from every list and can't be bought anymore; subscriptions already bought stay as they are.",
+      "error": "Unable to delete this plan right now.",
+      "submit": "Delete plan"
     }
   },
   "gyms": {
@@ -421,16 +413,8 @@
       "loadErrorMessage": "Unable to load gyms right now.",
       "emptyTitle": "No gyms yet",
       "emptyMessage": "Add the locations where you train.",
-      "noActive": "No active gyms",
-      "noInactive": "No inactive gyms",
-      "tryOtherFilter": "Try a different status filter.",
-      "showAll": "Show all gyms",
       "tableLabel": "Gyms table",
       "detailsColumn": "Details"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
     },
     "fields": {
       "gym": "Gym",
@@ -448,7 +432,8 @@
     "loadingOne": "Loading gym...",
     "errors": {
       "missingId": "Gym ID is missing.",
-      "load": "Unable to load this gym."
+      "load": "Unable to load this gym.",
+      "notFound": "Gym not found. It may have been deleted."
     },
     "create": {
       "title": "Create gym",
@@ -464,16 +449,15 @@
     "details": {
       "edit": "Edit gym",
       "title": "Gym details",
-      "subtitle": "Review gym location information and manage availability.",
-      "deactivate": "Deactivate gym"
+      "subtitle": "Review the gym's information.",
+      "delete": "Delete gym"
     },
     "delete": {
-      "title": "Deactivate gym",
-      "submit": "Deactivate gym",
-      "subtitle": "Gyms are archived by marking them inactive.",
-      "warning": "Deactivating a gym hides it from new schedules, but existing references remain unchanged.",
-      "inactive": "Gym inactive",
-      "error": "Unable to deactivate this gym right now."
+      "title": "Delete gym",
+      "subtitle": "Remove this gym from the app.",
+      "warning": "Deleting cannot be undone. The gym disappears from every list and can't be picked anymore; the trainings held there stay in the history.",
+      "error": "Unable to delete this gym right now.",
+      "submit": "Delete gym"
     },
     "homeGym": {
       "none": "No gym",
@@ -490,16 +474,8 @@
       "loadErrorMessage": "Unable to load gym subscriptions right now.",
       "emptyTitle": "No gym subscriptions yet",
       "emptyMessage": "Add gym cards such as Multisport or Coolfit so trainees can be linked to them.",
-      "noActive": "No active gym subscriptions",
-      "noInactive": "No inactive gym subscriptions",
-      "tryOtherFilter": "Try a different status filter.",
-      "showAll": "Show all gym subscriptions",
       "tableLabel": "Gym subscriptions table",
       "detailsColumn": "Details"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
     },
     "fields": {
       "gymSubscription": "Gym subscription",
@@ -512,7 +488,8 @@
     "loadingOne": "Loading gym subscription...",
     "errors": {
       "missingId": "Gym subscription ID is missing.",
-      "load": "Unable to load this gym subscription."
+      "load": "Unable to load this gym subscription.",
+      "notFound": "Gym subscription not found. It may have been deleted."
     },
     "create": {
       "title": "Create gym subscription",
@@ -528,16 +505,15 @@
     "details": {
       "edit": "Edit gym subscription",
       "title": "Gym subscription details",
-      "subtitle": "Review gym subscription information and manage availability.",
-      "deactivate": "Deactivate gym subscription"
+      "subtitle": "Review the gym subscription's information.",
+      "delete": "Delete gym subscription"
     },
     "delete": {
-      "title": "Deactivate gym subscription",
-      "submit": "Deactivate gym subscription",
-      "subtitle": "Gym subscriptions are archived by marking them inactive.",
-      "warning": "Deactivating a gym subscription hides it from new trainee assignments.",
-      "inactive": "Gym subscription inactive",
-      "error": "Unable to deactivate this gym subscription right now."
+      "title": "Delete gym subscription",
+      "subtitle": "Remove this gym subscription from the app.",
+      "warning": "Deleting cannot be undone. The gym subscription disappears from every list and can't be given to trainees anymore.",
+      "error": "Unable to delete this gym subscription right now.",
+      "submit": "Delete gym subscription"
     }
   },
   "trainers": {
@@ -552,9 +528,7 @@
       "loadErrorMessage": "Unable to load trainers right now.",
       "emptyTitle": "No trainers yet",
       "emptyMessage": "Add the coaches who run your classes.",
-      "noActive": "No active trainers",
-      "noInactive": "No inactive trainers",
-      "tryOtherFilter": "Try a different status filter.",
+      "tryOtherFilter": "Try a different account filter.",
       "showAll": "Show all trainers",
       "noMatchesTitle": "No matches",
       "noMatches": "No trainer matches “{term}”.",
@@ -562,11 +536,9 @@
       "detailsColumn": "Details",
       "appMark": "App",
       "appMarkHidden": "account linked",
-      "accountColumn": "App account"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
+      "accountColumn": "App account",
+      "noWithAccount": "No trainers with an app account",
+      "noWithoutAccount": "No trainers without an app account"
     },
     "fields": {
       "trainer": "Trainer",
@@ -574,7 +546,6 @@
       "nickname": "Nickname",
       "appAccount": "App account",
       "account": "Account",
-      "profileStatus": "Profile status",
       "nameError": "Enter a name of 2–100 characters.",
       "nameHint": "2–100 characters.",
       "nicknameError": "Nickname must be 1–50 characters.",
@@ -588,7 +559,8 @@
     "loadingOne": "Loading trainer...",
     "errors": {
       "missingId": "Trainer ID is missing.",
-      "load": "Unable to load this trainer."
+      "load": "Unable to load this trainer.",
+      "notFound": "Trainer not found. It may have been deleted."
     },
     "create": {
       "title": "Create trainer",
@@ -605,19 +577,19 @@
       "edit": "Edit trainer",
       "title": "Trainer details",
       "subtitle": "Review trainer information and account access.",
-      "deactivate": "Deactivate trainer",
       "accountInfo": "Account information",
       "email": "Email",
       "role": "Role",
       "manageAccount": "Manage account",
-      "createAccount": "Create account"
+      "createAccount": "Create account",
+      "delete": "Delete trainer"
     },
     "delete": {
-      "title": "Deactivate trainer",
-      "submit": "Deactivate trainer",
-      "subtitle": "Disable access for a trainer while keeping their profile.",
-      "warning": "This trainer will no longer be active, but their profile can be reactivated later.",
-      "error": "Unable to deactivate this trainer right now."
+      "title": "Delete trainer",
+      "subtitle": "Remove this trainer from the app.",
+      "warning": "Deleting cannot be undone. The trainer disappears from every list and can't be picked anymore; the trainings they led stay in the history.",
+      "error": "Unable to delete this trainer right now.",
+      "submit": "Delete trainer"
     },
     "account": {
       "pageTitle": "Trainer account",

@@ -55,24 +55,6 @@ describe('TraineesComponent display helpers', () => {
     ).toBeNull();
     expect(component.gymCardName(trainee())).toBeNull();
   });
-
-  it('shows "Inactive" before the gym card on mobile rows', () => {
-    expect(
-      component.trailingChip(
-        trainee({ isActive: false, gymSubscriptionId: 'gs1' }),
-      ),
-    ).toEqual({
-      label: 'Inactive',
-      tone: 'neutral',
-    });
-    expect(
-      component.trailingChip(trainee({ gymSubscriptionId: 'gs1' })),
-    ).toEqual({
-      label: 'Multisport',
-      tone: 'accent',
-    });
-    expect(component.trailingChip(trainee())).toBeNull();
-  });
 });
 
 describe('TraineesComponent list', () => {
@@ -92,7 +74,6 @@ describe('TraineesComponent list', () => {
       id: 't3',
       name: 'Maria Koleva',
       nickname: 'Mimi',
-      isActive: false,
     }),
   ];
 
@@ -125,7 +106,7 @@ describe('TraineesComponent list', () => {
     } else {
       cards.flush([{ id: 'gs1', name: 'Multisport', isActive: true }]);
     }
-    await flush('/api/trainees', trainees);
+    await flush('/api/trainees?active=true', trainees);
     return fixture.componentInstance;
   }
 
@@ -142,22 +123,55 @@ describe('TraineesComponent list', () => {
       ?.textContent?.replace(/\s+/g, ' ')
       .trim();
 
-  it('loads every trainee and the gym cards, inactive ones included', async () => {
+  it('loads only active trainees (deleted ones are gone) and every gym card', async () => {
     await render();
 
     expect(count()).toBe('3 of 3 trainees');
     expect(page.text()).toContain('Multisport');
+    expect(page.text()).not.toContain(en.common.status);
+    expect(page.text()).not.toContain(en.common.inactive);
   });
 
-  it('maps the status filter to the active param', async () => {
+  it('filters by app account on the page, without asking the API', async () => {
     await render();
+    const labels = page
+      .queryAll('fieldset label')
+      .map((label) => label.textContent?.trim());
+    expect(labels).toEqual([
+      en.common.all,
+      en.common.accountFilter.withAccount,
+      en.common.accountFilter.withoutAccount,
+    ]);
 
-    await page.click('input[type="radio"][value="active"]');
-    await flush('/api/trainees?active=true', trainees.slice(0, 2));
-    await page.click('input[type="radio"][value="inactive"]');
-    await flush('/api/trainees?active=false', trainees.slice(2));
+    await page.click('input[type="radio"][value="withAccount"]');
+    expect(count()).toBe('1 of 3 trainees');
+    expect(page.text()).toContain('Ivan Petrov');
+    expect(page.text()).not.toContain('Georgi Ivanov');
 
+    await page.click('input[type="radio"][value="withoutAccount"]');
+    expect(count()).toBe('2 of 3 trainees');
+    expect(page.text()).not.toContain('Ivan Petrov');
+
+    await page.click('input[type="radio"][value="all"]');
+    expect(count()).toBe('3 of 3 trainees');
+  });
+
+  it('says when nobody matches the account filter, with a way back to everyone', async () => {
+    const fixture = TestBed.createComponent(TraineesComponent);
+    page = driver(
+      () => fixture.nativeElement,
+      () => fixture.whenStable(),
+    );
+    await page.settle();
+    http.expectOne('/api/gym-subscriptions?includeInactive=true').flush([]);
+    await flush('/api/trainees?active=true', [trainee()]);
+
+    await page.click('input[type="radio"][value="withAccount"]');
+    expect(page.text()).toContain(en.trainees.list.noWithAccount);
+
+    await page.click('app-empty-state button');
     expect(count()).toBe('1 of 1 trainee');
+    expect(page.text()).toContain('Georgi Ivanov');
   });
 
   it('searches names and nicknames on the page, without asking the API', async () => {
@@ -180,12 +194,14 @@ describe('TraineesComponent list', () => {
 
   it('keeps the search applied when the filter changes', async () => {
     await render();
+    await page.type('input[type="search"]', 'i');
+    expect(count()).toBe('3 of 3 trainees');
+
+    await page.click('input[type="radio"][value="withoutAccount"]');
+    expect(count()).toBe('2 of 3 trainees');
+
     await page.type('input[type="search"]', 'petrov');
-
-    await page.click('input[type="radio"][value="active"]');
-    await flush('/api/trainees?active=true', trainees.slice(0, 2));
-
-    expect(count()).toBe('1 of 2 trainees');
+    expect(page.text()).toContain('No trainee matches “petrov”.');
   });
 
   it('still lists trainees when the gym cards fail to load', async () => {
@@ -204,12 +220,14 @@ describe('TraineesComponent list', () => {
     await page.settle();
     http.expectOne('/api/gym-subscriptions?includeInactive=true').flush([]);
     const error = apiError('Database unavailable', 503);
-    http.expectOne('/api/trainees').flush(error.body, error.options);
+    http
+      .expectOne('/api/trainees?active=true')
+      .flush(error.body, error.options);
     await page.settle();
     expect(page.text()).toContain('Database unavailable');
 
     await page.click('app-empty-state button');
-    await flush('/api/trainees', []);
+    await flush('/api/trainees?active=true', []);
     expect(page.text()).toContain(en.trainees.list.emptyTitle);
   });
 });

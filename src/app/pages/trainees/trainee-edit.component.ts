@@ -28,6 +28,10 @@ import { trimmedLength } from '../../utils/form-validators.util';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import {
+  recordLoadError,
+  rejectDeleted,
+} from '../../utils/deleted-record.util';
 
 @Component({
   selector: 'app-trainee-edit',
@@ -99,25 +103,32 @@ export class TraineeEditComponent implements OnInit {
       },
     });
 
-    this.traineesService.getById(id).subscribe({
-      next: (trainee) => {
-        this.trainee = trainee;
-        this.form.patchValue({
-          name: trainee.name,
-          nickname: trainee.nickname,
-          phone: trainee.phone,
-          gymSubscriptionId: trainee.gymSubscriptionId,
-          preferredGymId: trainee.preferredGymId ?? '',
-        });
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-      error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'trainees.errors.load');
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-    });
+    this.traineesService
+      .getById(id)
+      .pipe(rejectDeleted())
+      .subscribe({
+        next: (trainee) => {
+          this.trainee = trainee;
+          this.form.patchValue({
+            name: trainee.name,
+            nickname: trainee.nickname,
+            phone: trainee.phone,
+            gymSubscriptionId: trainee.gymSubscriptionId,
+            preferredGymId: trainee.preferredGymId ?? '',
+          });
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+        error: (error) => {
+          this.errorMessage = recordLoadError(
+            error,
+            'trainees.errors.notFound',
+            'trainees.errors.load',
+          );
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+      });
   }
 
   handleSubmit(): void {

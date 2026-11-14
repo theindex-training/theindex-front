@@ -147,6 +147,14 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     ]);
   });
 
+  it('a deleted (inactive) trainee is not found: no profile, no sale form', async () => {
+    await open({ trainee: { ...TRAINEE, isActive: false } });
+
+    expect(page.alert()).toBe(en.trainees.errors.notFound);
+    expect(page.text()).not.toContain('Ivan Petrov');
+    expect(page.query('form')).toBeNull();
+  });
+
   it('shows only the social profiles given, linked to their network', async () => {
     await open({
       trainee: {

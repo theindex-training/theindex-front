@@ -30,18 +30,6 @@
           <dt>{{ 'trainers.fields.nickname' | transloco }}</dt>
           <dd>{{ formatNickname() }}</dd>
         </div>
-        <div>
-          <dt>{{ 'trainers.fields.profileStatus' | transloco }}</dt>
-          <dd>
-            <app-status-dot [tone]="trainer.isActive ? 'success' : 'neutral'">
-              {{
-                trainer.isActive
-                  ? ('trainers.status.active' | transloco)
-                  : ('trainers.status.inactive' | transloco)
-              }}
-            </app-status-dot>
-          </dd>
-        </div>
       </dl>
 
       <form

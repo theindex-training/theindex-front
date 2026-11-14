@@ -18,6 +18,10 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 import { LanguageService } from '../../i18n/language.service';
+import {
+  recordLoadError,
+  rejectDeleted,
+} from '../../utils/deleted-record.util';
 
 @Component({
   selector: 'app-trainer-delete',
@@ -48,21 +52,28 @@ export class TrainerDeleteComponent implements OnInit {
       return;
     }
 
-    this.trainersService.getById(id).subscribe({
-      next: (trainer) => {
-        this.trainer = trainer;
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-      error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'trainers.errors.load');
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-    });
+    this.trainersService
+      .getById(id)
+      .pipe(rejectDeleted())
+      .subscribe({
+        next: (trainer) => {
+          this.trainer = trainer;
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+        error: (error) => {
+          this.errorMessage = recordLoadError(
+            error,
+            'trainers.errors.notFound',
+            'trainers.errors.load',
+          );
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+      });
   }
 
-  confirmDeactivate(): void {
+  confirmDelete(): void {
     if (!this.trainer) {
       return;
     }

@@ -100,12 +100,12 @@ describe('PlanCreateComponent', () => {
     req.flush({ id: 'p2' });
   });
 
-  it('can create an inactive plan', async () => {
+  it('always creates an active plan: there is no "Active" checkbox', async () => {
     await fill({ title: 'Old plan', credits: '5', price: '20' });
-    await page.check('input[type="checkbox"]', false);
+    expect(page.query('input[type="checkbox"]')).toBeNull();
     await page.submit();
 
-    expect(expectPost().request.body.isActive).toBe(false);
+    expect(expectPost().request.body.isActive).toBe(true);
   });
 
   it('converts euros to cents without floating-point drift', async () => {

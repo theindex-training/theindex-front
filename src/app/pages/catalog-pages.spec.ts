@@ -191,7 +191,7 @@ describe('catalog pages', () => {
         },
       ],
       [
-        'plan deactivate',
+        'plan delete',
         {
           url: '/plans/p1/delete',
           recordUrl: '/api/plans/p1',
@@ -221,7 +221,7 @@ describe('catalog pages', () => {
         },
       ],
       [
-        'gym deactivate',
+        'gym delete',
         {
           url: '/gyms/g1/delete',
           recordUrl: '/api/gym-locations/g1',
@@ -252,7 +252,7 @@ describe('catalog pages', () => {
         },
       ],
       [
-        'gym subscription deactivate',
+        'gym subscription delete',
         {
           url: '/gym-subscriptions/gs1/delete',
           recordUrl: '/api/gym-subscriptions/gs1',
@@ -316,7 +316,7 @@ describe('catalog pages', () => {
         },
       ],
       [
-        'trainer deactivate',
+        'trainer delete',
         {
           url: '/trainers/tr1/delete',
           recordUrl: '/api/trainers/tr1',
@@ -344,7 +344,7 @@ describe('catalog pages', () => {
         },
       ],
       [
-        'trainee deactivate',
+        'trainee delete',
         {
           url: '/trainees/t1/delete',
           recordUrl: '/api/trainees/t1',
@@ -388,6 +388,55 @@ describe('catalog pages', () => {
         await page.settle();
 
         expect(page.alert()).toBe('Not found');
+      },
+    );
+
+    /** Soft-deleted records: the API still answers them, inactive, and the pages say "not found". */
+    const deletedMessages: [string, string][] = [
+      ['gym subscription', en.gymSubscriptions.errors.notFound],
+      ['plan', en.plans.errors.notFound],
+      ['gym', en.gyms.errors.notFound],
+      ['trainer', en.trainers.errors.notFound],
+      ['trainee', en.trainees.errors.notFound],
+    ];
+    const deletedCases = recordCases.flatMap(([name, testCase]) => {
+      const entry = deletedMessages.find(([entity]) =>
+        name.startsWith(`${entity} `),
+      );
+      return entry
+        ? [[name, testCase, entry[1]] as [string, RecordCase, string]]
+        : [];
+    });
+
+    it('covers every page of a soft-deleted record', () => {
+      expect(deletedCases.map(([name]) => name)).toEqual([
+        'plan details',
+        'plan delete',
+        'gym details',
+        'gym edit',
+        'gym delete',
+        'gym subscription details',
+        'gym subscription edit',
+        'gym subscription delete',
+        'trainer details',
+        'trainer edit',
+        'trainer delete',
+        'trainee edit',
+        'trainee delete',
+      ]);
+    });
+
+    it.each(deletedCases)(
+      '%s: a deleted (inactive) record is not found',
+      async (_, testCase, notFoundMessage) => {
+        await open(testCase.url, {
+          ...testCase.otherLoads,
+          [testCase.recordUrl]: { ...testCase.record, isActive: false },
+        });
+
+        expect(page.alert()).toBe(notFoundMessage);
+        expect(page.query('form')).toBeNull();
+        expect(page.queryAll('.form-actions')).toEqual([]);
       },
     );
 
@@ -845,7 +894,7 @@ describe('catalog pages', () => {
     });
   });
 
-  describe('delete and deactivate', () => {
+  describe('delete', () => {
     const deleteCases: [
       string,
       string,
@@ -917,69 +966,6 @@ describe('catalog pages', () => {
         await page.settle();
 
         expect(router.url).toBe(listUrl);
-      },
-    );
-
-    it.each([
-      [
-        'plan',
-        '/plans/p1/delete',
-        { '/api/plans/p1': { ...PLAN, isActive: false } },
-        en.plans.delete.inactive,
-      ],
-      [
-        'gym',
-        '/gyms/g1/delete',
-        { '/api/gym-locations/g1': { ...GYM, isActive: false } },
-        en.gyms.delete.inactive,
-      ],
-      [
-        'gym subscription',
-        '/gym-subscriptions/gs1/delete',
-        {
-          '/api/gym-subscriptions/gs1': {
-            ...GYM_SUBSCRIPTION,
-            isActive: false,
-          },
-        },
-        en.gymSubscriptions.delete.inactive,
-      ],
-    ])(
-      'an inactive %s cannot be deactivated again',
-      async (_, url, loads, inactiveLabel) => {
-        await open(url, loads);
-
-        expect(button(inactiveLabel)!.disabled).toBe(true);
-      },
-    );
-
-    it.each([
-      [
-        'trainer',
-        '/trainers/tr1/delete',
-        { '/api/trainers/tr1': { ...TRAINER, isActive: false } },
-        en.trainers.delete.submit,
-        '/api/trainers/tr1',
-      ],
-      [
-        'trainee',
-        '/trainees/t1/delete',
-        { '/api/trainees/t1': { ...TRAINEE, isActive: false } },
-        en.trainees.delete.submit,
-        '/api/trainees/t1',
-      ],
-    ])(
-      'an inactive %s can still be deactivated again',
-      async (_, url, loads, label, deleteUrl) => {
-        await open(url, loads);
-
-        // CHARACTERIZATION: possibly unintended — unlike plans, gyms and gym cards, these pages don't
-        // disable the button for an already-inactive record, so the DELETE is sent again.
-        // TEST_NOTES.md S15.
-        expect(button(label)!.disabled).toBe(false);
-        button(label)!.click();
-        await page.settle();
-        http.expectOne(deleteUrl).flush({});
       },
     );
   });

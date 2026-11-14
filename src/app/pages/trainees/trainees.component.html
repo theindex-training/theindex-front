@@ -14,10 +14,10 @@
       (valueChange)="searchTerm = $event; applySearch()"
     />
     <app-segmented-control
-      [label]="'common.status' | transloco"
-      [options]="statusOptions"
-      [value]="activeFilter"
-      (valueChange)="activeFilter = $event; loadTrainees()"
+      [label]="'common.accountFilter.label' | transloco"
+      [options]="accountOptions"
+      [value]="accountFilter"
+      (valueChange)="setAccountFilter($event)"
     />
     @if (!loading && !errorMessage && trainees.length) {
       <p
@@ -50,36 +50,34 @@
       </button>
     </app-empty-state>
   } @else if (!trainees.length) {
-    @if (activeFilter === 'all') {
-      <app-empty-state
-        icon="users"
-        [title]="'trainees.list.emptyTitle' | transloco"
-        [message]="'trainees.list.emptyMessage' | transloco"
+    <app-empty-state
+      icon="users"
+      [title]="'trainees.list.emptyTitle' | transloco"
+      [message]="'trainees.list.emptyMessage' | transloco"
+    >
+      <a class="btn btn--primary" routerLink="/trainees/new">{{
+        'trainees.list.new' | transloco
+      }}</a>
+    </app-empty-state>
+  } @else if (!accountTrainees.length) {
+    <app-empty-state
+      icon="users"
+      [title]="
+        (accountFilter === 'withAccount'
+          ? 'trainees.list.noWithAccount'
+          : 'trainees.list.noWithoutAccount'
+        ) | transloco
+      "
+      [message]="'trainees.list.tryOtherFilter' | transloco"
+    >
+      <button
+        class="btn btn--secondary"
+        type="button"
+        (click)="setAccountFilter('all')"
       >
-        <a class="btn btn--primary" routerLink="/trainees/new">{{
-          'trainees.list.new' | transloco
-        }}</a>
-      </app-empty-state>
-    } @else {
-      <app-empty-state
-        icon="users"
-        [title]="
-          (activeFilter === 'active'
-            ? 'trainees.list.noActive'
-            : 'trainees.list.noInactive'
-          ) | transloco
-        "
-        [message]="'trainees.list.tryOtherFilter' | transloco"
-      >
-        <button
-          class="btn btn--secondary"
-          type="button"
-          (click)="activeFilter = 'all'; loadTrainees()"
-        >
-          {{ 'trainees.list.showAll' | transloco }}
-        </button>
-      </app-empty-state>
-    }
+        {{ 'trainees.list.showAll' | transloco }}
+      </button>
+    </app-empty-state>
   } @else if (!filteredTrainees.length) {
     <app-empty-state
       [title]="'trainees.list.noMatchesTitle' | transloco"
@@ -115,7 +113,6 @@
             <th scope="col">{{ 'trainees.fields.phone' | transloco }}</th>
             <th scope="col">{{ 'trainees.fields.gymCard' | transloco }}</th>
             <th scope="col">{{ 'trainees.list.accountColumn' | transloco }}</th>
-            <th scope="col">{{ 'common.status' | transloco }}</th>
             <th scope="col" class="cell-fit">
               <span class="visually-hidden">{{
                 'trainees.list.detailsColumn' | transloco
@@ -162,18 +159,6 @@
                   }}</span>
                 }
               </td>
-              <td>
-                <app-status-dot
-                  [tone]="trainee.isActive ? 'success' : 'neutral'"
-                >
-                  {{
-                    (trainee.isActive
-                      ? 'trainees.status.active'
-                      : 'trainees.status.inactive'
-                    ) | transloco
-                  }}
-                </app-status-dot>
-              </td>
               <td class="cell-fit">
                 <!-- Mouse shortcut only; the name link is the accessible link for the row. -->
                 <a
@@ -203,7 +188,6 @@
             [title]="trainee.name"
             [titleSuffix]="quotedNickname(trainee.nickname)"
             [avatarName]="trainee.name"
-            [dimmed]="!trainee.isActive"
           >
             <span listRowMeta class="num">{{ formatPhone(trainee) }}</span>
             @if (hasLinkedAccount(trainee)) {
@@ -214,10 +198,8 @@
                 >
               </span>
             }
-            @if (trailingChip(trainee); as chip) {
-              <app-chip listRowTrailing [tone]="chip.tone">{{
-                chip.label
-              }}</app-chip>
+            @if (gymCardName(trainee); as gymCard) {
+              <app-chip listRowTrailing tone="accent">{{ gymCard }}</app-chip>
             }
           </app-list-row>
         </li>

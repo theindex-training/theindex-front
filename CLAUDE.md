@@ -123,6 +123,15 @@ public/                   # static assets; brand/ holds the official logo PNGs; 
 - Roles are the strings `ADMIN`, `TRAINER`, `TRAINEE`. The API enforces them; `roleGuard` only gates navigation (trainees get redirected to `/my-profile`).
 - Components subscribe directly, track `loading`/`errorMessage` fields, show `error?.error?.message` from API errors, and call `ChangeDetectorRef.detectChanges()` after async updates. Money arrives as integer cents (`priceCents`), formatted as EUR.
 
+## Deleting trainees, trainers, gyms, gym subscriptions and plans
+In theindex-api, `DELETE` on these only marks the record inactive (a soft delete), so history that points to it (attendance, subscriptions, settlements, schedules) keeps working. The app treats an inactive one as **deleted**: the action is called Delete ("Deleting cannot be undone"), there is no Active/Inactive filter, status column or "Active" checkbox, and nothing offers to bring it back.
+- Lists ask the API for the active ones only (`active=true` for trainees, trainers and plans; no `includeInactive` for gyms and gym subscriptions).
+- Their details, edit, delete and account pages load the record through `rejectDeleted()` and show `<feature>.errors.notFound` for an inactive one (`utils/deleted-record.util.ts`, `recordLoadError`).
+- The Trainees and Trainers lists filter by app account instead (All / With account / Without account, `utils/account-filter.util.ts`, on the page; `common.accountFilter.*`).
+- Other pages may still name a deleted record where history uses it (a trainee's subscriptions, a schedule's trainer, a select that keeps a profile's own inactive gym).
+- Training times are deleted for real (`DELETE` removes the row).
+- Exercises keep their own Active/Inactive status (hidden from new workouts); that is not a delete.
+
 ## Renewals (`/renewals`)
 ADMIN and TRAINER, the menu item right under Dashboard (first in the More sheet on phones). `pages/renewals/` shows `GET /api/subscription-renewals` (`SubscriptionRenewalsService`): active trainees who have had a subscription, in a Punch or Time tab (an `app-segmented-control`), each with a used up/expired section and an active one. The API decides the tab, the sections and the order (theindex-api `subscriptions/subscription-renewals.ts`); the page only formats them. The Dashboard's "without active subscription" report is separate and unchanged.
 
@@ -311,7 +320,7 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
 ```
 - **Breakpoints:** at 768px and up, show the table. Below 768px, show the `list-card` of `app-list-row`s. The global `.responsive-table` / `.responsive-list` classes do the toggling, so list pages usually need no SCSS of their own. The create action is a header button at 1024px and up, and a floating "+" below that, where the tab bar shows.
 - **Data:** keep loading and filtering in the page component; these pieces are presentational only. A segmented filter that maps to an API param keeps calling the existing load method.
-- **Only the controls a page already has:** don't add search or filters while restyling. Plans has a status filter but no search, and Training times has neither.
+- **Only the controls a page already has:** don't add search or filters while restyling. Trainees and Trainers have a search and an app-account filter (All / With account / Without account); Plans, Gyms, Gym subscriptions and Training times have neither.
 - **Rows with their own actions** (delete, an inline link) can't be an `app-list-row`, which is a single link:
   - A link row plus one button: `li.row-with-action` holding the `app-list-row` and an `.icon-btn`. Example: settlements with delete.
   - Anything richer: `li.record` with `.record__main` and `.record__aside`. Examples: attendees and transactions.
@@ -420,9 +429,9 @@ Create, edit, details and delete pages share one structure. They need no page SC
   - Use a `.panel` containing a `<dl class="detail-list">`, with `<div><dt>Label</dt><dd>Value</dd></div>` pairs. Status uses `app-status-dot`.
   - Extra sections inside the panel go in `section.panel-section` with an `h2.panel__title`.
   - Actions sit in `.form-actions`: least important first and primary last.
-  - With only edit and deactivate: Deactivate (`btn--ghost`), then Edit (`btn--primary`).
-  - With an account: Deactivate (`btn--ghost`), Edit (`btn--secondary`), then Manage account (`btn--primary`).
-- **Delete/deactivate pages:**
+  - With only edit and delete: Delete (`btn--ghost`), then Edit (`btn--primary`).
+  - With an account: Delete (`btn--ghost`), Edit (`btn--secondary`), then Manage account (`btn--primary`).
+- **Delete pages:**
   - The panel holds a `detail-list`, a `.notice.notice--warning` explaining the consequence, and a `btn--danger-solid` confirm button.
   - Secondary destructive actions on other pages (e.g. "Deactivate account" next to Save) use the soft `btn--danger`.
 - **Password inputs:**

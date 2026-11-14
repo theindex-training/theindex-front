@@ -11,21 +11,18 @@ import {
   GymLocationsService,
 } from '../../services/gym-locations.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
-import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import {
+  recordLoadError,
+  rejectDeleted,
+} from '../../utils/deleted-record.util';
 
 @Component({
   selector: 'app-gym-delete',
   standalone: true,
-  imports: [
-    UiMessagePipe,
-    TranslocoPipe,
-    CommonModule,
-    PageHeaderComponent,
-    StatusDotComponent,
-  ],
+  imports: [UiMessagePipe, TranslocoPipe, CommonModule, PageHeaderComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './gym-delete.component.html',
 })
@@ -50,21 +47,28 @@ export class GymDeleteComponent implements OnInit {
       return;
     }
 
-    this.gymsService.getById(id).subscribe({
-      next: (gym) => {
-        this.gym = gym;
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-      error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'gyms.errors.load');
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-    });
+    this.gymsService
+      .getById(id)
+      .pipe(rejectDeleted())
+      .subscribe({
+        next: (gym) => {
+          this.gym = gym;
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+        error: (error) => {
+          this.errorMessage = recordLoadError(
+            error,
+            'gyms.errors.notFound',
+            'gyms.errors.load',
+          );
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+      });
   }
 
-  confirmDeactivate(): void {
+  confirmDelete(): void {
     if (!this.gym) {
       return;
     }

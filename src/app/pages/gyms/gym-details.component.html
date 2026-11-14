@@ -22,18 +22,6 @@
           <dt>{{ 'gyms.fields.address' | transloco }}</dt>
           <dd>{{ formatAddress() }}</dd>
         </div>
-        <div>
-          <dt>{{ 'common.status' | transloco }}</dt>
-          <dd>
-            <app-status-dot [tone]="gym.isActive ? 'success' : 'neutral'">
-              {{
-                gym.isActive
-                  ? ('gyms.status.active' | transloco)
-                  : ('gyms.status.inactive' | transloco)
-              }}
-            </app-status-dot>
-          </dd>
-        </div>
       </dl>
 
       @if (isAdmin) {
@@ -55,7 +43,7 @@
 
       <div class="form-actions">
         <a class="btn btn--ghost" [routerLink]="['/gyms', gym.id, 'delete']">{{
-          'gyms.details.deactivate' | transloco
+          'gyms.details.delete' | transloco
         }}</a>
         <a class="btn btn--primary" [routerLink]="['/gyms', gym.id, 'edit']">{{
           'gyms.details.edit' | transloco

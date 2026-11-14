@@ -7,15 +7,10 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
-import {
-  SegmentedControlComponent,
-  SegmentedOption,
-} from '../../components/segmented-control/segmented-control.component';
+import { SegmentedControlComponent } from '../../components/segmented-control/segmented-control.component';
 import { SearchFieldComponent } from '../../components/search-field/search-field.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
-import { ChipComponent } from '../../components/chip/chip.component';
-import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import { ListRowComponent } from '../../components/list-row/list-row.component';
 import { IconComponent } from '../../components/icon/icon.component';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
@@ -27,6 +22,11 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 import { LanguageService } from '../../i18n/language.service';
+import {
+  ACCOUNT_FILTER_OPTIONS,
+  AccountFilter,
+  matchesAccountFilter,
+} from '../../utils/account-filter.util';
 
 @Component({
   selector: 'app-trainers',
@@ -40,8 +40,6 @@ import { LanguageService } from '../../i18n/language.service';
     SearchFieldComponent,
     SkeletonListComponent,
     EmptyStateComponent,
-    ChipComponent,
-    StatusDotComponent,
     ListRowComponent,
     IconComponent,
     AvatarComponent,
@@ -53,12 +51,10 @@ export class TrainersComponent implements OnInit {
   private readonly i18n = inject(LanguageService);
   trainers: TrainerProfile[] = [];
   filteredTrainers: TrainerProfile[] = [];
-  activeFilter: 'all' | 'active' | 'inactive' = 'all';
-  readonly statusOptions: SegmentedOption<'all' | 'active' | 'inactive'>[] = [
-    { value: 'all', label: 'common.all' },
-    { value: 'active', label: 'common.active' },
-    { value: 'inactive', label: 'common.inactive' },
-  ];
+  /** Trainers left by the account filter, before the search. */
+  accountTrainers: TrainerProfile[] = [];
+  accountFilter: AccountFilter = 'all';
+  readonly accountOptions = ACCOUNT_FILTER_OPTIONS;
   searchTerm = '';
   loading = true;
   errorMessage: UiMessage | null = null;
@@ -76,14 +72,9 @@ export class TrainersComponent implements OnInit {
     this.loading = true;
     this.errorMessage = null;
 
-    const active =
-      this.activeFilter === 'all'
-        ? undefined
-        : this.activeFilter === 'active'
-          ? true
-          : false;
-
-    this.trainersService.list(active).subscribe({
+    // Deleting a trainer only deactivates it, so the list asks for the active ones: the others
+    // are gone as far as the app is concerned.
+    this.trainersService.list(true).subscribe({
       next: (trainers) => {
         this.trainers = trainers;
         this.applySearch();
@@ -101,15 +92,24 @@ export class TrainersComponent implements OnInit {
     });
   }
 
+  setAccountFilter(filter: AccountFilter): void {
+    this.accountFilter = filter;
+    this.applySearch();
+  }
+
+  /** Applies the account filter, then the search. */
   applySearch(): void {
+    this.accountTrainers = this.trainers.filter((trainer) =>
+      matchesAccountFilter(trainer, this.accountFilter),
+    );
     const query = this.searchTerm.trim().toLowerCase();
 
     if (!query) {
-      this.filteredTrainers = [...this.trainers];
+      this.filteredTrainers = [...this.accountTrainers];
       return;
     }
 
-    this.filteredTrainers = this.trainers.filter((trainer) => {
+    this.filteredTrainers = this.accountTrainers.filter((trainer) => {
       const name = trainer.name.toLowerCase();
       const nickname = (trainer.nickname || '').toLowerCase();
       return name.includes(query) || nickname.includes(query);

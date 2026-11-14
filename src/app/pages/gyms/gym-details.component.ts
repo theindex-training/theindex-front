@@ -14,10 +14,13 @@ import {
 import { AuthService } from '../../services/auth.service';
 import { displayValue } from '../../utils/display.util';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
-import { StatusDotComponent } from '../../components/status-dot/status-dot.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
-import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import { i18nMessage, UiMessage } from '../../i18n/ui-message';
+import {
+  recordLoadError,
+  rejectDeleted,
+} from '../../utils/deleted-record.util';
 
 @Component({
   selector: 'app-gym-details',
@@ -28,7 +31,6 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
     CommonModule,
     RouterLink,
     PageHeaderComponent,
-    StatusDotComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './gym-details.component.html',
@@ -57,18 +59,25 @@ export class GymDetailsComponent implements OnInit {
       return;
     }
 
-    this.gymsService.getById(id).subscribe({
-      next: (gym) => {
-        this.gym = gym;
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-      error: (error) => {
-        this.errorMessage = apiErrorMessage(error, 'gyms.errors.load');
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-    });
+    this.gymsService
+      .getById(id)
+      .pipe(rejectDeleted())
+      .subscribe({
+        next: (gym) => {
+          this.gym = gym;
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+        error: (error) => {
+          this.errorMessage = recordLoadError(
+            error,
+            'gyms.errors.notFound',
+            'gyms.errors.load',
+          );
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+      });
   }
 
   formatAddress(): string {

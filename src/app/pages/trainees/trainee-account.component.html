@@ -34,18 +34,6 @@
           <dt>{{ 'trainees.fields.phone' | transloco }}</dt>
           <dd>{{ formatPhone() }}</dd>
         </div>
-        <div>
-          <dt>{{ 'trainees.fields.profileStatus' | transloco }}</dt>
-          <dd>
-            <app-status-dot [tone]="trainee.isActive ? 'success' : 'neutral'">
-              {{
-                trainee.isActive
-                  ? ('trainees.status.active' | transloco)
-                  : ('trainees.status.inactive' | transloco)
-              }}
-            </app-status-dot>
-          </dd>
-        </div>
       </dl>
 
       <form

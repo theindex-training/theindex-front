@@ -69,7 +69,6 @@ export class PlanCreateComponent implements OnInit {
     price: FormControl<number>;
     credits: FormControl<number | null>;
     durationDays: FormControl<number | null>;
-    isActive: FormControl<boolean>;
   }>;
 
   submitting = false;
@@ -92,7 +91,6 @@ export class PlanCreateComponent implements OnInit {
       ]),
       credits: this.formBuilder.control<number | null>(null),
       durationDays: this.formBuilder.control<number | null>(null),
-      isActive: this.formBuilder.nonNullable.control(true),
     });
   }
 
@@ -114,7 +112,8 @@ export class PlanCreateComponent implements OnInit {
       type: raw.type,
       title: raw.title.trim(),
       priceCents: this.toCents(raw.price),
-      isActive: raw.isActive,
+      // A plan is created active; deleting it is the only way to make it inactive.
+      isActive: true,
     };
 
     if (raw.type === 'PUNCH') {

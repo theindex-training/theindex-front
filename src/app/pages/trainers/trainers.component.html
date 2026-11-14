@@ -17,10 +17,10 @@
       (valueChange)="searchTerm = $event; applySearch()"
     />
     <app-segmented-control
-      [label]="'common.status' | transloco"
-      [options]="statusOptions"
-      [value]="activeFilter"
-      (valueChange)="activeFilter = $event; loadTrainers()"
+      [label]="'common.accountFilter.label' | transloco"
+      [options]="accountOptions"
+      [value]="accountFilter"
+      (valueChange)="setAccountFilter($event)"
     />
     @if (!loading && !errorMessage && trainers.length) {
       <p
@@ -53,35 +53,34 @@
       </button>
     </app-empty-state>
   } @else if (!trainers.length) {
-    @if (activeFilter === 'all') {
-      <app-empty-state
-        icon="trainer"
-        [title]="'trainers.list.emptyTitle' | transloco"
-        [message]="'trainers.list.emptyMessage' | transloco"
+    <app-empty-state
+      icon="trainer"
+      [title]="'trainers.list.emptyTitle' | transloco"
+      [message]="'trainers.list.emptyMessage' | transloco"
+    >
+      <a class="btn btn--primary" routerLink="/trainers/new">{{
+        'trainers.list.new' | transloco
+      }}</a>
+    </app-empty-state>
+  } @else if (!accountTrainers.length) {
+    <app-empty-state
+      icon="trainer"
+      [title]="
+        (accountFilter === 'withAccount'
+          ? 'trainers.list.noWithAccount'
+          : 'trainers.list.noWithoutAccount'
+        ) | transloco
+      "
+      [message]="'trainers.list.tryOtherFilter' | transloco"
+    >
+      <button
+        class="btn btn--secondary"
+        type="button"
+        (click)="setAccountFilter('all')"
       >
-        <a class="btn btn--primary" routerLink="/trainers/new">{{
-          'trainers.list.new' | transloco
-        }}</a>
-      </app-empty-state>
-    } @else {
-      <app-empty-state
-        icon="trainer"
-        [title]="
-          activeFilter === 'active'
-            ? ('trainers.list.noActive' | transloco)
-            : ('trainers.list.noInactive' | transloco)
-        "
-        [message]="'trainers.list.tryOtherFilter' | transloco"
-      >
-        <button
-          class="btn btn--secondary"
-          type="button"
-          (click)="activeFilter = 'all'; loadTrainers()"
-        >
-          {{ 'trainers.list.showAll' | transloco }}
-        </button>
-      </app-empty-state>
-    }
+        {{ 'trainers.list.showAll' | transloco }}
+      </button>
+    </app-empty-state>
   } @else if (!filteredTrainers.length) {
     <app-empty-state
       [title]="'trainers.list.noMatchesTitle' | transloco"
@@ -114,7 +113,6 @@
           <tr>
             <th scope="col">{{ 'trainers.fields.trainer' | transloco }}</th>
             <th scope="col">{{ 'trainers.list.accountColumn' | transloco }}</th>
-            <th scope="col">{{ 'common.status' | transloco }}</th>
             <th scope="col" class="cell-fit">
               <span class="visually-hidden">{{
                 'trainers.list.detailsColumn' | transloco
@@ -151,17 +149,6 @@
                   }}</span>
                 }
               </td>
-              <td>
-                <app-status-dot
-                  [tone]="trainer.isActive ? 'success' : 'neutral'"
-                >
-                  {{
-                    trainer.isActive
-                      ? ('trainers.status.active' | transloco)
-                      : ('trainers.status.inactive' | transloco)
-                  }}
-                </app-status-dot>
-              </td>
               <td class="cell-fit">
                 <a
                   class="row-chevron"
@@ -189,7 +176,6 @@
             [title]="trainer.name"
             [titleSuffix]="quotedNickname(trainer.nickname)"
             [avatarName]="trainer.name"
-            [dimmed]="!trainer.isActive"
           >
             @if (hasLinkedAccount(trainer)) {
               <span listRowMeta class="linked-mark">
@@ -198,11 +184,6 @@
                   {{ 'trainers.list.appMarkHidden' | transloco }}</span
                 >
               </span>
-            }
-            @if (!trainer.isActive) {
-              <app-chip listRowTrailing>{{
-                'trainers.status.inactive' | transloco
-              }}</app-chip>
             }
           </app-list-row>
         </li>

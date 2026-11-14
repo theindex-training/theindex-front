@@ -46,12 +46,12 @@
         <button
           class="btn btn--danger-solid"
           type="button"
-          (click)="confirmDeactivate()"
+          (click)="confirmDelete()"
           [disabled]="submitting"
         >
           {{
             submitting
-              ? ('common.deactivating' | transloco)
+              ? ('common.deleting' | transloco)
               : ('trainees.delete.submit' | transloco)
           }}
         </button>
