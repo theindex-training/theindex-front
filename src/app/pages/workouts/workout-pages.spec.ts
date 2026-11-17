@@ -92,6 +92,7 @@ describe('workouts area pages', () => {
   afterEach(() => {
     http.verify();
     vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   async function open(url: string): Promise<void> {
@@ -182,6 +183,11 @@ describe('workouts area pages', () => {
     });
 
     it('moves a week at a time and keeps the week in the address', async () => {
+      // A week before these, so none of them is "this week" (which drops ?week=).
+      vi.useFakeTimers({
+        toFake: ['Date'],
+        now: new Date('2026-10-01T10:00:00Z'),
+      });
       await open('/workouts?week=2026-11-09');
       http.expectOne('/api/workouts?from=2026-11-09&to=2026-11-15').flush([]);
       await page.settle();
