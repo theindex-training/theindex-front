@@ -98,14 +98,15 @@ export const routes: Routes = [
         data: { roles: ['TRAINEE'] },
       },
       {
+        // The booking confirmation: the training's page, saying it is booked.
         path: 'schedule/:id/booked',
         title: 'traineeBooked.title',
         loadComponent: () =>
-          import('./pages/trainee-schedule/trainee-booked.component').then(
-            (m) => m.TraineeBookedComponent,
+          import('./pages/trainee-schedule/trainee-training.component').then(
+            (m) => m.TraineeTrainingComponent,
           ),
         canActivate: [roleGuard],
-        data: { roles: ['TRAINEE'] },
+        data: { roles: ['TRAINEE'], confirmation: true },
       },
       {
         path: 'stats',

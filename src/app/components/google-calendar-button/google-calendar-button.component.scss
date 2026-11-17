@@ -1,0 +1,36 @@
+// Google's button: its surface, a 1px grey outline, a pill, Roboto Medium-like mixed case (no
+// uppercase or tracking), the mark at 20px. Taller than Google's 40px to keep the touch target.
+:host {
+  display: inline-flex;
+}
+
+.google-calendar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-4) 0 var(--space-3);
+  border: 1px solid var(--google-button-border);
+  border-radius: var(--radius-pill);
+  background: var(--google-button-bg);
+  color: var(--google-button-text);
+  font-family: Roboto, Arial, var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.0125em;
+  line-height: 1.25;
+  text-decoration: none;
+  transition: background-color var(--transition-fast);
+}
+
+.google-calendar-button:hover {
+  background: var(--google-button-hover);
+}
+
+.google-calendar-button__mark {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}

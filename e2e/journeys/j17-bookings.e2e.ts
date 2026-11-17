@@ -185,15 +185,29 @@ test.describe('J17 bookings', () => {
         }),
       ).toBeVisible();
       await expect(page.getByText(t('traineeBooked.message'))).toBeVisible();
-      await expect(page.getByTestId('trainee-booked')).toContainText(
-        'ul. Ranni list 13, Plovdiv',
+      const panel = page.getByTestId('trainee-training-booking');
+      await expect(panel).toContainText('ul. Ranni list 13, Plovdiv');
+      await expect(panel).toContainText('Velcho Sokolov');
+      await expect(panel).toContainText(
+        t('schedules.days.booked', { count: 7 }),
       );
-      await expect(page.getByTestId('trainee-booked')).toContainText(
-        'Velcho Sokolov',
-      );
+      // Cancel is right here; nothing leads to the training's page, which shows the same.
+      await expect(
+        panel.getByRole('button', {
+          name: t('traineeSchedule.cancelFor', {
+            training: 'Wednesday, 11 November 18:00 – 19:00',
+          }),
+        }),
+      ).toBeVisible();
+      expect(
+        await page
+          .getByRole('main')
+          .getByRole('link')
+          .evaluateAll((links) => links.map((a) => a.getAttribute('href'))),
+      ).not.toContain('/schedule/t-wed');
       await expect(page.getByTestId('training-workout-summary')).toBeVisible();
       const calendar = page.getByRole('link', {
-        name: t('traineeBooked.addToCalendar'),
+        name: t('googleCalendar.add'),
       });
       await expect(calendar).toHaveAttribute('target', '_blank');
       const event = new URL((await calendar.getAttribute('href'))!);
@@ -202,12 +216,12 @@ test.describe('J17 bookings', () => {
       );
       expect(Object.fromEntries(event.searchParams)).toEqual({
         action: 'TEMPLATE',
-        text: t('traineeBooked.calendar.title'),
+        text: t('googleCalendar.event.title'),
         dates: '20261111T160000Z/20261111T170000Z',
         location: 'ul. Ranni list 13, Plovdiv',
         details: [
-          t('traineeBooked.calendar.trainer', { name: 'Velcho Sokolov' }),
-          t('traineeBooked.calendar.workout', { title: 'Helen' }),
+          t('googleCalendar.event.trainer', { name: 'Velcho Sokolov' }),
+          t('googleCalendar.event.workout', { title: 'Helen' }),
           new URL('/schedule/t-wed', page.url()).href,
         ].join('\n'),
       });
@@ -291,7 +305,7 @@ test.describe('J17 bookings', () => {
         page.getByText(t('traineeTraining.noWorkoutTitle')),
       ).toBeVisible();
       const href = await page
-        .getByRole('link', { name: t('traineeBooked.addToCalendar') })
+        .getByRole('link', { name: t('googleCalendar.add') })
         .getAttribute('href');
       expect(new URL(href!).searchParams.get('location')).toBe('Center');
       expect(new URL(href!).searchParams.get('dates')).toBe(

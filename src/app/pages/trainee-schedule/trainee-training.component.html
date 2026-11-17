@@ -1,6 +1,6 @@
 <section class="page-stack page-narrow">
   <app-page-header
-    [title]="training?.workout?.title || ('traineeTraining.title' | transloco)"
+    [title]="title(training)"
     [subtitle]="training ? describe(training) : ''"
     [back]="{
       label: 'traineeTraining.back' | transloco,
@@ -23,6 +23,27 @@
       </button>
     </app-empty-state>
   } @else if (training) {
+    @if (confirmation && !actionDone) {
+      @if (training.bookedByMe) {
+        <p
+          class="notice notice--success booked-notice"
+          role="status"
+          data-testid="trainee-booked"
+        >
+          <app-icon name="check" />
+          <span>{{ 'traineeBooked.message' | transloco }}</span>
+        </p>
+      } @else {
+        <!-- Opened again after the booking was cancelled elsewhere (or never made). -->
+        <p
+          class="notice notice--warning"
+          role="status"
+          data-testid="trainee-booked-missing"
+        >
+          {{ 'traineeBooked.notBookedMessage' | transloco }}
+        </p>
+      }
+    }
     <section
       class="panel"
       aria-labelledby="training-booking-title"
@@ -42,7 +63,14 @@
         </div>
         <div>
           <dt>{{ 'traineeTraining.gym' | transloco }}</dt>
-          <dd>{{ training.gym.name }}</dd>
+          <dd>
+            {{ training.gym.name }}
+            @if (training.gym.address) {
+              <span class="gym-address text-muted">{{
+                training.gym.address
+              }}</span>
+            }
+          </dd>
         </div>
         <div>
           <dt>{{ 'traineeTraining.trainer' | transloco }}</dt>
@@ -89,6 +117,11 @@
           {{ 'traineeSchedule.rules' | transloco }}
         </p>
       }
+      @if (training.bookedByMe && !isPast(training)) {
+        <p class="text-muted calendar-hint">
+          {{ 'googleCalendar.hint' | transloco }}
+        </p>
+      }
       @if (training.canBook || training.canCancel || !isPast(training)) {
         <div class="form-actions">
           @if (training.canBook) {
@@ -107,31 +140,38 @@
                   | transloco
               }}
             </button>
-          } @else if (training.canCancel) {
-            <button
-              class="btn btn--danger"
-              type="button"
-              [disabled]="busy"
-              [attr.aria-label]="
-                'traineeSchedule.cancelFor'
-                  | transloco: { training: describe(training) }
-              "
-              (click)="cancel()"
-            >
-              {{
-                (busy ? 'traineeSchedule.cancelling' : 'traineeSchedule.cancel')
-                  | transloco
-              }}
-            </button>
-          } @else if (!isPast(training)) {
-            <p class="text-muted closed">
-              {{
-                (training.bookedByMe
-                  ? 'traineeSchedule.cancelClosed'
-                  : 'traineeSchedule.closed'
-                ) | transloco
-              }}
-            </p>
+          } @else {
+            @if (training.canCancel) {
+              <button
+                class="btn btn--danger"
+                type="button"
+                [disabled]="busy"
+                [attr.aria-label]="
+                  'traineeSchedule.cancelFor'
+                    | transloco: { training: describe(training) }
+                "
+                (click)="cancel()"
+              >
+                {{
+                  (busy
+                    ? 'traineeSchedule.cancelling'
+                    : 'traineeSchedule.cancel'
+                  ) | transloco
+                }}
+              </button>
+            } @else if (!isPast(training)) {
+              <p class="text-muted closed">
+                {{
+                  (training.bookedByMe
+                    ? 'traineeSchedule.cancelClosed'
+                    : 'traineeSchedule.closed'
+                  ) | transloco
+                }}
+              </p>
+            }
+            @if (training.bookedByMe && !isPast(training)) {
+              <app-google-calendar-button [href]="calendarUrl(training)" />
+            }
           }
         </div>
       }

@@ -6,13 +6,17 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { firstValueFrom } from 'rxjs';
 import en from '../../../../public/i18n/en.json';
+import { LanguageService } from '../../i18n/language.service';
 import { PageDriver, apiError, driver } from '../../../testing/dom';
 import { signInAs } from '../../../testing/jwt';
 import { TraineeTrainingComponent } from './trainee-training.component';
 
 const texts = en.traineeTraining;
 const schedule = en.traineeSchedule;
+const booked = en.traineeBooked;
+const calendar = en.googleCalendar;
 
 const WORKOUT = {
   title: 'Fran',
@@ -72,6 +76,11 @@ describe('TraineeTrainingComponent', () => {
         provideHttpClientTesting(),
         provideRouter([
           { path: 'schedule/:id', component: TraineeTrainingComponent },
+          {
+            path: 'schedule/:id/booked',
+            component: TraineeTrainingComponent,
+            data: { confirmation: true },
+          },
           { path: '**', children: [] },
         ]),
       ],
@@ -86,9 +95,9 @@ describe('TraineeTrainingComponent', () => {
     vi.useRealTimers();
   });
 
-  async function open(training: object = TRAINING) {
+  async function open(training: object = TRAINING, url = '/schedule/t-fri') {
     const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/schedule/t-fri');
+    await harness.navigateByUrl(url);
     page = driver(
       () => harness.routeNativeElement!,
       () => harness.fixture.whenStable(),
@@ -115,6 +124,18 @@ describe('TraineeTrainingComponent', () => {
     page.query<HTMLButtonElement>(
       '[data-testid="trainee-training-booking"] .form-actions button',
     );
+  const calendarLink = () =>
+    page.query<HTMLAnchorElement>('[data-testid="google-calendar-button"]');
+  const calendarEvent = () =>
+    Object.fromEntries(new URL(calendarLink()!.href).searchParams);
+  const trainingPage = () => new URL('/schedule/t-fri', document.baseURI).href;
+  const BOOKED = {
+    ...TRAINING,
+    bookedCount: 4,
+    bookedByMe: true,
+    canBook: false,
+    canCancel: true,
+  };
 
   it('shows when and where, the bookings and the whole workout', async () => {
     await open();
@@ -201,6 +222,9 @@ describe('TraineeTrainingComponent', () => {
     await page.settle();
 
     expect(router.url).toBe('/schedule/t-fri/booked');
+    http.expectOne('/api/bookings/trainings/t-fri').flush(BOOKED);
+    await page.settle();
+    expect(page.query('h1')!.textContent.trim()).toBe(booked.title);
   });
 
   it('cancels a booking once confirmed', async () => {
@@ -314,5 +338,170 @@ describe('TraineeTrainingComponent', () => {
 
     expect(page.alert()).toContain('Training not found');
     expect(router.url).toBe('/schedule/t-fri');
+  });
+
+  describe('Add to Google Calendar', () => {
+    it('is offered once booked, with the time, the address and the trainer', async () => {
+      await open({
+        ...BOOKED,
+        gym: { ...TRAINING.gym, address: 'ul. Ranni list 13, Plovdiv' },
+      });
+
+      const link = calendarLink()!;
+      expect(link.textContent.replace(/\s+/g, ' ').trim()).toBe(
+        `${calendar.add} ${calendar.opensInNewTab}`,
+      );
+      expect(link.getAttribute('target')).toBe('_blank');
+      expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+      expect(link.href).toMatch(
+        /^https:\/\/calendar\.google\.com\/calendar\/render\?action=TEMPLATE&/,
+      );
+      expect(calendarEvent()).toEqual({
+        action: 'TEMPLATE',
+        text: 'CrossFit training',
+        dates: '20261113T160000Z/20261113T170000Z',
+        location: 'ul. Ranni list 13, Plovdiv',
+        details: `Group instructor: Velcho Sokolov\nWorkout: Fran\n${trainingPage()}`,
+      });
+      expect(page.text()).toContain(calendar.hint);
+      expect(details()[2]).toBe(
+        `${texts.gym}: Center ul. Ranni list 13, Plovdiv`,
+      );
+    });
+
+    it('names the gym when it has no address, and no workout before it is out', async () => {
+      await open({
+        ...BOOKED,
+        workout: null,
+        workoutReleasesAt: '2026-11-13T18:00:00Z',
+      });
+
+      expect(calendarEvent()).toMatchObject({
+        location: 'Center',
+        details: `Group instructor: Velcho Sokolov\n${trainingPage()}`,
+      });
+    });
+
+    it('is written in the language the page is shown in', async () => {
+      await open(BOOKED);
+      await firstValueFrom(TestBed.inject(LanguageService).use('bg'));
+      await page.settle();
+
+      expect(calendarEvent()).toMatchObject({
+        text: 'CrossFit тренировка',
+        details: `Групов инструктор: Velcho Sokolov\nТренировка на деня: Fran\n${trainingPage()}`,
+      });
+    });
+
+    it('is not offered before booking', async () => {
+      await open();
+      expect(calendarLink()).toBeNull();
+      expect(page.text()).not.toContain(calendar.hint);
+    });
+
+    it('is not offered for a booked training that has started', async () => {
+      await open({
+        ...BOOKED,
+        date: '2026-11-12',
+        startsAt: '2026-11-12T16:00:00Z',
+        canCancel: false,
+      });
+      expect(calendarLink()).toBeNull();
+    });
+
+    it('stays next to "Too late to cancel"', async () => {
+      await open({ ...BOOKED, canCancel: false });
+
+      expect(actionButton()).toBeNull();
+      expect(page.text()).toContain(schedule.cancelClosed);
+      expect(calendarLink()).not.toBeNull();
+    });
+  });
+
+  describe('the booking confirmation (/schedule/:id/booked)', () => {
+    it('says the trainee is booked, with every detail of the training and no link to itself', async () => {
+      await open(
+        {
+          ...BOOKED,
+          gym: { ...TRAINING.gym, address: 'ul. Ranni list 13, Plovdiv' },
+        },
+        '/schedule/t-fri/booked',
+      );
+
+      expect(page.query('h1')!.textContent.trim()).toBe(booked.title);
+      expect(page.text()).toContain('Friday, 13 November 18:00 – 19:00');
+      expect(
+        page.query('[data-testid="trainee-booked"]')!.textContent.trim(),
+      ).toBe(booked.message);
+      expect(details()).toEqual([
+        `${texts.day}: Friday, 13 November`,
+        `${texts.time}: 18:00 – 19:00`,
+        `${texts.gym}: Center ul. Ranni list 13, Plovdiv`,
+        `${texts.trainer}: Velcho Sokolov`,
+        `${texts.bookings}: 4 booked`,
+        `${texts.yourBooking}: ${schedule.booked}`,
+      ]);
+      expect(actionButton()!.textContent.trim()).toBe(schedule.cancel);
+      expect(calendarLink()).not.toBeNull();
+      expect(page.queryAll('[data-testid^="training-exercise-"]')).toHaveLength(
+        2,
+      );
+      // Back to the week; nothing leads to the training's page, which shows the same.
+      const links = page
+        .queryAll<HTMLAnchorElement>('a[href]')
+        .map((a) => a.getAttribute('href'))
+        .filter((href) => href!.startsWith('/'));
+      expect(links).toEqual(['/schedule?gym=gym-c&week=2026-11-09']);
+    });
+
+    it('cancelled there, it shows the training as not booked, and books it again in place', async () => {
+      await open(BOOKED, '/schedule/t-fri/booked');
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      actionButton()!.click();
+      await page.settle();
+      http.expectOne('/api/bookings/t-fri').flush(answer({ bookedCount: 3 }));
+      await page.settle();
+
+      expect(page.query('h1')!.textContent.trim()).toBe('Fran');
+      expect(page.query('[data-testid="trainee-booked"]')).toBeNull();
+      expect(page.text()).toContain(texts.cancelledNotice);
+      expect(calendarLink()).toBeNull();
+      expect(actionButton()!.textContent.trim()).toBe(schedule.book);
+
+      actionButton()!.click();
+      await page.settle();
+      http.expectOne('/api/bookings').flush(
+        answer({
+          bookedCount: 4,
+          bookedByMe: true,
+          canBook: false,
+          canCancel: true,
+        }),
+      );
+      await page.settle();
+
+      expect(router.url).toBe('/schedule/t-fri/booked');
+      expect(page.query('h1')!.textContent.trim()).toBe(booked.title);
+      expect(
+        page.query('[data-testid="trainee-booked"]')!.textContent.trim(),
+      ).toBe(booked.message);
+      expect(page.text()).not.toContain(texts.cancelledNotice);
+      expect(calendarLink()).not.toBeNull();
+    });
+
+    it("says so when the trainee isn't booked (any more), with Book", async () => {
+      await open(TRAINING, '/schedule/t-fri/booked');
+
+      expect(page.query('h1')!.textContent.trim()).toBe('Fran');
+      expect(
+        page
+          .query('[data-testid="trainee-booked-missing"]')!
+          .textContent.trim(),
+      ).toBe(booked.notBookedMessage);
+      expect(page.query('[data-testid="trainee-booked"]')).toBeNull();
+      expect(calendarLink()).toBeNull();
+      expect(actionButton()!.textContent.trim()).toBe(schedule.book);
+    });
   });
 });

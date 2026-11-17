@@ -1626,14 +1626,13 @@
   "traineeBooked": {
     "title": "You're booked",
     "message": "Your place is saved. See you at the training!",
-    "detailsTitle": "Your training",
-    "addToCalendar": "Add to Google Calendar",
+    "notBookedMessage": "You aren't booked for this training."
+  },
+  "googleCalendar": {
+    "add": "Add to Google Calendar",
     "opensInNewTab": "(opens in a new tab)",
-    "calendarHint": "Google Calendar opens with the training filled in; save it there. Your calendar's usual reminders apply.",
-    "openTraining": "Training details",
-    "notBookedTitle": "Not booked",
-    "notBookedMessage": "You aren't booked for this training. Open it to book a place.",
-    "calendar": {
+    "hint": "Google Calendar opens with the training filled in; save it there. Your calendar's usual reminders apply.",
+    "event": {
       "title": "CrossFit training",
       "trainer": "Group instructor: {name}",
       "workout": "Workout: {title}"
