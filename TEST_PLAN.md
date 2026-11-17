@@ -142,6 +142,7 @@ The review below turned up a few traps. Every spec should follow these.
 
 **`pages/trainees/trainee-details.component.ts`, selling a subscription** (the spec covers the whole page; this part first)
 - [x] Plans load from `GET /api/plans?active=true`. The first plan is preselected and **Paid** is prefilled with its price in euros (`4550` cents → `45.5`).
+- [x] The preselected plan is the plan of the trainee's latest active subscription, else their latest subscription of any status (pure `default-plan.ts`, unit-tested), skipping plans no longer offered; the first plan without one. Applied once, whichever of plans and subscriptions answers first, and not over a plan or amount changed by hand.
 - [x] Changing the plan re-fills **Paid** from that plan's price, overwriting a manual edit.
 - [x] Paid validation:
   - blank fails required;
@@ -657,7 +658,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
    - `GET /api/attendance/trainees/<id>`
    - `GET /api/plans?active=true`
 5. Sell a subscription:
-   - the first plan is preselected and Paid shows its price;
+   - the first plan is preselected (a new trainee has no subscriptions) and Paid shows its price;
    - switch the plan, and Paid follows;
    - set Paid to 40.5;
    - submit → `POST /api/trainees/<id>/subscriptions {planId, startsAt:'2026-11-02', paidCents:4050}`;
