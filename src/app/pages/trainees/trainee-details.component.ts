@@ -37,6 +37,7 @@ import {
   AccountProvisioningService,
   ProvisionedAccount,
 } from '../../services/account-provisioning.service';
+import { defaultPlanId } from './default-plan';
 
 type SubscriptionFilter = 'ACTIVE' | 'EXHAUSTED' | 'ALL';
 
@@ -120,6 +121,10 @@ export class TraineeDetailsComponent implements OnInit {
   trainingsLoading = true;
   deletingSubscriptionId: string | null = null;
   canDeleteSubscriptions = false;
+  /** The first subscriptions request has answered (or failed). */
+  private subscriptionsLoaded = false;
+  /** `preselectTraineePlan` has run (it runs once per page). */
+  private planPreselected = false;
 
   readonly form: FormGroup<{
     planId: FormControl<string>;
@@ -189,6 +194,8 @@ export class TraineeDetailsComponent implements OnInit {
 
     this.submitting = true;
     this.subscriptionErrorMessage = null;
+    // The plan being sold stays selected: no late preselection may replace it.
+    this.planPreselected = true;
 
     this.subscriptionsService
       .createForTrainee(this.trainee.id, payload)
@@ -335,6 +342,8 @@ export class TraineeDetailsComponent implements OnInit {
       next: (subscriptions) => {
         this.subscriptions = subscriptions;
         this.subscriptionsLoading = false;
+        this.subscriptionsLoaded = true;
+        this.preselectTraineePlan();
         this.changeDetector.detectChanges();
       },
       error: (error) => {
@@ -343,6 +352,7 @@ export class TraineeDetailsComponent implements OnInit {
           'trainees.details.loadSubscriptionsError',
         );
         this.subscriptionsLoading = false;
+        this.subscriptionsLoaded = true;
         this.changeDetector.detectChanges();
       },
     });
@@ -399,6 +409,36 @@ export class TraineeDetailsComponent implements OnInit {
       this.plans.find((entry) => entry.id === currentPlanId) ?? this.plans[0];
     this.form.controls.planId.setValue(plan.id);
     this.form.controls.paid.setValue(this.toEuros(plan.priceCents));
+    this.preselectTraineePlan();
+  }
+
+  /**
+   * Once both the plans and the trainee's subscriptions are in, preselects the
+   * plan of their latest subscription (`defaultPlanId`; the first plan when
+   * they have none). Only once per page, and not after the plan or the paid
+   * amount was changed by hand or a sale was started.
+   */
+  private preselectTraineePlan(): void {
+    if (
+      this.planPreselected ||
+      !this.subscriptionsLoaded ||
+      !this.plans.length
+    ) {
+      return;
+    }
+
+    this.planPreselected = true;
+    const { planId, paid } = this.form.controls;
+    if (planId.dirty || paid.dirty) {
+      return;
+    }
+
+    const preferredId = defaultPlanId(this.plans, this.subscriptions);
+    const plan = this.plans.find((entry) => entry.id === preferredId);
+    if (plan && plan.id !== planId.value) {
+      planId.setValue(plan.id);
+      paid.setValue(this.toEuros(plan.priceCents));
+    }
   }
 
   private resetSubscriptionDefaults(planId: string): void {

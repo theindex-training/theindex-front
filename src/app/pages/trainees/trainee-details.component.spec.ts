@@ -246,11 +246,153 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     expect(page.text()).toContain('ivan@gym.test');
   });
 
-  it('preselects the first plan and prefills its price in euros', async () => {
+  it('preselects the first plan for a trainee without subscriptions and prefills its price in euros', async () => {
     await open();
 
     expect(value('#buy-plan')).toBe('p1');
     expect(value('#buy-paid')).toBe('45.5');
+  });
+
+  it("preselects the plan of the trainee's latest active subscription, with its price", async () => {
+    await open({
+      subscriptions: [
+        subscription({
+          id: 's3',
+          planId: 'p1',
+          status: 'EXHAUSTED',
+          startsAt: '2026-10-20',
+        }),
+        subscription({
+          id: 's2',
+          planId: 'p2',
+          type: 'TIME',
+          startsAt: '2026-10-05',
+        }),
+        subscription({ id: 's1', planId: 'p1', startsAt: '2026-09-01' }),
+      ],
+    });
+
+    expect(value('#buy-plan')).toBe('p2');
+    expect(value('#buy-paid')).toBe('60');
+  });
+
+  it('preselects the plan of the latest subscription when none is active', async () => {
+    await open({
+      subscriptions: [
+        subscription({
+          id: 's2',
+          planId: 'p2',
+          type: 'TIME',
+          status: 'EXPIRED',
+          startsAt: '2026-10-05',
+        }),
+        subscription({
+          id: 's1',
+          planId: 'p1',
+          status: 'EXHAUSTED',
+          startsAt: '2026-09-01',
+        }),
+      ],
+    });
+
+    expect(value('#buy-plan')).toBe('p2');
+  });
+
+  it('falls back to the first plan when the latest subscription is on a plan no longer offered', async () => {
+    await open({
+      subscriptions: [subscription({ planId: 'retired-plan-id' })],
+    });
+
+    expect(value('#buy-plan')).toBe('p1');
+  });
+
+  it("preselects the trainee's plan when the plans answer before the subscriptions", async () => {
+    component = await harness.navigateByUrl(
+      '/trainees/tr1',
+      TraineeDetailsComponent,
+    );
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
+    http.expectOne('/api/trainees/tr1').flush(TRAINEE);
+    http.expectOne('/api/attendance/trainees/tr1').flush([]);
+    http.expectOne('/api/plans?active=true').flush(PLANS);
+    await page.settle();
+    expect(value('#buy-plan')).toBe('p1');
+
+    http
+      .expectOne('/api/trainees/tr1/subscriptions')
+      .flush([subscription({ planId: 'p2', type: 'TIME' })]);
+    await page.settle();
+
+    expect(value('#buy-plan')).toBe('p2');
+    expect(value('#buy-paid')).toBe('60');
+  });
+
+  it('stops preselecting once a sale has started, so the plan and its price stay together', async () => {
+    component = await harness.navigateByUrl(
+      '/trainees/tr1',
+      TraineeDetailsComponent,
+    );
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
+    http.expectOne('/api/trainees/tr1').flush(TRAINEE);
+    http.expectOne('/api/attendance/trainees/tr1').flush([]);
+    http.expectOne('/api/plans?active=true').flush(PLANS);
+    await page.settle();
+    // The untouched first plan is sold while the subscriptions are still loading.
+    await page.submit('form');
+    const sale = http.expectOne(
+      (req) =>
+        req.method === 'POST' && req.url === '/api/trainees/tr1/subscriptions',
+    );
+    expect(sale.request.body.planId).toBe('p1');
+
+    http
+      .expectOne(
+        (req) =>
+          req.method === 'GET' && req.url === '/api/trainees/tr1/subscriptions',
+      )
+      .flush([subscription({ planId: 'p2', type: 'TIME' })]);
+    await page.settle();
+    expect(value('#buy-plan')).toBe('p1');
+
+    sale.flush(subscription({ id: 's9', planId: 'p1' }));
+    await page.settle();
+    http
+      .expectOne('/api/trainees/tr1/subscriptions')
+      .flush([subscription({ id: 's9', planId: 'p1' })]);
+    await page.settle();
+
+    expect(value('#buy-plan')).toBe('p1');
+    expect(value('#buy-paid')).toBe('45.5');
+  });
+
+  it('keeps an amount typed before the subscriptions arrive', async () => {
+    component = await harness.navigateByUrl(
+      '/trainees/tr1',
+      TraineeDetailsComponent,
+    );
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
+    http.expectOne('/api/trainees/tr1').flush(TRAINEE);
+    http.expectOne('/api/attendance/trainees/tr1').flush([]);
+    http.expectOne('/api/plans?active=true').flush(PLANS);
+    await page.settle();
+    await page.type('#buy-paid', '30');
+
+    http
+      .expectOne('/api/trainees/tr1/subscriptions')
+      .flush([subscription({ planId: 'p2', type: 'TIME' })]);
+    await page.settle();
+
+    expect(value('#buy-plan')).toBe('p1');
+    expect(value('#buy-paid')).toBe('30');
   });
 
   it('refills the price when another plan is picked, overwriting a typed amount', async () => {
