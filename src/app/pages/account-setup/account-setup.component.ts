@@ -126,7 +126,14 @@ export class AccountSetupComponent implements OnInit {
     this.accountSetup.get().subscribe({
       next: (setup) => {
         if (!setup.setupRequired) {
-          // Already done (e.g. in another tab): nothing to fill in.
+          // Already done (e.g. on another device): nothing to fill in. A stored token that still
+          // says otherwise would bounce off setupGuard straight back here, so sign in again for a
+          // fresh one.
+          if (this.authService.isSetupRequired()) {
+            this.authService.logout();
+            void this.router.navigate(['/login'], { replaceUrl: true });
+            return;
+          }
           void this.router.navigate([this.authService.defaultRoute()], {
             replaceUrl: true,
           });

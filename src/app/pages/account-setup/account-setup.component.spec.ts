@@ -9,6 +9,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import en from '../../../../public/i18n/en.json';
 import { PageDriver, apiError, driver } from '../../../testing/dom';
 import { makeToken, signInAs } from '../../../testing/jwt';
+import { setupGuard } from '../../guards/setup.guard';
 import { AccountSetup } from '../../services/account-setup.service';
 import { AccountSetupComponent } from './account-setup.component';
 
@@ -233,10 +234,34 @@ describe('AccountSetupComponent', () => {
     expect(router.url).toBe('/account-setup');
   });
 
-  it('sends a person who has already finished the setup on, without showing the form', async () => {
-    await open({ ...TRAINEE_SETUP, setupRequired: false });
+  it('sends a person whose token is already set up on to their start page', async () => {
+    signInAs('TRAINEE', { setupRequired: false });
+    await harness.navigateByUrl('/account-setup', AccountSetupComponent);
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
+    http.expectOne('/api/auth/register/options').flush(OPTIONS);
+    http
+      .expectOne('/api/account-setup')
+      .flush({ ...TRAINEE_SETUP, setupRequired: false });
+    await page.settle();
 
     expect(router.url).toBe('/my-profile');
+  });
+
+  it('signs out to the login page when the setup was finished elsewhere but the stored token still requires it', async () => {
+    // With the real setupGuard on the start page: going there with this token would bounce back.
+    router.resetConfig([
+      { path: 'account-setup', component: AccountSetupComponent },
+      { path: 'login', children: [] },
+      { path: 'my-profile', canActivate: [setupGuard], children: [] },
+      { path: '**', children: [] },
+    ]);
+    await open({ ...TRAINEE_SETUP, setupRequired: false });
+
+    expect(localStorage.getItem('accessToken')).toBeNull();
+    expect(router.url).toBe('/login');
   });
 
   it('shows the load error with Try again, which asks again', async () => {
