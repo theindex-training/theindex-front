@@ -194,6 +194,8 @@ export class TraineeDetailsComponent implements OnInit {
 
     this.submitting = true;
     this.subscriptionErrorMessage = null;
+    // The plan being sold stays selected: no late preselection may replace it.
+    this.planPreselected = true;
 
     this.subscriptionsService
       .createForTrainee(this.trainee.id, payload)
@@ -414,7 +416,7 @@ export class TraineeDetailsComponent implements OnInit {
    * Once both the plans and the trainee's subscriptions are in, preselects the
    * plan of their latest subscription (`defaultPlanId`; the first plan when
    * they have none). Only once per page, and not after the plan or the paid
-   * amount was changed by hand.
+   * amount was changed by hand or a sale was started.
    */
   private preselectTraineePlan(): void {
     if (

@@ -142,7 +142,7 @@ The review below turned up a few traps. Every spec should follow these.
 
 **`pages/trainees/trainee-details.component.ts`, selling a subscription** (the spec covers the whole page; this part first)
 - [x] Plans load from `GET /api/plans?active=true`. The first plan is preselected and **Paid** is prefilled with its price in euros (`4550` cents → `45.5`).
-- [x] The preselected plan is the plan of the trainee's latest active subscription, else their latest subscription of any status (pure `default-plan.ts`, unit-tested), skipping plans no longer offered; the first plan without one. Applied once, whichever of plans and subscriptions answers first, and not over a plan or amount changed by hand.
+- [x] The preselected plan is the plan of the trainee's latest active subscription, else their latest subscription of any status (pure `default-plan.ts`, unit-tested), skipping plans no longer offered; the first plan without one. Applied once, whichever of plans and subscriptions answers first, and not over a plan or amount changed by hand, nor once a sale has started (a late answer would otherwise swap the plan under a sale in progress and leave the sold plan's price next to it).
 - [x] Changing the plan re-fills **Paid** from that plan's price, overwriting a manual edit.
 - [x] Paid validation:
   - blank fails required;

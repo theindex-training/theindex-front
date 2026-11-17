@@ -330,6 +330,47 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     expect(value('#buy-paid')).toBe('60');
   });
 
+  it('stops preselecting once a sale has started, so the plan and its price stay together', async () => {
+    component = await harness.navigateByUrl(
+      '/trainees/tr1',
+      TraineeDetailsComponent,
+    );
+    page = driver(
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
+    );
+    http.expectOne('/api/trainees/tr1').flush(TRAINEE);
+    http.expectOne('/api/attendance/trainees/tr1').flush([]);
+    http.expectOne('/api/plans?active=true').flush(PLANS);
+    await page.settle();
+    // The untouched first plan is sold while the subscriptions are still loading.
+    await page.submit('form');
+    const sale = http.expectOne(
+      (req) =>
+        req.method === 'POST' && req.url === '/api/trainees/tr1/subscriptions',
+    );
+    expect(sale.request.body.planId).toBe('p1');
+
+    http
+      .expectOne(
+        (req) =>
+          req.method === 'GET' && req.url === '/api/trainees/tr1/subscriptions',
+      )
+      .flush([subscription({ planId: 'p2', type: 'TIME' })]);
+    await page.settle();
+    expect(value('#buy-plan')).toBe('p1');
+
+    sale.flush(subscription({ id: 's9', planId: 'p1' }));
+    await page.settle();
+    http
+      .expectOne('/api/trainees/tr1/subscriptions')
+      .flush([subscription({ id: 's9', planId: 'p1' })]);
+    await page.settle();
+
+    expect(value('#buy-plan')).toBe('p1');
+    expect(value('#buy-paid')).toBe('45.5');
+  });
+
   it('keeps an amount typed before the subscriptions arrive', async () => {
     component = await harness.navigateByUrl(
       '/trainees/tr1',
