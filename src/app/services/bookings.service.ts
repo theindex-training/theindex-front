@@ -59,7 +59,9 @@ export interface TrainingWorkout {
 
 /** One training with its gym and its whole workout (`GET /api/bookings/trainings/:slotId`). */
 export interface TrainingDetails extends Omit<BookableTraining, 'workout'> {
-  gym: { id: string; name: string };
+  /** When it ends (its gym-local end time), e.g. for a calendar event. */
+  endsAt: string;
+  gym: { id: string; name: string; address: string | null };
   /** null until the staff pick the day's workout for this training, and until it is out. */
   workout: TrainingWorkout | null;
 }

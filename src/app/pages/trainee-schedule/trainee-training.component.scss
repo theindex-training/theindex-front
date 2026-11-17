@@ -1,4 +1,25 @@
 .rules,
-.closed {
+.closed,
+.calendar-hint {
   margin: 0;
+}
+
+.calendar-hint {
+  font-size: var(--text-sm);
+}
+
+.closed {
+  align-self: center;
+}
+
+.booked-notice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+
+.gym-address {
+  display: block;
+  font-size: var(--text-sm);
 }

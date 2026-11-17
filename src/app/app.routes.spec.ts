@@ -42,6 +42,7 @@ const SHELL_ACCESS: Record<string, string[] | null> = {
   'my-profile': TRAINEE,
   schedule: TRAINEE,
   'schedule/:id': TRAINEE,
+  'schedule/:id/booked': TRAINEE,
   stats: TRAINEE,
   records: TRAINEE,
   'change-password': null,

@@ -1613,7 +1613,6 @@
     "bookings": "Записани",
     "yourBooking": "Вашето записване",
     "notBooked": "Не сте записан",
-    "bookedNotice": "Записахте се за тази тренировка.",
     "cancelledNotice": "Записването ви е отказано.",
     "workoutTitle": "Тренировка на деня",
     "exercises": "Упражнения",
@@ -1623,6 +1622,21 @@
     "playVideo": "Пусни видеото: {name}",
     "videoTitle": "Видео: {name}",
     "openVideo": "Отвори в YouTube"
+  },
+  "traineeBooked": {
+    "title": "Записахте се",
+    "message": "Мястото ви е запазено. До скоро на тренировката!",
+    "notBookedMessage": "Не сте записан за тази тренировка."
+  },
+  "googleCalendar": {
+    "add": "Добави в Google Календар",
+    "opensInNewTab": "(отваря се в нов раздел)",
+    "hint": "Google Календар се отваря с попълнена тренировка; запазете я там. Важат обичайните напомняния на календара ви.",
+    "event": {
+      "title": "CrossFit тренировка",
+      "trainer": "Групов инструктор: {name}",
+      "workout": "Тренировка на деня: {title}"
+    }
   },
   "register": {
     "title": "Създаване на акаунт",

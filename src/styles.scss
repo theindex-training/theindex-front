@@ -33,6 +33,11 @@
   --nav-border: #3a3934;
   --nav-accent: #ff4a3d;
   --scrim: rgba(18, 18, 17, 0.55);
+  // Google's own button colors (light), for "Add to Google Calendar".
+  --google-button-bg: #ffffff;
+  --google-button-hover: #eeeeee;
+  --google-button-border: #747775;
+  --google-button-text: #1f1f1f;
   --shadow-sm: 0 1px 2px rgba(18, 18, 17, 0.06);
   --shadow-md: 0 10px 24px rgba(18, 18, 17, 0.12);
 }
@@ -69,6 +74,11 @@
   --nav-border: #2d2c29;
   --nav-accent: #ff4a3d;
   --scrim: rgba(0, 0, 0, 0.65);
+  // Google's own button colors (dark), for "Add to Google Calendar".
+  --google-button-bg: #131314;
+  --google-button-hover: #262627;
+  --google-button-border: #8e918f;
+  --google-button-text: #e3e3e3;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.5);
 }

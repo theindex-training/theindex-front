@@ -152,14 +152,31 @@
                       }
                       @if (training.canBook) {
                         <a
-                          class="btn btn--primary"
+                          class="btn btn--secondary"
                           [routerLink]="['/schedule', training.id]"
+                          [attr.aria-label]="
+                            'traineeSchedule.detailsFor'
+                              | transloco: { training: describe(training) }
+                          "
+                          >{{ 'traineeSchedule.details' | transloco }}</a
+                        >
+                        <button
+                          class="btn btn--primary"
+                          type="button"
+                          [disabled]="!!busyId"
                           [attr.aria-label]="
                             'traineeSchedule.bookFor'
                               | transloco: { training: describe(training) }
                           "
-                          >{{ 'traineeSchedule.book' | transloco }}</a
+                          (click)="book(training)"
                         >
+                          {{
+                            (busyId === training.id
+                              ? 'traineeSchedule.booking'
+                              : 'traineeSchedule.book'
+                            ) | transloco
+                          }}
+                        </button>
                       } @else {
                         @if (!training.canCancel && !isPast(training)) {
                           <span class="text-muted">{{
