@@ -1678,6 +1678,28 @@
     "doneNext": "An admin will connect it to your profile at the gym. Once that's done, you can sign in with your email and password.",
     "toSignIn": "Go to sign in"
   },
+  "accountSetup": {
+    "title": "Set up your account",
+    "welcome": "Welcome to The Index",
+    "copy": "The gym has created an account for you. Check your details once and you're ready.",
+    "stepPassword": "Choose your own password",
+    "stepDetails": "Check the details the gym entered for you",
+    "stepStart": "Book trainings and follow your progress",
+    "introPassword": "The gym has filled in what it knows about you. Check it, choose your own password and agree to the terms. Fields marked (optional) can stay empty.",
+    "introDetails": "Check the details the gym has for you and agree to the terms to continue. Fields marked (optional) can stay empty.",
+    "loading": "Loading your details...",
+    "loadError": "Couldn't load your details. Try again.",
+    "password": "New password",
+    "passwordHint": "8–128 characters, different from the one you were given.",
+    "confirmPassword": "Confirm new password",
+    "consentHint": "Required to use your account.",
+    "consentRequired": "You need to agree to use your account.",
+    "submit": "Save and continue",
+    "submitting": "Saving...",
+    "error": "Couldn't save your details. Try again.",
+    "notYou": "Not you?",
+    "signOut": "Sign out"
+  },
   "contact": {
     "phone": "Phone",
     "phoneHint": "6–15 digits, e.g. +359 88 123 4567.",

@@ -12,6 +12,7 @@ export interface TestClaims {
   role?: string;
   trainerProfileId?: string | null;
   traineeProfileId?: string | null;
+  setupRequired?: boolean;
   iat?: number;
   exp?: number;
 }

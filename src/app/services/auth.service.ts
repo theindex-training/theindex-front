@@ -14,6 +14,8 @@ interface TokenPayload {
   role?: string;
   trainerProfileId?: string | null;
   traineeProfileId?: string | null;
+  /** The account must finish its first-login setup (`/account-setup`) before anything else. */
+  setupRequired?: boolean;
   iat?: number;
   exp?: number;
 }
@@ -97,6 +99,30 @@ export class AuthService {
     }
 
     return this.decodeToken(token)?.traineeProfileId ?? null;
+  }
+
+  /**
+   * Whether the signed-in account still has to go through the first-login setup: an account an
+   * admin created (their password is still the admin's), or one that never gave consent.
+   */
+  isSetupRequired(): boolean {
+    const token = this.getToken();
+
+    if (!token) {
+      return false;
+    }
+
+    return this.decodeToken(token)?.setupRequired === true;
+  }
+
+  /** Signs in with a token the API answered outside the login (the finished account setup). */
+  useToken(token: string): void {
+    this.setToken(token);
+  }
+
+  /** Where a signed-in person starts: trainees on their profile, staff on the dashboard. */
+  defaultRoute(): string {
+    return this.getUserRole() === 'TRAINEE' ? '/my-profile' : '/home';
   }
 
   private setToken(token: string): void {

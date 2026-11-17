@@ -19,6 +19,7 @@ import { routes } from './app.routes';
 import { authGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login.guard';
 import { roleGuard } from './guards/role.guard';
+import { setupGuard } from './guards/setup.guard';
 import { TranslatedTitleStrategy } from './i18n/translated-title.strategy';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { ArticleCreateComponent } from './pages/content/articles/article-create.component';
@@ -110,13 +111,25 @@ const shellPages = shell.children!.filter((route) => !route.redirectTo);
 
 describe('route table', () => {
   it('guards the app shell with authGuard, and the login and register pages with loginGuard', () => {
-    expect(guardsOf(shell)).toEqual([authGuard]);
+    expect(guardsOf(shell)).toEqual([authGuard, setupGuard]);
     for (const path of ['login', 'register']) {
       const route = routes.find((entry) => entry.path === path)!;
       expect(guardsOf(route)).toEqual([loginGuard]);
       // Outside the shell: people without an account open it.
       expect(shell.children!.some((child) => child.path === path)).toBe(false);
     }
+  });
+
+  it('keeps an account with an unfinished first-login setup out of every shell page', () => {
+    expect(shell.canActivateChild).toEqual([setupGuard]);
+  });
+
+  it('puts the first-login setup outside the shell, signed in but without the setup guard', () => {
+    const route = routes.find((entry) => entry.path === 'account-setup')!;
+    expect(guardsOf(route)).toEqual([authGuard]);
+    expect(
+      shell.children!.some((child) => child.path === 'account-setup'),
+    ).toBe(false);
   });
 
   it('puts the full-screen article editor outside the shell, for admins, with the leave guard', () => {

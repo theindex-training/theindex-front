@@ -126,4 +126,42 @@ describe('authInterceptor', () => {
     expect(router.url).toBe('/trainees');
     expect(result.status).toBe(status);
   });
+
+  it('on a 403 ACCOUNT_SETUP_REQUIRED: keeps the session, goes to /account-setup and passes the error on', async () => {
+    const token = makeToken({ sub: 'a1', role: 'TRAINEE' });
+    localStorage.setItem('accessToken', token);
+
+    const result = get();
+    controller.expectOne('/api/trainees').flush(
+      {
+        statusCode: 403,
+        error: 'ACCOUNT_SETUP_REQUIRED',
+        message: 'Finish setting up your account first.',
+      },
+      { status: 403, statusText: 'Forbidden' },
+    );
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(localStorage.getItem('accessToken')).toBe(token);
+    expect(router.url).toBe('/account-setup');
+    expect(result.status).toBe(403);
+  });
+
+  it('stays put on any other 403 (e.g. a role the route refuses)', async () => {
+    localStorage.setItem(
+      'accessToken',
+      makeToken({ sub: 'a1', role: 'TRAINEE' }),
+    );
+
+    get();
+    controller
+      .expectOne('/api/trainees')
+      .flush(
+        { statusCode: 403, error: 'Forbidden', message: 'Forbidden resource' },
+        { status: 403, statusText: 'Forbidden' },
+      );
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(router.url).toBe('/trainees');
+  });
 });

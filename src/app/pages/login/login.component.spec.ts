@@ -97,48 +97,59 @@ describe('LoginComponent', () => {
     req.flush({ accessToken: makeToken({ role: 'ADMIN' }), account: {} });
   });
 
-  it('skips the password check and goes home when the token has no account id', async () => {
-    await logInWith({ role: 'TRAINER' });
+  it('skips the password check and sends an admin without an account id home', async () => {
+    await logInWith({ role: 'ADMIN' });
 
     http.expectNone((req) => req.url.includes('password-status'));
     expect(router.url).toBe('/home');
   });
 
-  it('sends a trainee without an account id to /my-profile', async () => {
-    await logInWith({ role: 'TRAINEE' });
-
-    expect(router.url).toBe('/my-profile');
-  });
-
   it.each([
-    ['ADMIN', true, '/home'],
-    ['TRAINER', true, '/home'],
-    ['TRAINEE', true, '/my-profile'],
-    ['ADMIN', false, '/change-password'],
-    ['TRAINEE', false, '/change-password'],
+    ['TRAINER', '/home'],
+    ['TRAINEE', '/my-profile'],
   ])(
-    '%s with password changed = %s lands on %s',
-    async (role, changed, url) => {
-      await logInWith({ sub: 'account-1', role });
+    'sends a set-up %s to %s without asking about the password',
+    async (role, url) => {
+      await logInWith({ sub: 'account-1', role, setupRequired: false });
 
-      const req = http.expectOne('/api/accounts/account-1/password-status');
-      expect(req.request.method).toBe('GET');
-      req.flush({ accountId: 'account-1', hasUpdatedInitialPassword: changed });
-      await settle();
-
+      http.expectNone((req) => req.url.includes('password-status'));
       expect(router.url).toBe(url);
     },
   );
 
-  it('goes to the default page when the password check fails', async () => {
-    await logInWith({ sub: 'account-1', role: 'TRAINEE' });
+  it.each(['TRAINER', 'TRAINEE'])(
+    'sends a %s whose token requires the first-login setup to /account-setup',
+    async (role) => {
+      await logInWith({ sub: 'account-1', role, setupRequired: true });
+
+      http.expectNone((req) => req.url.includes('password-status'));
+      expect(router.url).toBe('/account-setup');
+    },
+  );
+
+  it.each([
+    [true, '/home'],
+    [false, '/change-password'],
+  ])('ADMIN with password changed = %s lands on %s', async (changed, url) => {
+    await logInWith({ sub: 'account-1', role: 'ADMIN' });
+
+    const req = http.expectOne('/api/accounts/account-1/password-status');
+    expect(req.request.method).toBe('GET');
+    req.flush({ accountId: 'account-1', hasUpdatedInitialPassword: changed });
+    await settle();
+
+    expect(router.url).toBe(url);
+  });
+
+  it('sends an admin home when the password check fails', async () => {
+    await logInWith({ sub: 'account-1', role: 'ADMIN' });
 
     http
       .expectOne('/api/accounts/account-1/password-status')
       .flush(null, { status: 500, statusText: 'Server Error' });
     await settle();
 
-    expect(router.url).toBe('/my-profile');
+    expect(router.url).toBe('/home');
   });
 
   describe('when the login fails', () => {
