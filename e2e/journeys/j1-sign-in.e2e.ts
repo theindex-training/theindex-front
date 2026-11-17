@@ -120,15 +120,12 @@ test.describe('J1 sign-in', { tag: ['@desktop', '@mobile'] }, () => {
     ).toHaveLength(1);
   });
 
-  test('goes straight to the dashboard once the password was changed', async ({
+  test('takes a trainer whose account is set up straight to the dashboard', async ({
     page,
     api,
   }) => {
     api.on('POST', '/api/auth/login', {
       body: { accessToken: tokenFor('TRAINER'), account: {} },
-    });
-    api.on('GET', '/api/accounts/account-trainer/password-status', {
-      body: { accountId: 'account-trainer', hasUpdatedInitialPassword: true },
     });
     mockStaffHome(api);
 
@@ -141,14 +138,15 @@ test.describe('J1 sign-in', { tag: ['@desktop', '@mobile'] }, () => {
     await expect(
       page.getByRole('heading', { level: 1, name: t('nav.dashboard') }),
     ).toBeVisible();
+    // Trainees and trainers have the first-login setup instead of the password check.
+    expect(
+      api.calls('GET', '/api/accounts/account-trainer/password-status'),
+    ).toHaveLength(0);
   });
 
   test('takes a trainee to their own profile', async ({ page, api }) => {
     api.on('POST', '/api/auth/login', {
       body: { accessToken: tokenFor('TRAINEE'), account: {} },
-    });
-    api.on('GET', '/api/accounts/account-trainee/password-status', {
-      body: { accountId: 'account-trainee', hasUpdatedInitialPassword: true },
     });
     mockTraineeHome(api);
 

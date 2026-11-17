@@ -1,0 +1,224 @@
+<main class="login">
+  <div class="login__panel login__panel--brand">
+    <app-language-switch class="login__language" [compact]="true" />
+    <div class="login__brand">
+      <img
+        class="login__logo"
+        src="brand/the-index-logo-red.png"
+        alt="The Index"
+        width="640"
+        height="270"
+      />
+      <h1>{{ 'accountSetup.welcome' | transloco }}</h1>
+      <p class="login__copy">{{ 'accountSetup.copy' | transloco }}</p>
+      <ul class="login__highlights">
+        <li>{{ 'accountSetup.stepPassword' | transloco }}</li>
+        <li>{{ 'accountSetup.stepDetails' | transloco }}</li>
+        <li>{{ 'accountSetup.stepStart' | transloco }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="login__panel">
+    <div class="login__card register__card">
+      <div class="login__header">
+        <h2>{{ 'accountSetup.title' | transloco }}</h2>
+        @if (setup) {
+          <p>
+            {{
+              (asksPassword
+                ? 'accountSetup.introPassword'
+                : 'accountSetup.introDetails'
+              ) | transloco
+            }}
+          </p>
+        }
+      </div>
+
+      @if (loading) {
+        <p class="notice" role="status">
+          {{ 'accountSetup.loading' | transloco }}
+        </p>
+      } @else if (loadError) {
+        <p class="notice notice--danger" role="alert">
+          {{ loadError | uiMessage }}
+        </p>
+        <div class="form-actions">
+          <button class="btn btn--secondary" type="button" (click)="load()">
+            {{ 'common.tryAgain' | transloco }}
+          </button>
+        </div>
+      } @else if (setup) {
+        <form
+          class="form-grid"
+          novalidate
+          [formGroup]="form"
+          (ngSubmit)="handleSubmit()"
+        >
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-field__label" for="account-setup-name">{{
+                'register.name' | transloco
+              }}</label>
+              <input
+                id="account-setup-name"
+                type="text"
+                autocomplete="name"
+                formControlName="name"
+                aria-describedby="account-setup-name-help"
+                [attr.aria-invalid]="invalid('name')"
+              />
+              @if (invalid('name')) {
+                <span class="form-field__error" id="account-setup-name-help">{{
+                  'register.nameError' | transloco
+                }}</span>
+              } @else {
+                <span class="form-field__hint" id="account-setup-name-help">{{
+                  'register.nameHint' | transloco
+                }}</span>
+              }
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label" for="account-setup-email">{{
+                'register.email' | transloco
+              }}</label>
+              <input
+                id="account-setup-email"
+                type="email"
+                autocomplete="email"
+                formControlName="email"
+                aria-describedby="account-setup-email-help"
+                [attr.aria-invalid]="invalid('email')"
+              />
+              @if (invalid('email')) {
+                <span class="form-field__error" id="account-setup-email-help">{{
+                  emailError | transloco
+                }}</span>
+              } @else {
+                <span class="form-field__hint" id="account-setup-email-help">{{
+                  'register.emailHint' | transloco
+                }}</span>
+              }
+            </div>
+          </div>
+
+          @if (asksPassword) {
+            <div class="form-row">
+              <div class="form-field">
+                <label class="form-field__label" for="account-setup-password">{{
+                  'accountSetup.password' | transloco
+                }}</label>
+                <input
+                  id="account-setup-password"
+                  type="password"
+                  autocomplete="new-password"
+                  formControlName="password"
+                  aria-describedby="account-setup-password-help"
+                  [attr.aria-invalid]="invalid('password')"
+                />
+                @if (invalid('password')) {
+                  <span
+                    class="form-field__error"
+                    id="account-setup-password-help"
+                    >{{ passwordError | transloco }}</span
+                  >
+                } @else {
+                  <span
+                    class="form-field__hint"
+                    id="account-setup-password-help"
+                    >{{ 'accountSetup.passwordHint' | transloco }}</span
+                  >
+                }
+              </div>
+
+              <div class="form-field">
+                <label class="form-field__label" for="account-setup-confirm">{{
+                  'accountSetup.confirmPassword' | transloco
+                }}</label>
+                <input
+                  id="account-setup-confirm"
+                  type="password"
+                  autocomplete="new-password"
+                  formControlName="confirmPassword"
+                  aria-describedby="account-setup-confirm-help"
+                  [attr.aria-invalid]="!!confirmError"
+                />
+                @if (confirmError) {
+                  <span
+                    class="form-field__error"
+                    id="account-setup-confirm-help"
+                    >{{ confirmError | transloco }}</span
+                  >
+                } @else {
+                  <span
+                    class="form-field__hint"
+                    id="account-setup-confirm-help"
+                    >{{ 'register.confirmHint' | transloco }}</span
+                  >
+                }
+              </div>
+            </div>
+          }
+
+          <app-contact-fields
+            idPrefix="account-setup"
+            [form]="contact"
+            [gyms]="gyms"
+            [gymSubscriptions]="gymSubscriptions"
+            [showGymSubscription]="isTrainee"
+            [homeGym]="isTrainee ? 'preferred' : 'primary'"
+          />
+
+          <div class="form-field">
+            <label class="form-field form-field--check register__consent">
+              <input
+                id="account-setup-consent"
+                type="checkbox"
+                formControlName="acceptTerms"
+                aria-describedby="account-setup-consent-help"
+                [attr.aria-invalid]="invalid('acceptTerms')"
+              />
+              <span>{{ 'register.consent' | transloco }}</span>
+            </label>
+            @if (invalid('acceptTerms')) {
+              <span class="form-field__error" id="account-setup-consent-help">{{
+                'accountSetup.consentRequired' | transloco
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="account-setup-consent-help">{{
+                'accountSetup.consentHint' | transloco
+              }}</span>
+            }
+          </div>
+
+          @if (errorMessage) {
+            <p class="notice notice--danger" role="alert">
+              {{ errorMessage | uiMessage }}
+            </p>
+          }
+
+          <div class="form-actions">
+            <button
+              class="btn btn--primary"
+              type="submit"
+              [disabled]="submitting"
+            >
+              {{
+                (submitting ? 'accountSetup.submitting' : 'accountSetup.submit')
+                  | transloco
+              }}
+            </button>
+          </div>
+        </form>
+      }
+
+      <p class="login__footer">
+        {{ 'accountSetup.notYou' | transloco }}
+        <button class="btn btn--ghost" type="button" (click)="signOut()">
+          {{ 'accountSetup.signOut' | transloco }}
+        </button>
+      </p>
+    </div>
+  </div>
+</main>

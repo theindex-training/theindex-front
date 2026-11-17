@@ -805,6 +805,11 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 1. Desktop and phone, visitor: Sign in → Create one → the form; without the consent nothing is sent; with it, the exact body is posted and the card says what happens next; signing in before an admin connects the account shows the translated "not connected yet" message and stays on Sign in.
 2. Desktop and phone, admin: Accounts asks for `link=unlinked`; the waiting account opens on Existing profile with only the list (no fields or Connect); picking the trainee who already exists keeps what they registered, shows the profile's nickname, counts two differences and shows the profile's phone under the field; Use it takes it, and Connect posts every field with the `profileId`; the page links to the trainee.
 
+### J20. First-login account setup (P0) [desktop, mobile]
+✅ `e2e/journeys/j20-account-setup.e2e.ts`, 2 tests (4 runs). Unit specs: `account-setup.component.spec.ts`, `setup.guard.spec.ts`, `account-setup.service.spec.ts`, the interceptor's 403, the login redirects and the route table. Two deliberate breaks (the guard letting everyone through, the password left out of the body) were each caught.
+1. Desktop and phone, trainee an admin created: signing in with a `setupRequired` token opens `/account-setup`, prefilled with what the admin entered; `/my-profile` sends them back; a 409 shows the API's message and stays; saving posts every field, stores the answered token and opens My profile.
+2. A token without the claim (issued before the setup existed): the API's 403 `ACCOUNT_SETUP_REQUIRED` sends the person to the form, here without the password fields (`passwordChangeRequired: false`).
+
 ---
 
 ## Suspected unintended behavior (to characterize, then log in `TEST_NOTES.md`)

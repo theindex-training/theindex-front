@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login.guard';
 import { roleGuard } from './guards/role.guard';
+import { setupGuard } from './guards/setup.guard';
 import { leaveEditorGuard } from './pages/content/articles/leave-editor.guard';
 
 // Route titles are translation keys; TranslatedTitleStrategy turns them into "<page> · The Index".
@@ -28,6 +29,16 @@ export const routes: Routes = [
     canActivate: [loginGuard],
   },
   {
+    // The first-login form of an account an admin created; outside the shell, like Register.
+    path: 'account-setup',
+    title: 'accountSetup.title',
+    loadComponent: () =>
+      import('./pages/account-setup/account-setup.component').then(
+        (m) => m.AccountSetupComponent,
+      ),
+    canActivate: [authGuard],
+  },
+  {
     path: 'unauthorized',
     title: 'system.unauthorized.title',
     loadComponent: () =>
@@ -41,7 +52,8 @@ export const routes: Routes = [
       import('./components/main-layout/main-layout.component').then(
         (m) => m.MainLayoutComponent,
       ),
-    canActivate: [authGuard],
+    canActivate: [authGuard, setupGuard],
+    canActivateChild: [setupGuard],
     children: [
       {
         path: '',

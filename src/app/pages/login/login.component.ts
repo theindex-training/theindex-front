@@ -67,29 +67,19 @@ export class LoginComponent {
 
     this.authService.login(email, password).subscribe({
       next: () => {
-        const accountId = this.authService.getAccountId();
-
-        if (!accountId) {
-          this.isSubmitting = false;
-          this.changeDetector.detectChanges();
-          this.router.navigate([this.getDefaultRoute()]);
+        if (this.authService.getUserRole() === 'ADMIN') {
+          this.goAfterAdminLogin();
           return;
         }
-
-        this.accountSecurityService.hasChangedPassword(accountId).subscribe({
-          next: (hasChangedPassword) => {
-            this.isSubmitting = false;
-            this.changeDetector.detectChanges();
-            this.router.navigate([
-              hasChangedPassword ? this.getDefaultRoute() : '/change-password',
-            ]);
-          },
-          error: () => {
-            this.isSubmitting = false;
-            this.changeDetector.detectChanges();
-            this.router.navigate([this.getDefaultRoute()]);
-          },
-        });
+        this.isSubmitting = false;
+        this.changeDetector.detectChanges();
+        // Trainees and trainers an admin created an account for (or who never gave consent)
+        // fill in the first-login form before anything else.
+        void this.router.navigate([
+          this.authService.isSetupRequired()
+            ? '/account-setup'
+            : this.authService.defaultRoute(),
+        ]);
       },
       error: (error: unknown) => {
         this.isSubmitting = false;
@@ -103,9 +93,24 @@ export class LoginComponent {
     });
   }
 
-  private getDefaultRoute(): string {
-    return this.authService.getUserRole() === 'TRAINEE'
-      ? '/my-profile'
-      : '/home';
+  /** Admins have no first-login setup; they are still asked once to replace a seeded password. */
+  private goAfterAdminLogin(): void {
+    const accountId = this.authService.getAccountId();
+    const go = (route: string) => {
+      this.isSubmitting = false;
+      this.changeDetector.detectChanges();
+      void this.router.navigate([route]);
+    };
+
+    if (!accountId) {
+      go('/home');
+      return;
+    }
+
+    this.accountSecurityService.hasChangedPassword(accountId).subscribe({
+      next: (hasChangedPassword) =>
+        go(hasChangedPassword ? '/home' : '/change-password'),
+      error: () => go('/home'),
+    });
   }
 }
