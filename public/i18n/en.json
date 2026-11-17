@@ -1621,7 +1621,8 @@
     "workoutComesOut": "The day's workout comes out on {day} at {time}. Check back then.",
     "playVideo": "Play the video: {name}",
     "videoTitle": "Video: {name}",
-    "openVideo": "Open on YouTube"
+    "openVideo": "Open on YouTube",
+    "calendarHint": "Google Calendar opens with the training filled in, to save there with your calendar's usual reminders. Apple Calendar gets a file with a reminder 30 minutes before."
   },
   "traineeBooked": {
     "title": "You're booked",
@@ -1631,12 +1632,15 @@
   "googleCalendar": {
     "add": "Add to Google Calendar",
     "opensInNewTab": "(opens in a new tab)",
-    "hint": "Google Calendar opens with the training filled in; save it there. Your calendar's usual reminders apply.",
     "event": {
       "title": "CrossFit training",
       "trainer": "Group instructor: {name}",
       "workout": "Workout: {title}"
     }
+  },
+  "appleCalendar": {
+    "add": "Add to Apple Calendar",
+    "downloadsFile": "(downloads a calendar file)"
   },
   "register": {
     "title": "Create an account",

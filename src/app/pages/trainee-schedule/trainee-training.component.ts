@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, UrlTree } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { AppleCalendarButtonComponent } from '../../components/apple-calendar-button/apple-calendar-button.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { IconComponent } from '../../components/icon/icon.component';
 import { GoogleCalendarButtonComponent } from '../../components/google-calendar-button/google-calendar-button.component';
@@ -47,6 +48,7 @@ import { TrainingWorkoutComponent } from './training-workout.component';
     EmptyStateComponent,
     StatusDotComponent,
     GoogleCalendarButtonComponent,
+    AppleCalendarButtonComponent,
     IconComponent,
     TrainingWorkoutComponent,
   ],
@@ -147,6 +149,25 @@ export class TraineeTrainingComponent implements OnInit {
     return trainingCalendarUrl(training, this.language, this.router);
   }
 
+  /** The training's `.ics` file (Apple Calendar), in the page's language; null when not booked. */
+  calendarFileUrl(training: TrainingDetails): string | null {
+    return training.calendarToken
+      ? this.bookings.calendarFileUrl(
+          training.calendarToken,
+          this.language.lang(),
+        )
+      : null;
+  }
+
+  /** The tile of the Apple Calendar button: the training's weekday and day. */
+  calendarTile(training: TrainingDetails): { weekday: string; day: string } {
+    const date = dayKeyToDate(training.date);
+    return {
+      weekday: this.format.custom(date, 'EEE'),
+      day: this.format.custom(date, 'd'),
+    };
+  }
+
   /** A training that has started: no actions and no "closed" note any more. */
   isPast(training: TrainingDetails): boolean {
     return new Date(training.startsAt).getTime() <= Date.now();
@@ -169,6 +190,8 @@ export class TraineeTrainingComponent implements OnInit {
         if (this.confirmation) {
           this.applyBooking(updated);
           this.changeDetector.detectChanges();
+          // The booking's calendar file needs its new token.
+          this.load();
           return;
         }
         void this.router.navigate(['/schedule', training.id, 'booked']);
