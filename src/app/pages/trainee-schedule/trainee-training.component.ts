@@ -21,12 +21,13 @@ import {
 import { dayKeyToDate } from '../../utils/calendar.util';
 import { timeRange } from '../schedules/schedule-slot-form.component';
 import { mondayOf } from '../workouts/workouts.component';
+import { noWorkoutMessage } from './no-workout-message';
 import { TrainingWorkoutComponent } from './training-workout.component';
 
 /**
  * A trainee's training (`/schedule/:id`): when and where, the trainer, how many booked and the
- * trainee's booking, with Book or Cancel booking while the API allows it, then the workout that
- * will be done: its name, summary and exercises with their descriptions and videos.
+ * trainee's booking, with Book (which then shows the confirmation, `/schedule/:id/booked`) or
+ * Cancel booking while the API allows it, then the workout that will be done: its name, summary and exercises with their descriptions and videos.
  */
 @Component({
   selector: 'app-trainee-training',
@@ -111,19 +112,12 @@ export class TraineeTrainingComponent implements OnInit {
     return `${this.dayLabel(training.date)} ${timeRange(training.trainingTime)}`;
   }
 
-  /**
-   * Why the training shows no workout: not out yet, with when it comes out (20:00 the day before,
-   * from the API), or not chosen by the staff.
-   */
   noWorkoutMessage(training: TrainingDetails): string {
-    const releasesAt = new Date(training.workoutReleasesAt);
-    if (releasesAt.getTime() > Date.now()) {
-      return this.language.t('traineeTraining.workoutComesOut', {
-        day: this.format.custom(releasesAt, 'EEEE, d MMMM'),
-        time: this.format.clock(releasesAt),
-      });
-    }
-    return this.language.t('traineeTraining.noWorkoutMessage');
+    return noWorkoutMessage(
+      training.workoutReleasesAt,
+      this.language,
+      this.format,
+    );
   }
 
   /** A training that has started: no actions and no "closed" note any more. */
@@ -131,15 +125,21 @@ export class TraineeTrainingComponent implements OnInit {
     return new Date(training.startsAt).getTime() <= Date.now();
   }
 
+  /** Books the training, then shows the confirmation (`/schedule/:id/booked`). */
   book(): void {
-    if (!this.training) {
+    const training = this.training;
+    if (!training) {
       return;
     }
-    this.act(
-      this.bookings.book(this.training.id),
-      'traineeTraining.bookedNotice',
-      'traineeSchedule.bookError',
-    );
+    this.busy = true;
+    this.actionError = null;
+    this.actionDone = null;
+    this.bookings.book(training.id).subscribe({
+      next: () => {
+        void this.router.navigate(['/schedule', training.id, 'booked']);
+      },
+      error: (error) => this.failed(error, 'traineeSchedule.bookError'),
+    });
   }
 
   cancel(): void {
@@ -153,22 +153,10 @@ export class TraineeTrainingComponent implements OnInit {
     if (!window.confirm(question)) {
       return;
     }
-    this.act(
-      this.bookings.cancel(training.id),
-      'traineeTraining.cancelledNotice',
-      'traineeSchedule.cancelError',
-    );
-  }
-
-  private act(
-    request: ReturnType<BookingsService['book']>,
-    doneKey: string,
-    fallbackKey: string,
-  ): void {
     this.busy = true;
     this.actionError = null;
     this.actionDone = null;
-    request.subscribe({
+    this.bookings.cancel(training.id).subscribe({
       next: (updated) => {
         this.busy = false;
         if (this.training) {
@@ -181,15 +169,17 @@ export class TraineeTrainingComponent implements OnInit {
             canCancel: updated.canCancel,
           };
         }
-        this.actionDone = i18nMessage(doneKey);
+        this.actionDone = i18nMessage('traineeTraining.cancelledNotice');
         this.changeDetector.detectChanges();
       },
-      error: (error) => {
-        this.busy = false;
-        this.actionError = apiErrorMessage(error, fallbackKey);
-        // The training may have changed meanwhile (closed, cancelled elsewhere): show it as it is.
-        this.load(true);
-      },
+      error: (error) => this.failed(error, 'traineeSchedule.cancelError'),
     });
+  }
+
+  private failed(error: unknown, fallbackKey: string): void {
+    this.busy = false;
+    this.actionError = apiErrorMessage(error, fallbackKey);
+    // The training may have changed meanwhile (closed, cancelled elsewhere): show it as it is.
+    this.load(true);
   }
 }

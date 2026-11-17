@@ -5,8 +5,9 @@ import { t } from '../support/i18n';
 
 /**
  * J17: a trainee opens a training of this week's schedule from the Schedule tab, sees its workout
- * and books it there, then cancels another booking from the list, seeing only how many booked.
- * The API decides what can be booked or cancelled.
+ * and books it there, lands on the booking confirmation with its "Add to Google Calendar" link,
+ * then cancels another booking from the list, seeing only how many booked. Another training is
+ * booked in one click from the list. The API decides what can be booked or cancelled.
  */
 test.describe('J17 bookings', () => {
   /** Tuesday 10 Nov 2026, 10:00 in Sofia. */
@@ -49,9 +50,20 @@ test.describe('J17 bookings', () => {
     canBook: false,
     canCancel: true,
   });
+  const friday = training('t-fri', '2026-11-13', '07:10:00', {
+    bookedCount: 1,
+  });
+  const booked = <T extends { bookedCount: number }>(slot: T) => ({
+    ...slot,
+    bookedCount: slot.bookedCount + 1,
+    bookedByMe: true,
+    canBook: false,
+    canCancel: true,
+  });
   const wednesdayDetails = {
     ...wednesday,
-    gym: gyms[0],
+    endsAt: '2026-11-11T19:00:00+02:00',
+    gym: { ...gyms[0], address: 'ul. Ranni list 13, Plovdiv' },
     workout: {
       title: 'Helen',
       summary: '3 rounds for time:\n400 m run\n21 kettlebell swings',
@@ -76,14 +88,14 @@ test.describe('J17 bookings', () => {
     weekStart: '2026-11-09',
     weekEnd: '2026-11-15',
     week: { id: 'week-1' },
-    slots: [wednesday, thursday],
+    slots: [wednesday, thursday, friday],
   };
 
   const mainNav = (page: Page) =>
     page.getByRole('navigation', { name: t('nav.mainLabel') });
 
   test(
-    'books a training from its page and cancels another from the list',
+    'books a training from its page, sees the confirmation and cancels another from the list',
     { tag: ['@desktop', '@mobile'] },
     async ({ page, api, signInAs }) => {
       await page.clock.setFixedTime(NOW);
@@ -96,13 +108,7 @@ test.describe('J17 bookings', () => {
       });
       api.on('POST', '/api/bookings', {
         status: 201,
-        body: {
-          ...wednesday,
-          bookedCount: 7,
-          bookedByMe: true,
-          canBook: false,
-          canCancel: true,
-        },
+        body: booked(wednesday),
       });
       api.on('DELETE', '/api/bookings/t-thu', {
         body: {
@@ -129,7 +135,7 @@ test.describe('J17 bookings', () => {
       );
       await wed
         .getByRole('link', {
-          name: t('traineeSchedule.bookFor', {
+          name: t('traineeSchedule.detailsFor', {
             training: 'Wednesday, 11 November 18:00 – 19:00',
           }),
         })
@@ -152,6 +158,13 @@ test.describe('J17 bookings', () => {
           name: t('traineeTraining.playVideo', { name: 'Kettlebell Swing' }),
         }),
       ).toBeVisible();
+      // From now on the API answers with Wednesday booked.
+      api.on('GET', '/api/bookings/trainings/t-wed', {
+        body: booked(wednesdayDetails),
+      });
+      api.on('GET', '/api/bookings/schedule', {
+        body: { ...week, slots: [booked(wednesday), thursday, friday] },
+      });
       await page
         .getByRole('button', {
           name: t('traineeSchedule.bookFor', {
@@ -162,35 +175,42 @@ test.describe('J17 bookings', () => {
       await expect
         .poll(() => api.last('POST', '/api/bookings')?.body)
         .toEqual({ slotId: 't-wed' });
-      // From now on the API answers the week with Wednesday booked.
-      api.on('GET', '/api/bookings/schedule', {
-        body: {
-          ...week,
-          slots: [
-            {
-              ...wednesday,
-              bookedCount: 7,
-              bookedByMe: true,
-              canBook: false,
-              canCancel: true,
-            },
-            thursday,
-          ],
-        },
-      });
+
+      // The confirmation: when, where, with whom, and Google Calendar.
+      await expect(page).toHaveURL(/\/schedule\/t-wed\/booked$/);
       await expect(
-        page.getByText(t('traineeTraining.bookedNotice')),
-      ).toBeVisible();
-      await expect(page.getByTestId('trainee-training-count')).toHaveText(
-        t('schedules.days.booked', { count: 7 }),
-      );
-      await expect(
-        page.getByRole('button', {
-          name: t('traineeSchedule.cancelFor', {
-            training: 'Wednesday, 11 November 18:00 – 19:00',
-          }),
+        page.getByRole('heading', {
+          level: 1,
+          name: t('traineeBooked.title'),
         }),
       ).toBeVisible();
+      await expect(page.getByText(t('traineeBooked.message'))).toBeVisible();
+      await expect(page.getByTestId('trainee-booked')).toContainText(
+        'ul. Ranni list 13, Plovdiv',
+      );
+      await expect(page.getByTestId('trainee-booked')).toContainText(
+        'Velcho Sokolov',
+      );
+      await expect(page.getByTestId('training-workout-summary')).toBeVisible();
+      const calendar = page.getByRole('link', {
+        name: t('traineeBooked.addToCalendar'),
+      });
+      await expect(calendar).toHaveAttribute('target', '_blank');
+      const event = new URL((await calendar.getAttribute('href'))!);
+      expect(event.origin + event.pathname).toBe(
+        'https://calendar.google.com/calendar/render',
+      );
+      expect(Object.fromEntries(event.searchParams)).toEqual({
+        action: 'TEMPLATE',
+        text: t('traineeBooked.calendar.title'),
+        dates: '20261111T160000Z/20261111T170000Z',
+        location: 'ul. Ranni list 13, Plovdiv',
+        details: [
+          t('traineeBooked.calendar.trainer', { name: 'Velcho Sokolov' }),
+          t('traineeBooked.calendar.workout', { title: 'Helen' }),
+          new URL('/schedule/t-wed', page.url()).href,
+        ].join('\n'),
+      });
 
       // Back to the week, which shows Wednesday booked now.
       await page.getByRole('link', { name: t('traineeTraining.back') }).click();
@@ -219,10 +239,64 @@ test.describe('J17 bookings', () => {
         .poll(() => api.calls('DELETE', '/api/bookings/t-thu').length)
         .toBe(1);
       await expect(
-        page
-          .getByTestId('trainee-training-t-thu')
-          .getByRole('link', { name: /^Book/ }),
+        page.getByTestId('trainee-training-t-thu').getByRole('button', {
+          name: t('traineeSchedule.bookFor', {
+            training: 'Thursday, 12 November 07:10 – 08:10',
+          }),
+        }),
       ).toBeVisible();
+    },
+  );
+
+  test(
+    'books a training from the list in one click',
+    { tag: ['@desktop', '@mobile'] },
+    async ({ page, api, signInAs }) => {
+      await page.clock.setFixedTime(NOW);
+      await signInAs('TRAINEE', { traineeProfileId: 'trainee-1' });
+      api.on('GET', '/api/bookings/gyms', { body: gyms });
+      api.on('GET', '/api/bookings/schedule', { body: week });
+      api.on('POST', '/api/bookings', { status: 201, body: booked(friday) });
+      api.on('GET', '/api/bookings/trainings/t-fri', {
+        body: {
+          ...booked(friday),
+          endsAt: '2026-11-13T08:10:00+02:00',
+          gym: { ...gyms[0], address: null },
+          workoutReleasesAt: '2026-11-12T20:00:00+02:00',
+        },
+      });
+
+      await page.goto('/schedule');
+      await page
+        .getByTestId('trainee-training-t-fri')
+        .getByRole('button', {
+          name: t('traineeSchedule.bookFor', {
+            training: 'Friday, 13 November 07:10 – 08:10',
+          }),
+        })
+        .click();
+
+      await expect(page).toHaveURL(/\/schedule\/t-fri\/booked$/);
+      expect(api.last('POST', '/api/bookings')?.body).toEqual({
+        slotId: 't-fri',
+      });
+      await expect(
+        page.getByRole('heading', {
+          level: 1,
+          name: t('traineeBooked.title'),
+        }),
+      ).toBeVisible();
+      // The workout isn't out yet; the gym has no address, so the event names it.
+      await expect(
+        page.getByText(t('traineeTraining.noWorkoutTitle')),
+      ).toBeVisible();
+      const href = await page
+        .getByRole('link', { name: t('traineeBooked.addToCalendar') })
+        .getAttribute('href');
+      expect(new URL(href!).searchParams.get('location')).toBe('Center');
+      expect(new URL(href!).searchParams.get('dates')).toBe(
+        '20261113T051000Z/20261113T061000Z',
+      );
     },
   );
 

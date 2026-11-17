@@ -149,15 +149,18 @@ describe('TraineeScheduleComponent', () => {
     expect(linkIn('t-soon')!.getAttribute('aria-label')).toBe(
       'Details of Friday, 13 November 00:45 – 23:00',
     );
-    // Open: Book leads to the training's page, where the trainee books.
+    // Open: Details leads to the training's page, Book books it right here.
     expect(rowText('t-fri')).toBe(
-      `18:00 – 23:00 | Velcho Sokolov | Helen | 3 booked | ${texts.book}`,
+      `18:00 – 23:00 | Velcho Sokolov | Helen | 3 booked | ${texts.details} ${texts.book}`,
     );
-    expect(buttonIn('t-fri')).toBeNull();
     expect(linkIn('t-fri')!.getAttribute('aria-label')).toBe(
-      'Book Friday, 13 November 18:00 – 23:00',
+      'Details of Friday, 13 November 18:00 – 23:00',
     );
     expect(linkIn('t-fri')!.getAttribute('href')).toBe('/schedule/t-fri');
+    expect(buttonIn('t-fri')!.getAttribute('aria-label')).toBe(
+      'Book Friday, 13 November 18:00 – 23:00',
+    );
+    expect(buttonIn('t-fri')!.classList).toContain('btn--primary');
     // Booked: its page, and Cancel booking right here.
     expect(rowText('t-sat')).toBe(
       `07:10 – 23:00 | Velcho Sokolov | 2 booked | Booked ${texts.details} ${texts.cancel}`,
@@ -227,7 +230,30 @@ describe('TraineeScheduleComponent', () => {
     await page.settle();
   });
 
-  it("Book opens the training's page and books nothing yet", async () => {
+  it('Book books the training in one click and opens the confirmation', async () => {
+    await open();
+
+    buttonIn('t-fri')!.click();
+    await page.settle();
+    expect(buttonIn('t-fri')!.textContent.trim()).toBe(texts.booking);
+    expect(buttonIn('t-fri')!.disabled).toBe(true);
+    expect(buttonIn('t-sat')!.disabled).toBe(true);
+    const request = http.expectOne('/api/bookings');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ slotId: 't-fri' });
+    request.flush({
+      ...OPEN,
+      bookedCount: 4,
+      bookedByMe: true,
+      canBook: false,
+      canCancel: true,
+    });
+    await page.settle();
+
+    expect(router.url).toBe('/schedule/t-fri/booked');
+  });
+
+  it("Details opens the training's page and books nothing", async () => {
     await open();
 
     linkIn('t-fri')!.click();
@@ -235,6 +261,31 @@ describe('TraineeScheduleComponent', () => {
 
     expect(router.url).toBe('/schedule/t-fri');
     http.expectNone('/api/bookings');
+  });
+
+  it("shows the API's reason when booking fails, and the week as it is now", async () => {
+    await open();
+
+    buttonIn('t-fri')!.click();
+    await page.settle();
+    const failed = apiError(
+      'Booking for this training has closed (30 minutes before it starts)',
+    );
+    http.expectOne('/api/bookings').flush(failed.body, failed.options);
+    await page.settle();
+    http.expectOne('/api/bookings/schedule?gymId=gym-c&week=2026-11-09').flush({
+      ...WEEK,
+      slots: [PAST, CLOSED, { ...OPEN, canBook: false }, MINE],
+    });
+    await page.settle();
+
+    expect(router.url).toBe('/schedule');
+    expect(page.alert()).toBe(
+      'Booking for this training has closed (30 minutes before it starts)',
+    );
+    expect(rowText('t-fri')).toBe(
+      `18:00 – 23:00 | Velcho Sokolov | Helen | 3 booked | ${texts.closed} ${texts.details}`,
+    );
   });
 
   it('cancels a booking once confirmed', async () => {
@@ -263,7 +314,7 @@ describe('TraineeScheduleComponent', () => {
     await page.settle();
 
     expect(rowText('t-sat')).toBe(
-      `07:10 – 23:00 | Velcho Sokolov | 1 booked | ${texts.book}`,
+      `07:10 – 23:00 | Velcho Sokolov | 1 booked | ${texts.details} ${texts.book}`,
     );
   });
 

@@ -1613,7 +1613,6 @@
     "bookings": "Bookings",
     "yourBooking": "Your booking",
     "notBooked": "Not booked",
-    "bookedNotice": "You're booked for this training.",
     "cancelledNotice": "Your booking is cancelled.",
     "workoutTitle": "Workout",
     "exercises": "Exercises",
@@ -1623,6 +1622,22 @@
     "playVideo": "Play the video: {name}",
     "videoTitle": "Video: {name}",
     "openVideo": "Open on YouTube"
+  },
+  "traineeBooked": {
+    "title": "You're booked",
+    "message": "Your place is saved. See you at the training!",
+    "detailsTitle": "Your training",
+    "addToCalendar": "Add to Google Calendar",
+    "opensInNewTab": "(opens in a new tab)",
+    "calendarHint": "Google Calendar opens with the training filled in; save it there. Your calendar's usual reminders apply.",
+    "openTraining": "Training details",
+    "notBookedTitle": "Not booked",
+    "notBookedMessage": "You aren't booked for this training. Open it to book a place.",
+    "calendar": {
+      "title": "CrossFit training",
+      "trainer": "Group instructor: {name}",
+      "workout": "Workout: {title}"
+    }
   },
   "register": {
     "title": "Create an account",

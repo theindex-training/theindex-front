@@ -1,0 +1,112 @@
+<section class="page-stack page-narrow">
+  <app-page-header
+    [title]="
+      (training && !training.bookedByMe
+        ? 'traineeBooked.notBookedTitle'
+        : 'traineeBooked.title'
+      ) | transloco
+    "
+    [subtitle]="training ? describe(training) : ''"
+    [back]="{
+      label: 'traineeTraining.back' | transloco,
+      link: backLink,
+    }"
+  />
+
+  @if (loading) {
+    <p class="notice" role="status">
+      {{ 'traineeTraining.loading' | transloco }}
+    </p>
+  } @else if (errorMessage || !training) {
+    <app-empty-state
+      tone="danger"
+      [title]="'traineeTraining.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="load()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else if (!training.bookedByMe) {
+    <!-- Opened again after the booking was cancelled (or never made). -->
+    <div class="panel" data-testid="trainee-booked-missing">
+      <p class="notice notice--warning" role="status">
+        {{ 'traineeBooked.notBookedMessage' | transloco }}
+      </p>
+      <div class="form-actions">
+        <a class="btn btn--primary" [routerLink]="['/schedule', training.id]">{{
+          'traineeBooked.openTraining' | transloco
+        }}</a>
+      </div>
+    </div>
+  } @else {
+    <section
+      class="panel"
+      aria-labelledby="booked-title"
+      data-testid="trainee-booked"
+    >
+      <p class="notice notice--success booked-notice" role="status">
+        <app-icon name="check" />
+        <span>{{ 'traineeBooked.message' | transloco }}</span>
+      </p>
+      <h2 class="panel__title" id="booked-title">
+        {{ 'traineeBooked.detailsTitle' | transloco }}
+      </h2>
+      <dl class="detail-list">
+        <div>
+          <dt>{{ 'traineeTraining.day' | transloco }}</dt>
+          <dd>{{ dayLabel(training.date) }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'traineeTraining.time' | transloco }}</dt>
+          <dd class="num">{{ range(training.trainingTime) }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'traineeTraining.gym' | transloco }}</dt>
+          <dd>
+            {{ training.gym.name }}
+            @if (training.gym.address) {
+              <span class="booked-address text-muted">{{
+                training.gym.address
+              }}</span>
+            }
+          </dd>
+        </div>
+        <div>
+          <dt>{{ 'traineeTraining.trainer' | transloco }}</dt>
+          <dd>{{ training.trainer.name }}</dd>
+        </div>
+      </dl>
+
+      <p class="text-muted booked-hint">
+        {{ 'traineeBooked.calendarHint' | transloco }}
+      </p>
+      <div class="form-actions">
+        <a
+          class="btn btn--secondary"
+          [routerLink]="['/schedule', training.id]"
+          >{{ 'traineeBooked.openTraining' | transloco }}</a
+        >
+        <a
+          class="btn btn--primary"
+          data-testid="trainee-booked-calendar"
+          target="_blank"
+          rel="noopener noreferrer"
+          [href]="calendarUrl(training)"
+        >
+          <app-icon name="calendar" />
+          {{ 'traineeBooked.addToCalendar' | transloco }}
+          <span class="visually-hidden">{{
+            'traineeBooked.opensInNewTab' | transloco
+          }}</span>
+        </a>
+      </div>
+    </section>
+
+    <app-training-workout
+      [workout]="training.workout"
+      [emptyTitle]="'traineeTraining.noWorkoutTitle' | transloco"
+      [emptyMessage]="noWorkoutMessage(training)"
+    />
+  }
+</section>

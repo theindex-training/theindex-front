@@ -34,10 +34,11 @@ const TRAINING = {
   weekday: 5,
   trainingTime: { startTime: '18:00:00', endTime: '19:00:00' },
   trainer: { name: 'Velcho Sokolov', nickname: null },
-  gym: { id: 'gym-c', name: 'Center' },
+  gym: { id: 'gym-c', name: 'Center', address: null },
   workout: WORKOUT,
   workoutReleasesAt: '2026-11-12T18:00:00Z',
   startsAt: '2026-11-13T16:00:00Z',
+  endsAt: '2026-11-13T17:00:00Z',
   bookedCount: 3,
   bookedByMe: false,
   bookingClosesAt: '2026-11-13T15:30:00Z',
@@ -176,7 +177,7 @@ describe('TraineeTrainingComponent', () => {
     );
   });
 
-  it('books the training and shows it booked, keeping the workout', async () => {
+  it('books the training, then opens the confirmation', async () => {
     await open();
     expect(actionButton()!.getAttribute('aria-label')).toBe(
       'Book Friday, 13 November 18:00 – 19:00',
@@ -184,6 +185,8 @@ describe('TraineeTrainingComponent', () => {
 
     actionButton()!.click();
     await page.settle();
+    expect(actionButton()!.textContent.trim()).toBe(schedule.booking);
+    expect(actionButton()!.disabled).toBe(true);
     const request = http.expectOne('/api/bookings');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({ slotId: 't-fri' });
@@ -197,18 +200,7 @@ describe('TraineeTrainingComponent', () => {
     );
     await page.settle();
 
-    expect(page.query('[role="status"]')!.textContent.trim()).toBe(
-      texts.bookedNotice,
-    );
-    expect(details().slice(4)).toEqual([
-      `${texts.bookings}: 4 booked`,
-      `${texts.yourBooking}: ${schedule.booked}`,
-    ]);
-    expect(actionButton()!.textContent.trim()).toBe(schedule.cancel);
-    expect(page.queryAll('[data-testid^="training-exercise-"]')).toHaveLength(
-      2,
-    );
-    expect(page.query('h1')!.textContent.trim()).toBe('Fran');
+    expect(router.url).toBe('/schedule/t-fri/booked');
   });
 
   it('cancels a booking once confirmed', async () => {

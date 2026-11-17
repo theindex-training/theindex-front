@@ -43,10 +43,11 @@ interface TraineeDay {
 
 /**
  * A trainee's Schedule (`/schedule`): a gym's week as the staff created it, with how many booked
- * and the trainee's own bookings. Each training opens its page (`/schedule/:id`, with the workout),
- * as Book while booking is open (the trainee books there) and as Details otherwise; a booking can
- * be cancelled right here while the rules allow (the API decides: booking closes 30 minutes before
- * a training, cancelling 1 hour before). `?gym=` and `?week=` keep the choice.
+ * and the trainee's own bookings. Each training links to its page (Details, `/schedule/:id`, with
+ * the workout). While booking is open, Book books it in one click and opens the confirmation
+ * (`/schedule/:id/booked`); a booking can be cancelled right here while the rules allow (the API
+ * decides: booking closes 30 minutes before a training, cancelling 1 hour before). `?gym=` and
+ * `?week=` keep the choice.
  */
 @Component({
   selector: 'app-trainee-schedule',
@@ -77,7 +78,7 @@ export class TraineeScheduleComponent implements OnInit {
   loading = true;
   errorMessage: UiMessage | null = null;
 
-  /** The training whose Cancel is on its way. */
+  /** The training whose Book or Cancel is on its way. */
   busyId: string | null = null;
   actionError: UiMessage | null = null;
 
@@ -257,6 +258,18 @@ export class TraineeScheduleComponent implements OnInit {
     return new Date(training.startsAt).getTime() <= Date.now();
   }
 
+  /** Books the training, then shows the confirmation with its details. */
+  book(training: BookableTraining): void {
+    this.busyId = training.id;
+    this.actionError = null;
+    this.bookings.book(training.id).subscribe({
+      next: () => {
+        void this.router.navigate(['/schedule', training.id, 'booked']);
+      },
+      error: (error) => this.failed(error, 'traineeSchedule.bookError'),
+    });
+  }
+
   cancel(training: BookableTraining): void {
     const question = this.language.t('traineeSchedule.confirmCancel', {
       training: this.describe(training),
@@ -264,21 +277,9 @@ export class TraineeScheduleComponent implements OnInit {
     if (!window.confirm(question)) {
       return;
     }
-    this.act(
-      training,
-      this.bookings.cancel(training.id),
-      'traineeSchedule.cancelError',
-    );
-  }
-
-  private act(
-    training: BookableTraining,
-    request: ReturnType<BookingsService['cancel']>,
-    fallbackKey: string,
-  ): void {
     this.busyId = training.id;
     this.actionError = null;
-    request.subscribe({
+    this.bookings.cancel(training.id).subscribe({
       next: (updated) => {
         this.busyId = null;
         if (this.schedule) {
@@ -291,12 +292,14 @@ export class TraineeScheduleComponent implements OnInit {
         }
         this.changeDetector.detectChanges();
       },
-      error: (error) => {
-        this.busyId = null;
-        this.actionError = apiErrorMessage(error, fallbackKey);
-        // The training may have changed meanwhile (closed, cancelled elsewhere): show it as it is.
-        this.load(true);
-      },
+      error: (error) => this.failed(error, 'traineeSchedule.cancelError'),
     });
+  }
+
+  private failed(error: unknown, fallbackKey: string): void {
+    this.busyId = null;
+    this.actionError = apiErrorMessage(error, fallbackKey);
+    // The training may have changed meanwhile (closed, cancelled elsewhere): show it as it is.
+    this.load(true);
   }
 }

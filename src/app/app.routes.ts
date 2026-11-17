@@ -98,6 +98,16 @@ export const routes: Routes = [
         data: { roles: ['TRAINEE'] },
       },
       {
+        path: 'schedule/:id/booked',
+        title: 'traineeBooked.title',
+        loadComponent: () =>
+          import('./pages/trainee-schedule/trainee-booked.component').then(
+            (m) => m.TraineeBookedComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['TRAINEE'] },
+      },
+      {
         path: 'stats',
         title: 'nav.stats',
         loadComponent: () =>
