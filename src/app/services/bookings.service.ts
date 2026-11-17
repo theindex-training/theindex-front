@@ -61,6 +61,8 @@ export interface TrainingWorkout {
 export interface TrainingDetails extends Omit<BookableTraining, 'workout'> {
   /** When it ends (its gym-local end time), e.g. for a calendar event. */
   endsAt: string;
+  /** While booked: the key of its calendar file (`calendarFileUrl`); null otherwise. */
+  calendarToken: string | null;
   gym: { id: string; name: string; address: string | null };
   /** null until the staff pick the day's workout for this training, and until it is out. */
   workout: TrainingWorkout | null;
@@ -103,6 +105,16 @@ export class BookingsService {
     return this.http.get<TrainingDetails>(
       `${this.baseUrl}/trainings/${slotId}`,
     );
+  }
+
+  /**
+   * The link to a booked training's calendar file (`.ics`, with a reminder 30 minutes before),
+   * for Apple Calendar and other apps that open one. A plain link the browser follows without the
+   * login, so the training's `calendarToken` is its key; `lang` is the event's language.
+   */
+  calendarFileUrl(token: string, lang: string): string {
+    const params = buildHttpParams({ token, lang });
+    return `${this.baseUrl}/calendar.ics?${params.toString()}`;
   }
 
   book(slotId: string): Observable<BookableTraining> {

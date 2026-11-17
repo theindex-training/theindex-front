@@ -43,6 +43,7 @@ const TRAINING = {
   workoutReleasesAt: '2026-11-12T18:00:00Z',
   startsAt: '2026-11-13T16:00:00Z',
   endsAt: '2026-11-13T17:00:00Z',
+  calendarToken: null,
   bookedCount: 3,
   bookedByMe: false,
   bookingClosesAt: '2026-11-13T15:30:00Z',
@@ -129,8 +130,23 @@ describe('TraineeTrainingComponent', () => {
   const calendarEvent = () =>
     Object.fromEntries(new URL(calendarLink()!.href).searchParams);
   const trainingPage = () => new URL('/schedule/t-fri', document.baseURI).href;
+  const appleLink = () =>
+    page.query<HTMLAnchorElement>('[data-testid="apple-calendar-button"]');
+  /** The Apple button's decorative tile: [weekday, day]. */
+  const appleTile = () =>
+    Array.from(
+      appleLink()!.querySelectorAll('[aria-hidden="true"] > span'),
+      (part) => part.textContent.trim(),
+    );
+  /** The Apple button's text, without the decorative tile. */
+  const appleText = () =>
+    Array.from(appleLink()!.children)
+      .filter((child) => child.getAttribute('aria-hidden') !== 'true')
+      .map((child) => child.textContent.replace(/\s+/g, ' ').trim())
+      .join(' ');
   const BOOKED = {
     ...TRAINING,
+    calendarToken: 'cal.token-1',
     bookedCount: 4,
     bookedByMe: true,
     canBook: false,
@@ -363,7 +379,7 @@ describe('TraineeTrainingComponent', () => {
         location: 'ul. Ranni list 13, Plovdiv',
         details: `Group instructor: Velcho Sokolov\nWorkout: Fran\n${trainingPage()}`,
       });
-      expect(page.text()).toContain(calendar.hint);
+      expect(page.text()).toContain(texts.calendarHint);
       expect(details()[2]).toBe(
         `${texts.gym}: Center ul. Ranni list 13, Plovdiv`,
       );
@@ -393,10 +409,42 @@ describe('TraineeTrainingComponent', () => {
       });
     });
 
+    it("offers Apple Calendar too: the training's .ics file, with its date on the tile", async () => {
+      await open(BOOKED);
+
+      const link = appleLink()!;
+      expect(link.getAttribute('href')).toBe(
+        '/api/bookings/calendar.ics?token=cal.token-1&lang=en',
+      );
+      // Same tab: the file is downloaded, or an iPhone offers to add it.
+      expect(link.getAttribute('target')).toBeNull();
+      expect(appleText()).toBe(
+        `${en.appleCalendar.add} ${en.appleCalendar.downloadsFile}`,
+      );
+      expect(appleTile()).toEqual(['Fri', '13']);
+      expect(
+        page
+          .queryAll('.form-actions a')
+          .map((a) => a.getAttribute('data-testid')),
+      ).toEqual(['google-calendar-button', 'apple-calendar-button']);
+    });
+
+    it('asks for the Apple Calendar file in the language the page is shown in', async () => {
+      await open(BOOKED);
+      await firstValueFrom(TestBed.inject(LanguageService).use('bg'));
+      await page.settle();
+
+      expect(appleLink()!.getAttribute('href')).toBe(
+        '/api/bookings/calendar.ics?token=cal.token-1&lang=bg',
+      );
+      expect(appleTile()).toEqual(['пт', '13']);
+    });
+
     it('is not offered before booking', async () => {
       await open();
       expect(calendarLink()).toBeNull();
-      expect(page.text()).not.toContain(calendar.hint);
+      expect(appleLink()).toBeNull();
+      expect(page.text()).not.toContain(texts.calendarHint);
     });
 
     it('is not offered for a booked training that has started', async () => {
@@ -407,6 +455,7 @@ describe('TraineeTrainingComponent', () => {
         canCancel: false,
       });
       expect(calendarLink()).toBeNull();
+      expect(appleLink()).toBeNull();
     });
 
     it('stays next to "Too late to cancel"', async () => {
@@ -451,7 +500,10 @@ describe('TraineeTrainingComponent', () => {
         .queryAll<HTMLAnchorElement>('a[href]')
         .map((a) => a.getAttribute('href'))
         .filter((href) => href!.startsWith('/'));
-      expect(links).toEqual(['/schedule?gym=gym-c&week=2026-11-09']);
+      expect(links).toEqual([
+        '/schedule?gym=gym-c&week=2026-11-09',
+        '/api/bookings/calendar.ics?token=cal.token-1&lang=en',
+      ]);
     });
 
     it('cancelled there, it shows the training as not booked, and books it again in place', async () => {
@@ -480,8 +532,16 @@ describe('TraineeTrainingComponent', () => {
         }),
       );
       await page.settle();
+      // The training again, for its new calendar token.
+      http
+        .expectOne('/api/bookings/trainings/t-fri')
+        .flush({ ...BOOKED, calendarToken: 'cal.token-2' });
+      await page.settle();
 
       expect(router.url).toBe('/schedule/t-fri/booked');
+      expect(appleLink()!.getAttribute('href')).toBe(
+        '/api/bookings/calendar.ics?token=cal.token-2&lang=en',
+      );
       expect(page.query('h1')!.textContent.trim()).toBe(booked.title);
       expect(
         page.query('[data-testid="trainee-booked"]')!.textContent.trim(),

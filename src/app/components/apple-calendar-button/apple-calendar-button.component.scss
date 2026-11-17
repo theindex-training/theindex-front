@@ -1,0 +1,57 @@
+// Apple's button: a solid black (light) or white (dark) rounded button, the system font in mixed
+// case, and a small Calendar tile (a red weekday over the day, on white).
+:host {
+  display: inline-flex;
+}
+
+.apple-calendar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-4) 0 var(--space-2);
+  border-radius: var(--radius-lg);
+  background: var(--apple-button-bg);
+  color: var(--apple-button-text);
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial,
+    var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.25;
+  text-decoration: none;
+  transition: background-color var(--transition-fast);
+}
+
+.apple-calendar-button:hover {
+  background: var(--apple-button-hover);
+}
+
+.apple-calendar-button__tile {
+  display: inline-flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--apple-tile-border);
+  border-radius: 6px;
+  background: var(--apple-tile-bg);
+  line-height: 1;
+}
+
+.apple-calendar-button__weekday {
+  color: var(--apple-tile-red);
+  font-size: 7px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.apple-calendar-button__day {
+  color: var(--apple-tile-text);
+  font-size: 15px;
+  font-weight: 400;
+}

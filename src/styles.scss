@@ -38,6 +38,14 @@
   --google-button-hover: #eeeeee;
   --google-button-border: #747775;
   --google-button-text: #1f1f1f;
+  // Apple's button colors (light): a black button and the Calendar tile, for "Add to Apple Calendar".
+  --apple-button-bg: #000000;
+  --apple-button-hover: #333336;
+  --apple-button-text: #ffffff;
+  --apple-tile-bg: #ffffff;
+  --apple-tile-border: #ffffff;
+  --apple-tile-red: #ff3b30;
+  --apple-tile-text: #1d1d1f;
   --shadow-sm: 0 1px 2px rgba(18, 18, 17, 0.06);
   --shadow-md: 0 10px 24px rgba(18, 18, 17, 0.12);
 }
@@ -79,6 +87,14 @@
   --google-button-hover: #262627;
   --google-button-border: #8e918f;
   --google-button-text: #e3e3e3;
+  // Apple's button colors (dark): a white button and the Calendar tile.
+  --apple-button-bg: #ffffff;
+  --apple-button-hover: #e8e8ed;
+  --apple-button-text: #000000;
+  --apple-tile-bg: #ffffff;
+  --apple-tile-border: #d2d2d7;
+  --apple-tile-red: #ff3b30;
+  --apple-tile-text: #1d1d1f;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.5);
 }

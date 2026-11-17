@@ -63,6 +63,7 @@ test.describe('J17 bookings', () => {
   const wednesdayDetails = {
     ...wednesday,
     endsAt: '2026-11-11T19:00:00+02:00',
+    calendarToken: null,
     gym: { ...gyms[0], address: 'ul. Ranni list 13, Plovdiv' },
     workout: {
       title: 'Helen',
@@ -160,7 +161,7 @@ test.describe('J17 bookings', () => {
       ).toBeVisible();
       // From now on the API answers with Wednesday booked.
       api.on('GET', '/api/bookings/trainings/t-wed', {
-        body: booked(wednesdayDetails),
+        body: { ...booked(wednesdayDetails), calendarToken: 'cal.token-wed' },
       });
       api.on('GET', '/api/bookings/schedule', {
         body: { ...week, slots: [booked(wednesday), thursday, friday] },
@@ -226,6 +227,14 @@ test.describe('J17 bookings', () => {
         ].join('\n'),
       });
 
+      // Apple Calendar: the training's .ics file from the API, in the page's language.
+      await expect(
+        page.getByRole('link', { name: t('appleCalendar.add') }),
+      ).toHaveAttribute(
+        'href',
+        '/api/bookings/calendar.ics?token=cal.token-wed&lang=en',
+      );
+
       // Back to the week, which shows Wednesday booked now.
       await page.getByRole('link', { name: t('traineeTraining.back') }).click();
       await expect(page).toHaveURL(/\/schedule\?gym=gym-c&week=2026-11-09$/);
@@ -275,6 +284,7 @@ test.describe('J17 bookings', () => {
         body: {
           ...booked(friday),
           endsAt: '2026-11-13T08:10:00+02:00',
+          calendarToken: 'cal.token-fri',
           gym: { ...gyms[0], address: null },
           workoutReleasesAt: '2026-11-12T20:00:00+02:00',
         },
