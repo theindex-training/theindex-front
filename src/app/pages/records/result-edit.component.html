@@ -1,0 +1,321 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="
+      (isNew ? 'records.form.logTitle' : 'records.form.editTitle')
+        | transloco: { name: benchmark?.name ?? '' }
+    "
+    [subtitle]="scoring()"
+    [back]="{
+      label: ('records.form.back' | transloco),
+      link: backLink,
+    }"
+  />
+
+  @if (loading) {
+    <p class="notice" role="status">
+      {{ 'records.form.loading' | transloco }}
+    </p>
+  } @else if (!benchmark) {
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
+  } @else {
+    <form
+      class="panel"
+      [formGroup]="form"
+      (ngSubmit)="handleSubmit()"
+      data-testid="result-form"
+    >
+      <div class="form-grid">
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="result-day">{{
+              'records.form.day' | transloco
+            }}</label>
+            <input
+              id="result-day"
+              type="date"
+              formControlName="performedOn"
+              [max]="today"
+              aria-describedby="result-day-help"
+              [attr.aria-invalid]="showError('performedOn')"
+            />
+            @if (showError('performedOn')) {
+              <span class="form-field__error" id="result-day-help">{{
+                'records.form.dayError' | transloco
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="result-day-help">{{
+                'records.form.dayHint' | transloco
+              }}</span>
+            }
+          </div>
+        </div>
+
+        @switch (benchmark.scoreType) {
+          @case ('TIME') {
+            @if (benchmark.timeCapSeconds) {
+              <label class="form-field form-field--check">
+                <input
+                  type="checkbox"
+                  formControlName="capped"
+                  data-testid="result-capped"
+                />
+                <span>{{
+                  'records.form.capped' | transloco: { cap: timeCap() }
+                }}</span>
+              </label>
+            }
+            @if (form.controls.capped.value) {
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-field__label" for="result-reps">{{
+                    'records.form.repsDone' | transloco
+                  }}</label>
+                  <input
+                    id="result-reps"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    step="1"
+                    formControlName="reps"
+                    aria-describedby="result-reps-help"
+                    [attr.aria-invalid]="showError('reps')"
+                  />
+                  @if (showError('reps')) {
+                    <span class="form-field__error" id="result-reps-help">{{
+                      'records.form.wholeNumberError' | transloco
+                    }}</span>
+                  } @else {
+                    <span class="form-field__hint" id="result-reps-help">{{
+                      'records.form.repsDoneHint' | transloco
+                    }}</span>
+                  }
+                </div>
+              </div>
+            } @else {
+              <fieldset class="form-row result-time">
+                <legend class="form-field__label">
+                  {{ 'records.form.time' | transloco }}
+                </legend>
+                <div class="form-field">
+                  <label class="form-field__label" for="result-minutes">{{
+                    'records.form.minutes' | transloco
+                  }}</label>
+                  <input
+                    id="result-minutes"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    step="1"
+                    formControlName="minutes"
+                    aria-describedby="result-time-help"
+                    [attr.aria-invalid]="timeError() !== null"
+                  />
+                </div>
+                <div class="form-field">
+                  <label class="form-field__label" for="result-seconds">{{
+                    'records.form.seconds' | transloco
+                  }}</label>
+                  <input
+                    id="result-seconds"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    max="59"
+                    step="1"
+                    formControlName="seconds"
+                    aria-describedby="result-time-help"
+                    [attr.aria-invalid]="timeError() !== null"
+                  />
+                </div>
+              </fieldset>
+              @if (timeError() === 'overCap') {
+                <span class="form-field__error" id="result-time-help">{{
+                  'records.form.overCapError' | transloco: { cap: timeCap() }
+                }}</span>
+              } @else if (timeError() === 'time') {
+                <span class="form-field__error" id="result-time-help">{{
+                  'records.form.timeError' | transloco
+                }}</span>
+              } @else {
+                <span class="form-field__hint" id="result-time-help">{{
+                  'records.form.timeHint' | transloco
+                }}</span>
+              }
+            }
+          }
+          @case ('ROUNDS_REPS') {
+            <div class="form-row">
+              <div class="form-field">
+                <label class="form-field__label" for="result-rounds">{{
+                  'records.form.rounds' | transloco
+                }}</label>
+                <input
+                  id="result-rounds"
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  step="1"
+                  formControlName="rounds"
+                  aria-describedby="result-rounds-help"
+                  [attr.aria-invalid]="showError('rounds')"
+                />
+                @if (showError('rounds')) {
+                  <span class="form-field__error" id="result-rounds-help">{{
+                    'records.form.wholeNumberError' | transloco
+                  }}</span>
+                } @else {
+                  <span class="form-field__hint" id="result-rounds-help">{{
+                    'records.form.roundsHint' | transloco
+                  }}</span>
+                }
+              </div>
+              <div class="form-field">
+                <label class="form-field__label" for="result-reps">
+                  {{ 'records.form.extraReps' | transloco }}
+                  <span class="form-field__optional">{{
+                    'common.optional' | transloco
+                  }}</span>
+                </label>
+                <input
+                  id="result-reps"
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  step="1"
+                  formControlName="reps"
+                  aria-describedby="result-reps-help"
+                  [attr.aria-invalid]="showError('reps')"
+                />
+                @if (showError('reps')) {
+                  <span class="form-field__error" id="result-reps-help">{{
+                    'records.form.wholeNumberError' | transloco
+                  }}</span>
+                } @else {
+                  <span class="form-field__hint" id="result-reps-help">{{
+                    'records.form.extraRepsHint' | transloco
+                  }}</span>
+                }
+              </div>
+            </div>
+          }
+          @case ('REPS') {
+            <div class="form-row">
+              <div class="form-field">
+                <label class="form-field__label" for="result-reps">{{
+                  'records.form.reps' | transloco
+                }}</label>
+                <input
+                  id="result-reps"
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  step="1"
+                  formControlName="reps"
+                  aria-describedby="result-reps-help"
+                  [attr.aria-invalid]="showError('reps')"
+                />
+                @if (showError('reps')) {
+                  <span class="form-field__error" id="result-reps-help">{{
+                    'records.form.wholeNumberError' | transloco
+                  }}</span>
+                } @else {
+                  <span class="form-field__hint" id="result-reps-help">{{
+                    'records.form.repsHint' | transloco
+                  }}</span>
+                }
+              </div>
+            </div>
+          }
+          @case ('LOAD') {
+            <div class="form-row">
+              <div class="form-field">
+                <label class="form-field__label" for="result-load">{{
+                  'records.form.load' | transloco
+                }}</label>
+                <input
+                  id="result-load"
+                  type="number"
+                  inputmode="decimal"
+                  min="0.5"
+                  step="0.5"
+                  formControlName="loadKg"
+                  aria-describedby="result-load-help"
+                  [attr.aria-invalid]="showError('loadKg')"
+                />
+                @if (showError('loadKg')) {
+                  <span class="form-field__error" id="result-load-help">{{
+                    'records.form.loadError' | transloco
+                  }}</span>
+                } @else {
+                  <span class="form-field__hint" id="result-load-help">{{
+                    'records.form.loadHint' | transloco
+                  }}</span>
+                }
+              </div>
+            </div>
+          }
+        }
+
+        @if (benchmark.kind === 'BENCHMARK') {
+          <label class="form-field form-field--check">
+            <input
+              type="checkbox"
+              formControlName="scaled"
+              data-testid="result-scaled"
+            />
+            <span>{{ 'records.form.scaled' | transloco }}</span>
+          </label>
+        }
+
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="result-note">
+              {{ 'records.form.note' | transloco }}
+              <span class="form-field__optional">{{
+                'common.optional' | transloco
+              }}</span>
+            </label>
+            <textarea
+              id="result-note"
+              rows="3"
+              formControlName="note"
+              aria-describedby="result-note-help"
+              [attr.aria-invalid]="showError('note')"
+            ></textarea>
+            @if (showError('note')) {
+              <span class="form-field__error" id="result-note-help">{{
+                'records.form.noteError' | transloco: { max: noteMax }
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="result-note-help">{{
+                (form.controls.scaled.value
+                  ? 'records.form.noteHintScaled'
+                  : 'records.form.noteHint'
+                ) | transloco: { max: noteMax }
+              }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (errorMessage) {
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
+      }
+
+      <div class="form-actions">
+        <button class="btn btn--primary" type="submit" [disabled]="submitting">
+          {{
+            submitting
+              ? ('common.saving' | transloco)
+              : ((isNew ? 'records.form.submit' : 'common.saveChanges')
+                | transloco)
+          }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

@@ -1,0 +1,371 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="
+      (isNew
+        ? 'workouts.benchmarks.create.title'
+        : 'workouts.benchmarks.edit.title'
+      ) | transloco
+    "
+    [subtitle]="
+      (isNew
+        ? 'workouts.benchmarks.create.subtitle'
+        : 'workouts.benchmarks.edit.subtitle'
+      ) | transloco
+    "
+    [back]="{
+      label: ('workouts.benchmarks.backToList' | transloco),
+      link: '/workouts/benchmarks',
+    }"
+  />
+
+  @if (loading) {
+    <p class="notice" role="status">
+      {{ 'workouts.benchmarks.loadingOne' | transloco }}
+    </p>
+  } @else if (errorMessage && !catalogue.length) {
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
+  } @else {
+    <form class="panel" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <div class="form-grid">
+        @if (isNew) {
+          <fieldset class="bm-kind">
+            <legend class="form-field__label">
+              {{ 'workouts.benchmarks.fields.kind' | transloco }}
+            </legend>
+            @for (kind of ['BENCHMARK', 'LIFT']; track kind) {
+              <label class="form-field form-field--check">
+                <input
+                  type="radio"
+                  formControlName="kind"
+                  [value]="kind"
+                  [attr.data-testid]="'benchmark-kind-' + kind"
+                />
+                <span>
+                  {{ kind | enumLabel: 'benchmarkKind' }}
+                  <span class="form-field__hint bm-kind__hint">{{
+                    (kind === 'LIFT'
+                      ? 'workouts.benchmarks.fields.kindLiftHint'
+                      : 'workouts.benchmarks.fields.kindBenchmarkHint'
+                    ) | transloco
+                  }}</span>
+                </span>
+              </label>
+            }
+          </fieldset>
+        } @else {
+          <p class="bm-kind__fixed">
+            {{ 'workouts.benchmarks.fields.kind' | transloco }}:
+            <strong>{{
+              form.controls.kind.value | enumLabel: 'benchmarkKind'
+            }}</strong>
+          </p>
+        }
+
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="benchmark-name">{{
+              'workouts.benchmarks.fields.name' | transloco
+            }}</label>
+            <input
+              id="benchmark-name"
+              type="text"
+              formControlName="name"
+              aria-describedby="benchmark-name-help"
+              [attr.aria-invalid]="showError('name')"
+            />
+            @if (showError('name')) {
+              <span class="form-field__error" id="benchmark-name-help">{{
+                'workouts.benchmarks.fields.nameError'
+                  | transloco: { max: limits.name }
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="benchmark-name-help">{{
+                (isLift
+                  ? 'workouts.benchmarks.fields.nameHintLift'
+                  : 'workouts.benchmarks.fields.nameHint'
+                ) | transloco: { max: limits.name }
+              }}</span>
+            }
+          </div>
+
+          @if (!isLift) {
+            <div class="form-field">
+              <label class="form-field__label" for="benchmark-score">{{
+                'workouts.benchmarks.fields.scoreType' | transloco
+              }}</label>
+              <select
+                id="benchmark-score"
+                formControlName="scoreType"
+                aria-describedby="benchmark-score-help"
+              >
+                @for (type of scoreTypes; track type) {
+                  <option [value]="type">
+                    {{ type | enumLabel: 'scoreType' }}
+                  </option>
+                }
+              </select>
+              <span class="form-field__hint" id="benchmark-score-help">{{
+                (benchmark && benchmark.resultCount
+                  ? 'workouts.benchmarks.fields.scoreTypeLocked'
+                  : 'workouts.benchmarks.fields.scoreTypeHint'
+                ) | transloco
+              }}</span>
+            </div>
+          }
+
+          @if (!isLift && form.controls.scoreType.value === 'TIME') {
+            <div class="form-field">
+              <label class="form-field__label" for="benchmark-cap">
+                {{ 'workouts.benchmarks.fields.timeCap' | transloco }}
+                <span class="form-field__optional">{{
+                  'common.optional' | transloco
+                }}</span>
+              </label>
+              <input
+                id="benchmark-cap"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                formControlName="timeCapMinutes"
+                aria-describedby="benchmark-cap-help"
+                [attr.aria-invalid]="showError('timeCapMinutes')"
+              />
+              @if (showError('timeCapMinutes')) {
+                <span class="form-field__error" id="benchmark-cap-help">{{
+                  'workouts.benchmarks.fields.timeCapError' | transloco
+                }}</span>
+              } @else {
+                <span class="form-field__hint" id="benchmark-cap-help">{{
+                  'workouts.benchmarks.fields.timeCapHint' | transloco
+                }}</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-field__label" for="benchmark-description">
+              {{ 'workouts.benchmarks.fields.description' | transloco }}
+              @if (isLift) {
+                <span class="form-field__optional">{{
+                  'common.optional' | transloco
+                }}</span>
+              }
+            </label>
+            <textarea
+              id="benchmark-description"
+              class="bm-description"
+              rows="7"
+              formControlName="description"
+              aria-describedby="benchmark-description-help"
+              [attr.aria-invalid]="showError('description')"
+            ></textarea>
+            @if (showError('description')) {
+              <span class="form-field__error" id="benchmark-description-help">{{
+                'workouts.benchmarks.fields.descriptionError'
+                  | transloco: { max: limits.description }
+              }}</span>
+            } @else {
+              <span class="form-field__hint" id="benchmark-description-help">{{
+                (isLift
+                  ? 'workouts.benchmarks.fields.descriptionHintLift'
+                  : 'workouts.benchmarks.fields.descriptionHint'
+                ) | transloco: { max: limits.description }
+              }}</span>
+            }
+          </div>
+        </div>
+
+        @if (isLift) {
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-field__label" for="benchmark-lift-exercise">{{
+                'workouts.benchmarks.fields.liftExercise' | transloco
+              }}</label>
+              <select
+                id="benchmark-lift-exercise"
+                aria-describedby="benchmark-lift-exercise-help"
+                [attr.aria-invalid]="exercisesError"
+                (change)="setLiftExercise($any($event.target).value)"
+              >
+                <option value="" [selected]="!listed.length">
+                  {{ 'workouts.form.exercises.choose' | transloco }}
+                </option>
+                @for (exercise of liftChoices; track exercise.id) {
+                  <option
+                    [value]="exercise.id"
+                    [selected]="listed[0]?.id === exercise.id"
+                  >
+                    {{ exercise.name }}
+                  </option>
+                }
+              </select>
+              @if (exercisesError) {
+                <span
+                  class="form-field__error"
+                  id="benchmark-lift-exercise-help"
+                  >{{
+                    'workouts.benchmarks.fields.liftExerciseError' | transloco
+                  }}</span
+                >
+              } @else {
+                <span
+                  class="form-field__hint"
+                  id="benchmark-lift-exercise-help"
+                  >{{
+                    'workouts.benchmarks.fields.liftExerciseHint' | transloco
+                  }}</span
+                >
+              }
+            </div>
+          </div>
+        } @else {
+          <section
+            class="bm-exercises"
+            aria-labelledby="bm-exercises-title"
+            data-testid="benchmark-exercises"
+          >
+            <h2 class="panel__title" id="bm-exercises-title">
+              {{ 'workouts.benchmarks.fields.exercises' | transloco }}
+            </h2>
+            @if (listed.length) {
+              <ol class="bm-list">
+                @for (exercise of listed; track exercise.id; let i = $index) {
+                  <li class="bm-list__item" [attr.data-testid]="'listed-' + i">
+                    <span class="bm-list__name">{{ exercise.name }}</span>
+                    @if (!exercise.isActive) {
+                      <app-chip tone="neutral">{{
+                        'common.inactive' | transloco
+                      }}</app-chip>
+                    }
+                    <span class="bm-list__actions">
+                      <button
+                        class="icon-btn"
+                        type="button"
+                        [disabled]="i === 0"
+                        [attr.aria-label]="
+                          'workouts.form.exercises.moveUp'
+                            | transloco: { n: i + 1 }
+                        "
+                        (click)="move(i, -1)"
+                      >
+                        <app-icon name="chevron-up" />
+                      </button>
+                      <button
+                        class="icon-btn"
+                        type="button"
+                        [disabled]="i === listed.length - 1"
+                        [attr.aria-label]="
+                          'workouts.form.exercises.moveDown'
+                            | transloco: { n: i + 1 }
+                        "
+                        (click)="move(i, 1)"
+                      >
+                        <app-icon name="chevron-down" />
+                      </button>
+                      <button
+                        class="icon-btn icon-btn--danger"
+                        type="button"
+                        [attr.aria-label]="
+                          'workouts.form.exercises.remove'
+                            | transloco: { n: i + 1 }
+                        "
+                        (click)="removeAt(i)"
+                      >
+                        <app-icon name="trash" />
+                      </button>
+                    </span>
+                  </li>
+                }
+              </ol>
+            } @else {
+              <p
+                [class]="exercisesError ? 'form-field__error' : 'text-muted'"
+                data-testid="no-exercises"
+              >
+                {{ 'workouts.benchmarks.fields.exercisesEmpty' | transloco }}
+              </p>
+            }
+            <div class="bm-add">
+              <div class="form-field bm-add__field">
+                <label class="form-field__label" for="benchmark-add-exercise">{{
+                  'workouts.form.exercises.add' | transloco
+                }}</label>
+                <select
+                  id="benchmark-add-exercise"
+                  [disabled]="listed.length >= limits.exercises"
+                  (change)="toAdd = $any($event.target).value"
+                >
+                  <option value="" [selected]="!toAdd">
+                    {{ 'workouts.form.exercises.choose' | transloco }}
+                  </option>
+                  @for (exercise of addable; track exercise.id) {
+                    <option
+                      [value]="exercise.id"
+                      [selected]="toAdd === exercise.id"
+                    >
+                      {{ exercise.name }}
+                    </option>
+                  }
+                </select>
+              </div>
+              <button
+                class="btn btn--secondary"
+                type="button"
+                data-testid="add-exercise"
+                [disabled]="!toAdd || listed.length >= limits.exercises"
+                (click)="addExercise()"
+              >
+                {{ 'workouts.form.exercises.addButton' | transloco }}
+              </button>
+            </div>
+          </section>
+        }
+
+        <label class="form-field form-field--check">
+          <input type="checkbox" formControlName="isActive" />
+          <span>{{ 'workouts.benchmarks.fields.isActive' | transloco }}</span>
+        </label>
+      </div>
+
+      @if (errorMessage) {
+        <p class="notice notice--danger" role="alert">
+          {{ errorMessage | uiMessage }}
+        </p>
+      }
+
+      <div class="form-actions">
+        @if (benchmark) {
+          <button
+            class="btn btn--danger"
+            type="button"
+            data-testid="benchmark-delete"
+            (click)="deleteBenchmark()"
+            [disabled]="busy"
+          >
+            {{
+              (deleting
+                ? 'workouts.benchmarks.edit.deleting'
+                : 'workouts.benchmarks.edit.delete'
+              ) | transloco
+            }}
+          </button>
+        }
+        <button class="btn btn--primary" type="submit" [disabled]="busy">
+          {{
+            submitting
+              ? ('common.saving' | transloco)
+              : ((isNew
+                  ? 'workouts.benchmarks.create.submit'
+                  : 'common.saveChanges'
+                ) | transloco)
+          }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

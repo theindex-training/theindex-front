@@ -1,0 +1,84 @@
+.bm-kind {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.bm-kind > legend {
+  margin-bottom: var(--space-2);
+  padding: 0;
+}
+
+.bm-kind__hint {
+  display: block;
+}
+
+.bm-kind__fixed {
+  margin: 0;
+}
+
+.bm-description {
+  min-height: 10rem;
+  line-height: 1.5;
+}
+
+.bm-exercises {
+  display: grid;
+  gap: var(--space-3);
+
+  .panel__title,
+  p {
+    margin: 0;
+  }
+}
+
+.bm-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: exercise;
+}
+
+.bm-list__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  counter-increment: exercise;
+}
+
+.bm-list__name {
+  flex: 1 1 12rem;
+  font-weight: 600;
+
+  &::before {
+    content: counter(exercise) '. ';
+    color: var(--muted);
+    font-weight: 500;
+  }
+}
+
+.bm-list__actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.bm-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.bm-add__field {
+  flex: 1 1 16rem;
+}

@@ -1,0 +1,206 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="benchmark?.name ?? ('records.detail.title' | transloco)"
+    [subtitle]="scoring()"
+    [back]="{ label: ('records.backToRecords' | transloco), link: backLink }"
+  />
+
+  @if (loading) {
+    <p class="notice" role="status">
+      {{ 'records.detail.loading' | transloco }}
+    </p>
+  } @else if (errorMessage || !benchmark) {
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
+  } @else {
+    @if (!benchmark.isActive) {
+      <p class="notice notice--warning" data-testid="benchmark-inactive">
+        {{ 'records.detail.inactive' | transloco }}
+      </p>
+    } @else if (canLog) {
+      <div class="detail-actions">
+        <a
+          class="btn btn--primary"
+          data-testid="log-result"
+          [routerLink]="['/records', benchmark.id, 'log']"
+          >{{ 'records.log' | transloco }}</a
+        >
+      </div>
+    }
+
+    @if (benchmark.description) {
+      <div class="panel">
+        <p
+          class="detail-description"
+          data-testid="benchmark-description"
+          [textContent]="benchmark.description"
+        ></p>
+      </div>
+    } @else if (!isBenchmark) {
+      <p class="text-muted detail-lift-hint">
+        {{ 'records.detail.liftHint' | transloco }}
+      </p>
+    }
+
+    @if (benchmark.exercises.length) {
+      <section class="page-stack" aria-labelledby="benchmark-exercises-title">
+        <h2 class="detail-heading" id="benchmark-exercises-title">
+          {{
+            (isBenchmark
+              ? 'records.detail.movements'
+              : 'records.detail.movement'
+            ) | transloco
+          }}
+        </h2>
+        <ol class="movements">
+          @for (exercise of benchmark.exercises; track exercise.id) {
+            <li
+              class="panel movement"
+              [attr.data-testid]="'benchmark-exercise-' + exercise.id"
+            >
+              <h3 class="movement__name">{{ exercise.name }}</h3>
+              @if (exercise.description) {
+                <p
+                  class="movement__description"
+                  [textContent]="exercise.description"
+                ></p>
+              }
+              @if (exercise.videoUrl) {
+                <app-exercise-video
+                  [name]="exercise.name"
+                  [url]="exercise.videoUrl"
+                />
+              }
+            </li>
+          }
+        </ol>
+      </section>
+    }
+
+    @if (actionError) {
+      <p class="notice notice--danger" role="alert">
+        {{ actionError | uiMessage }}
+      </p>
+    }
+
+    <div class="boards" [class.boards--two]="isBenchmark">
+      <section class="panel board" aria-labelledby="board-rx-title">
+        <h2 class="panel__title" id="board-rx-title">
+          {{ (isBenchmark ? 'records.rx' : 'records.board.title') | transloco }}
+          <span class="text-muted">{{
+            'records.people' | transloco: { count: board.rx.length }
+          }}</span>
+        </h2>
+        <app-leaderboard-list
+          data-testid="board-rx"
+          [entries]="board.rx"
+          [scoreType]="benchmark.scoreType"
+          [label]="
+            boardLabel(isBenchmark ? 'records.rx' : 'records.board.title')
+          "
+          [emptyText]="'records.board.empty' | transloco"
+          [canDelete]="isAdmin"
+          (remove)="deleteEntry($event)"
+        />
+      </section>
+      @if (isBenchmark) {
+        <section class="panel board" aria-labelledby="board-scaled-title">
+          <h2 class="panel__title" id="board-scaled-title">
+            {{ 'records.scaled' | transloco }}
+            <span class="text-muted">{{
+              'records.people' | transloco: { count: board.scaled.length }
+            }}</span>
+          </h2>
+          <app-leaderboard-list
+            data-testid="board-scaled"
+            [entries]="board.scaled"
+            [scoreType]="benchmark.scoreType"
+            [label]="boardLabel('records.scaled')"
+            [emptyText]="'records.board.emptyScaled' | transloco"
+            [canDelete]="isAdmin"
+            (remove)="deleteEntry($event)"
+          />
+        </section>
+      }
+    </div>
+
+    @if (canLog) {
+      <section class="page-stack" aria-labelledby="my-results-title">
+        <div class="section-header">
+          <h2 class="detail-heading" id="my-results-title">
+            {{ 'records.detail.mine' | transloco }}
+          </h2>
+        </div>
+        @if (!mine.length) {
+          <p class="text-muted" data-testid="no-my-results">
+            {{ 'records.detail.mineEmpty' | transloco }}
+          </p>
+        } @else {
+          <ul
+            class="list-card"
+            [attr.aria-label]="'records.detail.mine' | transloco"
+          >
+            @for (result of mine; track result.id) {
+              <li class="record" [attr.data-testid]="'my-result-' + result.id">
+                <div class="record__main">
+                  <span class="record__title num">{{ score(result) }}</span>
+                  <span class="record__meta">{{
+                    day(result.performedOn)
+                  }}</span>
+                  @if (result.note) {
+                    <span
+                      class="record__meta mine__note"
+                      [textContent]="result.note"
+                    ></span>
+                  }
+                  <span class="mine__chips">
+                    @if (result.scaled) {
+                      <app-chip tone="neutral">{{
+                        'records.scaled' | transloco
+                      }}</app-chip>
+                    }
+                    @if (result.personalBest) {
+                      <app-chip tone="success">{{
+                        'records.personalBest' | transloco
+                      }}</app-chip>
+                    }
+                  </span>
+                </div>
+                <div class="mine__actions">
+                  <a
+                    class="icon-btn"
+                    [routerLink]="[
+                      '/records',
+                      benchmark.id,
+                      'results',
+                      result.id,
+                    ]"
+                    [attr.aria-label]="
+                      'records.detail.editMine'
+                        | transloco: { day: day(result.performedOn) }
+                    "
+                  >
+                    <app-icon name="pencil" />
+                  </a>
+                  <button
+                    class="icon-btn icon-btn--danger"
+                    type="button"
+                    [disabled]="deletingId !== null"
+                    [attr.aria-label]="
+                      'records.detail.deleteMine'
+                        | transloco: { day: day(result.performedOn) }
+                    "
+                    (click)="deleteMine(result)"
+                  >
+                    <app-icon name="trash" />
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  }
+</section>

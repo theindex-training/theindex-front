@@ -24,6 +24,7 @@ describe('buildNavigation', () => {
       'Attendance history',
       'Settlements',
       'Workouts',
+      'Records',
       'Cash register',
     ]);
     expect(labels(nav.manage)).toEqual([
@@ -48,6 +49,7 @@ describe('buildNavigation', () => {
       'Renewals',
       'Attendance history',
       'Workouts',
+      'Records',
       'Cash register',
     ]);
     expect(english(nav.sheetLabel)).toBe('More');
@@ -70,6 +72,7 @@ describe('buildNavigation', () => {
       'Renewals',
       'Attendance history',
       'Workouts',
+      'Records',
     ]);
   });
 

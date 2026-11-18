@@ -147,12 +147,15 @@ test.describe('J8 trainee self-service', () => {
       await expect(page).toHaveURL(/\/stats$/);
       await expect(page.getByText('Georgi Ivanov')).toBeVisible();
       await expect(page.getByText('Monday')).toBeVisible();
-      const requestsBeforeRecords = api.requests.length;
+      // Records opens on the benchmarks' leaderboards (J21 covers the page itself).
+      api.on('GET', '/api/leaderboards', { body: [] });
       await tabs(page)
         .getByRole('link', { name: t('nav.records') })
         .click();
-      await expect(page.getByText(t('records.comingSoon'))).toBeVisible();
-      expect(api.requests.length).toBe(requestsBeforeRecords);
+      await expect(page.getByText(t('records.emptyBenchmarks'))).toBeVisible();
+      expect(api.last('GET', '/api/leaderboards')?.query).toEqual({
+        kind: 'BENCHMARK',
+      });
 
       // 5. The Account sheet is a modal dialog: focus moves in, Escape and a backdrop tap close it.
       const accountTab = tabs(page).getByRole('button', {

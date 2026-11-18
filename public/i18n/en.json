@@ -119,6 +119,16 @@
       "DRAFT": "Draft",
       "PUBLISHED": "Published",
       "UNPUBLISHED": "Unpublished"
+    },
+    "benchmarkKind": {
+      "BENCHMARK": "Benchmark",
+      "LIFT": "Heavy lift"
+    },
+    "scoreType": {
+      "TIME": "For time",
+      "ROUNDS_REPS": "AMRAP (rounds + reps)",
+      "REPS": "Max reps",
+      "LOAD": "Max load (1RM)"
     }
   },
   "trainees": {
@@ -1293,9 +1303,108 @@
     "trainingsCount": "{count, plural, one {# training} other {# trainings}}"
   },
   "records": {
-    "subtitle": "Your personal bests and benchmark results.",
-    "comingSoon": "Coming soon",
-    "comingSoonMessage": "Personal records will show up here once tracking is available."
+    "subtitle": "Benchmark workouts and heavy lifts: everyone's best results, and your own.",
+    "tabs": {
+      "label": "Records sections",
+      "benchmarks": "Benchmarks",
+      "lifts": "Heavy lifts",
+      "mine": "Mine"
+    },
+    "search": "Search by name or movement",
+    "loading": "Loading records",
+    "loadError": "Couldn't load records",
+    "loadErrorMessage": "Unable to load records right now.",
+    "emptyBenchmarks": "No benchmarks yet",
+    "emptyLifts": "No heavy lifts yet",
+    "emptyMessage": "Trainers add them under Workouts, in the Benchmarks tab.",
+    "noMatchesTitle": "No matches",
+    "noMatchesMessage": "Nothing matches the search.",
+    "rx": "Rx",
+    "scaled": "Scaled",
+    "people": "{count, plural, one {# person} other {# people}}",
+    "seeAll": "See all",
+    "log": "Log a result",
+    "myRx": "Your Rx best: {score} (#{rank})",
+    "myScaled": "Your scaled best: {score} (#{rank})",
+    "myBest": "Your best: {score} (#{rank})",
+    "personalBest": "Personal best",
+    "backToRecords": "Back to records",
+    "scoringWithCap": "{type} · Time cap {cap}",
+    "score": {
+      "capped": "Time cap + {reps, plural, one {# rep} other {# reps}}",
+      "roundsReps": "{rounds, plural, one {# round} other {# rounds}} + {reps, plural, one {# rep} other {# reps}}",
+      "rounds": "{rounds, plural, one {# round} other {# rounds}}",
+      "reps": "{reps, plural, one {# rep} other {# reps}}",
+      "load": "{kg} kg"
+    },
+    "board": {
+      "title": "Leaderboard",
+      "label": "{list} leaderboard of {name}",
+      "rank": "Place {rank}:",
+      "you": "You",
+      "coach": "Coach",
+      "delete": "Delete the result of {name}",
+      "empty": "No results yet. Be the first!",
+      "emptyScaled": "No scaled results yet."
+    },
+    "mine": {
+      "emptyTitle": "No results yet",
+      "emptyMessage": "Pick a benchmark or a heavy lift and log your first result.",
+      "browse": "See the benchmarks"
+    },
+    "detail": {
+      "title": "Benchmark",
+      "loading": "Loading...",
+      "loadError": "Unable to load this benchmark right now.",
+      "inactive": "This one is no longer active: it takes no new results, but its leaderboards stay.",
+      "liftHint": "One rep, as heavy as possible (1RM).",
+      "movements": "Movements",
+      "movement": "Movement",
+      "mine": "My results",
+      "mineEmpty": "You haven't logged a result here yet.",
+      "editMine": "Edit your result of {day}",
+      "deleteMine": "Delete your result of {day}",
+      "deleteMineConfirm": "Delete your result of {day}? This can't be undone.",
+      "deleteEntryConfirm": "Delete the result of {name}? Their next best result takes its place.",
+      "deleteError": "Unable to delete this result right now."
+    },
+    "form": {
+      "logTitle": "Log a result: {name}",
+      "editTitle": "Edit result: {name}",
+      "logRouteTitle": "Log a result",
+      "editRouteTitle": "Edit result",
+      "back": "Back to the benchmark",
+      "loading": "Loading...",
+      "loadError": "Enter a load from 0.5 to 1000 kg, in steps of 0.5.",
+      "saveError": "Unable to save the result right now.",
+      "day": "Day",
+      "dayHint": "The day you did it: today or earlier.",
+      "dayError": "Pick a day: today or earlier.",
+      "capped": "Not finished within the time cap ({cap})",
+      "repsDone": "Reps done",
+      "repsDoneHint": "All the reps you did before the time cap.",
+      "time": "Time",
+      "minutes": "Minutes",
+      "seconds": "Seconds",
+      "timeHint": "Minutes and seconds, e.g. 4 and 26 for 4:26.",
+      "timeError": "Enter the time: whole minutes and 0 to 59 seconds.",
+      "overCapError": "The time can't be over the time cap ({cap}): tick “Not finished” and enter the reps done.",
+      "rounds": "Rounds",
+      "roundsHint": "Whole rounds completed.",
+      "extraReps": "Extra reps",
+      "extraRepsHint": "Reps of the round you didn't finish.",
+      "reps": "Reps",
+      "repsHint": "Whole number, 0 or more.",
+      "wholeNumberError": "Enter a whole number, 0 or more.",
+      "load": "Load (kg)",
+      "loadHint": "In steps of 0.5 kg, e.g. 102.5.",
+      "scaled": "Scaled: not as prescribed (lighter, fewer reps or another movement)",
+      "note": "Note",
+      "noteHint": "Anything worth remembering. Up to {max} characters.",
+      "noteHintScaled": "How did you scale it? e.g. 30 kg thrusters, band pull-ups. Up to {max} characters.",
+      "noteError": "The note must be at most {max} characters.",
+      "submit": "Save result"
+    }
   },
   "system": {
     "notFound": {
@@ -1313,7 +1422,8 @@
       "label": "Workouts sections",
       "schedule": "Schedule",
       "workouts": "Workouts",
-      "exercises": "Exercises"
+      "exercises": "Exercises",
+      "benchmarks": "Benchmarks"
     },
     "list": {
       "title": "Workouts",
@@ -1456,6 +1566,70 @@
         "delete": "Delete exercise",
         "deleting": "Deleting...",
         "deleteConfirm": "Delete “{name}”? An exercise used in workouts can't be deleted, only made inactive."
+      }
+    },
+    "benchmarks": {
+      "backToList": "Back to benchmarks",
+      "loadingOne": "Loading...",
+      "list": {
+        "title": "Benchmarks and heavy lifts",
+        "subtitle": "What people log their results on, shown on Records.",
+        "new": "New benchmark",
+        "search": "Search benchmarks and lifts",
+        "count": "{shown} of {total}",
+        "loading": "Loading benchmarks",
+        "loadError": "Couldn't load benchmarks",
+        "loadErrorMessage": "Unable to load benchmarks right now.",
+        "emptyTitle": "No benchmarks yet",
+        "emptyMessage": "Add a benchmark like Fran, or a heavy lift like Back Squat.",
+        "noMatchesTitle": "No matches",
+        "noMatchesMessage": "Nothing matches the search and the filter.",
+        "tableLabel": "Benchmarks table",
+        "editColumn": "Edit",
+        "results": "Results"
+      },
+      "fields": {
+        "kind": "Kind",
+        "kindBenchmarkHint": "A workout of one or more movements, done Rx or scaled, e.g. Fran.",
+        "kindLiftHint": "One movement, one rep, the heaviest load (1RM), e.g. Deadlift.",
+        "name": "Name",
+        "nameHint": "Up to {max} characters, e.g. Fran.",
+        "nameHintLift": "Up to {max} characters, usually the movement’s name, e.g. Back Squat.",
+        "nameError": "Enter a name of up to {max} characters.",
+        "scoreType": "Scored by",
+        "scoreTypeHint": "How results are compared.",
+        "scoreTypeLocked": "It has results: its scoring can no longer change.",
+        "timeCap": "Time cap (minutes)",
+        "timeCapHint": "Whoever doesn’t finish in time logs the reps done. Empty: no time cap.",
+        "timeCapError": "Whole minutes, from 1 to 1440.",
+        "description": "Description",
+        "descriptionHint": "The workout as people read it, e.g. 21-15-9 reps of thrusters (43/29 kg) and pull-ups. Line breaks are kept. Up to {max} characters.",
+        "descriptionHintLift": "Anything worth knowing about it. Up to {max} characters.",
+        "descriptionError": "Write the workout, up to {max} characters.",
+        "exercises": "Movements",
+        "exercisesEmpty": "List the movements it uses, in order.",
+        "liftExercise": "Movement",
+        "liftExerciseHint": "The one movement lifted.",
+        "liftExerciseError": "Pick the movement.",
+        "isActive": "Active (shown on Records and takes new results)"
+      },
+      "create": {
+        "title": "New benchmark or lift",
+        "subtitle": "People log their results on it from Records.",
+        "submit": "Create"
+      },
+      "edit": {
+        "title": "Edit benchmark",
+        "subtitle": "Results already logged stay.",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "deleteConfirm": "Delete “{name}”? This can't be undone.",
+        "hasResults": "It has {count, plural, one {# result} other {# results}}, so it can't be deleted. Make it inactive instead."
+      },
+      "errors": {
+        "load": "Unable to load this benchmark right now.",
+        "save": "Unable to save the benchmark right now.",
+        "delete": "Unable to delete the benchmark right now."
       }
     }
   },

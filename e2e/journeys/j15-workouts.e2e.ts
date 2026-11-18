@@ -230,7 +230,8 @@ test.describe('J15 workouts', () => {
         .getByRole('link', { name: t('nav.workouts') })
         .click();
       await expect(page).toHaveURL(/\/workouts$/);
-      await expect(sections.getByRole('link')).toHaveCount(3);
+      // Schedule, Workouts, Exercises and Benchmarks (the records catalogue, J21).
+      await expect(sections.getByRole('link')).toHaveCount(4);
 
       await sections
         .getByRole('link', { name: t('workouts.nav.exercises') })
