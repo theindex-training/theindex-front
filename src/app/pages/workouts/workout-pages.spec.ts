@@ -800,6 +800,27 @@ describe('workouts area pages', () => {
         }
         const objectUrls: string[] = [];
         const revoked: string[] = [];
+        // URL is shared by every spec file of a test worker: the stubs below are put back after
+        // each test, so code elsewhere (e.g. a library making an object URL when it loads) never
+        // runs into them.
+        const realObjectUrl = Object.getOwnPropertyDescriptor(
+          URL,
+          'createObjectURL',
+        );
+        const realRevokeObjectUrl = Object.getOwnPropertyDescriptor(
+          URL,
+          'revokeObjectURL',
+        );
+
+        afterEach(() => {
+          for (const [name, real] of [
+            ['createObjectURL', realObjectUrl],
+            ['revokeObjectURL', realRevokeObjectUrl],
+          ] as const) {
+            if (real) Object.defineProperty(URL, name, real);
+            else delete (URL as unknown as Record<string, unknown>)[name];
+          }
+        });
 
         beforeEach(() => {
           objectUrls.length = 0;
