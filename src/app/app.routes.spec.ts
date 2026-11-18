@@ -32,6 +32,7 @@ const STAFF = ['ADMIN', 'TRAINER'];
 const ADMIN = ['ADMIN'];
 const TRAINEE = ['TRAINEE'];
 const WITH_PROFILE = ['TRAINEE', 'TRAINER'];
+const EVERYONE = ['ADMIN', 'TRAINER', 'TRAINEE'];
 
 /**
  * Who may open each page inside the app shell. `null` = any signed-in user (no roleGuard).
@@ -45,7 +46,10 @@ const SHELL_ACCESS: Record<string, string[] | null> = {
   'schedule/:id': TRAINEE,
   'schedule/:id/booked': TRAINEE,
   stats: TRAINEE,
-  records: TRAINEE,
+  records: EVERYONE,
+  'records/:id': EVERYONE,
+  'records/:id/log': EVERYONE,
+  'records/:id/results/:resultId': EVERYONE,
   'change-password': null,
   'my-details': WITH_PROFILE,
   accounts: ADMIN,
@@ -72,6 +76,9 @@ const SHELL_ACCESS: Record<string, string[] | null> = {
   'trainers/:id/account': ADMIN,
   'trainers/:id': ADMIN,
   trainers: ADMIN,
+  'workouts/benchmarks/new': STAFF,
+  'workouts/benchmarks/:id/edit': STAFF,
+  'workouts/benchmarks': STAFF,
   'workouts/exercises/new': STAFF,
   'workouts/exercises/:id/edit': STAFF,
   'workouts/exercises': STAFF,

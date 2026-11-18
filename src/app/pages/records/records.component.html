@@ -4,9 +4,117 @@
     [subtitle]="'records.subtitle' | transloco"
   />
 
-  <app-empty-state
-    icon="trophy"
-    [title]="'records.comingSoon' | transloco"
-    [message]="'records.comingSoonMessage' | transloco"
-  />
+  <div class="list-toolbar">
+    <app-segmented-control
+      [label]="'records.tabs.label' | transloco"
+      [options]="tabOptions"
+      [value]="tab"
+      (valueChange)="selectTab($event)"
+    />
+    @if (tab !== 'mine' && !loading && !errorMessage && items.length) {
+      <app-search-field
+        class="list-toolbar__search"
+        [label]="'records.search' | transloco"
+        [value]="term"
+        (valueChange)="term = $event; applySearch()"
+      />
+    }
+  </div>
+
+  @if (loading) {
+    <app-skeleton-list [label]="'records.loading' | transloco" />
+  } @else if (errorMessage) {
+    <app-empty-state
+      tone="danger"
+      [title]="'records.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="load()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else if (tab === 'mine') {
+    @if (!results.length) {
+      <app-empty-state
+        icon="trophy"
+        [title]="'records.mine.emptyTitle' | transloco"
+        [message]="'records.mine.emptyMessage' | transloco"
+      >
+        <a class="btn btn--primary" routerLink="/records">{{
+          'records.mine.browse' | transloco
+        }}</a>
+      </app-empty-state>
+    } @else {
+      <ul
+        class="list-card"
+        [attr.aria-label]="'records.tabs.mine' | transloco"
+        data-testid="my-results"
+      >
+        @for (result of results; track result.id) {
+          <li class="record" [attr.data-testid]="'my-result-' + result.id">
+            <div class="record__main">
+              <a
+                class="record__title"
+                [routerLink]="['/records', result.benchmark.id]"
+                >{{ result.benchmark.name }}</a
+              >
+              <span class="record__meta">{{ day(result.performedOn) }}</span>
+              @if (result.note) {
+                <span
+                  class="record__meta result__note"
+                  [textContent]="result.note"
+                ></span>
+              }
+            </div>
+            <div class="record__aside">
+              <span class="num">{{ score(result) }}</span>
+              <span class="result__chips">
+                @if (result.scaled) {
+                  <app-chip tone="neutral">{{
+                    'records.scaled' | transloco
+                  }}</app-chip>
+                }
+                @if (result.personalBest) {
+                  <app-chip tone="success">{{
+                    'records.personalBest' | transloco
+                  }}</app-chip>
+                }
+              </span>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  } @else if (!items.length) {
+    <app-empty-state
+      icon="trophy"
+      [title]="
+        (tab === 'lifts' ? 'records.emptyLifts' : 'records.emptyBenchmarks')
+          | transloco
+      "
+      [message]="'records.emptyMessage' | transloco"
+    />
+  } @else if (!filtered.length) {
+    <app-empty-state
+      icon="search"
+      [title]="'records.noMatchesTitle' | transloco"
+      [message]="'records.noMatchesMessage' | transloco"
+    >
+      <button class="btn btn--secondary" type="button" (click)="clearSearch()">
+        {{ 'common.showAll' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else {
+    <ul
+      class="cards"
+      [attr.aria-label]="
+        (tab === 'lifts' ? 'records.tabs.lifts' : 'records.tabs.benchmarks')
+          | transloco
+      "
+    >
+      @for (item of filtered; track item.id) {
+        <li><app-benchmark-card [item]="item" [canLog]="canLog" /></li>
+      }
+    </ul>
+  }
 </section>

@@ -136,7 +136,37 @@ export const routes: Routes = [
             (m) => m.RecordsComponent,
           ),
         canActivate: [roleGuard],
-        data: { roles: ['TRAINEE'] },
+        data: { roles: ['ADMIN', 'TRAINER', 'TRAINEE'] },
+      },
+      {
+        path: 'records/:id',
+        title: 'records.detail.title',
+        loadComponent: () =>
+          import('./pages/records/benchmark-detail.component').then(
+            (m) => m.BenchmarkDetailComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER', 'TRAINEE'] },
+      },
+      {
+        path: 'records/:id/log',
+        title: 'records.form.logRouteTitle',
+        loadComponent: () =>
+          import('./pages/records/result-edit.component').then(
+            (m) => m.ResultEditComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER', 'TRAINEE'] },
+      },
+      {
+        path: 'records/:id/results/:resultId',
+        title: 'records.form.editRouteTitle',
+        loadComponent: () =>
+          import('./pages/records/result-edit.component').then(
+            (m) => m.ResultEditComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER', 'TRAINEE'] },
       },
       {
         path: 'my-details',
@@ -502,6 +532,36 @@ export const routes: Routes = [
           ),
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
+      },
+      {
+        path: 'workouts/benchmarks/new',
+        title: 'workouts.benchmarks.create.title',
+        loadComponent: () =>
+          import('./pages/workouts/benchmarks/benchmark-edit.component').then(
+            (m) => m.BenchmarkEditComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
+        path: 'workouts/benchmarks/:id/edit',
+        title: 'workouts.benchmarks.edit.title',
+        loadComponent: () =>
+          import('./pages/workouts/benchmarks/benchmark-edit.component').then(
+            (m) => m.BenchmarkEditComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
+      },
+      {
+        path: 'workouts/benchmarks',
+        title: 'workouts.benchmarks.list.title',
+        loadComponent: () =>
+          import('./pages/workouts/benchmarks/benchmarks.component').then(
+            (m) => m.BenchmarksComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'TRAINER'] },
       },
       {
         path: 'workouts/exercises/new',

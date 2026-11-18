@@ -96,7 +96,8 @@ The review below turned up a few traps. Every spec should follow these.
 **`app.routes.ts` → `app.routes.spec.ts`** (route config is access control, so it gets pinned)
 - [x] Table test over the flattened route tree. Every path has exactly the documented `roleGuard` + `data.roles`:
   - ADMIN only: `trainers/**`, `settlements/new`, `cash-register`;
-  - TRAINEE only: `my-profile`, `stats`, `records`;
+  - TRAINEE only: `my-profile`, `stats`;
+  - every role: `records`, `records/:id`, `records/:id/log`, `records/:id/results/:resultId`;
   - `change-password`: authenticated users of any role, with no `roleGuard`;
   - everything else under the shell: ADMIN + TRAINER;
   - the shell itself has `authGuard`, and `login` has `loginGuard`.
@@ -443,7 +444,7 @@ One spec per service, each method asserting method, URL, query and body. These p
 - [x] `SearchFieldComponent`: input emits the value; Clear emits '' and refocuses the input.
 - [x] `AvatarComponent` initials, `RankedListComponent`, `SegmentedControlComponent` (existing).
 - [~] `AppComponent` "should create" adds nothing; the health-check test covers it.
-- Not unit-tested (presentational, covered by the pages and E2E): brand, chip, icon, status-dot, skeleton-list, empty-state, page-header, list-row, ui-button, sidebar, tab-bar, theme-switch, language-switch, not-found, unauthorized, records.
+- Not unit-tested (presentational, covered by the pages and E2E): brand, chip, icon, status-dot, skeleton-list, empty-state, page-header, list-row, ui-button, sidebar, tab-bar, theme-switch, language-switch, not-found, unauthorized.
 
 ### 13. Content: article categories (P1)
 
@@ -530,6 +531,27 @@ One spec per service, each method asserting method, URL, query and body. These p
 
 **`app.routes.spec.ts`, `navigation.spec.ts`**
 - [x] `/renewals` is for ADMIN and TRAINER (a trainee goes to `/my-profile`); the menu item sits right under Dashboard, and on phones first in the More sheet.
+
+### 17. Records: benchmarks and heavy lifts (P1)
+
+**`services/benchmarks.service.ts` → `benchmarks.service.spec.ts`**
+- [x] The catalogue (list with `kind`/`active`, get, create, update, delete), the leaderboards (`/benchmarks/:id/leaderboard`, `/leaderboards?kind=`) and the person's own results (`/benchmark-results/mine`, get, create, update, delete): methods, URLs and bodies.
+
+**Pure models: `score-format.spec.ts`, `result-form.spec.ts`, `benchmark-form.spec.ts`**
+- [x] Scores in words ("4:26", "Time cap + 80 reps", "12 rounds + 5 reps", "102.5 kg"), Bulgarian plurals and decimal comma; "For time · Time cap 10:00".
+- [x] The result form: today by default, never a later day; only the score type's fields are on and sent (the rest as null); a time of at least a second and within the cap; capped → the reps done and no time; kg in steps of 0.5; a lift is never scaled; an existing result fills back in.
+- [x] The catalogue form: a benchmark needs a description, sends its time cap in seconds (only for TIME); a lift sends no score type or time cap; edits send everything but the kind.
+
+**`pages/records/records-pages.spec.ts`**
+- [x] Overview: each card with the top of its Rx and scaled lists, the person's own row marked and their best; a card nobody is on collapses to one line; search by name or movement; the lifts and "Mine" tabs (in the address); errors with Try again. An admin without a profile gets no "Mine" tab and no log links.
+- [x] A benchmark's page: description, movements with their descriptions and videos, both whole lists, the person's own results with edit and delete (asked first); an admin deletes anyone's result after asking; an inactive one offers no logging.
+- [x] The result form: logs a time (POST body), refuses one over the cap, logs the reps when capped, shows the API's error and stays; edits a lift result with a PATCH; both go back to the benchmark.
+
+**`pages/workouts/benchmarks/benchmark-pages.spec.ts`** (staff)
+- [x] The list (kind, scoring, results, filter); creating a lift (one movement, inactive ones not offered) and a benchmark (movements in the order given, none → an error and no request; the API's 409 shown); editing one with results (score type fixed, delete refused without asking); deleting one without results.
+
+**`app.routes.spec.ts`, `navigation.spec.ts`**
+- [x] `/records/**` is for every role; `/workouts/benchmarks/**` for ADMIN and TRAINER; staff get "Records" after Workouts (in the More sheet on phones).
 
 ---
 
@@ -706,7 +728,7 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
    - `GET /api/plans`
 2. Subscriptions are filtered to Active. Switching to Exhausted and then All changes the rows and the empty message. The trainings table renders.
 3. Tab "Stats" → `GET /api/trainees/me/training-insights`. The ranked lists render; weekdays come from `weekdayNumber`.
-4. Tab "Records" → coming-soon state, with no API call.
+4. Tab "Records" → the benchmarks' leaderboards (`GET /api/leaderboards?kind=BENCHMARK`; empty here). The page itself is J21.
 5. Tab "Account" (`aria-haspopup="dialog"`) opens the sheet, a real `<dialog>`. Check that:
    - the tab gets `aria-expanded="true"` and focus is inside the dialog;
    - Escape closes it, `aria-expanded` goes back to `false` and focus returns to the tab;
@@ -809,6 +831,12 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 ✅ `e2e/journeys/j20-account-setup.e2e.ts`, 2 tests (4 runs). Unit specs: `account-setup.component.spec.ts`, `setup.guard.spec.ts`, `account-setup.service.spec.ts`, the interceptor's 403, the login redirects and the route table. Two deliberate breaks (the guard letting everyone through, the password left out of the body) were each caught.
 1. Desktop and phone, trainee an admin created: signing in with a `setupRequired` token opens `/account-setup`, prefilled with what the admin entered; `/my-profile` sends them back; a 409 shows the API's message and stays; saving posts every field, stores the answered token and opens My profile.
 2. A token without the claim (issued before the setup existed): the API's 403 `ACCOUNT_SETUP_REQUIRED` sends the person to the form, here without the password fields (`passwordChangeRequired: false`).
+
+### J21. Records (P1) [desktop, mobile]
+✅ `e2e/journeys/j21-records.e2e.ts`. Unit specs: section 17. Two deliberate breaks (a capped result still sending its time, the own row not marked) were each caught.
+1. A trainee opens Records from the tab bar, sees Fran's card with its movements and Rx list, opens Fran: its description and movements; no results of their own yet.
+2. Logs a scaled 6:52 with a note: the POST body has every score field (the others null); back on Fran, the scaled board and their own results show it, a personal best.
+3. Back to Records, the Heavy lifts tab (`?tab=lifts`): one list per lift, in kg.
 
 ---
 

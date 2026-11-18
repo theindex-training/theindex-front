@@ -1,0 +1,172 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="'workouts.benchmarks.list.title' | transloco"
+    [subtitle]="'workouts.benchmarks.list.subtitle' | transloco"
+    [action]="{
+      label: ('workouts.benchmarks.list.new' | transloco),
+      link: '/workouts/benchmarks/new',
+    }"
+  />
+
+  <app-workouts-nav />
+
+  @if (!loading && !errorMessage && benchmarks.length) {
+    <div class="list-toolbar">
+      <app-search-field
+        class="list-toolbar__search"
+        [label]="'workouts.benchmarks.list.search' | transloco"
+        [value]="term"
+        (valueChange)="term = $event; applyFilters()"
+      />
+      <app-segmented-control
+        [label]="'workouts.benchmarks.fields.kind' | transloco"
+        [options]="kindOptions"
+        [value]="kind"
+        (valueChange)="kind = $event; applyFilters()"
+      />
+      <p
+        class="list-toolbar__count"
+        data-testid="list-count"
+        aria-live="polite"
+      >
+        {{
+          'workouts.benchmarks.list.count'
+            | transloco: { shown: filtered.length, total: benchmarks.length }
+        }}
+      </p>
+    </div>
+  }
+
+  @if (loading) {
+    <app-skeleton-list
+      [label]="'workouts.benchmarks.list.loading' | transloco"
+    />
+  } @else if (errorMessage) {
+    <app-empty-state
+      tone="danger"
+      [title]="'workouts.benchmarks.list.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="load()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else if (!benchmarks.length) {
+    <app-empty-state
+      icon="trophy"
+      [title]="'workouts.benchmarks.list.emptyTitle' | transloco"
+      [message]="'workouts.benchmarks.list.emptyMessage' | transloco"
+    >
+      <a class="btn btn--primary" routerLink="/workouts/benchmarks/new">{{
+        'workouts.benchmarks.list.new' | transloco
+      }}</a>
+    </app-empty-state>
+  } @else if (!filtered.length) {
+    <app-empty-state
+      icon="search"
+      [title]="'workouts.benchmarks.list.noMatchesTitle' | transloco"
+      [message]="'workouts.benchmarks.list.noMatchesMessage' | transloco"
+    >
+      <button class="btn btn--secondary" type="button" (click)="clearFilters()">
+        {{ 'common.showAll' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else {
+    <div
+      class="data-table-wrap responsive-table"
+      tabindex="0"
+      role="region"
+      [attr.aria-label]="'workouts.benchmarks.list.tableLabel' | transloco"
+    >
+      <table class="data-table">
+        <caption class="visually-hidden">
+          {{
+            'workouts.benchmarks.list.title' | transloco
+          }}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">
+              {{ 'workouts.benchmarks.fields.name' | transloco }}
+            </th>
+            <th scope="col">
+              {{ 'workouts.benchmarks.fields.kind' | transloco }}
+            </th>
+            <th scope="col">
+              {{ 'workouts.benchmarks.fields.scoreType' | transloco }}
+            </th>
+            <th scope="col" class="cell-right">
+              {{ 'workouts.benchmarks.list.results' | transloco }}
+            </th>
+            <th scope="col">{{ 'common.status' | transloco }}</th>
+            <th scope="col" class="cell-fit">
+              <span class="visually-hidden">{{
+                'workouts.benchmarks.list.editColumn' | transloco
+              }}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (benchmark of filtered; track benchmark.id) {
+            <tr>
+              <td>
+                <a
+                  class="cell-link"
+                  [routerLink]="['/workouts/benchmarks', benchmark.id, 'edit']"
+                  >{{ benchmark.name }}</a
+                >
+              </td>
+              <td>{{ benchmark.kind | enumLabel: 'benchmarkKind' }}</td>
+              <td>{{ scoring(benchmark) }}</td>
+              <td class="cell-right num">{{ benchmark.resultCount }}</td>
+              <td>
+                <app-status-dot
+                  [tone]="benchmark.isActive ? 'success' : 'neutral'"
+                  >{{
+                    (benchmark.isActive ? 'common.active' : 'common.inactive')
+                      | transloco
+                  }}</app-status-dot
+                >
+              </td>
+              <td class="cell-fit">
+                <a
+                  class="row-chevron"
+                  [routerLink]="['/workouts/benchmarks', benchmark.id, 'edit']"
+                  tabindex="-1"
+                  aria-hidden="true"
+                >
+                  <app-icon name="chevron-right" />
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <ul
+      class="list-card responsive-list"
+      [attr.aria-label]="'workouts.benchmarks.list.title' | transloco"
+    >
+      @for (benchmark of filtered; track benchmark.id) {
+        <li>
+          <app-list-row
+            [link]="['/workouts/benchmarks', benchmark.id, 'edit']"
+            [title]="benchmark.name"
+            [dimmed]="!benchmark.isActive"
+          >
+            <span listRowMeta
+              >{{ benchmark.kind | enumLabel: 'benchmarkKind' }} ·
+              {{ scoring(benchmark) }}</span
+            >
+            @if (!benchmark.isActive) {
+              <app-chip listRowTrailing tone="neutral">{{
+                'common.inactive' | transloco
+              }}</app-chip>
+            }
+          </app-list-row>
+        </li>
+      }
+    </ul>
+  }
+</section>
