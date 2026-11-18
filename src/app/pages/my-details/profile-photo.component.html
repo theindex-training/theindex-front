@@ -1,0 +1,160 @@
+<section
+  class="panel"
+  aria-labelledby="profile-photo-title"
+  data-testid="profile-photo"
+>
+  <h2 class="panel__title" id="profile-photo-title">
+    {{ 'myDetails.photo.title' | transloco }}
+  </h2>
+
+  <div class="photo">
+    <app-avatar
+      class="photo__current"
+      [name]="name"
+      [photoUrl]="photo?.url"
+      data-testid="profile-photo-current"
+    />
+    <div class="photo__side">
+      <p class="photo__text text-muted">
+        {{
+          (photo ? 'myDetails.photo.shown' : 'myDetails.photo.none') | transloco
+        }}
+      </p>
+      @if (!editing) {
+        <div class="photo__actions">
+          <button
+            class="btn btn--secondary"
+            type="button"
+            [disabled]="busy"
+            (click)="choose()"
+          >
+            <app-icon name="image" />
+            {{
+              (photo ? 'myDetails.photo.change' : 'myDetails.photo.upload')
+                | transloco
+            }}
+          </button>
+          @if (photo) {
+            <button
+              class="btn btn--ghost"
+              type="button"
+              [disabled]="busy"
+              (click)="adjust()"
+            >
+              {{
+                (loadingOriginal
+                  ? 'myDetails.photo.loadingOriginal'
+                  : 'myDetails.photo.adjust'
+                ) | transloco
+              }}
+            </button>
+            <button
+              class="btn btn--danger"
+              type="button"
+              [disabled]="busy"
+              (click)="remove()"
+            >
+              {{ 'myDetails.photo.remove' | transloco }}
+            </button>
+          }
+        </div>
+        <p class="form-field__hint" id="profile-photo-hint">
+          {{ 'myDetails.photo.hint' | transloco }}
+        </p>
+      }
+      <input
+        #fileInput
+        class="visually-hidden"
+        type="file"
+        tabindex="-1"
+        aria-hidden="true"
+        data-testid="profile-photo-file"
+        [accept]="accept"
+        (change)="picked($event)"
+      />
+    </div>
+  </div>
+
+  @if (editing && imageFile) {
+    <div class="photo-editor" data-testid="profile-photo-editor">
+      <h3 class="photo-editor__title">
+        {{ 'myDetails.photo.editTitle' | transloco }}
+      </h3>
+      <p class="form-field__hint" id="profile-photo-edit-hint">
+        {{ 'myDetails.photo.editHint' | transloco }}
+      </p>
+      <div class="photo-editor__stage">
+        <image-cropper
+          class="photo-editor__cropper"
+          [style.--photo-aspect]="aspect"
+          [imageFile]="imageFile"
+          [maintainAspectRatio]="true"
+          [aspectRatio]="1"
+          [canvasRotation]="rotation / 90"
+          [cropper]="position"
+          [autoCrop]="false"
+          [cropperMinWidth]="64"
+          [resizeToWidth]="64"
+          format="jpeg"
+          output="base64"
+          [cropperFrameAriaLabel]="frameLabel"
+          [disabled]="saving"
+          (imageLoaded)="loaded($event)"
+          (cropperReady)="cropperReady($event)"
+          (loadImageFailed)="loadFailed()"
+        />
+      </div>
+      <div class="photo-editor__tools">
+        <button
+          class="icon-btn"
+          type="button"
+          [disabled]="saving || !ready"
+          [attr.aria-label]="'myDetails.photo.rotateLeft' | transloco"
+          [title]="'myDetails.photo.rotateLeft' | transloco"
+          (click)="rotate(-1)"
+        >
+          <app-icon name="rotate-ccw" />
+        </button>
+        <button
+          class="icon-btn"
+          type="button"
+          [disabled]="saving || !ready"
+          [attr.aria-label]="'myDetails.photo.rotateRight' | transloco"
+          [title]="'myDetails.photo.rotateRight' | transloco"
+          (click)="rotate(1)"
+        >
+          <app-icon name="rotate-cw" />
+        </button>
+      </div>
+      <div class="form-actions">
+        <button
+          class="btn btn--ghost"
+          type="button"
+          [disabled]="saving"
+          (click)="cancel()"
+        >
+          {{ 'common.cancel' | transloco }}
+        </button>
+        <button
+          class="btn btn--primary"
+          type="button"
+          [disabled]="saving || !ready"
+          (click)="save()"
+        >
+          {{ (saving ? 'common.saving' : 'myDetails.photo.save') | transloco }}
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
+  }
+  @if (successMessage) {
+    <p class="notice notice--success" role="status">
+      {{ successMessage | uiMessage }}
+    </p>
+  }
+</section>

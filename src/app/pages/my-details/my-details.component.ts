@@ -21,16 +21,19 @@ import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import {
   MyProfile,
   MyProfileService,
+  ProfilePhoto,
   UpdateMyProfilePayload,
 } from '../../services/my-profile.service';
 import {
   NamedOption,
   RegistrationService,
 } from '../../services/registration.service';
+import { ProfilePhotoComponent } from './profile-photo.component';
 
 /**
- * "My details" (TRAINEE, TRAINER): what people could enter when they registered. The name and email
- * are shown, not changed (an admin does that); the nickname is internal to staff and never shown.
+ * "My details" (TRAINEE, TRAINER): their profile photo, then what people could enter when they
+ * registered. The name and email are shown, not changed (an admin does that); the nickname is
+ * internal to staff and never shown.
  */
 @Component({
   selector: 'app-my-details',
@@ -42,6 +45,7 @@ import {
     UiMessagePipe,
     ContactFieldsComponent,
     PageHeaderComponent,
+    ProfilePhotoComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './my-details.component.html',
@@ -132,6 +136,10 @@ export class MyDetailsComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
     });
+  }
+
+  photoChanged(photo: ProfilePhoto | null): void {
+    if (this.profile) this.profile = { ...this.profile, photo };
   }
 
   private show(profile: MyProfile): void {

@@ -17,6 +17,25 @@ export const inactiveTrainee = {
   },
 };
 
+/**
+ * `GET /api/my-profile`: a trainee's or trainer's own details. The navigation's user block loads
+ * it for its avatar, so every test signed in as one gets this one unless it says otherwise.
+ */
+export const myProfile = (over: object = {}) => ({
+  profileType: 'trainee',
+  email: 'trainee@theindex.test',
+  name: 'Ivan Petrov',
+  phone: '0888 123 456',
+  gymSubscriptionId: null,
+  homeGymId: null,
+  instagram: null,
+  facebook: null,
+  tiktok: null,
+  consentAt: '2026-11-10T08:00:00.000Z',
+  photo: null,
+  ...over,
+});
+
 /** The two reports the staff dashboard (/home) loads. */
 export function mockStaffHome(
   api: ApiMock,

@@ -6,6 +6,7 @@ import {
   makeToken,
 } from '../../src/testing/jwt';
 import { ApiMock } from './api-mock';
+import { myProfile } from './data';
 
 export { expect };
 
@@ -24,12 +25,15 @@ interface Fixtures {
 
 /**
  * - Every /api request is answered by `api`; an unanswered one fails the test at the end.
+ *   `GET /api/my-profile` (the navigation's avatar) is answered by default with `myProfile()`.
  * - The UI starts in English (localStorage `lang`), so `t()` selectors apply. Seeded values are
  *   written once per tab, so a reload or the app's own logout/language switch behaves as in real use.
  */
 export const test = base.extend<Fixtures>({
   api: async ({ page }, use) => {
     const api = new ApiMock();
+    // The navigation's avatar of trainees and trainers (a test's own rule wins).
+    api.on('GET', '/api/my-profile', { body: myProfile() });
     await api.install(page);
     await use(api);
     expect(api.unhandled, 'API requests no rule answered').toEqual([]);

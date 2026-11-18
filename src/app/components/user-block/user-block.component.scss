@@ -12,18 +12,10 @@
 }
 
 .user__avatar {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--radius-md);
-  background: var(--nav-surface);
-  color: var(--nav-text-strong);
-  font-family: var(--font-heading);
-  font-size: var(--text-lg);
-  font-weight: 700;
+  --avatar-size: 2.5rem;
+  --avatar-radius: var(--radius-md);
+  --avatar-bg: var(--nav-surface);
+  --avatar-color: var(--nav-text-strong);
 }
 
 .user__text {

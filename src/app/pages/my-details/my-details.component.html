@@ -16,6 +16,12 @@
       </button>
     </div>
   } @else if (profile) {
+    <app-profile-photo
+      [name]="profile.name"
+      [photo]="profile.photo"
+      (photoChange)="photoChanged($event)"
+    />
+
     <form class="panel" [formGroup]="form" (ngSubmit)="save()" novalidate>
       <dl class="detail-list">
         <div>
