@@ -553,6 +553,19 @@ One spec per service, each method asserting method, URL, query and body. These p
 **`app.routes.spec.ts`, `navigation.spec.ts`**
 - [x] `/records/**` is for every role; `/workouts/benchmarks/**` for ADMIN and TRAINER; staff get "Records" after Workouts (in the More sheet on phones).
 
+### 18. Profile photos
+
+**Pure model: `pages/my-details/profile-photo.spec.ts`**
+- [x] Files: JPEG, PNG, WebP up to 15 MB; quarter turns both ways; the square as fractions of the turned picture, kept inside 0–1; a saved crop drawn back at the size the cropper shows. (Break: always sending rotation 0 is caught.)
+
+**`services/my-profile.service.spec.ts`, `components/avatar/avatar.component.spec.ts`, `components/user-block/user-block.component.spec.ts`**
+- [x] `PUT` multipart (file + crop fields), `PATCH` JSON, the kept picture as a blob, `DELETE`; `current` loaded once per account (never for admins, reset for another account) and updated by every photo change.
+- [x] The avatar shows the photo instead of the initials, and the initials again when it fails to load. The navigation shows a trainee's or trainer's photo, else their name's initials once loaded; admins and failures keep the email's initials. (Break: the navigation never showing the photo is caught.)
+
+**`pages/my-details/my-details.component.spec.ts`, `pages/records/records-pages.spec.ts`**
+- [x] My details: Upload with initials and nothing else without a photo; Choose another / Adjust / Remove with one; a wrong type or a file over 15 MB is refused before any request; Remove asks, then shows the initials (the API's error keeps the photo); Adjust fetches the kept picture and says when it can't. The cropper itself needs a real browser: J22.
+- [x] Leaderboard rows show the photo, or the initials without one.
+
 ---
 
 ## Part B — E2E user journeys (Playwright)
@@ -837,6 +850,13 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 1. A trainee opens Records from the tab bar, sees Fran's card with its movements and Rx list, opens Fran: its description and movements; no results of their own yet.
 2. Logs a scaled 6:52 with a note: the POST body has every score field (the others null); back on Fran, the scaled board and their own results show it, a personal best.
 3. Back to Records, the Heavy lifts tab (`?tab=lifts`): one list per lift, in kg.
+
+### J22. Profile photo (P1) [desktop]
+✅ `e2e/journeys/j22-profile-photo.e2e.ts`. Unit specs: section 18.
+1. A trainee without a photo opens My details; the navigation shows their initials.
+2. Uploads a 600×400 picture, turns it right and saves: the `PUT` carries the file and the cropper's own square as fractions of the turned 400×600 picture (`0, 0.166667, 1, 0.666667, 90`); the page and the navigation show the new photo, no initials.
+3. Adjusts the crop: the kept picture comes back with the saved square, sent as JSON (`PATCH`); the navigation shows the new crop.
+4. Removes the photo after confirming: initials again, and Upload.
 
 ---
 

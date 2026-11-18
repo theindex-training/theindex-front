@@ -9,15 +9,31 @@
   justify-content: center;
   width: var(--avatar-size, 2.75rem);
   height: var(--avatar-size, 2.75rem);
-  border-radius: var(--radius-lg);
-  background: var(--surface-2);
-  color: var(--text);
+  border-radius: var(--avatar-radius, var(--radius-lg));
+  background: var(--avatar-bg, var(--surface-2));
+  color: var(--avatar-color, var(--text));
   font-family: var(--font-heading);
-  font-size: var(--text-lg);
+  font-size: var(--avatar-font-size, var(--text-lg));
   font-weight: 700;
   letter-spacing: var(--heading-tracking);
 }
 
 .avatar--muted {
-  color: var(--muted);
+  color: var(--avatar-muted-color, var(--muted));
+}
+
+.avatar--photo {
+  overflow: hidden;
+}
+
+.avatar__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+// An inactive person's photo is greyed, as their name is.
+.avatar--muted .avatar__photo {
+  filter: grayscale(1);
 }

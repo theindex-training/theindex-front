@@ -75,6 +75,8 @@ export interface LeaderboardEntry extends Score {
   rank: number;
   resultId: string;
   name: string;
+  /** Their profile photo's thumbnail, or null (initials show instead). */
+  photoUrl: string | null;
   personType: 'TRAINEE' | 'TRAINER';
   /** The signed-in person's own row. */
   isMe: boolean;

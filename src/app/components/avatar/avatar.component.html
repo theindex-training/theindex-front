@@ -1,3 +1,20 @@
-<span class="avatar" [class.avatar--muted]="muted" aria-hidden="true">{{
-  initials
-}}</span>
+<span
+  class="avatar"
+  [class.avatar--muted]="muted"
+  [class.avatar--photo]="showPhoto"
+  aria-hidden="true"
+>
+  @if (showPhoto) {
+    <img
+      class="avatar__photo"
+      [src]="photoUrl"
+      alt=""
+      loading="lazy"
+      decoding="async"
+      data-testid="avatar-photo"
+      (error)="photoFailed()"
+    />
+  } @else {
+    {{ initials }}
+  }
+</span>

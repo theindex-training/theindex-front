@@ -16,6 +16,7 @@ test.describe('J21 records', () => {
     rank,
     resultId: `r-${name}`,
     name,
+    photoUrl: null,
     personType: 'TRAINEE',
     isMe: false,
     performedOn: '2026-11-10',

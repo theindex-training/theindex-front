@@ -1,0 +1,84 @@
+.photo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.photo__current {
+  --avatar-size: 7.5rem;
+  --avatar-radius: var(--radius-xl);
+  --avatar-font-size: var(--text-3xl);
+}
+
+.photo__side {
+  display: grid;
+  flex: 1 1 16rem;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.photo__text {
+  margin: 0;
+}
+
+.photo__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    --icon-size: 1.125rem;
+  }
+}
+
+.photo-editor {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.photo-editor__title {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.photo-editor__stage {
+  display: flex;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+// ngx-image-cropper's look, on the design tokens. The picture keeps its proportions inside a
+// box shorter than the screen, so the whole picture and the buttons under it stay visible.
+.photo-editor__cropper {
+  // The frame sits on any photo, so it uses the nav shell's tokens, which are the same light
+  // and accent colors in both themes.
+  --cropper-overlay-color: var(--surface-2);
+  --cropper-outline-color: var(--scrim);
+  --cropper-color: var(--nav-text-strong);
+  --cropper-border: 2px solid var(--nav-text-strong);
+  --cropper-hover-border: 2px solid var(--nav-text-strong);
+  --cropper-focus-border: 3px solid var(--nav-accent);
+  --cropper-resize-square-bg: var(--nav-accent);
+  --cropper-resize-square-border: 1px solid var(--nav-text-strong);
+  // A definite height, from the picture's proportions (`--photo-aspect`, set by the page) but
+  // never taller than most screens: the cropper fits the picture inside it (max-height alone
+  // doesn't), so the whole picture and the buttons under it stay visible.
+  width: 100%;
+  max-width: 40rem;
+  aspect-ratio: var(--photo-aspect, 1);
+  max-height: min(60vh, 32rem);
+}
+
+.photo-editor__tools {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+}

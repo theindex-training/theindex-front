@@ -6,6 +6,7 @@ import {
   Output,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { AvatarComponent } from '../../components/avatar/avatar.component';
 import { ChipComponent } from '../../components/chip/chip.component';
 import { IconComponent } from '../../components/icon/icon.component';
 import { LanguageService } from '../../i18n/language.service';
@@ -17,14 +18,15 @@ import {
 import { scoreText } from './score-format';
 
 /**
- * A ranked list of results (presentational): rank, name, score, day and note. The signed-in
+ * A ranked list of results (presentational): rank, the person's photo (or initials) and name,
+ * score, day and note. The signed-in
  * person's own row is marked. With `canDelete` (admins), each row has a delete button; the page
  * asks and deletes.
  */
 @Component({
   selector: 'app-leaderboard-list',
   standalone: true,
-  imports: [TranslocoPipe, ChipComponent, IconComponent],
+  imports: [TranslocoPipe, AvatarComponent, ChipComponent, IconComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (entries.length) {
@@ -38,6 +40,11 @@ import { scoreText } from './score-format';
             <span class="board__rank num" aria-hidden="true">{{
               entry.rank
             }}</span>
+            <app-avatar
+              class="board__avatar"
+              [name]="entry.name"
+              [photoUrl]="entry.photoUrl"
+            />
             <div class="board__main">
               <span class="board__name">
                 <span class="visually-hidden">{{
@@ -123,6 +130,12 @@ import { scoreText } from './score-format';
       text-align: center;
     }
 
+    .board__avatar {
+      --avatar-size: 2.5rem;
+      --avatar-radius: var(--radius-md);
+      --avatar-font-size: var(--text-sm);
+    }
+
     .board__main {
       display: grid;
       flex: 1;
@@ -162,16 +175,18 @@ import { scoreText } from './score-format';
     @container (max-width: 22rem) {
       .board__row {
         flex-wrap: wrap;
+        // Rank and avatar, and the gaps after them.
+        --board-lead: calc(2rem + 2.5rem + 2 * var(--space-3));
       }
 
       .board__main {
-        flex-basis: calc(100% - 2rem - var(--space-3));
+        flex-basis: calc(100% - var(--board-lead));
       }
 
       .board__score {
         order: 1;
         flex-basis: 100%;
-        padding-left: calc(2rem + var(--space-3));
+        padding-left: var(--board-lead);
         text-align: left;
       }
     }

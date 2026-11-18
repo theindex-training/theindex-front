@@ -36,6 +36,7 @@ const entry = (
   rank,
   resultId: `r-${name}`,
   name,
+  photoUrl: null,
   personType: 'TRAINEE',
   isMe: false,
   performedOn: '2026-06-20',
@@ -59,7 +60,10 @@ const FRAN_OVERVIEW: BenchmarkOverview = {
     { id: 'e2', name: 'Pull-up' },
   ],
   rx: [
-    entry(1, 'Mia', { timeSeconds: 240 }),
+    entry(1, 'Mia', {
+      timeSeconds: 240,
+      photoUrl: 'https://media.test/profile-photos/mia/s128.webp',
+    }),
     entry(2, 'John', { timeSeconds: 266, isMe: true }),
   ],
   rxCount: 2,
@@ -229,9 +233,16 @@ describe('records pages', () => {
       expect(text).toContain('For time · Time cap 10:00');
       expect(text).toContain('Thruster · Pull-up');
       const [rx, scaled] = Array.from(fran.querySelectorAll('ol'));
+      // Mia's photo; John has none, so his initials.
       expect(Array.from(rx.querySelectorAll('li')).map(words)).toEqual([
         '1 Place 1: Mia 20 Jun 2026 4:00',
-        '2 Place 2: John You 20 Jun 2026 4:26',
+        '2 JO Place 2: John You 20 Jun 2026 4:26',
+      ]);
+      const photos = Array.from(
+        rx.querySelectorAll('[data-testid="avatar-photo"]'),
+      ).map((img) => img.getAttribute('src'));
+      expect(photos).toEqual([
+        'https://media.test/profile-photos/mia/s128.webp',
       ]);
       expect(rx.querySelectorAll('li.is-me')).toHaveLength(1);
       expect(scaled.textContent).toContain('Coach');

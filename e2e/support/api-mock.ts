@@ -1,6 +1,6 @@
 import { Page, Request, Route } from '@playwright/test';
 
-export type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE';
+export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 export interface RecordedRequest {
   method: string;

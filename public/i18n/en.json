@@ -2007,6 +2007,32 @@
     "fixedHint": "Ask an admin to change your name or email.",
     "consent": "You agreed to the use of your personal data and to receiving emails on {date}.",
     "saved": "Your details are saved.",
-    "saveError": "Couldn't save your details."
+    "saveError": "Couldn't save your details.",
+    "photo": {
+      "title": "Profile photo",
+      "none": "Add a photo so people recognise you, e.g. on the leaderboards.",
+      "shown": "People see it next to your name, e.g. on the leaderboards.",
+      "upload": "Upload a photo",
+      "change": "Choose another photo",
+      "adjust": "Adjust the crop",
+      "remove": "Remove photo",
+      "removeConfirm": "Remove your profile photo?",
+      "hint": "JPEG, PNG or WebP, up to 15 MB.",
+      "editTitle": "Choose what shows",
+      "editHint": "Drag the square or its corners. With the keyboard: the arrow keys move it, Shift and an arrow key resize it.",
+      "frameLabel": "Selected area of the photo",
+      "rotateLeft": "Rotate left",
+      "rotateRight": "Rotate right",
+      "save": "Save photo",
+      "loadingOriginal": "Loading your photo...",
+      "wrongType": "Choose a JPEG, PNG or WebP image.",
+      "tooLarge": "The image is larger than 15 MB. Choose a smaller one.",
+      "unreadable": "This image can't be opened. Choose another one.",
+      "saved": "Your profile photo is saved.",
+      "removed": "Your profile photo is removed.",
+      "saveError": "Couldn't save the photo.",
+      "removeError": "Couldn't remove the photo.",
+      "loadError": "Couldn't load your photo."
+    }
   }
 }

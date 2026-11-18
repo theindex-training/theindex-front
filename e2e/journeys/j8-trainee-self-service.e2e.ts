@@ -268,8 +268,13 @@ test.describe('J8 trainee self-service', () => {
       await expect(
         page.getByText(t('traineeDashboard.missingProfile')),
       ).toHaveCount(0);
+      // The page loads nothing; only the navigation asks for the avatar (name, photo).
       expect(
-        api.requests.filter((request) => request.path !== '/api/health'),
+        api.requests.filter(
+          (request) =>
+            request.path !== '/api/health' &&
+            request.path !== '/api/my-profile',
+        ),
       ).toEqual([]);
     },
   );

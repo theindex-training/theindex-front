@@ -1,6 +1,11 @@
 <div class="user" [class.user--list]="layout === 'list'">
   <div class="user__identity">
-    <span class="user__avatar" aria-hidden="true">{{ initials }}</span>
+    <app-avatar
+      class="user__avatar"
+      [name]="avatarName"
+      [photoUrl]="photoUrl"
+      data-testid="user-avatar"
+    />
     <span class="user__text">
       <span
         class="user__email"
