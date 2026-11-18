@@ -419,6 +419,29 @@ describe('records pages', () => {
       expect(page.alert()).toBe('Result not found');
     });
 
+    it("goes back to the tab it is on: a lift's page to Heavy lifts", async () => {
+      await setUp('TRAINEE');
+      await open('/records/dl');
+      http.expectOne('/api/benchmarks/dl').flush(DEADLIFT);
+      http
+        .expectOne('/api/benchmarks/dl/leaderboard')
+        .flush({ rx: DEADLIFT_OVERVIEW.rx, scaled: [] });
+      http.expectOne('/api/benchmark-results/mine?benchmarkId=dl').flush([]);
+      await page.settle();
+
+      const back = page.query<HTMLAnchorElement>(
+        `a[href^="/records"]:not([href*="/dl"])`,
+      )!;
+      expect(back.textContent).toContain(texts.backToRecords);
+      expect(back.getAttribute('href')).toBe('/records?tab=lifts');
+      // A lift has one leaderboard and no scaled one.
+      expect(page.query('[data-testid="board-scaled"]')).toBeNull();
+
+      await page.click(`a[href="/records?tab=lifts"]`);
+      expect(router.url).toBe('/records?tab=lifts');
+      leavePage();
+    });
+
     it('says when it is no longer active, and offers no logging', async () => {
       await setUp('TRAINEE');
       await open('/records/fran');

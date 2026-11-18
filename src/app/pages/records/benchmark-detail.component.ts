@@ -4,7 +4,7 @@ import {
   Component,
   OnInit,
 } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, UrlTree } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { forkJoin, of } from 'rxjs';
 import { ChipComponent } from '../../components/chip/chip.component';
@@ -70,10 +70,12 @@ export class BenchmarkDetailComponent implements OnInit {
     private readonly language: LanguageService,
     private readonly format: LocaleFormatService,
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
     private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.canLog = canLogResults(auth);
     this.isAdmin = auth.getUserRole() === 'ADMIN';
+    this.backLink = router.createUrlTree(['/records']);
   }
 
   ngOnInit(): void {
@@ -85,10 +87,11 @@ export class BenchmarkDetailComponent implements OnInit {
     return this.benchmark?.kind === 'BENCHMARK';
   }
 
-  /** Back to the records tab it is on. */
-  get backLink(): string {
-    return this.benchmark?.kind === 'LIFT' ? '/records?tab=lifts' : '/records';
-  }
+  /**
+   * Back to the records tab it is on. A UrlTree, so `?tab=` stays a query parameter (in a string
+   * the "?" would be encoded into the path). Set once the benchmark is known.
+   */
+  backLink: UrlTree;
 
   load(): void {
     this.loading = true;
@@ -102,6 +105,9 @@ export class BenchmarkDetailComponent implements OnInit {
     }).subscribe({
       next: ({ benchmark, board, mine }) => {
         this.benchmark = benchmark;
+        this.backLink = this.router.createUrlTree(['/records'], {
+          queryParams: benchmark.kind === 'LIFT' ? { tab: 'lifts' } : {},
+        });
         this.board = board;
         this.mine = mine;
         this.loading = false;
