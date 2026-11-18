@@ -77,18 +77,21 @@ export class MyProfileService {
   readonly current = this.profile.asReadonly();
   /** The account `current` belongs to (a sign-in as someone else starts over). */
   private loadedFor: string | null = null;
-  private loading = false;
+  /** The account whose `loadCurrent()` request is on its way, if any. */
+  private loadingFor: string | null = null;
 
   get(): Observable<MyProfile> {
+    const account = this.auth.getAccountId();
     return this.http
       .get<MyProfile>(this.baseUrl)
-      .pipe(tap((profile) => this.remember(profile)));
+      .pipe(tap((profile) => this.remember(profile, account)));
   }
 
   update(payload: UpdateMyProfilePayload): Observable<MyProfile> {
+    const account = this.auth.getAccountId();
     return this.http
       .patch<MyProfile>(this.baseUrl, payload)
-      .pipe(tap((profile) => this.remember(profile)));
+      .pipe(tap((profile) => this.remember(profile, account)));
   }
 
   /**
@@ -102,16 +105,18 @@ export class MyProfileService {
     }
     const role = this.auth.getUserRole();
     if (role !== 'TRAINEE' && role !== 'TRAINER') return;
-    if (this.loadedFor || this.loading) return;
-    this.loading = true;
-    this.get().subscribe({
-      next: () => (this.loading = false),
-      error: () => (this.loading = false),
-    });
+    const account = this.auth.getAccountId();
+    if (this.loadedFor || this.loadingFor === account) return;
+    this.loadingFor = account;
+    const done = () => {
+      if (this.loadingFor === account) this.loadingFor = null;
+    };
+    this.get().subscribe({ next: done, error: done });
   }
 
   /** Sets a new photo: the picture (JPEG, PNG or WebP) and the square chosen on it. */
   uploadPhoto(file: Blob, crop: PhotoCrop): Observable<ProfilePhoto> {
+    const account = this.auth.getAccountId();
     const body = new FormData();
     body.append('file', file);
     for (const [field, value] of Object.entries(crop)) {
@@ -119,14 +124,15 @@ export class MyProfileService {
     }
     return this.http
       .put<ProfilePhoto>(`${this.baseUrl}/photo`, body)
-      .pipe(tap((photo) => this.rememberPhoto(photo)));
+      .pipe(tap((photo) => this.rememberPhoto(photo, account)));
   }
 
   /** Crops the kept picture again. */
   recropPhoto(crop: PhotoCrop): Observable<ProfilePhoto> {
+    const account = this.auth.getAccountId();
     return this.http
       .patch<ProfilePhoto>(`${this.baseUrl}/photo`, crop)
-      .pipe(tap((photo) => this.rememberPhoto(photo)));
+      .pipe(tap((photo) => this.rememberPhoto(photo, account)));
   }
 
   /** The picture the photo was cropped from (private: fetched with the token). */
@@ -137,18 +143,29 @@ export class MyProfileService {
   }
 
   removePhoto(): Observable<void> {
+    const account = this.auth.getAccountId();
     return this.http
       .delete<void>(`${this.baseUrl}/photo`)
-      .pipe(tap(() => this.rememberPhoto(null)));
+      .pipe(tap(() => this.rememberPhoto(null, account)));
   }
 
-  private remember(profile: MyProfile): void {
-    this.loadedFor = this.auth.getAccountId();
+  /**
+   * Keeps an answer as `current` only if it was asked for by the account still signed in: a
+   * sign-out and another sign-in while it was on its way must not show someone else's profile.
+   */
+  private remember(profile: MyProfile, account: string | null): void {
+    if (account !== this.auth.getAccountId()) return;
+    this.loadedFor = account;
     this.profile.set(profile);
   }
 
-  private rememberPhoto(photo: ProfilePhoto | null): void {
+  private rememberPhoto(
+    photo: ProfilePhoto | null,
+    account: string | null,
+  ): void {
     const profile = this.profile();
-    if (profile) this.profile.set({ ...profile, photo });
+    if (profile && account === this.loadedFor) {
+      this.profile.set({ ...profile, photo });
+    }
   }
 }

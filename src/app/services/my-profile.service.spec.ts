@@ -139,4 +139,21 @@ describe('MyProfileService photo and current profile', () => {
       .flush(profile({ profileType: 'trainer', name: 'Coach Ivo' }));
     expect(service.current()?.name).toBe('Coach Ivo');
   });
+
+  it("never keeps an answer for an account that signed out meanwhile, and loads the new one's", () => {
+    signInAs('TRAINEE', { sub: 'account-a' });
+    service.loadCurrent();
+    const first = http.expectOne('/api/my-profile');
+
+    // Signed out and in as someone else before the answer came.
+    signInAs('TRAINER', { sub: 'account-b' });
+    service.loadCurrent();
+    const second = http.expectOne('/api/my-profile');
+
+    first.flush(profile({ name: 'Ivan Petrov', photo: PHOTO }));
+    expect(service.current()).toBeNull();
+    second.flush(profile({ profileType: 'trainer', name: 'Coach Ivo' }));
+    expect(service.current()?.name).toBe('Coach Ivo');
+    expect(service.current()?.photo).toBeNull();
+  });
 });
