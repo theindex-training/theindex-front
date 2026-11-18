@@ -245,7 +245,10 @@
                 <tr>
                   <td>
                     <div class="person-cell">
-                      <app-avatar [name]="traineeName(item.traineeId)" />
+                      <app-avatar
+                        [name]="traineeName(item.traineeId)"
+                        [photoUrl]="traineePhoto(item.traineeId)"
+                      />
                       <div class="person-cell__text">
                         <a
                           class="cell-link"
@@ -298,7 +301,10 @@
         >
           @for (item of session.attendance; track item.id) {
             <li class="record">
-              <app-avatar [name]="traineeName(item.traineeId)" />
+              <app-avatar
+                [name]="traineeName(item.traineeId)"
+                [photoUrl]="traineePhoto(item.traineeId)"
+              />
               <div class="record__main">
                 <a
                   class="record__title"

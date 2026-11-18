@@ -24,6 +24,8 @@ export class ListRowComponent {
   @Input() titleSuffix = '';
   /** Name for the initials avatar; omit to hide the avatar. */
   @Input() avatarName = '';
+  /** The avatar's photo, if the person has one (else the initials show). */
+  @Input() avatarPhotoUrl: string | null | undefined = null;
   /** De-emphasizes the row (e.g. inactive records) while keeping text contrast ≥ 4.5:1. */
   @Input() dimmed = false;
 }

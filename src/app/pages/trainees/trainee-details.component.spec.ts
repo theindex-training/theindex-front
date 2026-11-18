@@ -147,6 +147,15 @@ describe('TraineeDetailsComponent: selling a subscription', () => {
     ]);
   });
 
+  it("shows the trainee's photo instead of the initials when they have one", async () => {
+    const photo = 'https://media.test/profile-photos/p1/s128.webp';
+    await open({ trainee: { ...TRAINEE, photoUrl: photo } });
+
+    const avatar = page.query('.profile__avatar')!;
+    expect(avatar.querySelector('img')?.getAttribute('src')).toBe(photo);
+    expect(avatar.textContent?.trim()).toBe('');
+  });
+
   it('shows only the social profiles given, linked to their network', async () => {
     await open({
       trainee: {

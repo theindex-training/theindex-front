@@ -92,6 +92,8 @@ export interface AttendanceSessionEntity {
   id: string;
   name: string;
   nickname?: string | null;
+  /** Trainees only: their profile photo's thumbnail, or null. */
+  photoUrl?: string | null;
 }
 
 export interface AttendanceTraineeTrainingItem {

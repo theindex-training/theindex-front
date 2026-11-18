@@ -1,6 +1,10 @@
 <a class="list-row" [class.list-row--dimmed]="dimmed" [routerLink]="link">
   @if (avatarName) {
-    <app-avatar [name]="avatarName" [muted]="dimmed" />
+    <app-avatar
+      [name]="avatarName"
+      [photoUrl]="avatarPhotoUrl"
+      [muted]="dimmed"
+    />
   }
   <span class="list-row__body">
     <span class="list-row__title">

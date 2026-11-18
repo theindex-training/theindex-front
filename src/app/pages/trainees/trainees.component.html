@@ -128,7 +128,10 @@
             <tr>
               <td>
                 <div class="person-cell">
-                  <app-avatar [name]="trainee.name" />
+                  <app-avatar
+                    [name]="trainee.name"
+                    [photoUrl]="trainee.photoUrl"
+                  />
                   <div class="person-cell__text">
                     <a
                       class="cell-link"
@@ -203,6 +206,7 @@
             [title]="trainee.name"
             [titleSuffix]="quotedNickname(trainee.nickname)"
             [avatarName]="trainee.name"
+            [avatarPhotoUrl]="trainee.photoUrl"
             [dimmed]="!trainee.isActive"
           >
             <span listRowMeta class="num">{{ formatPhone(trainee) }}</span>

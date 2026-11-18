@@ -60,6 +60,7 @@ export class AttendanceSessionsComponent implements OnInit {
 
   traineeNameById = new Map<string, string>();
   traineeNicknameById = new Map<string, string | null>();
+  traineePhotoById = new Map<string, string | null>();
   trainerNameById = new Map<string, string>();
   trainerNicknameById = new Map<string, string | null>();
   locationNameById = new Map<string, string>();
@@ -256,6 +257,11 @@ export class AttendanceSessionsComponent implements OnInit {
     return this.traineeNameById.get(traineeId) || '—';
   }
 
+  /** The trainee's profile photo thumbnail, or null (initials show instead). */
+  traineePhoto(traineeId: string): string | null {
+    return this.traineePhotoById.get(traineeId) ?? null;
+  }
+
   traineeNickname(traineeId: string): string {
     return this.traineeNicknameById.get(traineeId) || '—';
   }
@@ -336,6 +342,12 @@ export class AttendanceSessionsComponent implements OnInit {
       response.entities.trainees.map((item) => [
         item.id,
         item.nickname ?? null,
+      ]),
+    );
+    this.traineePhotoById = new Map(
+      response.entities.trainees.map((item) => [
+        item.id,
+        item.photoUrl ?? null,
       ]),
     );
     this.trainerNameById = new Map(

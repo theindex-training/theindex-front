@@ -19,6 +19,11 @@ export interface TraineeProfile {
   tiktok?: string | null;
   isActive: boolean;
   createdAt?: string;
+  /**
+   * Their profile photo's thumbnail, or null (theindex-api gives it on `GET /api/trainees` and
+   * `GET /api/trainees/:id`; other answers leave it out).
+   */
+  photoUrl?: string | null;
 }
 
 export interface CreateTraineePayload {
