@@ -8,42 +8,59 @@ export type SettlementStatus = 'DRAFT' | 'FINAL';
 export type AllocationReason = 'PUNCH_CREDIT' | 'TIME_PRORATA' | 'UNPAID';
 export type SubscriptionType = 'PUNCH' | 'TIME' | null;
 
+/**
+ * A settlement report. The API creates one per half month (1st–15th, 16th–end) once the period is
+ * over; staff review it and an admin finalizes it, oldest first. Nobody creates or deletes one.
+ */
 export interface Settlement {
   id: string;
   periodStart: string;
   periodEnd: string;
+  /** When the API created the report. */
   generatedAt: string;
   status: SettlementStatus;
+  /** When it was finalized (paid out); null while a draft. */
+  finalizedAt: string | null;
   notes: string | null;
 }
 
+/** One trainer's part of a report (a draft's is worked out when it is read). */
 export interface SettlementLine {
-  id: string;
-  settlementId: string;
   trainerId: string;
+  /** What the report pays the trainer. */
   amountCents: number;
+  /** Trainings it pays them for. */
   attendanceCount: number;
-  unpaidAttendanceCount: number;
-  details: {
-    punchCents: number;
-    timeCents: number;
-  };
+  punchCents: number;
+  timeCents: number;
+  /** The part carried over from earlier periods (paid once their value became known). */
+  earlierPeriodsCents: number;
+  earlierPeriodsCount: number;
+  /** Their trainings of the period that a later report pays. */
+  waitingCount: number;
 }
 
-export interface GenerateSettlementPayload {
-  periodStart: string;
-  periodEnd: string;
-}
+/**
+ * Why a training of the period isn't paid by its report: no subscription pays it yet, its TIME
+ * pass ends after the period (`availableFrom`), or its value became known after the period.
+ */
+export type WaitingReason = 'UNPAID' | 'TIME_PASS_NOT_ENDED' | 'NEXT_REPORT';
 
-export interface GenerateSettlementResponse {
-  settlement: Settlement;
-  lines: SettlementLine[];
-  info?: unknown;
+export interface SettlementWaiting {
+  attendanceId: string;
+  trainerId: string;
+  traineeId: string;
+  locationId: string | null;
+  trainedAt: string;
+  reason: WaitingReason;
+  subscriptionType: SubscriptionType;
+  availableFrom: string | null;
 }
 
 export interface SettlementDetailsResponse {
   settlement: Settlement;
   lines: SettlementLine[];
+  waiting: SettlementWaiting[];
 }
 
 export interface SettlementAllocationsQuery {
@@ -71,6 +88,8 @@ export interface SettlementAllocation {
   subscriptionType: SubscriptionType;
   valueCents: number;
   reason: AllocationReason;
+  /** Trained before the report's period: carried over from an earlier period. */
+  fromEarlierPeriod: boolean;
   attendance?: SettlementAllocationAttendance;
 }
 
@@ -93,22 +112,12 @@ export class SettlementsService {
     return this.http.get<Settlement[]>(this.baseUrl);
   }
 
-  generate(
-    payload: GenerateSettlementPayload,
-  ): Observable<GenerateSettlementResponse> {
-    return this.http.post<GenerateSettlementResponse>(this.baseUrl, payload);
-  }
-
   getById(id: string): Observable<SettlementDetailsResponse> {
     return this.http.get<SettlementDetailsResponse>(`${this.baseUrl}/${id}`);
   }
 
   finalize(id: string): Observable<Settlement> {
     return this.http.post<Settlement>(`${this.baseUrl}/${id}/finalize`, {});
-  }
-
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
   allocations(

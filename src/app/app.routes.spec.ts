@@ -94,7 +94,6 @@ const SHELL_ACCESS: Record<string, string[] | null> = {
   'training-times': STAFF,
   'attendance/new': STAFF,
   attendance: STAFF,
-  'settlements/new': ADMIN,
   'settlements/:id': STAFF,
   settlements: STAFF,
   'cash-register': ADMIN,
@@ -256,7 +255,8 @@ describe('routing (real routes)', () => {
     signInAs('TRAINER');
     expect(await open('/trainers')).toBe('/unauthorized');
     expect(await open('/cash-register')).toBe('/unauthorized');
-    expect(await open('/settlements/new')).toBe('/unauthorized');
+    // Reports are created by the API; the old Generate page's address lands on the list.
+    expect(await open('/settlements/new')).toBe('/settlements');
     expect(await open('/content')).toBe('/unauthorized');
     expect(await open('/content/categories/new')).toBe('/unauthorized');
     expect(await open('/content/articles/a-1')).toBe('/unauthorized');

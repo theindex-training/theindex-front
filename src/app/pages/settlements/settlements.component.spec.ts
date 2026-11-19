@@ -20,6 +20,7 @@ const SETTLEMENTS: Settlement[] = [
     periodEnd: '2026-10-31',
     generatedAt: '2026-11-01T09:00:00Z',
     status: 'DRAFT',
+    finalizedAt: null,
     notes: null,
   },
   {
@@ -28,6 +29,7 @@ const SETTLEMENTS: Settlement[] = [
     periodEnd: '2026-09-30',
     generatedAt: '2026-10-01T09:00:00Z',
     status: 'FINAL',
+    finalizedAt: '2026-10-02T09:00:00Z',
     notes: null,
   },
 ];
@@ -35,7 +37,6 @@ const SETTLEMENTS: Settlement[] = [
 describe('SettlementsComponent', () => {
   let http: HttpTestingController;
   let page: PageDriver;
-  let component: SettlementsComponent;
 
   beforeEach(() => {
     localStorage.clear();
@@ -60,7 +61,6 @@ describe('SettlementsComponent', () => {
   ) {
     signInAs(role);
     const fixture = TestBed.createComponent(SettlementsComponent);
-    component = fixture.componentInstance;
     page = driver(
       () => fixture.nativeElement,
       () => fixture.whenStable(),
@@ -70,86 +70,39 @@ describe('SettlementsComponent', () => {
     await page.settle();
   }
 
-  const deleteButtons = () =>
-    page.queryAll<HTMLButtonElement>('button[aria-label^="Delete settlement"]');
-  const generateLinks = () =>
-    page
-      .queryAll('a')
-      .filter((link) => link.textContent?.trim() === copy.generate);
-
-  it('lets an admin generate and delete settlements', async () => {
-    await render('ADMIN');
-
-    expect(generateLinks().length).toBeGreaterThan(0);
-    expect(deleteButtons().length).toBe(4); // two settlements, table + phone list
-  });
-
-  it('gives a trainer a read-only list', async () => {
-    await render('TRAINER');
-
-    expect(generateLinks().length).toBe(0);
-    expect(deleteButtons().length).toBe(0);
-    component.deleteSettlement(SETTLEMENTS[0]);
-    http.expectNone('/api/settlements/s1');
-  });
-
-  it('tells each role what to do when there are no settlements yet', async () => {
-    await render('TRAINER', []);
-    expect(page.text()).toContain(copy.emptyTrainer);
-  });
-
-  it('asks before deleting, naming the period, and does nothing when cancelled', async () => {
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+  it('lists every report with its period, creation time and status, linked to its page', async () => {
     await render('ADMIN');
     const format = TestBed.inject(LocaleFormatService);
 
-    deleteButtons()[0].click();
-    await page.settle();
-
-    expect(confirm).toHaveBeenCalledWith(
-      `Delete settlement for ${format.date('2026-10-01')} to ${format.date('2026-10-31')}?`,
-    );
-    http.expectNone('/api/settlements/s1');
+    const text = page.text();
+    expect(text).toContain(format.date('2026-10-01'));
+    expect(text).toContain(format.dateTime('2026-11-01T09:00:00Z'));
+    expect(text).toContain(en.enums.settlementStatus.DRAFT);
+    expect(text).toContain(en.enums.settlementStatus.FINAL);
+    const links = page
+      .queryAll<HTMLAnchorElement>('a.cell-link')
+      .map((a) => a.getAttribute('href'));
+    expect(links).toEqual(['/settlements/s1', '/settlements/s2']);
   });
 
-  it('deletes the settlement and removes it from the list', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-    await render('ADMIN');
+  it.each(['ADMIN', 'TRAINER'] as const)(
+    'offers %s no way to create or delete a report: only links to the reports',
+    async (role) => {
+      await render(role);
 
-    deleteButtons()[0].click();
-    await page.settle();
-    const req = http.expectOne('/api/settlements/s1');
-    expect(req.request.method).toBe('DELETE');
-    req.flush(null);
-    await page.settle();
+      expect(page.queryAll('button')).toEqual([]);
+      const hrefs = page
+        .queryAll<HTMLAnchorElement>('a')
+        .map((a) => a.getAttribute('href'));
+      expect(new Set(hrefs)).toEqual(
+        new Set(['/settlements/s1', '/settlements/s2']),
+      );
+    },
+  );
 
-    expect(component.settlements.map((item) => item.id)).toEqual(['s2']);
-    expect(deleteButtons().length).toBe(2);
-  });
-
-  it('ignores a second delete while one is in progress', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-    await render('ADMIN');
-
-    component.deleteSettlement(SETTLEMENTS[0]);
-    component.deleteSettlement(SETTLEMENTS[1]);
-
-    http.expectOne('/api/settlements/s1').flush(null);
-    http.expectNone('/api/settlements/s2');
-  });
-
-  it('keeps the list and shows a notice when a delete fails', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-    await render('ADMIN');
-
-    deleteButtons()[0].click();
-    await page.settle();
-    const error = apiError('Settlement is final', 409);
-    http.expectOne('/api/settlements/s1').flush(error.body, error.options);
-    await page.settle();
-
-    expect(page.alert()).toBe('Settlement is final');
-    expect(deleteButtons().length).toBe(4);
+  it('explains that reports are created automatically when there are none yet', async () => {
+    await render('ADMIN', []);
+    expect(page.text()).toContain(copy.emptyMessage);
   });
 
   it('shows the error state and reloads on "Try again"', async () => {
@@ -168,6 +121,6 @@ describe('SettlementsComponent', () => {
     await page.click('app-empty-state button');
     http.expectOne('/api/settlements').flush([]);
     await page.settle();
-    expect(page.text()).toContain(copy.emptyAdmin);
+    expect(page.text()).toContain(copy.emptyMessage);
   });
 });

@@ -12,7 +12,6 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
 import { ChipComponent } from '../../components/chip/chip.component';
 import { ListRowComponent } from '../../components/list-row/list-row.component';
 import { IconComponent } from '../../components/icon/icon.component';
-import { AuthService } from '../../services/auth.service';
 import {
   Settlement,
   SettlementsService,
@@ -21,7 +20,6 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
-import { LanguageService } from '../../i18n/language.service';
 import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 
 @Component({
@@ -42,24 +40,23 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './settlements.component.html',
 })
+/**
+ * The settlement reports, latest period first. The API creates one per half month, so there is no
+ * create or delete action here: staff open a report to review it, and an admin finalizes it there.
+ */
 export class SettlementsComponent implements OnInit {
-  private readonly i18n = inject(LanguageService);
   readonly format = inject(LocaleFormatService);
   settlements: Settlement[] = [];
 
   loading = true;
   errorMessage: UiMessage | null = null;
-  deletingSettlementId: string | null = null;
-  canManageSettlements = false;
 
   constructor(
-    private readonly authService: AuthService,
     private readonly settlementsService: SettlementsService,
     private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
-    this.canManageSettlements = this.authService.getUserRole() === 'ADMIN';
     this.loadSettlements();
   }
 
@@ -79,47 +76,6 @@ export class SettlementsComponent implements OnInit {
           'settlements.list.loadErrorMessage',
         );
         this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-    });
-  }
-
-  deleteSettlement(settlement: Settlement): void {
-    if (!this.canManageSettlements) {
-      return;
-    }
-
-    if (this.deletingSettlementId) {
-      return;
-    }
-
-    const confirmed = window.confirm(
-      this.i18n.t('settlements.list.confirmDelete', {
-        start: this.format.date(settlement.periodStart),
-        end: this.format.date(settlement.periodEnd),
-      }),
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    this.deletingSettlementId = settlement.id;
-
-    this.settlementsService.delete(settlement.id).subscribe({
-      next: () => {
-        this.settlements = this.settlements.filter(
-          (item) => item.id !== settlement.id,
-        );
-        this.deletingSettlementId = null;
-        this.changeDetector.detectChanges();
-      },
-      error: (error) => {
-        this.errorMessage = apiErrorMessage(
-          error,
-          'settlements.list.deleteError',
-        );
-        this.deletingSettlementId = null;
         this.changeDetector.detectChanges();
       },
     });

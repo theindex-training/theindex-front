@@ -4,7 +4,10 @@ import { gym, mockStaffHome, trainee, trainer } from '../support/data';
 import { expect, test } from '../support/fixtures';
 import { t } from '../support/i18n';
 
-/** TEST_PLAN.md J6: generate, review, finalize and delete a settlement. */
+/**
+ * TEST_PLAN.md J6: the API creates a report per half month; staff review it and an admin
+ * finalizes it after confirming. Nobody creates or deletes one.
+ */
 const settlement = (
   id: string,
   periodStart: string,
@@ -14,20 +17,34 @@ const settlement = (
   id,
   periodStart,
   periodEnd,
-  generatedAt: '2026-11-02T08:00:00Z',
+  generatedAt: '2026-12-01T02:00:00Z',
   status,
+  finalizedAt: status === 'FINAL' ? '2026-12-02T09:00:00Z' : null,
   notes: null,
 });
 
 const LINES = [
   {
-    id: 'l1',
-    settlementId: 's-new',
     trainerId: 'trainer-1',
     amountCents: 9000,
     attendanceCount: 12,
-    unpaidAttendanceCount: 1,
-    details: { punchCents: 5000, timeCents: 4000 },
+    punchCents: 5000,
+    timeCents: 4000,
+    earlierPeriodsCents: 3000,
+    earlierPeriodsCount: 1,
+    waitingCount: 1,
+  },
+];
+const WAITING = [
+  {
+    attendanceId: 'a9',
+    trainerId: 'trainer-1',
+    traineeId: 't-ivan',
+    locationId: 'gym-1',
+    trainedAt: '2026-11-20T16:30:00Z',
+    reason: 'UNPAID',
+    subscriptionType: null,
+    availableFrom: null,
   },
 ];
 const ALLOCATION = {
@@ -36,12 +53,13 @@ const ALLOCATION = {
   attendanceId: 'a1',
   trainerId: 'trainer-1',
   subscriptionId: 'sub1',
-  subscriptionType: 'PUNCH',
-  valueCents: 450,
-  reason: 'PUNCH_CREDIT',
+  subscriptionType: 'TIME',
+  valueCents: 3000,
+  reason: 'TIME_PRORATA',
+  fromEarlierPeriod: true,
   attendance: {
     id: 'a1',
-    trainedAt: '2026-10-05T16:30:00Z',
+    trainedAt: '2026-11-05T16:30:00Z',
     paymentStatus: 'PAID',
     trainerId: 'trainer-1',
     traineeId: 't-ivan',
@@ -50,18 +68,15 @@ const ALLOCATION = {
   },
 };
 
-/** "Delete settlement …" buttons, whatever the period. */
-const deleteButtons = (page: Page) => {
-  const prefix = t('settlements.list.deleteLabel', {
-    start: 'START',
-    end: 'END',
-  }).split('START')[0];
-  return page.getByRole('button', { name: new RegExp(`^${prefix}`) });
-};
+const finalizeButton = (page: Page) =>
+  page.getByRole('button', { name: t('settlements.details.finalize') });
+/** The text before the first placeholder of a translation. */
+const prefixOf = (key: string, params: Record<string, string>) =>
+  t(key, params).split('PLACEHOLDER')[0];
 
 test.describe('J6 settlements', { tag: '@desktop' }, () => {
   test.beforeEach(async ({ page, api }) => {
-    await page.clock.setFixedTime(new Date('2026-11-02T10:00:00+02:00'));
+    await page.clock.setFixedTime(new Date('2026-12-02T10:00:00+02:00'));
     mockStaffHome(api);
     api.on('GET', '/api/trainers', {
       body: [
@@ -78,153 +93,161 @@ test.describe('J6 settlements', { tag: '@desktop' }, () => {
     });
   });
 
-  test('an admin generates a report, reviews it, finalizes it, and deletes an old one', async ({
+  test('an admin opens the automatic draft, reviews what it pays and what waits, and finalizes it', async ({
     page,
     api,
     signInAs,
   }) => {
     await signInAs('ADMIN');
-    let generated: ReturnType<typeof settlement> | null = null;
-    let deleted = false;
-    const old = settlement('s-old', '2026-09-01', '2026-09-30', 'FINAL');
-    api.on('GET', '/api/settlements', () => ({
-      body: [...(generated ? [generated] : []), ...(deleted ? [] : [old])],
-    }));
-    api.on('POST', '/api/settlements', (request) => {
-      const { periodStart, periodEnd } = request.body as {
-        periodStart: string;
-        periodEnd: string;
-      };
-      generated = settlement('s-new', periodStart, periodEnd, 'DRAFT');
-      return { status: 201, body: { settlement: generated, lines: LINES } };
-    });
+    let draft = settlement('s-new', '2026-11-16', '2026-11-30', 'DRAFT');
+    const old = settlement('s-old', '2026-11-01', '2026-11-15', 'FINAL');
+    api.on('GET', '/api/settlements', () => ({ body: [draft, old] }));
     api.on('GET', '/api/settlements/s-new', () => ({
-      body: { settlement: generated, lines: LINES },
+      body: {
+        settlement: draft,
+        lines: LINES,
+        waiting: draft.status === 'DRAFT' ? WAITING : [],
+      },
     }));
     api.on('POST', '/api/settlements/s-new/finalize', () => {
-      generated = { ...generated!, status: 'FINAL' };
-      return { status: 201, body: generated };
-    });
-    api.on('DELETE', '/api/settlements/s-old', () => {
-      deleted = true;
-      return { body: null };
+      draft = settlement('s-new', '2026-11-16', '2026-11-30', 'FINAL');
+      return { status: 201, body: draft };
     });
 
     await page.goto('/settlements');
-    await page
-      .getByRole('link', { name: t('settlements.list.generate') })
-      .first()
-      .click();
-    await expect(page).toHaveURL(/\/settlements\/new$/);
-
-    const start = page.getByLabel(t('settlements.generate.periodStart'));
-    const end = page.getByLabel(t('settlements.generate.periodEnd'));
-    await expect(start).toHaveValue('2026-11-02');
-    await expect(end).toHaveValue('2026-11-02');
-    await start.fill('2026-10-01');
-    await end.fill('2026-10-31');
-    await page
-      .getByRole('button', { name: t('settlements.generate.submit') })
-      .click();
+    const reports = page.getByRole('region', {
+      name: t('settlements.list.tableLabel'),
+    });
+    await expect(reports.getByRole('link')).toHaveCount(2);
+    // Nothing to create or delete: the page has no action of its own.
+    await expect(page.getByRole('main').getByRole('button')).toHaveCount(0);
+    await reports.getByRole('link').first().click();
 
     await expect(page).toHaveURL(/\/settlements\/s-new$/);
-    expect(api.last('POST', '/api/settlements')?.body).toEqual({
-      periodStart: '2026-10-01',
-      periodEnd: '2026-10-31',
-    });
     await expect
       .poll(() => api.last('GET', '/api/settlements/s-new/allocations')?.query)
       .toEqual({ offset: '0', limit: '500' });
-    expect(api.last('GET', '/api/gym-locations')?.query).toEqual({
-      includeInactive: 'true',
-    });
     await expect(page.getByTestId('settlement-status')).toHaveText(
       t('enums.settlementStatus.DRAFT'),
     );
-    await expect(page.getByText('Ivan Petrov (Vanko)').first()).toBeVisible();
+    await expect(
+      page.getByText(
+        prefixOf('settlements.details.draftNoticeAdmin', {
+          end: 'PLACEHOLDER',
+        }),
+      ),
+    ).toBeVisible();
+
+    // What it pays: a training carried over from the first half (its TIME pass ended).
+    const paid = page.getByRole('region', {
+      name: t('settlements.details.allocationsTable'),
+    });
+    await expect(paid.getByText('Ivan Petrov (Vanko)')).toBeVisible();
+    await expect(
+      paid.getByText(t('settlements.details.earlierPeriod')),
+    ).toBeVisible();
+    // What waits for a later report.
+    const waiting = page.getByRole('region', {
+      name: t('settlements.details.waitingTable'),
+    });
+    await expect(
+      waiting.getByText(t('settlements.details.waitingUnpaid')),
+    ).toBeVisible();
 
     await page
       .getByRole('combobox', { name: t('settlements.details.trainer') })
       .selectOption('trainer-2');
     await expect
       .poll(() => api.last('GET', '/api/settlements/s-new/allocations')?.query)
-      .toEqual({
-        trainerId: 'trainer-2',
-        offset: '0',
-        limit: '500',
-      });
+      .toEqual({ trainerId: 'trainer-2', offset: '0', limit: '500' });
+    await expect(
+      page.getByText(t('settlements.details.noWaiting')),
+    ).toBeVisible();
 
-    await page
-      .getByRole('button', { name: t('settlements.details.finalize') })
-      .click();
+    let question = '';
+    page.once('dialog', (dialog) => {
+      question = dialog.message();
+      void dialog.accept();
+    });
+    await finalizeButton(page).click();
+
     await expect(page.getByTestId('settlement-status')).toHaveText(
       t('enums.settlementStatus.FINAL'),
     );
-    await expect(
-      page.getByRole('button', { name: t('settlements.details.finalize') }),
-    ).toHaveCount(0);
+    expect(question).toContain(
+      prefixOf('settlements.details.confirmFinalize', { start: 'PLACEHOLDER' }),
+    );
     expect(api.last('POST', '/api/settlements/s-new/finalize')?.body).toEqual(
       {},
     );
-
-    await page.goto('/settlements');
-    await expect(deleteButtons(page)).toHaveCount(2);
-    page.once('dialog', (dialog) => void dialog.accept());
-    await deleteButtons(page).last().click();
-    await expect(deleteButtons(page)).toHaveCount(1);
-    expect(api.calls('DELETE', '/api/settlements/s-old')).toHaveLength(1);
+    await expect(finalizeButton(page)).toHaveCount(0);
+    await expect(
+      page.getByText(t('settlements.details.finalizedAt'), { exact: true }),
+    ).toBeVisible();
+    expect(api.calls('GET', '/api/settlements/s-new')).toHaveLength(2);
   });
 
-  test('a failed delete keeps the list and explains why', async ({
+  test('cancelling the confirmation finalizes nothing; a refused finalize shows why', async ({
     page,
     api,
     signInAs,
   }) => {
     await signInAs('ADMIN');
-    api.on('GET', '/api/settlements', {
-      body: [settlement('s-old', '2026-09-01', '2026-09-30', 'FINAL')],
+    const draft = settlement('s-new', '2026-11-16', '2026-11-30', 'DRAFT');
+    api.on('GET', '/api/settlements/s-new', {
+      body: { settlement: draft, lines: LINES, waiting: [] },
     });
     api.on(
-      'DELETE',
-      '/api/settlements/s-old',
-      apiError(409, 'A final settlement cannot be deleted'),
+      'POST',
+      '/api/settlements/s-new/finalize',
+      apiError(409, 'Finalize the report for 2026-11-01 to 2026-11-15 first'),
     );
 
-    await page.goto('/settlements');
+    await page.goto('/settlements/s-new');
+    page.once('dialog', (dialog) => void dialog.dismiss());
+    await finalizeButton(page).click();
+    expect(api.calls('POST', '/api/settlements/s-new/finalize')).toHaveLength(
+      0,
+    );
+
     page.once('dialog', (dialog) => void dialog.accept());
-    await deleteButtons(page).click();
+    await finalizeButton(page).click();
 
     await expect(page.getByRole('alert')).toHaveText(
-      'A final settlement cannot be deleted',
+      'Finalize the report for 2026-11-01 to 2026-11-15 first',
     );
-    await expect(deleteButtons(page)).toHaveCount(1);
+    await expect(page.getByTestId('settlement-status')).toHaveText(
+      t('enums.settlementStatus.DRAFT'),
+    );
+    await expect(finalizeButton(page)).toBeVisible();
   });
 
-  test('a trainer can read reports but not generate, filter, finalize or delete', async ({
+  test('a trainer can read reports, drafts included, but not filter or finalize', async ({
     page,
     api,
     signInAs,
   }) => {
     await signInAs('TRAINER');
-    const draft = settlement('s-new', '2026-10-01', '2026-10-31', 'DRAFT');
+    const draft = settlement('s-new', '2026-11-16', '2026-11-30', 'DRAFT');
     api.on('GET', '/api/settlements', { body: [draft] });
     api.on('GET', '/api/settlements/s-new', {
-      body: { settlement: draft, lines: LINES },
+      body: { settlement: draft, lines: LINES, waiting: WAITING },
     });
 
     await page.goto('/settlements');
-    await expect(deleteButtons(page)).toHaveCount(0);
-    await expect(
-      page.getByRole('link', { name: t('settlements.list.generate') }),
-    ).toHaveCount(0);
+    await page
+      .getByRole('region', { name: t('settlements.list.tableLabel') })
+      .getByRole('link')
+      .first()
+      .click();
 
-    await page.goto('/settlements/s-new');
     await expect(page.getByTestId('settlement-status')).toHaveText(
       t('enums.settlementStatus.DRAFT'),
     );
     await expect(
-      page.getByRole('button', { name: t('settlements.details.finalize') }),
-    ).toHaveCount(0);
+      page.getByText(t('settlements.details.draftNoticeTrainer')),
+    ).toBeVisible();
+    await expect(finalizeButton(page)).toHaveCount(0);
     await expect(
       page.getByRole('combobox', { name: t('settlements.details.trainer') }),
     ).toHaveCount(0);

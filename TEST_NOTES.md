@@ -30,7 +30,7 @@ This file records findings only. Fixes are on hold: as in theindex-api, no fixes
 ## S2 — Subscription start date defaults to the UTC date
 - **Where:** `TraineeDetailsComponent.todayString()` (`new Date().toISOString().slice(0, 10)`).
 - **Behavior:** between 00:00 and 02:00 (03:00 in summer) Sofia time, the default "Starts" date is yesterday.
-- **Why it looks wrong:** Register attendance and Generate settlement use the local date. A subscription sold just after midnight would start a day early unless the trainer notices.
+- **Why it looks wrong:** Register attendance (and the Generate settlement page, removed in Nov 2026) use the local date. A subscription sold just after midnight would start a day early unless the trainer notices.
 - **Pinned by:** `trainee-details.component.spec.ts`:
   - "defaults the start date to today's local date" (00:30 Sofia time, with a faked Date);
   - the reset after a sale, in "sells the subscription…".
@@ -93,16 +93,16 @@ This file records findings only. Fixes are on hold: as in theindex-api, no fixes
 - **Status:** open.
 
 ## S11 — A settlement period can end before it starts
-- **Where:** `SettlementGenerateComponent.generateSettlement()` checks only that both dates are filled.
-- **Behavior:** start 31 Oct and end 1 Oct is sent to the API as is.
-- **Why it looks wrong:** the user gets whatever the API says (or a nonsense report) instead of a clear form error.
-- **Pinned by:** `settlement-generate.component.spec.ts` › "sends a period that ends before it starts".
-- **Status:** open.
+- **Where:** `SettlementGenerateComponent.generateSettlement()` checked only that both dates were filled.
+- **Behavior:** start 31 Oct and end 1 Oct was sent to the API as is.
+- **Why it looks wrong:** the user got whatever the API said (or a nonsense report) instead of a clear form error.
+- **Pinned by:** `settlement-generate.component.spec.ts` › "sends a period that ends before it starts" (removed with the page).
+- **Status:** **fixed in Nov 2026** by automatic settlement reports: the API creates one report per half month, and the Generate page (and its period input) is gone. `/settlements/new` now redirects to the list (`app.routes.spec.ts`).
 
 ## S12 — A training time can end before it starts
 - **Where:** training time create/edit forms: both times are only `Validators.required`.
 - **Behavior:** 19:00 to 18:00 is sent to the API as is.
-- **Why it looks wrong:** same as S11.
+- **Why it looks wrong:** the user gets whatever the API says instead of a clear form error (as S11 was).
 - **Pinned by:** `catalog-pages.spec.ts` › "accepts a training time that ends before it starts".
 - **Status:** open.
 

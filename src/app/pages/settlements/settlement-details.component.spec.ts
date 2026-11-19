@@ -9,7 +9,12 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import en from '../../../../public/i18n/en.json';
 import { PageDriver, apiError, driver } from '../../../testing/dom';
 import { signInAs } from '../../../testing/jwt';
-import { SettlementAllocation } from '../../services/settlements.service';
+import { LocaleFormatService } from '../../i18n/locale-format.service';
+import {
+  SettlementAllocation,
+  SettlementLine,
+  SettlementWaiting,
+} from '../../services/settlements.service';
 import { SettlementDetailsComponent } from './settlement-details.component';
 
 const copy = en.settlements.details;
@@ -20,17 +25,51 @@ const SETTLEMENT = {
   periodEnd: '2026-10-31',
   generatedAt: '2026-11-01T09:00:00Z',
   status: 'DRAFT',
+  finalizedAt: null,
   notes: null,
 };
-const LINES = [
+const LINES: SettlementLine[] = [
   {
-    id: 'l1',
-    settlementId: 's1',
     trainerId: 'tr1',
     amountCents: 9000,
     attendanceCount: 12,
-    unpaidAttendanceCount: 1,
-    details: { punchCents: 5000, timeCents: 4000 },
+    punchCents: 5000,
+    timeCents: 4000,
+    earlierPeriodsCents: 1234,
+    earlierPeriodsCount: 2,
+    waitingCount: 3,
+  },
+];
+const WAITING: SettlementWaiting[] = [
+  {
+    attendanceId: 'w1',
+    trainerId: 'tr1',
+    traineeId: 't1',
+    locationId: 'g1',
+    trainedAt: '2026-10-07T16:30:00Z',
+    reason: 'UNPAID',
+    subscriptionType: null,
+    availableFrom: null,
+  },
+  {
+    attendanceId: 'w2',
+    trainerId: 'tr2',
+    traineeId: 't1',
+    locationId: 'g1',
+    trainedAt: '2026-10-08T16:30:00Z',
+    reason: 'TIME_PASS_NOT_ENDED',
+    subscriptionType: 'TIME',
+    availableFrom: '2026-11-20T22:00:00Z',
+  },
+  {
+    attendanceId: 'w3',
+    trainerId: 'tr1',
+    traineeId: 't1',
+    locationId: 'g1',
+    trainedAt: '2026-10-09T16:30:00Z',
+    reason: 'NEXT_REPORT',
+    subscriptionType: 'PUNCH',
+    availableFrom: '2026-11-02T10:00:00Z',
   },
 ];
 const ALLOCATION: SettlementAllocation = {
@@ -42,6 +81,7 @@ const ALLOCATION: SettlementAllocation = {
   subscriptionType: 'PUNCH',
   valueCents: 450,
   reason: 'PUNCH_CREDIT',
+  fromEarlierPeriod: false,
   attendance: {
     id: 'a1',
     trainedAt: '2026-10-05T16:30:00Z',
@@ -78,7 +118,10 @@ describe('SettlementDetailsComponent', () => {
     harness = await RouterTestingHarness.create();
   });
 
-  afterEach(() => http.verify());
+  afterEach(() => {
+    http.verify();
+    vi.restoreAllMocks();
+  });
 
   async function open(
     role: 'ADMIN' | 'TRAINER',
@@ -86,6 +129,8 @@ describe('SettlementDetailsComponent', () => {
       settlement?: object;
       entities?: 'ok' | 'error';
       allocationsTotal?: number;
+      allocations?: SettlementAllocation[];
+      waiting?: SettlementWaiting[];
     } = {},
   ) {
     signInAs(role);
@@ -144,14 +189,16 @@ describe('SettlementDetailsComponent', () => {
         },
       ]);
     }
-    http
-      .expectOne('/api/settlements/s1')
-      .flush({ settlement: options.settlement ?? SETTLEMENT, lines: LINES });
+    http.expectOne('/api/settlements/s1').flush({
+      settlement: options.settlement ?? SETTLEMENT,
+      lines: LINES,
+      waiting: options.waiting ?? WAITING,
+    });
     http.expectOne('/api/settlements/s1/allocations?offset=0&limit=500').flush({
       total: options.allocationsTotal ?? 1,
       limit: 500,
       offset: 0,
-      rows: [ALLOCATION],
+      rows: options.allocations ?? [ALLOCATION],
     });
     await page.settle();
   }
@@ -174,7 +221,7 @@ describe('SettlementDetailsComponent', () => {
     await open('ADMIN');
 
     const traineeLinks = page
-      .queryAll<HTMLAnchorElement>('a')
+      .queryAll<HTMLAnchorElement>('[aria-labelledby="allocations-title"] a')
       .filter((link) => link.textContent?.includes('Ivan Petrov (Vanko)'));
     // The desktop table and the phone list both render the row.
     expect(traineeLinks.map((link) => link.getAttribute('href'))).toEqual([
@@ -185,7 +232,9 @@ describe('SettlementDetailsComponent', () => {
       ALLOCATION.attendance!.trainedAt,
     );
     expect(trainedAt).not.toBe('—');
-    expect(page.text().split(trainedAt).length - 1).toBe(2);
+    const allocationsText =
+      page.query('[aria-labelledby="allocations-title"]')?.textContent ?? '';
+    expect(allocationsText.split(trainedAt).length - 1).toBe(2);
   });
 
   it("shows each trainer's photo on their lines, from the trainers list", async () => {
@@ -234,7 +283,22 @@ describe('SettlementDetailsComponent', () => {
     expect(page.text()).toContain('Showing 1 of 734 rows');
   });
 
-  it('lets an admin finalize a draft, then hides the button', async () => {
+  it('asks before finalizing, naming the period and the total paid out, and does nothing when cancelled', async () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    await open('ADMIN');
+    const format = TestBed.inject(LocaleFormatService);
+
+    finalizeButton()!.click();
+    await page.settle();
+
+    expect(confirm).toHaveBeenCalledWith(
+      `Finalize the report for ${format.date('2026-10-01')} to ${format.date('2026-10-31')}? ${format.money(9000)} is paid out of the cash register, and attendance on or before ${format.date('2026-10-31')} can no longer be added or deleted.`,
+    );
+    http.expectNone('/api/settlements/s1/finalize');
+  });
+
+  it('lets an admin finalize a draft, then shows the report as the API stored it', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
     await open('ADMIN');
 
     finalizeButton()!.click();
@@ -242,31 +306,117 @@ describe('SettlementDetailsComponent', () => {
     const req = http.expectOne('/api/settlements/s1/finalize');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({});
-    req.flush({ ...SETTLEMENT, status: 'FINAL' });
+    const finalized = {
+      ...SETTLEMENT,
+      status: 'FINAL',
+      finalizedAt: '2026-11-03T08:00:00Z',
+    };
+    req.flush(finalized);
+    await page.settle();
+    http
+      .expectOne('/api/settlements/s1')
+      .flush({ settlement: finalized, lines: LINES, waiting: [] });
+    http
+      .expectOne('/api/settlements/s1/allocations?offset=0&limit=500')
+      .flush({ total: 1, limit: 500, offset: 0, rows: [ALLOCATION] });
     await page.settle();
 
     expect(finalizeButton()).toBeUndefined();
     expect(page.text()).toContain(en.enums.settlementStatus.FINAL);
+    expect(page.text()).toContain(copy.finalizedAt);
+    expect(page.text()).not.toContain(copy.draftNoticeAdmin.split('{')[0]);
+    expect(page.text()).toContain(copy.noWaiting);
   });
 
-  it('shows a failed finalize and keeps the draft', async () => {
+  it("shows the API's reason when finalizing fails, and keeps the draft", async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
     await open('ADMIN');
 
     finalizeButton()!.click();
     await page.settle();
-    const error = apiError('Settlement has unpaid attendance', 409);
+    const error = apiError(
+      'Finalize the report for 2026-09-16 to 2026-09-30 first',
+      409,
+    );
     http
       .expectOne('/api/settlements/s1/finalize')
       .flush(error.body, error.options);
     await page.settle();
 
-    expect(page.alert()).toBe('Settlement has unpaid attendance');
+    expect(page.alert()).toBe(
+      'Finalize the report for 2026-09-16 to 2026-09-30 first',
+    );
     expect(finalizeButton()).toBeDefined();
+    expect(page.text()).toContain(en.enums.settlementStatus.DRAFT);
+  });
+
+  it('tells an admin what finalizing a draft does, and a trainer that it can still change', async () => {
+    await open('ADMIN');
+    const format = TestBed.inject(LocaleFormatService);
+    expect(page.text()).toContain(
+      copy.draftNoticeAdmin.replace('{end}', format.date('2026-10-31')),
+    );
+  });
+
+  it('shows what each trainer is paid, with the part carried over from earlier periods', async () => {
+    await open('ADMIN');
+    const format = TestBed.inject(LocaleFormatService);
+
+    const text = page.text();
+    expect(text).toContain(format.money(9000));
+    expect(text).toContain(format.money(1234));
+    expect(text).toContain(
+      `Incl. ${format.money(1234)} carried over (2 trainings)`,
+    );
+    expect(text).toContain('3 waiting');
+  });
+
+  it('marks a paid training carried over from an earlier period', async () => {
+    await open('ADMIN', {
+      allocations: [{ ...ALLOCATION, fromEarlierPeriod: true }],
+    });
+
+    expect(
+      page
+        .queryAll('app-chip')
+        .filter((chip) => chip.textContent?.includes(copy.earlierPeriod)),
+    ).toHaveLength(2); // table and phone list
+  });
+
+  it('lists the trainings of the period that wait, with why, and filters them by trainer', async () => {
+    await open('ADMIN');
+    const format = TestBed.inject(LocaleFormatService);
+
+    const text = page.text();
+    expect(text).toContain(copy.waitingUnpaid);
+    expect(text).toContain(
+      copy.waitingTimePass.replace(
+        '{date}',
+        format.date('2026-11-20T22:00:00Z'),
+      ),
+    );
+    expect(text).toContain(copy.waitingNextReport);
+
+    await page.select('select', 'tr2');
+    http
+      .expectOne(
+        '/api/settlements/s1/allocations?trainerId=tr2&offset=0&limit=500',
+      )
+      .flush({ total: 0, limit: 500, offset: 0, rows: [] });
+    await page.settle();
+    expect(component.shownWaiting.map((w) => w.attendanceId)).toEqual(['w2']);
+    expect(page.text()).not.toContain(copy.waitingUnpaid);
+  });
+
+  it('says when nothing of the period waits', async () => {
+    await open('TRAINER', { waiting: [] });
+    expect(page.text()).toContain(copy.noWaiting);
   });
 
   it('gives a trainer no finalize button and no trainer filter', async () => {
     await open('TRAINER');
 
+    expect(page.text()).toContain(copy.draftNoticeTrainer);
     expect(finalizeButton()).toBeUndefined();
     expect(page.query('select')).toBeNull();
     component.finalizeSettlement();

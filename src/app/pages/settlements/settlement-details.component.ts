@@ -14,6 +14,7 @@ import {
   Settlement,
   SettlementAllocation,
   SettlementLine,
+  SettlementWaiting,
   SettlementsService,
 } from '../../services/settlements.service';
 import {
@@ -33,6 +34,7 @@ import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
 import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
+import { LanguageService } from '../../i18n/language.service';
 
 @Component({
   selector: 'app-settlement-details',
@@ -53,10 +55,17 @@ import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './settlement-details.component.scss',
 })
+/**
+ * One settlement report: what it pays each trainer (a draft is worked out by the API whenever it is
+ * read), the trainings it pays, and its period's trainings that wait for a later report. An admin
+ * finalizes a draft here, after confirming the payout.
+ */
 export class SettlementDetailsComponent implements OnInit {
   readonly format = inject(LocaleFormatService);
+  private readonly i18n = inject(LanguageService);
   settlement: Settlement | null = null;
   lines: SettlementLine[] = [];
+  waiting: SettlementWaiting[] = [];
   allocations: SettlementAllocation[] = [];
   allocationsTotal = 0;
 
@@ -102,14 +111,18 @@ export class SettlementDetailsComponent implements OnInit {
     this.loadAllocations();
   }
 
-  loadSettlement(): void {
-    this.loading = true;
-    this.errorMessage = null;
+  /** Loads the report; `quietly` keeps what is shown until the answer comes (after finalizing). */
+  loadSettlement(quietly = false): void {
+    this.loading = !quietly;
+    if (!quietly) {
+      this.errorMessage = null;
+    }
 
     this.settlementsService.getById(this.settlementId).subscribe({
       next: (response) => {
         this.settlement = response.settlement;
         this.lines = response.lines;
+        this.waiting = response.waiting;
         this.loading = false;
         this.changeDetector.detectChanges();
       },
@@ -152,21 +165,62 @@ export class SettlementDetailsComponent implements OnInit {
       });
   }
 
+  /** The waiting trainings, limited to the trainer picked in the filter (admins). */
+  get shownWaiting(): SettlementWaiting[] {
+    return this.selectedTrainerId
+      ? this.waiting.filter((row) => row.trainerId === this.selectedTrainerId)
+      : this.waiting;
+  }
+
+  /** Why a training waits, as shown in its row. */
+  waitingReason(row: SettlementWaiting): string {
+    switch (row.reason) {
+      case 'UNPAID':
+        return this.i18n.t('settlements.details.waitingUnpaid');
+      case 'TIME_PASS_NOT_ENDED':
+        return row.availableFrom
+          ? this.i18n.t('settlements.details.waitingTimePass', {
+              date: this.format.date(row.availableFrom),
+            })
+          : this.i18n.t('settlements.details.waitingNextReport');
+      default:
+        return this.i18n.t('settlements.details.waitingNextReport');
+    }
+  }
+
   finalizeSettlement(): void {
+    const settlement = this.settlement;
     if (
       !this.isAdmin ||
-      !this.settlement ||
-      this.settlement.status !== 'DRAFT'
+      !settlement ||
+      settlement.status !== 'DRAFT' ||
+      this.finalizing
     ) {
       return;
     }
 
-    this.finalizing = true;
+    const total = this.lines.reduce((sum, line) => sum + line.amountCents, 0);
+    const confirmed = window.confirm(
+      this.i18n.t('settlements.details.confirmFinalize', {
+        start: this.format.date(settlement.periodStart),
+        end: this.format.date(settlement.periodEnd),
+        total: this.formatCurrency(total),
+      }),
+    );
+    if (!confirmed) {
+      return;
+    }
 
-    this.settlementsService.finalize(this.settlement.id).subscribe({
-      next: (settlement) => {
-        this.settlement = settlement;
+    this.finalizing = true;
+    this.errorMessage = null;
+
+    this.settlementsService.finalize(settlement.id).subscribe({
+      next: (finalized) => {
+        this.settlement = finalized;
         this.finalizing = false;
+        // What was paid is now stored: show it as the API keeps it.
+        this.loadSettlement(true);
+        this.loadAllocations();
         this.changeDetector.detectChanges();
       },
       error: (error) => {
