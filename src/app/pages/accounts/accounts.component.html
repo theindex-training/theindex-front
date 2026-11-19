@@ -113,7 +113,10 @@
             <tr>
               <td>
                 <div class="person-cell">
-                  <app-avatar [name]="name(account)" />
+                  <app-avatar
+                    [name]="name(account)"
+                    [photoUrl]="account.profile?.photoUrl"
+                  />
                   <div class="person-cell__text">
                     <a
                       class="cell-link"
@@ -163,6 +166,7 @@
             [link]="['/accounts', account.id]"
             [title]="name(account)"
             [avatarName]="name(account)"
+            [avatarPhotoUrl]="account.profile?.photoUrl"
           >
             <span listRowMeta>{{ account.email }}</span>
             <span listRowMeta class="num">{{ phone(account) }}</span>

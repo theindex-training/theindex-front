@@ -82,7 +82,10 @@
                 class="record summary-row"
                 data-testid="attendance-summary-row"
               >
-                <app-avatar [name]="row.name" />
+                <app-avatar
+                  [name]="row.name"
+                  [photoUrl]="photoOf(row.traineeId)"
+                />
                 <div class="record__main">
                   <span class="record__title">{{
                     personName(row.name, row.nickname)
@@ -253,7 +256,10 @@
                     class="trainee"
                     [class.is-selected]="isSelected(trainee.id)"
                   >
-                    <app-avatar [name]="trainee.name" />
+                    <app-avatar
+                      [name]="trainee.name"
+                      [photoUrl]="trainee.photoUrl"
+                    />
                     <span class="trainee__text">
                       <span class="trainee__name">{{ trainee.name }}</span>
                       <span class="trainee__nickname">{{

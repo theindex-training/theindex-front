@@ -69,6 +69,8 @@ function session(
   };
 }
 
+const IVAN_PHOTO = 'https://media.test/profile-photos/ivan/s128.webp';
+
 function response(): AttendanceSessionsResponse {
   return {
     filters: {
@@ -89,7 +91,12 @@ function response(): AttendanceSessionsResponse {
     ],
     entities: {
       trainees: [
-        { id: 'ivan', name: 'Ivan Petrov', nickname: 'Vanko' },
+        {
+          id: 'ivan',
+          name: 'Ivan Petrov',
+          nickname: 'Vanko',
+          photoUrl: IVAN_PHOTO,
+        },
         { id: 'georgi', name: 'Georgi Dimitrov', nickname: null },
       ],
       trainers: [
@@ -191,6 +198,20 @@ describe('AttendanceSessionsComponent', () => {
         },
       ]);
       await flushSessions(DEFAULT_RANGE);
+    });
+
+    it("shows each attendee's photo, or initials without one", () => {
+      const photos = page
+        .queryAll('[data-testid="avatar-photo"]')
+        .map((img) => img.getAttribute('src'));
+      expect(photos.length).toBeGreaterThan(0);
+      expect(new Set(photos)).toEqual(new Set([IVAN_PHOTO]));
+      // Georgi has none: his avatars show his initials.
+      expect(
+        page
+          .queryAll('app-avatar')
+          .filter((avatar) => avatar.textContent?.trim() === 'GD'),
+      ).not.toHaveLength(0);
     });
 
     it('loads the last 7 days for every trainer and selects every session', () => {

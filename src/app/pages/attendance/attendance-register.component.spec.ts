@@ -67,8 +67,9 @@ const TIMES: TrainingTime[] = [
   { id: 'tt-evening', startTime: '18:30:00', endTime: '19:30:00' },
   { id: 'tt-morning', startTime: '8:00:00', endTime: '9:00:00' },
 ];
+const IVAN_PHOTO = 'https://media.test/profile-photos/ivan/s128.webp';
 const TRAINEES = [
-  trainee('t-ivan', 'Ivan Petrov', 'Vanko'),
+  { ...trainee('t-ivan', 'Ivan Petrov', 'Vanko'), photoUrl: IVAN_PHOTO },
   trainee('t-ivelina', 'Ivelina Koleva', null),
   trainee('t-georgi', 'Georgi Dimitrov', 'Gosho'),
   trainee('t-gone', 'Ivo Gone', null, false),
@@ -304,6 +305,22 @@ describe('AttendanceRegisterComponent', () => {
       expect(checkbox('Ivan Petrov').checked).toBe(true);
       expect(checkbox('Ivelina Koleva').checked).toBe(false);
       expect(checkbox('Georgi Dimitrov').checked).toBe(true);
+    });
+
+    it("shows each trainee's photo (or initials) in the list and on the summary", async () => {
+      const photoIn = (name: string) =>
+        page
+          .queryAll('label')
+          .find((label) => label.textContent?.includes(name))!
+          .querySelector('img')
+          ?.getAttribute('src') ?? null;
+      expect(photoIn('Ivan Petrov')).toBe(IVAN_PHOTO);
+      expect(photoIn('Ivelina Koleva')).toBeNull();
+
+      await tick('Ivan Petrov');
+      await review();
+      const [row] = page.queryAll('[data-testid="attendance-summary-row"]');
+      expect(row.querySelector('img')?.getAttribute('src')).toBe(IVAN_PHOTO);
     });
 
     it('asks for a preview of the selection first, with the time as HH:mm, and saves nothing yet', async () => {

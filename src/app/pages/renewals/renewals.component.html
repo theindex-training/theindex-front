@@ -89,7 +89,10 @@
                   <tr>
                     <td>
                       <div class="person-cell">
-                        <app-avatar [name]="row.name" />
+                        <app-avatar
+                          [name]="row.name"
+                          [photoUrl]="row.photoUrl"
+                        />
                         <div class="person-cell__text">
                           <a
                             class="cell-link"
@@ -141,6 +144,7 @@
                   [title]="row.name"
                   [titleSuffix]="quotedNickname(row.nickname)"
                   [avatarName]="row.name"
+                  [avatarPhotoUrl]="row.photoUrl"
                 >
                   <span listRowMeta>{{ section.meta(row) }}</span>
                   <app-chip listRowTrailing [tone]="section.chipTone(row)">{{

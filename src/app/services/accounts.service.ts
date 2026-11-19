@@ -35,6 +35,8 @@ export interface AccountView {
     name: string;
     nickname: string | null;
     isActive: boolean;
+    /** The profile's photo thumbnail, or null. */
+    photoUrl: string | null;
   } | null;
 }
 

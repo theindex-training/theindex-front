@@ -184,6 +184,11 @@ export class SettlementDetailsComponent implements OnInit {
     return this.trainerLabelById.get(trainerId) || trainerId;
   }
 
+  /** The trainer's profile photo thumbnail (from the trainers list), or null. */
+  trainerPhoto(trainerId: string): string | null {
+    return this.trainers.find((t) => t.id === trainerId)?.photoUrl ?? null;
+  }
+
   formatTrainee(traineeId: string | undefined): string {
     if (!traineeId) {
       return '—';

@@ -345,6 +345,11 @@ export class AttendanceRegisterComponent implements OnInit {
     });
   }
 
+  /** A trainee's profile photo thumbnail (from the trainees list), or null. */
+  photoOf(traineeId: string): string | null {
+    return this.trainees.find((t) => t.id === traineeId)?.photoUrl ?? null;
+  }
+
   isSelected(traineeId: string): boolean {
     return this.selectedTraineeIds.has(traineeId);
   }

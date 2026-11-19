@@ -149,6 +149,33 @@ describe('TraineesComponent list', () => {
     expect(page.text()).toContain('Multisport');
   });
 
+  it("shows a trainee's photo on the table and the phone list, and initials without one", async () => {
+    const photo = 'https://media.test/profile-photos/p2/s128.webp';
+    const fixture = TestBed.createComponent(TraineesComponent);
+    page = driver(
+      () => fixture.nativeElement,
+      () => fixture.whenStable(),
+    );
+    await page.settle();
+    http
+      .expectOne('/api/gym-subscriptions?includeInactive=true')
+      .flush([{ id: 'gs1', name: 'Multisport', isActive: true }]);
+    await flush('/api/trainees', [
+      trainees[0],
+      { ...trainees[1], photoUrl: photo },
+    ]);
+
+    const photos = page
+      .queryAll('[data-testid="avatar-photo"]')
+      .map((img) => img.getAttribute('src'));
+    // Ivan's photo, once in the table and once in the phone list.
+    expect(photos).toEqual([photo, photo]);
+    const table = page.query('table')!;
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+    expect(rows[1].querySelector('img')?.getAttribute('src')).toBe(photo);
+    expect(rows[0].querySelector('img')).toBeNull();
+  });
+
   it('maps the status filter to the active param', async () => {
     await render();
 

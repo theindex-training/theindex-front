@@ -53,6 +53,8 @@ const ALLOCATION: SettlementAllocation = {
   },
 };
 
+const PETAR_PHOTO = 'https://media.test/profile-photos/tr1/s128.webp';
+
 describe('SettlementDetailsComponent', () => {
   let http: HttpTestingController;
   let harness: RouterTestingHarness;
@@ -111,6 +113,7 @@ describe('SettlementDetailsComponent', () => {
           nickname: ' Pepi ',
           accountId: null,
           isActive: true,
+          photoUrl: PETAR_PHOTO,
         },
         {
           id: 'tr2',
@@ -183,6 +186,16 @@ describe('SettlementDetailsComponent', () => {
     );
     expect(trainedAt).not.toBe('—');
     expect(page.text().split(trainedAt).length - 1).toBe(2);
+  });
+
+  it("shows each trainer's photo on their lines, from the trainers list", async () => {
+    await open('ADMIN');
+
+    const photos = page
+      .queryAll('[data-testid="avatar-photo"]')
+      .map((img) => img.getAttribute('src'));
+    expect(photos.length).toBeGreaterThan(0);
+    expect(new Set(photos)).toEqual(new Set([PETAR_PHOTO]));
   });
 
   it('shows raw ids when the names cannot be loaded', async () => {

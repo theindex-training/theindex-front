@@ -127,7 +127,10 @@
             <tr>
               <td>
                 <div class="person-cell">
-                  <app-avatar [name]="trainer.name" />
+                  <app-avatar
+                    [name]="trainer.name"
+                    [photoUrl]="trainer.photoUrl"
+                  />
                   <div class="person-cell__text">
                     <a
                       class="cell-link"
@@ -189,6 +192,7 @@
             [title]="trainer.name"
             [titleSuffix]="quotedNickname(trainer.nickname)"
             [avatarName]="trainer.name"
+            [avatarPhotoUrl]="trainer.photoUrl"
             [dimmed]="!trainer.isActive"
           >
             @if (hasLinkedAccount(trainer)) {

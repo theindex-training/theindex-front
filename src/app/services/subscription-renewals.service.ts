@@ -16,6 +16,8 @@ export interface RenewalRow {
   traineeId: string;
   name: string;
   nickname: string | null;
+  /** Their profile photo's thumbnail, or null. */
+  photoUrl: string | null;
   /** Plan of the trainee's latest subscription of this type. */
   planTitle: string;
   /** Subscriptions of this type still running (0 when exhausted). */

@@ -565,6 +565,8 @@ One spec per service, each method asserting method, URL, query and body. These p
 **`pages/my-details/my-details.component.spec.ts`, `pages/records/records-pages.spec.ts`**
 - [x] My details: Upload with initials and nothing else without a photo; Choose another / Adjust / Remove with one; a wrong type or a file over 15 MB is refused before any request; Remove asks, then shows the initials (the API's error keeps the photo); Adjust fetches the kept picture and says when it can't. The cropper itself needs a real browser: J22.
 - [x] Leaderboard rows show the photo, or the initials without one.
+- [x] The Trainees and Trainers lists (`trainers.component.spec.ts`), Renewals, a training's booked trainees, the Accounts list and a settlement's trainer lines show the person's photo, or the initials without one; each fails with the photo left out of its template.
+- [x] The Trainees list (table and phone rows), a trainee's details, Register attendance (list and summary) and Attendance history show the trainee's photo, or the initials without one (`trainees.component.spec.ts`, `trainee-details.component.spec.ts`, `attendance-register.component.spec.ts`, `attendance-sessions.component.spec.ts`; each fails with the photo left out of its template).
 
 ---
 

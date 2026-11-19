@@ -108,11 +108,39 @@ describe('AccountsComponent', () => {
           name: 'Petar',
           nickname: null,
           isActive: true,
+          photoUrl: null,
         },
       }),
     ]);
     await page.settle();
     expect(tableRows()[0]).toContain('Trainer: Petar');
+  });
+
+  it("shows a connected profile's photo, and initials for the others", async () => {
+    const photo = 'https://media.test/profile-photos/t1/s128.webp';
+    expectList('unlinked').flush([
+      account('a1', {
+        profile: {
+          type: 'trainee',
+          id: 't1',
+          name: 'Ivan Petrov',
+          nickname: null,
+          isActive: true,
+          photoUrl: photo,
+        },
+      }),
+      account('a2'),
+    ]);
+    await page.settle();
+
+    // Ivan's photo, once in the table and once in the phone list.
+    expect(
+      page
+        .queryAll('[data-testid="avatar-photo"]')
+        .map((img) => img.getAttribute('src')),
+    ).toEqual([photo, photo]);
+    const rows = page.queryAll('table tbody tr');
+    expect(rows[1].querySelector('img')).toBeNull();
   });
 
   it('cancels a pending load when the filter changes, so an older answer never shows', async () => {

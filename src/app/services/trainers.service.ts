@@ -18,6 +18,11 @@ export interface TrainerProfile {
   tiktok?: string | null;
   isActive: boolean;
   createdAt?: string;
+  /**
+   * Their profile photo's thumbnail, or null (theindex-api gives it on `GET /api/trainers` and
+   * `GET /api/trainers/:id`; other answers leave it out).
+   */
+  photoUrl?: string | null;
 }
 
 export interface CreateTrainerPayload {

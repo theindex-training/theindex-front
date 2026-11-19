@@ -85,6 +85,8 @@ export interface TrainingBookingRow {
   traineeId: string;
   name: string;
   nickname: string | null;
+  /** Their profile photo's thumbnail, or null. */
+  photoUrl: string | null;
   isActive: boolean;
   bookedAt: string;
   attendanceSaved: boolean;
