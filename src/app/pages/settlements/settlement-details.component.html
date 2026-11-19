@@ -222,283 +222,303 @@
       }
     </section>
 
-    <section class="page-stack" aria-labelledby="allocations-title">
-      <div class="section-header">
-        <h2 class="panel__title" id="allocations-title">
-          {{ 'settlements.details.allocations' | transloco }}
-        </h2>
-        <p class="text-muted">
-          {{ 'settlements.details.allocationsHint' | transloco }}
-        </p>
-      </div>
-
+    <div class="list-toolbar settlement-toolbar" #listTop>
       @if (isAdmin) {
-        <div class="list-toolbar">
-          <label class="form-field allocation-filter">
-            <span class="form-field__label">{{
-              'settlements.details.trainer' | transloco
-            }}</span>
-            <select
-              [(ngModel)]="selectedTrainerId"
-              (change)="loadAllocations()"
-            >
-              <option value="">
-                {{ 'settlements.details.allTrainers' | transloco }}
+        <div class="form-field allocation-filter">
+          <label class="form-field__label" for="settlement-trainer">{{
+            'settlements.details.trainer' | transloco
+          }}</label>
+          <select
+            id="settlement-trainer"
+            [ngModel]="selectedTrainerId"
+            (ngModelChange)="changeTrainer($event)"
+          >
+            <option value="">
+              {{ 'settlements.details.allTrainers' | transloco }}
+            </option>
+            @for (trainer of trainers; track trainer.id) {
+              <option [value]="trainer.id">
+                {{ trainer.nickname || trainer.name }}
               </option>
-              @for (trainer of trainers; track trainer.id) {
-                <option [value]="trainer.id">
-                  {{ trainer.nickname || trainer.name }}
-                </option>
-              }
-            </select>
-          </label>
-          @if (!loadingAllocations && !allocationError && allocations.length) {
-            <p
-              class="list-toolbar__count"
-              data-testid="list-count"
-              aria-live="polite"
-            >
-              {{
-                'settlements.details.showing'
-                  | transloco
-                    : { shown: allocations.length, total: allocationsTotal }
-              }}
-            </p>
-          }
+            }
+          </select>
         </div>
-      } @else if (
-        !loadingAllocations && !allocationError && allocations.length
-      ) {
+      }
+      <app-segmented-control
+        [label]="'settlements.details.tabsLabel' | transloco"
+        [options]="tabOptions"
+        [value]="tab"
+        [translateLabels]="false"
+        (valueChange)="selectTab($event)"
+      />
+      @if (shownRange; as range) {
         <p
           class="list-toolbar__count"
           data-testid="list-count"
           aria-live="polite"
         >
-          {{
-            'settlements.details.showing'
-              | transloco
-                : { shown: allocations.length, total: allocationsTotal }
-          }}
+          {{ range }}
         </p>
       }
+    </div>
 
-      @if (loadingAllocations) {
-        <app-skeleton-list
-          [label]="'settlements.details.loadingAllocations' | transloco"
-          [rows]="4"
-        />
-      } @else if (allocationError) {
-        <p class="notice notice--danger" role="alert">
-          {{ allocationError | uiMessage }}
-        </p>
-      } @else if (!allocations.length) {
-        <p class="notice" role="status">
-          {{ 'settlements.details.noAllocations' | transloco }}
-        </p>
-      } @else {
-        <div
-          class="data-table-wrap responsive-table"
-          tabindex="0"
-          role="region"
-          [attr.aria-label]="'settlements.details.allocationsTable' | transloco"
-        >
-          <table class="data-table">
-            <caption class="visually-hidden">
-              {{
-                'settlements.details.allocations' | transloco
-              }}
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">
-                  {{ 'settlements.details.trainedAt' | transloco }}
-                </th>
-                <th scope="col">
-                  {{ 'settlements.details.trainee' | transloco }}
-                </th>
-                <th scope="col">
-                  {{ 'settlements.details.trainer' | transloco }}
-                </th>
-                <th scope="col">
-                  {{ 'settlements.details.subscription' | transloco }}
-                </th>
-                <th scope="col">{{ 'settlements.details.gym' | transloco }}</th>
-                <th scope="col" class="cell-right">
-                  {{ 'settlements.details.value' | transloco }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (row of allocations; track row.id) {
-                <tr>
-                  <td class="num">
-                    {{ formatOptionalDate(row.attendance?.trainedAt) }}
-                    @if (row.fromEarlierPeriod) {
-                      <app-chip>{{
-                        'settlements.details.earlierPeriod' | transloco
-                      }}</app-chip>
-                    }
-                  </td>
-                  <td>
-                    <a
-                      class="cell-link"
-                      [routerLink]="['/trainees', row.attendance?.traineeId]"
-                    >
-                      {{ formatTrainee(row.attendance?.traineeId) }}
-                    </a>
-                  </td>
-                  <td>{{ formatTrainer(row.trainerId) }}</td>
-                  <td>
-                    @if (row.subscriptionType) {
-                      <app-chip>{{
-                        row.subscriptionType | enumLabel: 'planType'
-                      }}</app-chip>
-                    } @else {
-                      <span class="text-muted">—</span>
-                    }
-                  </td>
-                  <td>{{ formatGym(row.attendance?.locationId) }}</td>
-                  <td class="num cell-right">
-                    {{ formatCurrency(row.valueCents) }}
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
+    @if (tab === 'paid') {
+      <section
+        class="page-stack"
+        aria-labelledby="allocations-title"
+        [attr.aria-busy]="updatingAllocations || null"
+      >
+        <div class="section-header">
+          <h2 class="panel__title" id="allocations-title">
+            {{ 'settlements.details.allocations' | transloco }}
+          </h2>
+          <p class="text-muted">
+            {{ 'settlements.details.allocationsHint' | transloco }}
+          </p>
         </div>
 
-        <ul
-          class="list-card responsive-list"
-          [attr.aria-label]="'settlements.details.allocations' | transloco"
-        >
-          @for (row of allocations; track row.id) {
-            <li class="record">
-              <div class="record__main">
-                <a
-                  class="record__title"
-                  [routerLink]="['/trainees', row.attendance?.traineeId]"
-                >
-                  {{ formatTrainee(row.attendance?.traineeId) }}
-                </a>
-                <span class="record__meta num">{{
-                  formatOptionalDate(row.attendance?.trainedAt)
-                }}</span>
-                <span class="record__meta"
-                  >{{ formatTrainer(row.trainerId) }} ·
-                  {{ formatGym(row.attendance?.locationId) }}</span
-                >
-              </div>
-              <div class="record__aside">
-                <span class="num total">{{
-                  formatCurrency(row.valueCents)
-                }}</span>
-                @if (row.fromEarlierPeriod) {
-                  <app-chip>{{
-                    'settlements.details.earlierPeriod' | transloco
-                  }}</app-chip>
-                } @else if (row.subscriptionType) {
-                  <app-chip>{{
-                    row.subscriptionType | enumLabel: 'planType'
-                  }}</app-chip>
+        @if (loadingAllocations) {
+          <app-skeleton-list
+            [label]="'settlements.details.loadingAllocations' | transloco"
+            [rows]="4"
+          />
+        } @else if (allocationError) {
+          <p class="notice notice--danger" role="alert">
+            {{ allocationError | uiMessage }}
+          </p>
+        } @else if (!allocations.length) {
+          <p class="notice" role="status">
+            {{ 'settlements.details.noAllocations' | transloco }}
+          </p>
+        } @else {
+          <div
+            class="data-table-wrap responsive-table"
+            tabindex="0"
+            role="region"
+            [attr.aria-label]="
+              'settlements.details.allocationsTable' | transloco
+            "
+          >
+            <table class="data-table">
+              <caption class="visually-hidden">
+                {{
+                  'settlements.details.allocations' | transloco
+                }}
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">
+                    {{ 'settlements.details.trainedAt' | transloco }}
+                  </th>
+                  <th scope="col">
+                    {{ 'settlements.details.trainee' | transloco }}
+                  </th>
+                  <th scope="col">
+                    {{ 'settlements.details.trainer' | transloco }}
+                  </th>
+                  <th scope="col">
+                    {{ 'settlements.details.subscription' | transloco }}
+                  </th>
+                  <th scope="col">
+                    {{ 'settlements.details.gym' | transloco }}
+                  </th>
+                  <th scope="col" class="cell-right">
+                    {{ 'settlements.details.value' | transloco }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of allocations; track row.id) {
+                  <tr>
+                    <td class="num">
+                      {{ formatOptionalDate(row.attendance?.trainedAt) }}
+                      @if (row.fromEarlierPeriod) {
+                        <app-chip>{{
+                          'settlements.details.earlierPeriod' | transloco
+                        }}</app-chip>
+                      }
+                    </td>
+                    <td>
+                      <a
+                        class="cell-link"
+                        [routerLink]="['/trainees', row.attendance?.traineeId]"
+                      >
+                        {{ formatTrainee(row.attendance?.traineeId) }}
+                      </a>
+                    </td>
+                    <td>{{ formatTrainer(row.trainerId) }}</td>
+                    <td>
+                      @if (row.subscriptionType) {
+                        <app-chip>{{
+                          row.subscriptionType | enumLabel: 'planType'
+                        }}</app-chip>
+                      } @else {
+                        <span class="text-muted">—</span>
+                      }
+                    </td>
+                    <td>{{ formatGym(row.attendance?.locationId) }}</td>
+                    <td class="num cell-right">
+                      {{ formatCurrency(row.valueCents) }}
+                    </td>
+                  </tr>
                 }
-              </div>
-            </li>
-          }
-        </ul>
-      }
-    </section>
+              </tbody>
+            </table>
+          </div>
 
-    <section class="page-stack" aria-labelledby="waiting-title">
-      <div class="section-header">
-        <h2 class="panel__title" id="waiting-title">
-          {{ 'settlements.details.waitingTitle' | transloco }}
-        </h2>
-        <p class="text-muted">
-          {{ 'settlements.details.waitingHint' | transloco }}
-        </p>
-      </div>
+          <ul
+            class="list-card responsive-list"
+            [attr.aria-label]="'settlements.details.allocations' | transloco"
+          >
+            @for (row of allocations; track row.id) {
+              <li class="record">
+                <div class="record__main">
+                  <a
+                    class="record__title"
+                    [routerLink]="['/trainees', row.attendance?.traineeId]"
+                  >
+                    {{ formatTrainee(row.attendance?.traineeId) }}
+                  </a>
+                  <span class="record__meta num">{{
+                    formatOptionalDate(row.attendance?.trainedAt)
+                  }}</span>
+                  <span class="record__meta"
+                    >{{ formatTrainer(row.trainerId) }} ·
+                    {{ formatGym(row.attendance?.locationId) }}</span
+                  >
+                </div>
+                <div class="record__aside">
+                  <span class="num total">{{
+                    formatCurrency(row.valueCents)
+                  }}</span>
+                  @if (row.fromEarlierPeriod) {
+                    <app-chip>{{
+                      'settlements.details.earlierPeriod' | transloco
+                    }}</app-chip>
+                  } @else if (row.subscriptionType) {
+                    <app-chip>{{
+                      row.subscriptionType | enumLabel: 'planType'
+                    }}</app-chip>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
 
-      @if (!shownWaiting.length) {
-        <p class="notice" role="status">
-          {{ 'settlements.details.noWaiting' | transloco }}
-        </p>
-      } @else {
-        <div
-          class="data-table-wrap responsive-table"
-          tabindex="0"
-          role="region"
-          [attr.aria-label]="'settlements.details.waitingTable' | transloco"
-        >
-          <table class="data-table">
-            <caption class="visually-hidden">
-              {{
-                'settlements.details.waitingTitle' | transloco
-              }}
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">
-                  {{ 'settlements.details.trainedAt' | transloco }}
-                </th>
-                <th scope="col">
-                  {{ 'settlements.details.trainee' | transloco }}
-                </th>
-                <th scope="col">
-                  {{ 'settlements.details.trainer' | transloco }}
-                </th>
-                <th scope="col">{{ 'settlements.details.gym' | transloco }}</th>
-                <th scope="col">
-                  {{ 'settlements.details.reason' | transloco }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (row of shownWaiting; track row.attendanceId) {
-                <tr>
-                  <td class="num">{{ formatDate(row.trainedAt) }}</td>
-                  <td>
-                    <a
-                      class="cell-link"
-                      [routerLink]="['/trainees', row.traineeId]"
-                    >
-                      {{ formatTrainee(row.traineeId) }}
-                    </a>
-                  </td>
-                  <td>{{ formatTrainer(row.trainerId) }}</td>
-                  <td>{{ formatGym(row.locationId) }}</td>
-                  <td>{{ waitingReason(row) }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
+          <app-pagination
+            [label]="'settlements.details.allocationsPages' | transloco"
+            [total]="allocationsTotal"
+            [page]="allocationsPage"
+            [pageSize]="pageSize"
+            (pageChange)="changePage($event)"
+            (pageSizeChange)="changePageSize($event)"
+          />
+        }
+      </section>
+    } @else {
+      <section class="page-stack" aria-labelledby="waiting-title">
+        <div class="section-header">
+          <h2 class="panel__title" id="waiting-title">
+            {{ 'settlements.details.waitingTitle' | transloco }}
+          </h2>
+          <p class="text-muted">
+            {{ 'settlements.details.waitingHint' | transloco }}
+          </p>
         </div>
 
-        <ul
-          class="list-card responsive-list"
-          [attr.aria-label]="'settlements.details.waitingTitle' | transloco"
-        >
-          @for (row of shownWaiting; track row.attendanceId) {
-            <li class="record">
-              <div class="record__main">
-                <a
-                  class="record__title"
-                  [routerLink]="['/trainees', row.traineeId]"
-                >
-                  {{ formatTrainee(row.traineeId) }}
-                </a>
-                <span class="record__meta num">{{
-                  formatDate(row.trainedAt)
-                }}</span>
-                <span class="record__meta"
-                  >{{ formatTrainer(row.trainerId) }} ·
-                  {{ formatGym(row.locationId) }}</span
-                >
-                <span class="record__meta">{{ waitingReason(row) }}</span>
-              </div>
-            </li>
-          }
-        </ul>
-      }
-    </section>
+        @if (!shownWaiting.length) {
+          <p class="notice" role="status">
+            {{ 'settlements.details.noWaiting' | transloco }}
+          </p>
+        } @else {
+          <div
+            class="data-table-wrap responsive-table"
+            tabindex="0"
+            role="region"
+            [attr.aria-label]="'settlements.details.waitingTable' | transloco"
+          >
+            <table class="data-table">
+              <caption class="visually-hidden">
+                {{
+                  'settlements.details.waitingTitle' | transloco
+                }}
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">
+                    {{ 'settlements.details.trainedAt' | transloco }}
+                  </th>
+                  <th scope="col">
+                    {{ 'settlements.details.trainee' | transloco }}
+                  </th>
+                  <th scope="col">
+                    {{ 'settlements.details.trainer' | transloco }}
+                  </th>
+                  <th scope="col">
+                    {{ 'settlements.details.gym' | transloco }}
+                  </th>
+                  <th scope="col">
+                    {{ 'settlements.details.reason' | transloco }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of waitingRows; track row.attendanceId) {
+                  <tr>
+                    <td class="num">{{ formatDate(row.trainedAt) }}</td>
+                    <td>
+                      <a
+                        class="cell-link"
+                        [routerLink]="['/trainees', row.traineeId]"
+                      >
+                        {{ formatTrainee(row.traineeId) }}
+                      </a>
+                    </td>
+                    <td>{{ formatTrainer(row.trainerId) }}</td>
+                    <td>{{ formatGym(row.locationId) }}</td>
+                    <td>{{ waitingReason(row) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <ul
+            class="list-card responsive-list"
+            [attr.aria-label]="'settlements.details.waitingTitle' | transloco"
+          >
+            @for (row of waitingRows; track row.attendanceId) {
+              <li class="record">
+                <div class="record__main">
+                  <a
+                    class="record__title"
+                    [routerLink]="['/trainees', row.traineeId]"
+                  >
+                    {{ formatTrainee(row.traineeId) }}
+                  </a>
+                  <span class="record__meta num">{{
+                    formatDate(row.trainedAt)
+                  }}</span>
+                  <span class="record__meta"
+                    >{{ formatTrainer(row.trainerId) }} ·
+                    {{ formatGym(row.locationId) }}</span
+                  >
+                  <span class="record__meta">{{ waitingReason(row) }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+
+          <app-pagination
+            [label]="'settlements.details.waitingPages' | transloco"
+            [total]="shownWaiting.length"
+            [page]="waitingPage"
+            [pageSize]="pageSize"
+            (pageChange)="changePage($event)"
+            (pageSizeChange)="changePageSize($event)"
+          />
+        }
+      </section>
+    }
   }
 </section>

@@ -1,0 +1,98 @@
+@if (shown) {
+  <nav class="pagination" [attr.aria-label]="label">
+    @if (count > 1) {
+      <ul class="pagination__pages">
+        <li>
+          <button
+            class="pagination__button"
+            type="button"
+            [disabled]="current === 1"
+            [attr.aria-label]="'common.pagination.first' | transloco"
+            (click)="go(1)"
+          >
+            <app-icon name="chevrons-left" />
+          </button>
+        </li>
+        <li>
+          <button
+            class="pagination__button"
+            type="button"
+            [disabled]="current === 1"
+            [attr.aria-label]="'common.pagination.previous' | transloco"
+            (click)="go(current - 1)"
+          >
+            <app-icon name="chevron-left" />
+          </button>
+        </li>
+        @for (item of items; track $index) {
+          <li class="pagination__number">
+            @if (item === 'gap') {
+              <span class="pagination__gap" aria-hidden="true">…</span>
+            } @else {
+              <button
+                class="pagination__button num"
+                type="button"
+                [class.is-current]="item === current"
+                [attr.aria-current]="item === current ? 'page' : null"
+                [attr.aria-label]="
+                  'common.pagination.page' | transloco: { page: item }
+                "
+                (click)="go(item)"
+              >
+                {{ format.number(item) }}
+              </button>
+            }
+          </li>
+        }
+        <li class="pagination__status num" data-testid="pagination-status">
+          <span aria-hidden="true"
+            >{{ format.number(current) }} / {{ format.number(count) }}</span
+          >
+          <span class="visually-hidden">{{
+            'common.pagination.pageOf'
+              | transloco
+                : {
+                    page: format.number(current),
+                    count: format.number(count),
+                  }
+          }}</span>
+        </li>
+        <li>
+          <button
+            class="pagination__button"
+            type="button"
+            [disabled]="current === count"
+            [attr.aria-label]="'common.pagination.next' | transloco"
+            (click)="go(current + 1)"
+          >
+            <app-icon name="chevron-right" />
+          </button>
+        </li>
+        <li>
+          <button
+            class="pagination__button"
+            type="button"
+            [disabled]="current === count"
+            [attr.aria-label]="'common.pagination.last' | transloco"
+            (click)="go(count)"
+          >
+            <app-icon name="chevrons-right" />
+          </button>
+        </li>
+      </ul>
+    }
+
+    <div class="pagination__size">
+      <label class="pagination__size-label" [for]="sizeId">{{
+        'common.pagination.perPage' | transloco
+      }}</label>
+      <select [id]="sizeId" (change)="changeSize($event)">
+        @for (size of pageSizeOptions; track size) {
+          <option [value]="size" [selected]="size === pageSize">
+            {{ format.number(size) }}
+          </option>
+        }
+      </select>
+    </div>
+  </nav>
+}

@@ -293,11 +293,11 @@ Reports are automatic since Nov 2026 (theindex-api creates one per half month; s
 **`settlement-details.component.ts`**
 - [x] On init:
   - `GET /api/settlements/<id>` (`{ settlement, lines, waiting }`);
-  - `GET …/allocations?offset=0&limit=500`;
+  - `GET …/allocations?offset=0&limit=50` (the page and size from `?page=` / `?size=`; `?trainer=` for admins);
   - `GET /api/trainers`, `GET /api/trainees` (no params);
   - `GET /api/gym-locations?includeInactive=true`.
 - [x] The admin trainer filter re-requests allocations with `trainerId`; "All" omits it. It also limits the waiting list (client-side).
-- [x] Allocations are capped at 500 with no paging; the page shows "N of total". CHARACTERIZATION, see S10.
+- [x] Paid and Waiting are two tabs (`?tab=waiting`), each labelled with its count. Paid trainings are paged by the API (`offset`/`limit`, 50 by default; S10 fixed), waiting ones in the browser; First / Previous / numbers / Next / Last and the page size change `?page=` / `?size=` (replacing the entry), a page past the end goes to the last one, the shown rows stay until the next page arrives, and there are no controls while everything fits on 25 rows.
 - [x] Lines show the carried-over part and the waiting count; a carried-over allocation has the "Earlier period" chip; the waiting list says why each training waits (`UNPAID`, `TIME_PASS_NOT_ENDED` with the date, `NEXT_REPORT`).
 - [x] A draft says it can still change (admins: what finalizing does, with the period end).
 - [x] Finalize is visible and works only for ADMIN on a DRAFT settlement: a confirm names the period and the total (cancel → no request), then `POST …/finalize` with `{}`, the status updates, the button disappears and the report reloads as stored. Error → the API's message, the draft stays. `finalizeSettlement()` is a no-op for a TRAINER or a FINAL settlement.
@@ -700,16 +700,17 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 8. With `accountId` now in the trainee fixture, details also calls `GET /api/accounts/<accountId>`, and the account section shows the email and status.
 
 ### J6. Settlement lifecycle (P1, money) [desktop]
-✅ Done in PR 5: `e2e/journeys/j6-settlements.e2e.ts`; rewritten in Nov 2026 for automatic reports, 3 tests.
+✅ Done in PR 5: `e2e/journeys/j6-settlements.e2e.ts`; rewritten in Nov 2026 for automatic reports, then paging and tabs, 4 tests.
 1. ADMIN token. `/settlements` → `GET /api/settlements`: the reports, with no create or delete action. Open the draft.
 2. Details calls:
    - `GET /api/settlements/<id>`
-   - `GET /api/settlements/<id>/allocations?offset=0&limit=500`
+   - `GET /api/settlements/<id>/allocations?offset=0&limit=50`
    - `GET /api/trainers`, `GET /api/trainees`
    - `GET /api/gym-locations?includeInactive=true`
-3. `settlement-status` shows the DRAFT label and the admin draft notice. The paid trainings show a carried-over one ("Earlier period"); the waiting list shows an unpaid one.
+3. `settlement-status` shows the DRAFT label and the admin draft notice. The paid trainings show a carried-over one ("Earlier period"); the Waiting tab (`?tab=waiting`) shows an unpaid one.
 4. Filter by trainer → the allocations GET runs again with `&trainerId=…`, and the waiting list is filtered.
 5. Finalize → the confirm names the period; accept → `POST /api/settlements/<id>/finalize` with body `{}` → FINAL label, "Finalized" row, no Finalize button, and the report is fetched again.
+6. A report of 4,812 paid trainings: "1–50 of 4,812 rows"; Next → `?page=2` and `offset=50`; Last → page 97; Per page 100 → `?size=100` from the first page; a reload keeps `?page=3&size=100`.
 6. Variant: dismissing the confirm sends nothing; a 409 (an older draft) shows the API's message and keeps the draft.
 7. As a TRAINER: the draft opens with the trainer notice, no finalize button, no trainer filter.
 
@@ -873,7 +874,7 @@ These come from reading the code. Each gets a `// CHARACTERIZATION: possibly uni
 - **S7 — Blank plan titles pass validation.** A whitespace-only plan title passes and is sent as `''`. The other forms use `trimmedLength`.
 - **S8 — A failed account load allows a second account.** On the trainee/trainer account page, a failed or `null` account GET for a linked profile falls back to "create account" mode.
 - **S9 — Trainer without a profile sees all sessions.** A TRAINER token without `trainerProfileId` gets unfiltered attendance history (but can't delete anything).
-- **S10 — Allocations capped at 500.** Settlement allocations stop at 500 rows with no paging.
+- **S10 — Allocations capped at 500.** Settlement allocations stopped at 500 rows with no paging. Fixed in Nov 2026 (page controls).
 - **S17 — The More/Account tab's "current page" state is visual only** (found in PR 5). It is shown with a CSS class only; there is no `aria-current`.
 - **S11 / S12 — No range checks.** Settlement generate and training times have no client-side range check (start ≤ end); only the API validates.
 - **S13 — Login can be submitted twice.** The submit button isn't disabled while signing in, so a double click sends two login requests (found while writing §2).

@@ -4,7 +4,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import en from '../../../../public/i18n/en.json';
 import { PageDriver, apiError, driver } from '../../../testing/dom';
@@ -94,6 +94,33 @@ const ALLOCATION: SettlementAllocation = {
 };
 
 const PETAR_PHOTO = 'https://media.test/profile-photos/tr1/s128.webp';
+const ALLOCATIONS = '/api/settlements/s1/allocations';
+
+/** `count` paid rows, numbered from `from` (their trainee ids say which row they are). */
+function allocationRows(from: number, count: number): SettlementAllocation[] {
+  return Array.from({ length: count }, (_, i) => {
+    const n = from + i;
+    return {
+      ...ALLOCATION,
+      id: `al${n}`,
+      attendanceId: `a${n}`,
+      attendance: {
+        ...ALLOCATION.attendance!,
+        id: `a${n}`,
+        traineeId: `t${n}`,
+      },
+    };
+  });
+}
+
+/** `count` waiting rows of trainer tr1, numbered from 1. */
+function waitingRows(count: number): SettlementWaiting[] {
+  return Array.from({ length: count }, (_, i) => ({
+    ...WAITING[0],
+    attendanceId: `w${i + 1}`,
+    traineeId: `t${i + 1}`,
+  }));
+}
 
 describe('SettlementDetailsComponent', () => {
   let http: HttpTestingController;
@@ -131,11 +158,13 @@ describe('SettlementDetailsComponent', () => {
       allocationsTotal?: number;
       allocations?: SettlementAllocation[];
       waiting?: SettlementWaiting[];
+      url?: string;
+      allocationsUrl?: string;
     } = {},
   ) {
     signInAs(role);
     component = await harness.navigateByUrl(
-      '/settlements/s1',
+      options.url ?? '/settlements/s1',
       SettlementDetailsComponent,
     );
     page = driver(
@@ -194,14 +223,45 @@ describe('SettlementDetailsComponent', () => {
       lines: LINES,
       waiting: options.waiting ?? WAITING,
     });
-    http.expectOne('/api/settlements/s1/allocations?offset=0&limit=500').flush({
-      total: options.allocationsTotal ?? 1,
-      limit: 500,
-      offset: 0,
-      rows: options.allocations ?? [ALLOCATION],
-    });
+    http
+      .expectOne(options.allocationsUrl ?? `${ALLOCATIONS}?offset=0&limit=50`)
+      .flush({
+        total: options.allocationsTotal ?? 1,
+        limit: 50,
+        offset: 0,
+        rows: options.allocations ?? [ALLOCATION],
+      });
     await page.settle();
   }
+
+  const url = () => TestBed.inject(Router).url;
+  /** The button with this accessible name, e.g. "Next page". */
+  const button = (name: string) =>
+    page.query<HTMLButtonElement>(`button[aria-label="${name}"]`);
+  const tabLabels = () =>
+    page
+      .queryAll('app-segmented-control label')
+      .map((label) => label.textContent?.trim());
+  /** Opens a tab the way a person does: the option's radio. */
+  const openTab = (tab: 'paid' | 'waiting') =>
+    page.click(`app-segmented-control input[value="${tab}"]`);
+  /** The trainee names of the rows in the open tab's table. */
+  const tableTrainees = () =>
+    page
+      .queryAll(
+        ['allocations-title', 'waiting-title']
+          .map((id) => `[aria-labelledby="${id}"] tbody td:nth-child(2)`)
+          .join(', '),
+      )
+      .map((cell) => cell.textContent?.trim());
+  const flushPage = (
+    request: string,
+    total: number,
+    rows: SettlementAllocation[],
+  ) => {
+    http.expectOne(request).flush({ total, limit: 50, offset: 0, rows });
+    return page.settle();
+  };
 
   const finalizeButton = () =>
     page
@@ -260,27 +320,251 @@ describe('SettlementDetailsComponent', () => {
   it('lets an admin filter allocations by trainer', async () => {
     await open('ADMIN');
 
-    await page.select('select', 'tr2');
-    http
-      .expectOne(
-        '/api/settlements/s1/allocations?trainerId=tr2&offset=0&limit=500',
-      )
-      .flush({ total: 0, limit: 500, offset: 0, rows: [] });
-    await page.settle();
+    await page.select('#settlement-trainer', 'tr2');
+    await flushPage(`${ALLOCATIONS}?trainerId=tr2&offset=0&limit=50`, 0, []);
     expect(page.text()).toContain(copy.noAllocations);
+    expect(url()).toBe('/settlements/s1?trainer=tr2');
 
-    await page.select('select', '');
-    http
-      .expectOne('/api/settlements/s1/allocations?offset=0&limit=500')
-      .flush({ total: 1, limit: 500, offset: 0, rows: [ALLOCATION] });
+    await page.select('#settlement-trainer', '');
+    await flushPage(`${ALLOCATIONS}?offset=0&limit=50`, 1, [ALLOCATION]);
+    expect(url()).toBe('/settlements/s1');
   });
 
-  it('shows at most 500 allocation rows, with no way to see the rest', async () => {
-    await open('ADMIN', { allocationsTotal: 734 });
+  it('pages through every paid training, 50 at a time by default (TEST_NOTES.md S10)', async () => {
+    await open('ADMIN', {
+      allocationsTotal: 734,
+      allocations: allocationRows(1, 50),
+    });
 
-    // CHARACTERIZATION: possibly unintended — the page asks for the first 500 rows only and has no
-    // paging; it says "Showing N of 734 rows". TEST_NOTES.md S10.
-    expect(page.text()).toContain('Showing 1 of 734 rows');
+    expect(page.query('[data-testid="list-count"]')?.textContent?.trim()).toBe(
+      '1–50 of 734 rows',
+    );
+    expect(tableTrainees()).toHaveLength(50);
+    expect(button('Previous page')?.disabled).toBe(true);
+    expect(button('First page')?.disabled).toBe(true);
+    expect(button('Page 1')?.getAttribute('aria-current')).toBe('page');
+    // 734 rows make 15 pages: the first five, a gap and the last.
+    expect(
+      page
+        .queryAll(
+          'nav[aria-label="Paid trainings pages"] li:not([data-testid="pagination-status"])',
+        )
+        .map((li) => li.textContent?.trim())
+        // The arrows are icons only.
+        .filter((text) => text),
+    ).toEqual(['1', '2', '3', '4', '5', '…', '15']);
+
+    await page.click('button[aria-label="Next page"]');
+    expect(url()).toBe('/settlements/s1?page=2');
+    await flushPage(
+      `${ALLOCATIONS}?offset=50&limit=50`,
+      734,
+      allocationRows(51, 50),
+    );
+    expect(page.query('[data-testid="list-count"]')?.textContent?.trim()).toBe(
+      '51–100 of 734 rows',
+    );
+    expect(tableTrainees()[0]).toBe('t51');
+    expect(button('Page 2')?.getAttribute('aria-current')).toBe('page');
+
+    await page.click('button[aria-label="Last page"]');
+    expect(url()).toBe('/settlements/s1?page=15');
+    await flushPage(
+      `${ALLOCATIONS}?offset=700&limit=50`,
+      734,
+      allocationRows(701, 34),
+    );
+    expect(page.query('[data-testid="list-count"]')?.textContent?.trim()).toBe(
+      '701–734 of 734 rows',
+    );
+    expect(tableTrainees()).toHaveLength(34);
+    expect(button('Next page')?.disabled).toBe(true);
+    expect(
+      page
+        .queryAll('[data-testid="pagination-status"] span')
+        .map((span) => span.textContent?.replace(/\s+/g, ' ').trim()),
+      // Phones show the short form; screen readers get the sentence.
+    ).toEqual(['15 / 15', 'Page 15 of 15']);
+
+    await page.click('button[aria-label="Page 13"]');
+    expect(url()).toBe('/settlements/s1?page=13');
+    await flushPage(
+      `${ALLOCATIONS}?offset=600&limit=50`,
+      734,
+      allocationRows(601, 50),
+    );
+
+    await page.click('button[aria-label="First page"]');
+    expect(url()).toBe('/settlements/s1');
+    await flushPage(
+      `${ALLOCATIONS}?offset=0&limit=50`,
+      734,
+      allocationRows(1, 50),
+    );
+  });
+
+  it('shows as many rows a page as asked, from the first page again', async () => {
+    await open('ADMIN', {
+      url: '/settlements/s1?page=3',
+      allocationsUrl: `${ALLOCATIONS}?offset=100&limit=50`,
+      allocationsTotal: 734,
+      allocations: allocationRows(101, 50),
+    });
+
+    await page.select('nav[aria-label="Paid trainings pages"] select', '200');
+    expect(url()).toBe('/settlements/s1?size=200');
+    await flushPage(
+      `${ALLOCATIONS}?offset=0&limit=200`,
+      734,
+      allocationRows(1, 200),
+    );
+    expect(page.query('[data-testid="list-count"]')?.textContent?.trim()).toBe(
+      '1–200 of 734 rows',
+    );
+    expect(tableTrainees()).toHaveLength(200);
+    expect(
+      page
+        .queryAll<HTMLOptionElement>(
+          'nav[aria-label="Paid trainings pages"] option',
+        )
+        .map((option) => option.value),
+    ).toEqual(['25', '50', '100', '200']);
+  });
+
+  it('opens on the tab, page, size and trainer in the address, so going back returns to the same rows', async () => {
+    await open('ADMIN', {
+      url: '/settlements/s1?page=3&size=25&trainer=tr2',
+      allocationsUrl: `${ALLOCATIONS}?trainerId=tr2&offset=50&limit=25`,
+      allocationsTotal: 80,
+      allocations: allocationRows(51, 25),
+    });
+
+    expect(page.query<HTMLSelectElement>('#settlement-trainer')?.value).toBe(
+      'tr2',
+    );
+    expect(page.query('[data-testid="list-count"]')?.textContent?.trim()).toBe(
+      '51–75 of 80 rows',
+    );
+    expect(button('Page 3')?.getAttribute('aria-current')).toBe('page');
+
+    // A page that isn't a number, or a size not offered, falls back to the defaults.
+    await harness.navigateByUrl('/settlements/s1?page=x&size=37');
+    await flushPage(`${ALLOCATIONS}?offset=0&limit=50`, 1, [ALLOCATION]);
+  });
+
+  it('ignores a trainer in the address for a trainer, whom the API shows only their own rows', async () => {
+    await open('TRAINER', {
+      url: '/settlements/s1?trainer=tr2&page=2',
+      allocationsUrl: `${ALLOCATIONS}?offset=50&limit=50`,
+      allocationsTotal: 60,
+      allocations: allocationRows(51, 10),
+    });
+
+    expect(page.query('#settlement-trainer')).toBeNull();
+    expect(tableTrainees()).toHaveLength(10);
+  });
+
+  it('goes to the last page when the address asks for one past the end', async () => {
+    await open('ADMIN', {
+      url: '/settlements/s1?page=40',
+      allocationsUrl: `${ALLOCATIONS}?offset=1950&limit=50`,
+      allocationsTotal: 734,
+      allocations: [],
+    });
+
+    expect(url()).toBe('/settlements/s1?page=15');
+    await flushPage(
+      `${ALLOCATIONS}?offset=700&limit=50`,
+      734,
+      allocationRows(701, 34),
+    );
+    expect(tableTrainees()).toHaveLength(34);
+  });
+
+  it('has no page controls while every row fits on the smallest page', async () => {
+    await open('ADMIN', {
+      allocationsTotal: 25,
+      allocations: allocationRows(1, 25),
+    });
+
+    expect(page.query('app-pagination nav')).toBeNull();
+    expect(page.query('[data-testid="list-count"]')?.textContent?.trim()).toBe(
+      '1–25 of 25 rows',
+    );
+  });
+
+  it('keeps the shown rows while the next page loads, then replaces them', async () => {
+    await open('ADMIN', {
+      allocationsTotal: 734,
+      allocations: allocationRows(1, 50),
+    });
+
+    await page.click('button[aria-label="Next page"]');
+    expect(tableTrainees()[1]).toBe('t2');
+    expect(
+      page
+        .query('[aria-labelledby="allocations-title"]')
+        ?.getAttribute('aria-busy'),
+    ).toBe('true');
+    await flushPage(
+      `${ALLOCATIONS}?offset=50&limit=50`,
+      734,
+      allocationRows(51, 50),
+    );
+    expect(tableTrainees()[1]).toBe('t52');
+    expect(
+      page
+        .query('[aria-labelledby="allocations-title"]')
+        ?.hasAttribute('aria-busy'),
+    ).toBe(false);
+  });
+
+  it('shows the paid and the waiting trainings in two tabs, each with its count', async () => {
+    await open('ADMIN', {
+      allocationsTotal: 734,
+      allocations: allocationRows(1, 50),
+    });
+
+    expect(tabLabels()).toEqual(['Paid · 734', 'Waiting · 3']);
+    expect(page.query('#allocations-title')).not.toBeNull();
+    expect(page.query('#waiting-title')).toBeNull();
+
+    await openTab('waiting');
+    expect(url()).toBe('/settlements/s1?tab=waiting');
+    expect(page.query('#allocations-title')).toBeNull();
+    expect(page.query('#waiting-title')).not.toBeNull();
+    expect(page.query('[data-testid="list-count"]')?.textContent?.trim()).toBe(
+      '1–3 of 3 rows',
+    );
+    // The paid page shown didn't change: nothing to ask the API for.
+    http.expectNone(() => true);
+
+    await openTab('paid');
+    expect(url()).toBe('/settlements/s1');
+    expect(tableTrainees()).toHaveLength(50);
+  });
+
+  it('pages through the waiting trainings in the browser', async () => {
+    await open('ADMIN', { waiting: waitingRows(60) });
+
+    await openTab('waiting');
+    expect(tabLabels()).toEqual(['Paid · 1', 'Waiting · 60']);
+    expect(tableTrainees()).toHaveLength(50);
+
+    await page.click(
+      'nav[aria-label="Waiting trainings pages"] button[aria-label="Next page"]',
+    );
+    expect(url()).toBe('/settlements/s1?tab=waiting&page=2');
+    expect(tableTrainees()).toHaveLength(10);
+    expect(page.query('[data-testid="list-count"]')?.textContent?.trim()).toBe(
+      '51–60 of 60 rows',
+    );
+    // Rows the browser already has: no request.
+    http.expectNone(() => true);
+
+    // Another tab starts on its first page.
+    await openTab('paid');
+    expect(url()).toBe('/settlements/s1');
   });
 
   it('asks before finalizing, naming the period and the total paid out, and does nothing when cancelled', async () => {
@@ -316,15 +600,13 @@ describe('SettlementDetailsComponent', () => {
     http
       .expectOne('/api/settlements/s1')
       .flush({ settlement: finalized, lines: LINES, waiting: [] });
-    http
-      .expectOne('/api/settlements/s1/allocations?offset=0&limit=500')
-      .flush({ total: 1, limit: 500, offset: 0, rows: [ALLOCATION] });
-    await page.settle();
+    await flushPage(`${ALLOCATIONS}?offset=0&limit=50`, 1, [ALLOCATION]);
 
     expect(finalizeButton()).toBeUndefined();
     expect(page.text()).toContain(en.enums.settlementStatus.FINAL);
     expect(page.text()).toContain(copy.finalizedAt);
     expect(page.text()).not.toContain(copy.draftNoticeAdmin.split('{')[0]);
+    await openTab('waiting');
     expect(page.text()).toContain(copy.noWaiting);
   });
 
@@ -386,6 +668,7 @@ describe('SettlementDetailsComponent', () => {
   it('lists the trainings of the period that wait, with why, and filters them by trainer', async () => {
     await open('ADMIN');
     const format = TestBed.inject(LocaleFormatService);
+    await openTab('waiting');
 
     const text = page.text();
     expect(text).toContain(copy.waitingUnpaid);
@@ -397,19 +680,17 @@ describe('SettlementDetailsComponent', () => {
     );
     expect(text).toContain(copy.waitingNextReport);
 
-    await page.select('select', 'tr2');
-    http
-      .expectOne(
-        '/api/settlements/s1/allocations?trainerId=tr2&offset=0&limit=500',
-      )
-      .flush({ total: 0, limit: 500, offset: 0, rows: [] });
-    await page.settle();
+    await page.select('#settlement-trainer', 'tr2');
+    expect(url()).toBe('/settlements/s1?tab=waiting&trainer=tr2');
+    await flushPage(`${ALLOCATIONS}?trainerId=tr2&offset=0&limit=50`, 0, []);
     expect(component.shownWaiting.map((w) => w.attendanceId)).toEqual(['w2']);
     expect(page.text()).not.toContain(copy.waitingUnpaid);
+    expect(tabLabels()).toEqual(['Paid · 0', 'Waiting · 1']);
   });
 
   it('says when nothing of the period waits', async () => {
     await open('TRAINER', { waiting: [] });
+    await openTab('waiting');
     expect(page.text()).toContain(copy.noWaiting);
   });
 

@@ -5,3 +5,8 @@
 .allocation-filter {
   flex: 0 1 18rem;
 }
+
+// The trainer filter's label sits above its select: line the tabs up with the select.
+.settlement-toolbar {
+  align-items: flex-end;
+}
