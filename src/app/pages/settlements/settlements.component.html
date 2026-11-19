@@ -2,14 +2,6 @@
   <app-page-header
     [title]="'nav.settlements' | transloco"
     [subtitle]="'settlements.list.subtitle' | transloco"
-    [action]="
-      canManageSettlements
-        ? {
-            label: ('settlements.list.generate' | transloco),
-            link: '/settlements/new',
-          }
-        : undefined
-    "
   />
 
   @if (loading) {
@@ -17,7 +9,7 @@
       [label]="'settlements.list.loading' | transloco"
       [rows]="4"
     />
-  } @else if (errorMessage && !settlements.length) {
+  } @else if (errorMessage) {
     <app-empty-state
       tone="danger"
       [title]="'settlements.list.loadError' | transloco"
@@ -35,25 +27,9 @@
     <app-empty-state
       icon="wallet"
       [title]="'settlements.list.emptyTitle' | transloco"
-      [message]="
-        canManageSettlements
-          ? ('settlements.list.emptyAdmin' | transloco)
-          : ('settlements.list.emptyTrainer' | transloco)
-      "
-    >
-      @if (canManageSettlements) {
-        <a class="btn btn--primary" routerLink="/settlements/new">{{
-          'settlements.list.generate' | transloco
-        }}</a>
-      }
-    </app-empty-state>
+      [message]="'settlements.list.emptyMessage' | transloco"
+    />
   } @else {
-    @if (errorMessage) {
-      <p class="notice notice--danger" role="alert">
-        {{ errorMessage | uiMessage }}
-      </p>
-    }
-
     <div
       class="data-table-wrap responsive-table"
       tabindex="0"
@@ -99,35 +75,14 @@
                 </app-chip>
               </td>
               <td class="cell-fit">
-                <div class="row-actions">
-                  @if (canManageSettlements) {
-                    <button
-                      class="icon-btn icon-btn--danger"
-                      type="button"
-                      [attr.aria-label]="
-                        'settlements.list.deleteLabel'
-                          | transloco
-                            : {
-                                start: format.date(settlement.periodStart),
-                                end: format.date(settlement.periodEnd),
-                              }
-                      "
-                      [disabled]="deletingSettlementId === settlement.id"
-                      [attr.aria-busy]="deletingSettlementId === settlement.id"
-                      (click)="deleteSettlement(settlement)"
-                    >
-                      <app-icon name="trash" />
-                    </button>
-                  }
-                  <a
-                    class="row-chevron"
-                    [routerLink]="['/settlements', settlement.id]"
-                    tabindex="-1"
-                    aria-hidden="true"
-                  >
-                    <app-icon name="chevron-right" />
-                  </a>
-                </div>
+                <a
+                  class="row-chevron"
+                  [routerLink]="['/settlements', settlement.id]"
+                  tabindex="-1"
+                  aria-hidden="true"
+                >
+                  <app-icon name="chevron-right" />
+                </a>
               </td>
             </tr>
           }
@@ -140,7 +95,7 @@
       [attr.aria-label]="'nav.settlements' | transloco"
     >
       @for (settlement of settlements; track settlement.id) {
-        <li class="row-with-action">
+        <li>
           <app-list-row
             [link]="['/settlements', settlement.id]"
             [title]="
@@ -160,25 +115,6 @@
               {{ settlement.status | enumLabel: 'settlementStatus' }}
             </app-chip>
           </app-list-row>
-          @if (canManageSettlements) {
-            <button
-              class="icon-btn icon-btn--danger"
-              type="button"
-              [attr.aria-label]="
-                'settlements.list.deleteLabel'
-                  | transloco
-                    : {
-                        start: format.date(settlement.periodStart),
-                        end: format.date(settlement.periodEnd),
-                      }
-              "
-              [disabled]="deletingSettlementId === settlement.id"
-              [attr.aria-busy]="deletingSettlementId === settlement.id"
-              (click)="deleteSettlement(settlement)"
-            >
-              <app-icon name="trash" />
-            </button>
-          }
         </li>
       }
     </ul>

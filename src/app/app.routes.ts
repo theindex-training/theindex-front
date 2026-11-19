@@ -493,16 +493,8 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'TRAINER'] },
       },
 
-      {
-        path: 'settlements/new',
-        title: 'settlements.generate.title',
-        loadComponent: () =>
-          import('./pages/settlements/settlement-generate.component').then(
-            (m) => m.SettlementGenerateComponent,
-          ),
-        canActivate: [roleGuard],
-        data: { roles: ['ADMIN'] },
-      },
+      // Reports are created by the API now; an old link to the Generate page lands on the list.
+      { path: 'settlements/new', redirectTo: 'settlements', pathMatch: 'full' },
       {
         path: 'settlements/:id',
         title: 'settlements.details.title',

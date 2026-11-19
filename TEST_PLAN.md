@@ -95,7 +95,7 @@ The review below turned up a few traps. Every spec should follow these.
 
 **`app.routes.ts` → `app.routes.spec.ts`** (route config is access control, so it gets pinned)
 - [x] Table test over the flattened route tree. Every path has exactly the documented `roleGuard` + `data.roles`:
-  - ADMIN only: `trainers/**`, `settlements/new`, `cash-register`;
+  - ADMIN only: `trainers/**`, `cash-register` (`settlements/new` now redirects to the list);
   - TRAINEE only: `my-profile`, `stats`;
   - every role: `records`, `records/:id`, `records/:id/log`, `records/:id/results/:resultId`;
   - `change-password`: authenticated users of any role, with no `roleGuard`;
@@ -285,29 +285,22 @@ The review below turned up a few traps. Every spec should follow these.
 
 ### 6. Settlements (P1, money-adjacent)
 
-**`settlements.component.ts`**
-- [x] `canManageSettlements` only for ADMIN. For a TRAINER the generate action is hidden, the delete buttons are hidden, and `deleteSettlement()` is a no-op.
-- [x] Delete:
-  - confirm text with the period; cancel → no request;
-  - `DELETE /api/settlements/<id>` → removed locally;
-  - error → the list stays, with a danger notice above it;
-  - a second delete while one is in flight is ignored.
+Reports are automatic since Nov 2026 (theindex-api creates one per half month; staff review, an admin finalizes). The Generate page and delete are gone (S11 fixed).
 
-**`settlement-generate.component.ts`**
-- [x] Both dates default to local today (fake clock).
-- [x] An empty date → `missingDates` and no request.
-- [x] No start ≤ end check: the request goes out and the API decides. CHARACTERIZATION, see S11.
-- [x] `POST /api/settlements {periodStart, periodEnd}` → `/settlements/<response.settlement.id>`. Error → message.
+**`settlements.component.ts`**
+- [x] Lists every report (period, created, status) with links to its page; no create or delete action for any role; the empty state says reports are created automatically.
 
 **`settlement-details.component.ts`**
 - [x] On init:
-  - `GET /api/settlements/<id>`;
+  - `GET /api/settlements/<id>` (`{ settlement, lines, waiting }`);
   - `GET …/allocations?offset=0&limit=500`;
   - `GET /api/trainers`, `GET /api/trainees` (no params);
   - `GET /api/gym-locations?includeInactive=true`.
-- [x] The admin trainer filter re-requests allocations with `trainerId`; "All" omits it.
+- [x] The admin trainer filter re-requests allocations with `trainerId`; "All" omits it. It also limits the waiting list (client-side).
 - [x] Allocations are capped at 500 with no paging; the page shows "N of total". CHARACTERIZATION, see S10.
-- [x] Finalize is visible and works only for ADMIN on a DRAFT settlement: `POST …/finalize` with `{}`, the status updates and the button disappears. Error → message. `finalizeSettlement()` is a no-op for a TRAINER or a FINAL settlement.
+- [x] Lines show the carried-over part and the waiting count; a carried-over allocation has the "Earlier period" chip; the waiting list says why each training waits (`UNPAID`, `TIME_PASS_NOT_ENDED` with the date, `NEXT_REPORT`).
+- [x] A draft says it can still change (admins: what finalizing does, with the period end).
+- [x] Finalize is visible and works only for ADMIN on a DRAFT settlement: a confirm names the period and the total (cancel → no request), then `POST …/finalize` with `{}`, the status updates, the button disappears and the report reloads as stored. Error → the API's message, the draft stays. `finalizeSettlement()` is a no-op for a TRAINER or a FINAL settlement.
 - [x] Labels:
   - trainer = trimmed nickname or name;
   - trainee = "Name (nick)";
@@ -638,8 +631,8 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 2. TRAINER token:
    - the sidebar has no Trainers and no Cash register;
    - the sidebar has no Content either (added with J11);
-   - `/trainers` → `/unauthorized`, and so do `/cash-register`, `/settlements/new` and `/content/categories`;
-   - `/settlements` loads with no generate action.
+   - `/trainers` → `/unauthorized`, and so do `/cash-register` and `/content/categories`;
+   - `/settlements/new` lands on the list, which explains that reports are created automatically.
 3. TRAINEE token: `/home` → `/my-profile`, and `/trainees` → `/my-profile`.
 4. Any token, `/login` → the role's home (`loginGuard`).
 5. Session expiry: an ADMIN on `/trainees` gets `GET /api/trainees` → 401.
@@ -707,19 +700,18 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 8. With `accountId` now in the trainee fixture, details also calls `GET /api/accounts/<accountId>`, and the account section shows the email and status.
 
 ### J6. Settlement lifecycle (P1, money) [desktop]
-✅ Done in PR 5: `e2e/journeys/j6-settlements.e2e.ts`, 3 tests.
-1. ADMIN token. `/settlements` → `GET /api/settlements`. "Generate settlement".
-2. Both dates default to 2026-11-02. Set 2026-10-01 to 2026-10-31. Submit → `POST /api/settlements {periodStart:'2026-10-01', periodEnd:'2026-10-31'}` → the app lands on `/settlements/<id>`.
-3. Details calls:
+✅ Done in PR 5: `e2e/journeys/j6-settlements.e2e.ts`; rewritten in Nov 2026 for automatic reports, 3 tests.
+1. ADMIN token. `/settlements` → `GET /api/settlements`: the reports, with no create or delete action. Open the draft.
+2. Details calls:
    - `GET /api/settlements/<id>`
    - `GET /api/settlements/<id>/allocations?offset=0&limit=500`
    - `GET /api/trainers`, `GET /api/trainees`
    - `GET /api/gym-locations?includeInactive=true`
-4. Lines and allocations render with resolved trainer, trainee and gym names. `settlement-status` shows `t('enums.settlementStatus.DRAFT')`.
-5. Filter by trainer → the allocations GET runs again with `&trainerId=…`.
-6. Finalize → `POST /api/settlements/<id>/finalize` with body `{}` → `settlement-status` shows the FINAL label and the Finalize button is gone.
-7. Back to the list. Delete a settlement: the confirm shows the period; accept → `DELETE /api/settlements/<id>`, and the row is gone. Variant: the DELETE → 409, a danger notice shows above the list, and the list stays.
-8. Same flow as a TRAINER: no generate action, no delete buttons, no finalize button, no trainer filter.
+3. `settlement-status` shows the DRAFT label and the admin draft notice. The paid trainings show a carried-over one ("Earlier period"); the waiting list shows an unpaid one.
+4. Filter by trainer → the allocations GET runs again with `&trainerId=…`, and the waiting list is filtered.
+5. Finalize → the confirm names the period; accept → `POST /api/settlements/<id>/finalize` with body `{}` → FINAL label, "Finalized" row, no Finalize button, and the report is fetched again.
+6. Variant: dismissing the confirm sends nothing; a 409 (an older draft) shows the API's message and keeps the draft.
+7. As a TRAINER: the draft opens with the trainer notice, no finalize button, no trainer filter.
 
 ### J7. Cash register manual entry (P1, money) [desktop, mobile]
 ✅ Done in PR 5: `e2e/journeys/j7-cash-register.e2e.ts`, 3 tests × 2 viewports.

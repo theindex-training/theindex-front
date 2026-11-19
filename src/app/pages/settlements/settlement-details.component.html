@@ -31,18 +31,35 @@
           </dd>
         </div>
         <div>
-          <dt>{{ 'settlements.generate.periodStart' | transloco }}</dt>
+          <dt>{{ 'settlements.details.periodStart' | transloco }}</dt>
           <dd class="num">{{ format.date(settlement.periodStart) }}</dd>
         </div>
         <div>
-          <dt>{{ 'settlements.generate.periodEnd' | transloco }}</dt>
+          <dt>{{ 'settlements.details.periodEnd' | transloco }}</dt>
           <dd class="num">{{ format.date(settlement.periodEnd) }}</dd>
         </div>
         <div>
           <dt>{{ 'settlements.details.generatedAt' | transloco }}</dt>
           <dd class="num">{{ formatDate(settlement.generatedAt) }}</dd>
         </div>
+        @if (settlement.finalizedAt) {
+          <div>
+            <dt>{{ 'settlements.details.finalizedAt' | transloco }}</dt>
+            <dd class="num">{{ formatDate(settlement.finalizedAt) }}</dd>
+          </div>
+        }
       </dl>
+
+      @if (settlement.status === 'DRAFT') {
+        <p class="notice notice--warning" role="status">
+          {{
+            isAdmin
+              ? ('settlements.details.draftNoticeAdmin'
+                | transloco: { end: format.date(settlement.periodEnd) })
+              : ('settlements.details.draftNoticeTrainer' | transloco)
+          }}
+        </p>
+      }
 
       @if (errorMessage) {
         <p class="notice notice--danger" role="alert">
@@ -103,7 +120,7 @@
                   {{ 'settlements.details.trainings' | transloco }}
                 </th>
                 <th scope="col" class="cell-right">
-                  {{ 'settlements.details.unpaid' | transloco }}
+                  {{ 'settlements.details.carriedOver' | transloco }}
                 </th>
                 <th scope="col" class="cell-right">
                   {{ 'settlements.details.punch' | transloco }}
@@ -111,10 +128,13 @@
                 <th scope="col" class="cell-right">
                   {{ 'settlements.details.time' | transloco }}
                 </th>
+                <th scope="col" class="cell-right">
+                  {{ 'settlements.details.waiting' | transloco }}
+                </th>
               </tr>
             </thead>
             <tbody>
-              @for (line of lines; track line.id) {
+              @for (line of lines; track line.trainerId) {
                 <tr>
                   <td>
                     <div class="person-cell">
@@ -129,18 +149,16 @@
                     {{ formatCurrency(line.amountCents) }}
                   </td>
                   <td class="num cell-right">{{ line.attendanceCount }}</td>
-                  <td
-                    class="num cell-right"
-                    [class.text-danger]="line.unpaidAttendanceCount > 0"
-                  >
-                    {{ line.unpaidAttendanceCount }}
+                  <td class="num cell-right">
+                    {{ formatCurrency(line.earlierPeriodsCents) }}
                   </td>
                   <td class="num cell-right">
-                    {{ formatCurrency(line.details.punchCents) }}
+                    {{ formatCurrency(line.punchCents) }}
                   </td>
                   <td class="num cell-right">
-                    {{ formatCurrency(line.details.timeCents) }}
+                    {{ formatCurrency(line.timeCents) }}
                   </td>
+                  <td class="num cell-right">{{ line.waitingCount }}</td>
                 </tr>
               }
             </tbody>
@@ -151,7 +169,7 @@
           class="list-card responsive-list"
           [attr.aria-label]="'settlements.details.trainerTotals' | transloco"
         >
-          @for (line of lines; track line.id) {
+          @for (line of lines; track line.trainerId) {
             <li class="record">
               <app-avatar
                 [name]="formatTrainer(line.trainerId)"
@@ -167,26 +185,36 @@
                       | transloco: { count: line.attendanceCount }
                   }}
                   ·
-                  <span [class.text-danger]="line.unpaidAttendanceCount > 0">{{
-                    'settlements.details.unpaidCount'
-                      | transloco: { count: line.unpaidAttendanceCount }
-                  }}</span>
+                  {{
+                    'settlements.details.waitingCount'
+                      | transloco: { count: line.waitingCount }
+                  }}
                 </span>
+                <span class="record__meta">
+                  {{
+                    'settlements.details.punchTime'
+                      | transloco
+                        : {
+                            punch: formatCurrency(line.punchCents),
+                            time: formatCurrency(line.timeCents),
+                          }
+                  }}
+                </span>
+                @if (line.earlierPeriodsCount) {
+                  <span class="record__meta">{{
+                    'settlements.details.carriedOverAmount'
+                      | transloco
+                        : {
+                            amount: formatCurrency(line.earlierPeriodsCents),
+                            count: line.earlierPeriodsCount,
+                          }
+                  }}</span>
+                }
               </div>
               <div class="record__aside">
                 <span class="num total">{{
                   formatCurrency(line.amountCents)
                 }}</span>
-                <span class="record__meta num">
-                  {{
-                    'settlements.details.punchTime'
-                      | transloco
-                        : {
-                            punch: formatCurrency(line.details.punchCents),
-                            time: formatCurrency(line.details.timeCents),
-                          }
-                  }}
-                </span>
               </div>
             </li>
           }
@@ -195,9 +223,14 @@
     </section>
 
     <section class="page-stack" aria-labelledby="allocations-title">
-      <h2 class="panel__title" id="allocations-title">
-        {{ 'settlements.details.allocations' | transloco }}
-      </h2>
+      <div class="section-header">
+        <h2 class="panel__title" id="allocations-title">
+          {{ 'settlements.details.allocations' | transloco }}
+        </h2>
+        <p class="text-muted">
+          {{ 'settlements.details.allocationsHint' | transloco }}
+        </p>
+      </div>
 
       @if (isAdmin) {
         <div class="list-toolbar">
@@ -300,6 +333,11 @@
                 <tr>
                   <td class="num">
                     {{ formatOptionalDate(row.attendance?.trainedAt) }}
+                    @if (row.fromEarlierPeriod) {
+                      <app-chip>{{
+                        'settlements.details.earlierPeriod' | transloco
+                      }}</app-chip>
+                    }
                   </td>
                   <td>
                     <a
@@ -354,11 +392,108 @@
                 <span class="num total">{{
                   formatCurrency(row.valueCents)
                 }}</span>
-                @if (row.subscriptionType) {
+                @if (row.fromEarlierPeriod) {
+                  <app-chip>{{
+                    'settlements.details.earlierPeriod' | transloco
+                  }}</app-chip>
+                } @else if (row.subscriptionType) {
                   <app-chip>{{
                     row.subscriptionType | enumLabel: 'planType'
                   }}</app-chip>
                 }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="page-stack" aria-labelledby="waiting-title">
+      <div class="section-header">
+        <h2 class="panel__title" id="waiting-title">
+          {{ 'settlements.details.waitingTitle' | transloco }}
+        </h2>
+        <p class="text-muted">
+          {{ 'settlements.details.waitingHint' | transloco }}
+        </p>
+      </div>
+
+      @if (!shownWaiting.length) {
+        <p class="notice" role="status">
+          {{ 'settlements.details.noWaiting' | transloco }}
+        </p>
+      } @else {
+        <div
+          class="data-table-wrap responsive-table"
+          tabindex="0"
+          role="region"
+          [attr.aria-label]="'settlements.details.waitingTable' | transloco"
+        >
+          <table class="data-table">
+            <caption class="visually-hidden">
+              {{
+                'settlements.details.waitingTitle' | transloco
+              }}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">
+                  {{ 'settlements.details.trainedAt' | transloco }}
+                </th>
+                <th scope="col">
+                  {{ 'settlements.details.trainee' | transloco }}
+                </th>
+                <th scope="col">
+                  {{ 'settlements.details.trainer' | transloco }}
+                </th>
+                <th scope="col">{{ 'settlements.details.gym' | transloco }}</th>
+                <th scope="col">
+                  {{ 'settlements.details.reason' | transloco }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of shownWaiting; track row.attendanceId) {
+                <tr>
+                  <td class="num">{{ formatDate(row.trainedAt) }}</td>
+                  <td>
+                    <a
+                      class="cell-link"
+                      [routerLink]="['/trainees', row.traineeId]"
+                    >
+                      {{ formatTrainee(row.traineeId) }}
+                    </a>
+                  </td>
+                  <td>{{ formatTrainer(row.trainerId) }}</td>
+                  <td>{{ formatGym(row.locationId) }}</td>
+                  <td>{{ waitingReason(row) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <ul
+          class="list-card responsive-list"
+          [attr.aria-label]="'settlements.details.waitingTitle' | transloco"
+        >
+          @for (row of shownWaiting; track row.attendanceId) {
+            <li class="record">
+              <div class="record__main">
+                <a
+                  class="record__title"
+                  [routerLink]="['/trainees', row.traineeId]"
+                >
+                  {{ formatTrainee(row.traineeId) }}
+                </a>
+                <span class="record__meta num">{{
+                  formatDate(row.trainedAt)
+                }}</span>
+                <span class="record__meta"
+                  >{{ formatTrainer(row.trainerId) }} ·
+                  {{ formatGym(row.locationId) }}</span
+                >
+                <span class="record__meta">{{ waitingReason(row) }}</span>
               </div>
             </li>
           }

@@ -29,26 +29,18 @@ describe('SettlementsService', () => {
         req.request.body,
       ]);
 
-  it('lists, generates, gets, finalizes and deletes settlements', () => {
+  it('lists, gets and finalizes settlements; it never creates or deletes one', () => {
     service.list().subscribe();
-    service
-      .generate({ periodStart: '2026-10-01', periodEnd: '2026-10-31' })
-      .subscribe();
     service.getById('s1').subscribe();
     service.finalize('s1').subscribe();
-    service.delete('s1').subscribe();
 
     expect(sent()).toEqual([
       ['GET', '/api/settlements', null],
-      [
-        'POST',
-        '/api/settlements',
-        { periodStart: '2026-10-01', periodEnd: '2026-10-31' },
-      ],
       ['GET', '/api/settlements/s1', null],
       ['POST', '/api/settlements/s1/finalize', {}],
-      ['DELETE', '/api/settlements/s1', null],
     ]);
+    expect('generate' in service).toBe(false);
+    expect('delete' in service).toBe(false);
   });
 
   it('pages allocations, with the trainer filter only when given', () => {

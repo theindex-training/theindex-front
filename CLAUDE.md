@@ -128,6 +128,13 @@ public/                   # static assets; brand/ holds the official logo PNGs; 
 ## Renewals (`/renewals`)
 ADMIN and TRAINER, the menu item right under Dashboard (first in the More sheet on phones). `pages/renewals/` shows `GET /api/subscription-renewals` (`SubscriptionRenewalsService`): active trainees who have had a subscription, in a Punch or Time tab (an `app-segmented-control`), each with a used up/expired section and an active one. The API decides the tab, the sections and the order (theindex-api `subscriptions/subscription-renewals.ts`); the page only formats them. The Dashboard's "without active subscription" report is separate and unchanged.
 
+## Settlements (`/settlements`)
+The trainers' payout reports, ADMIN and TRAINER (`pages/settlements/`, `SettlementsService`). They are **automatic** (theindex-api `settlements`): the API creates one per half month (1st–15th, 16th–last day, Sofia dates) at 04:00 the day after, as a DRAFT; nobody creates or deletes one, so the list has no create or delete action and `/settlements/new` redirects to the list.
+- **List** (`settlements.component`): every report, latest period first, with its period, when it was created and its status (Draft / Final chip). The empty state explains when reports appear.
+- **A report** (`settlement-details.component`): status, period, created and finalized times; a notice while it is a draft (it is worked out from the attendance as it is now; for admins, what finalizing does). Then the trainer totals (`GET /api/settlements/:id` lines: total, trainings, the part **carried over** from earlier periods, punch / time, waiting), the **paid trainings** (`/:id/allocations`, 500 rows; a carried-over one has an "Earlier period" chip) and the period's trainings **waiting** for a later report, with why (`waiting`: not paid yet, a time-based pass that ends after the period (with its end date), or in a later report). The admin's trainer filter re-requests the allocations and filters the waiting list.
+- **Finalize** (ADMIN, a DRAFT): `window.confirm` names the period and the total paid out of the cash register, and says attendance in the period then can't be added or deleted; then `POST /:id/finalize` and the report reloads as stored. The API refuses (409, shown as it comes) before the period is over and while an older report is a draft; trainers see drafts too, without the button.
+- What a report pays is the API's business (each training once, to its trainer, once its value is known: PUNCH from the purchase, TIME when the pass ends; unpaid trainings wait); the page only shows it.
+
 ## Accounts and self-registration
 People create their own accounts; an admin connects each one to a trainee or trainer profile (theindex-api `POST /api/auth/register`, `/api/accounts`, `/api/my-profile`).
 - **Register** (`/register`, `pages/register/`, public, `loginGuard`, outside the shell; linked from the sign-in card): the login layout (it reuses `login.component.scss`) with a wider card. Full name, email, password + confirmation, phone (required), gym subscription, preferred gym (the active ones from the public `GET /api/auth/register/options`, `RegistrationService`), Instagram / Facebook / TikTok (a handle or a link) and a **required consent** checkbox (personal data and emails: `acceptTerms`). On success the card says the account waits for an admin; no token is stored. Never a nickname.
@@ -337,9 +344,9 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
 - **Data:** keep loading and filtering in the page component; these pieces are presentational only. A segmented filter that maps to an API param keeps calling the existing load method.
 - **Only the controls a page already has:** don't add search or filters while restyling. Plans has a status filter but no search, and Training times has neither.
 - **Rows with their own actions** (delete, an inline link) can't be an `app-list-row`, which is a single link:
-  - A link row plus one button: `li.row-with-action` holding the `app-list-row` and an `.icon-btn`. Example: settlements with delete.
+  - A link row plus one button: `li.row-with-action` holding the `app-list-row` and an `.icon-btn` (no page uses it at the moment; settlements did until their reports became automatic).
   - Anything richer: `li.record` with `.record__main` and `.record__aside`. Examples: attendees and transactions.
-- **Destructive row actions:** an `.icon-btn.icon-btn--danger` with an `aria-label` that names the item, e.g. "Delete settlement 2026-10-01 to 2026-10-31".
+- **Destructive row actions:** an `.icon-btn.icon-btn--danger` with an `aria-label` that names the item, e.g. "Delete the result of 12 Nov 2026".
 - **Errors after something is already loaded** (e.g. a failed delete): show a `.notice.notice--danger` above the list instead of replacing it.
 - **States:** there are always four:
   - loading → `app-skeleton-list`

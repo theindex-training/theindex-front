@@ -54,7 +54,6 @@ test.describe(
       for (const url of [
         '/trainers',
         '/cash-register',
-        '/settlements/new',
         '/content/categories',
       ]) {
         await page.goto(url);
@@ -62,14 +61,12 @@ test.describe(
         await expect(unauthorizedHeading(page)).toBeVisible();
       }
 
-      await page.goto('/settlements');
+      // Reports are created by the API: the old Generate address lands on the list.
+      await page.goto('/settlements/new');
       await expect(page).toHaveURL(/\/settlements$/);
       await expect(
-        page.getByText(t('settlements.list.emptyTrainer')),
+        page.getByText(t('settlements.list.emptyMessage')),
       ).toBeVisible();
-      await expect(
-        page.getByRole('link', { name: t('settlements.list.generate') }),
-      ).toHaveCount(0);
     });
 
     test('a trainee is sent to their own profile from staff pages', async ({
