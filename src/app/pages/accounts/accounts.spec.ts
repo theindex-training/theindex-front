@@ -45,6 +45,7 @@ describe('accounts helpers', () => {
             name: 'Petar',
             nickname: null,
             isActive: true,
+            photoUrl: null,
           },
         }),
       ),
@@ -63,6 +64,7 @@ describe('accounts helpers', () => {
         name: 'Vanyo P.',
         nickname: null,
         isActive: true,
+        photoUrl: null,
       },
     });
     expect(matchesAccount(a, 'IVAN@')).toBe(true);

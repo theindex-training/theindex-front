@@ -22,6 +22,7 @@ function row(over: Partial<TrainingBookingRow>): TrainingBookingRow {
     traineeId: 'tr-x',
     name: 'Someone',
     nickname: null,
+    photoUrl: null,
     isActive: true,
     bookedAt: '2026-11-10T08:00:00Z',
     attendanceSaved: false,
@@ -275,6 +276,20 @@ describe('ScheduleTrainingComponent', () => {
       exercises[0].querySelector('[data-testid="exercise-video-play"]'),
     ).not.toBeNull();
     expect(exercises[1].querySelector('app-exercise-video')).toBeNull();
+  });
+
+  it("shows each booked trainee's photo, or initials without one", async () => {
+    const photo = 'https://media.test/profile-photos/cveta/s128.webp';
+    const [cveta, ...rest] = TRAINING.trainees;
+    await open({
+      ...TRAINING,
+      trainees: [{ ...cveta, photoUrl: photo }, ...rest],
+    });
+
+    const rows = page.queryAll('[data-testid="schedule-training-trainee"]');
+    expect(rows[0].querySelector('img')?.getAttribute('src')).toBe(photo);
+    expect(rows[1].querySelector('img')).toBeNull();
+    expect(rows[1].querySelector('app-avatar')?.textContent?.trim()).toBe('DI');
   });
 
   it('says when a saved attendance used the last training or was unpaid', async () => {

@@ -213,6 +213,7 @@ describe('AccountDetailsComponent', () => {
           name: 'Ivan P.',
           nickname: 'Vanko',
           isActive: true,
+          photoUrl: null,
         },
       }),
     );
@@ -378,6 +379,7 @@ describe('AccountDetailsComponent', () => {
           name: 'Ivan Petrov',
           nickname: 'Vanko',
           isActive: true,
+          photoUrl: null,
         },
       }),
     );
@@ -445,6 +447,7 @@ describe('AccountDetailsComponent', () => {
           name: 'Ivan',
           nickname: null,
           isActive: true,
+          photoUrl: null,
         },
       }),
     );

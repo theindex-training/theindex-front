@@ -118,7 +118,10 @@
                 <tr>
                   <td>
                     <div class="person-cell">
-                      <app-avatar [name]="formatTrainer(line.trainerId)" />
+                      <app-avatar
+                        [name]="formatTrainer(line.trainerId)"
+                        [photoUrl]="trainerPhoto(line.trainerId)"
+                      />
                       <strong>{{ formatTrainer(line.trainerId) }}</strong>
                     </div>
                   </td>
@@ -150,7 +153,10 @@
         >
           @for (line of lines; track line.id) {
             <li class="record">
-              <app-avatar [name]="formatTrainer(line.trainerId)" />
+              <app-avatar
+                [name]="formatTrainer(line.trainerId)"
+                [photoUrl]="trainerPhoto(line.trainerId)"
+              />
               <div class="record__main">
                 <span class="record__title">{{
                   formatTrainer(line.trainerId)

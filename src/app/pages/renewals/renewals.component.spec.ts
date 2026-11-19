@@ -18,6 +18,7 @@ const row = (overrides: Partial<RenewalRow>): RenewalRow => ({
   traineeId: 't1',
   name: 'Georgi Ivanov',
   nickname: null,
+  photoUrl: null,
   planTitle: '16 trainings',
   activeSubscriptions: 0,
   remainingCredits: null,
@@ -180,6 +181,32 @@ describe('RenewalsComponent', () => {
     );
     // The time tab's sections are not shown.
     expect(page.query('[data-testid="renewals-time-active"]')).toBeNull();
+  });
+
+  it("shows a trainee's photo in the table and the phone list, and initials without one", async () => {
+    const photo = 'https://media.test/profile-photos/p1/s128.webp';
+    await render();
+    await flush({
+      ...RENEWALS,
+      punch: {
+        ...RENEWALS.punch,
+        exhausted: [
+          { ...RENEWALS.punch.exhausted[0], photoUrl: photo },
+          RENEWALS.punch.exhausted[1],
+        ],
+      },
+    });
+
+    expect(
+      page
+        .queryAll('[data-testid="avatar-photo"]')
+        .map((img) => img.getAttribute('src')),
+    ).toEqual([photo, photo]);
+    expect(
+      page
+        .queryAll('app-avatar')
+        .filter((avatar) => avatar.textContent?.trim() === 'MK'),
+    ).not.toHaveLength(0);
   });
 
   it('links every trainee to their details page', async () => {
