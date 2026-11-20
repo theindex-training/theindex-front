@@ -12,6 +12,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { Subscription } from 'rxjs';
 import { ChipComponent } from '../../components/chip/chip.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { IconComponent } from '../../components/icon/icon.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { SearchFieldComponent } from '../../components/search-field/search-field.component';
 import {
@@ -40,7 +41,7 @@ const TABS: RecordsTab[] = ['benchmarks', 'lifts', 'mine'];
 /**
  * Records (`/records`, everyone): benchmark workouts and heavy lifts in two tabs, each a card
  * with the top of its Rx and scaled leaderboards, and, for people who log results, a third tab
- * with their own results. `?tab=` keeps the tab in the address.
+ * with their own results, which they edit or delete there. `?tab=` keeps the tab in the address.
  */
 @Component({
   selector: 'app-records',
@@ -55,6 +56,7 @@ const TABS: RecordsTab[] = ['benchmarks', 'lifts', 'mine'];
     SkeletonListComponent,
     EmptyStateComponent,
     ChipComponent,
+    IconComponent,
     BenchmarkCardComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -85,6 +87,29 @@ const TABS: RecordsTab[] = ['benchmarks', 'lifts', 'mine'];
       justify-content: flex-end;
       gap: var(--space-1);
     }
+
+    // On phones the buttons get their own line under the score, so the name keeps its width.
+    .my-result {
+      flex-wrap: wrap;
+    }
+
+    .result__actions {
+      display: flex;
+      flex-basis: 100%;
+      justify-content: flex-end;
+      gap: var(--space-1);
+    }
+
+    @media (min-width: 768px) {
+      .my-result {
+        flex-wrap: nowrap;
+      }
+
+      .result__actions {
+        flex-basis: auto;
+        flex-shrink: 0;
+      }
+    }
   `,
 })
 export class RecordsComponent implements OnInit {
@@ -100,6 +125,9 @@ export class RecordsComponent implements OnInit {
   term = '';
   loading = true;
   errorMessage: UiMessage | null = null;
+  /** A failed delete on the Mine tab, shown above the list. */
+  actionError: UiMessage | null = null;
+  deletingId: string | null = null;
   private request?: Subscription;
 
   constructor(
@@ -146,6 +174,7 @@ export class RecordsComponent implements OnInit {
     this.request?.unsubscribe();
     this.loading = true;
     this.errorMessage = null;
+    this.actionError = null;
     const failed = (error: unknown) => {
       this.errorMessage = apiErrorMessage(error, 'records.loadErrorMessage');
       this.loading = false;
@@ -191,6 +220,44 @@ export class RecordsComponent implements OnInit {
   clearSearch(): void {
     this.term = '';
     this.applySearch();
+  }
+
+  /**
+   * Deletes one of the person's results after asking. The list is then asked for again without
+   * the skeleton, since another result may become the personal best.
+   */
+  deleteResult(result: BenchmarkResult): void {
+    const params = {
+      name: result.benchmark.name,
+      day: this.day(result.performedOn),
+    };
+    if (
+      this.deletingId ||
+      !window.confirm(this.language.t('records.mine.deleteConfirm', params))
+    ) {
+      return;
+    }
+    this.deletingId = result.id;
+    this.actionError = null;
+    this.benchmarks.deleteResult(result.id).subscribe({
+      next: () => {
+        this.deletingId = null;
+        this.results = this.results.filter((item) => item.id !== result.id);
+        this.changeDetector.detectChanges();
+        this.request?.unsubscribe();
+        this.request = this.benchmarks.myResults().subscribe({
+          next: (results) => {
+            this.results = results;
+            this.changeDetector.detectChanges();
+          },
+        });
+      },
+      error: (error) => {
+        this.actionError = apiErrorMessage(error, 'records.mine.deleteError');
+        this.deletingId = null;
+        this.changeDetector.detectChanges();
+      },
+    });
   }
 
   score(result: BenchmarkResult): string {

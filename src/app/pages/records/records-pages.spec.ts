@@ -323,6 +323,131 @@ describe('records pages', () => {
     });
   });
 
+  describe('my results tab', () => {
+    beforeEach(() => setUp('TRAINEE'));
+
+    const DEADLIFT_RESULT = myResult({
+      id: 'mine-9',
+      benchmark: {
+        ...myResult().benchmark,
+        id: 'dl',
+        kind: 'LIFT',
+        name: 'Deadlift',
+        scoreType: 'LOAD',
+      },
+      timeSeconds: null,
+      loadKg: 140,
+      note: null,
+    });
+
+    async function openMine(results: object[]) {
+      await open('/records?tab=mine');
+      http.expectOne('/api/benchmark-results/mine').flush(results);
+      await page.settle();
+    }
+
+    const row = (id: string) => `[data-testid="my-result-${id}"]`;
+
+    it('links each result to its edit form, coming back to the tab', async () => {
+      await openMine([myResult(), DEADLIFT_RESULT]);
+
+      const edit = page.query(
+        `${row('mine-9')} [data-testid="my-result-edit"]`,
+      )!;
+      expect(edit.getAttribute('href')).toBe(
+        '/records/dl/results/mine-9?from=mine',
+      );
+      expect(edit.getAttribute('aria-label')).toBe(
+        'Edit your Deadlift result of 20 Jun 2026',
+      );
+      expect(
+        page
+          .query(`${row('mine-1')} [data-testid="my-result-delete"]`)
+          ?.getAttribute('aria-label'),
+      ).toBe('Delete your Fran result of 20 Jun 2026');
+    });
+
+    it('deletes a result after asking, then asks for the list again', async () => {
+      await openMine([
+        myResult(),
+        myResult({ id: 'mine-2', personalBest: false, timeSeconds: 300 }),
+      ]);
+      const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      await page.click(`${row('mine-1')} [data-testid="my-result-delete"]`);
+      expect(confirm).toHaveBeenCalledWith(
+        "Delete your Fran result of 20 Jun 2026? This can't be undone.",
+      );
+      const del = http.expectOne('/api/benchmark-results/mine-1');
+      expect(del.request.method).toBe('DELETE');
+      del.flush({ deleted: true });
+      await page.settle();
+      // Gone at once, and the list stays (no skeleton) while it is asked for again.
+      expect(page.query(row('mine-1'))).toBeNull();
+      expect(page.query(row('mine-2'))).not.toBeNull();
+
+      // The other result is the personal best now.
+      http
+        .expectOne('/api/benchmark-results/mine')
+        .flush([myResult({ id: 'mine-2', timeSeconds: 300 })]);
+      await page.settle();
+      expect(rowsOf('[data-testid="my-results"]')).toEqual([
+        'Fran 20 Jun 2026 Unbroken 5:00 Personal best',
+      ]);
+      expect(router.url).toBe('/records?tab=mine');
+    });
+
+    it('deletes nothing when the question is answered no', async () => {
+      await openMine([myResult()]);
+      vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+      await page.click(`${row('mine-1')} [data-testid="my-result-delete"]`);
+      http.expectNone('/api/benchmark-results/mine-1');
+      expect(page.query(row('mine-1'))).not.toBeNull();
+    });
+
+    it('shows a failed delete above the list and keeps the result', async () => {
+      await openMine([myResult()]);
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      await page.click(`${row('mine-1')} [data-testid="my-result-delete"]`);
+      refuse(
+        http.expectOne('/api/benchmark-results/mine-1'),
+        'Result not found',
+        404,
+      );
+      await page.settle();
+      expect(page.alert()).toBe('Result not found');
+      expect(page.query(row('mine-1'))).not.toBeNull();
+      expect(
+        page.query<HTMLButtonElement>(
+          `${row('mine-1')} [data-testid="my-result-delete"]`,
+        )?.disabled,
+      ).toBe(false);
+    });
+
+    it('an edit opened from the tab goes back to it, and saves back to it', async () => {
+      await open('/records/dl/results/mine-9?from=mine');
+      http.expectOne('/api/benchmarks/dl').flush(DEADLIFT);
+      http.expectOne('/api/benchmark-results/mine-9').flush(DEADLIFT_RESULT);
+      await page.settle();
+
+      const back = page.query('app-page-header a')!;
+      expect(back.textContent).toContain(texts.form.backToMine);
+      expect(back.getAttribute('href')).toBe('/records?tab=mine');
+
+      await page.type('#result-load', '142.5');
+      await page.submit();
+      const req = http.expectOne('/api/benchmark-results/mine-9');
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body).toMatchObject({ loadKg: 142.5 });
+      req.flush({});
+      await page.settle();
+      expect(router.url).toBe('/records?tab=mine');
+      leavePage();
+    });
+  });
+
   it('an admin without a profile gets no "Mine" tab and no log links', async () => {
     await setUp('ADMIN');
     await open('/records?tab=mine');
