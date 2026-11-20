@@ -26,6 +26,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - The weekly schedules (a feature: gym templates and weeks) came with journey J16 and its own specs (`pages/schedules/*.spec.ts`): 823 unit tests, 57 E2E tests. One deliberate break (days before `editableFrom` editable) was caught.
 - Who booked a training (a feature: the staff's training page and Register attendance opened from it) came with journey J18, `schedule-training.component.spec.ts`, Details links in `schedule-pages.spec.ts` and an "opened from a training" block in `attendance-register.component.spec.ts`. One deliberate break (the chosen gym not kept when the trainer changes) was caught.
 - Self-registration and connecting accounts (a feature: `/register`, `/accounts`, `/accounts/:id`, `/my-details`) came with journey J19 and its own specs (`register.component.spec.ts`, `pages/accounts/*.spec.ts`, `my-details.component.spec.ts`, `contact-form.spec.ts`, `contact.util.spec.ts`, `services/self-registration.services.spec.ts`), plus the login 403, the route table, the nav and the user block. Two deliberate breaks (registering without the consent, a trainer sending a gym subscription from My details) were each caught.
+- The exercise library (a feature: `/exercises` for trainees, with the staff Exercises table shared as `app-exercises-table`) came with section 19 and journey J23; J8 now opens Stats from the Account sheet. Two deliberate breaks (the Status column shown to trainees, Stats kept as a tab) were each caught.
 - The workouts area (a feature: workouts, exercises, workout types, PDF import) came with journey J15 and its own specs (`pages/workouts/*.spec.ts`, `services/workouts-api.services.spec.ts`): 81 spec files, 816 unit tests, 51 E2E tests. One deliberate break (the women's amount dropped from the payload) was caught.
 
 **Risk levels** (unit tests are ordered by them; modules are listed highest risk first):
@@ -563,6 +564,15 @@ One spec per service, each method asserting method, URL, query and body. These p
 
 ---
 
+### 19. Exercise library (trainees)
+
+**`pages/exercise-library/exercise-library-pages.spec.ts`**
+- [x] The list asks for `GET /api/exercises?active=true` and shows the staff page's table (`app-exercises-table`) without the Status column, the status filter or Inactive chips; rows link to `/exercises/:id`; the search matches a name or another name and clears; empty (nothing to create) and error (Try again) states.
+- [x] An exercise's page: name, other names (a dash without), the description with its line breaks (or a "not written yet" note), the video played in the page (youtube-nocookie) and none without a link; the API's 404 for an exercise not in the library; another id loads the other exercise.
+
+**`app.routes.spec.ts`, `navigation.spec.ts`**
+- [x] `/exercises` and `/exercises/:id` are for trainees only; trainees get Exercises after Schedule, the tabs Profile, Schedule, Exercises, Records, and Stats in the Account sheet. Two deliberate breaks (the Status column on the trainees' list, Stats kept as a tab) were each caught.
+
 ## Part B — E2E user journeys (Playwright)
 
 ### B0. Setup ✅ (PR 5, together with J1 and J2)
@@ -735,7 +745,7 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
    - `GET /api/trainees/P1/subscriptions`
    - `GET /api/plans`
 2. Subscriptions are filtered to Active. Switching to Exhausted and then All changes the rows and the empty message. The trainings table renders.
-3. Tab "Stats" → `GET /api/trainees/me/training-insights`. The ranked lists render; weekdays come from `weekdayNumber`.
+3. "Stats", a tile in the Account sheet since the exercise library took its tab → `GET /api/trainees/me/training-insights`. The ranked lists render; weekdays come from `weekdayNumber`.
 4. Tab "Records" → the benchmarks' leaderboards (`GET /api/leaderboards?kind=BENCHMARK`; empty here). The page itself is J21.
 5. Tab "Account" (`aria-haspopup="dialog"`) opens the sheet, a real `<dialog>`. Check that:
    - the tab gets `aria-expanded="true"` and focus is inside the dialog;
@@ -852,6 +862,11 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 2. Uploads a 600×400 picture, turns it right and saves: the `PUT` carries the file and the cropper's own square as fractions of the turned 400×600 picture (`0, 0.166667, 1, 0.666667, 90`); the page and the navigation show the new photo, no initials.
 3. Adjusts the crop: the kept picture comes back with the saved square, sent as JSON (`PATCH`); the navigation shows the new crop.
 4. Removes the photo after confirming: initials again, and Upload.
+
+### J23. Exercise library (P2) [desktop, mobile]
+✅ `e2e/journeys/j23-exercise-library.e2e.ts`. Unit specs: section 19.
+1. Desktop and phone, trainee: Exercises is the navigation item after Schedule; the list asks for `active=true` and has no status filter; searching an other name leaves Thruster; its page shows the other names, the description with its line breaks and, once played, the youtube-nocookie player; Back returns to the list.
+2. Phone: four tabs (Profile, Schedule, Exercises, Records) and Stats as the Account sheet's tile.
 
 ---
 

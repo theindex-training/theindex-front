@@ -5,7 +5,8 @@ import { Observable } from 'rxjs';
 import { buildHttpParams } from '../utils/http-params.util';
 
 /**
- * A movement workouts list (theindex-api `exercises`, ADMIN and TRAINER). `aliases`
+ * A movement workouts list (theindex-api `exercises`: ADMIN and TRAINER change it, trainees read
+ * the active ones as their exercise library). `aliases`
  * are other spellings the PDF import recognises; no two exercises may share a spelling (409).
  * The starter library has the crossfit.com movements, each with its YouTube video.
  */

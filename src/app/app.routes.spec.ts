@@ -45,6 +45,8 @@ const SHELL_ACCESS: Record<string, string[] | null> = {
   schedule: TRAINEE,
   'schedule/:id': TRAINEE,
   'schedule/:id/booked': TRAINEE,
+  exercises: TRAINEE,
+  'exercises/:id': TRAINEE,
   stats: TRAINEE,
   records: EVERYONE,
   'records/:id': EVERYONE,

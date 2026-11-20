@@ -1,0 +1,66 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="'exerciseLibrary.list.title' | transloco"
+    [subtitle]="'exerciseLibrary.list.subtitle' | transloco"
+  />
+
+  @if (!loading && !errorMessage && exercises.length) {
+    <div class="list-toolbar">
+      <app-search-field
+        class="list-toolbar__search"
+        [label]="'exerciseLibrary.list.search' | transloco"
+        [value]="term"
+        (valueChange)="term = $event; applySearch()"
+      />
+      <p
+        class="list-toolbar__count"
+        data-testid="list-count"
+        aria-live="polite"
+      >
+        {{
+          'workouts.exercises.list.count'
+            | transloco: { shown: filtered.length, total: exercises.length }
+        }}
+      </p>
+    </div>
+  }
+
+  @if (loading) {
+    <app-skeleton-list
+      [label]="'workouts.exercises.list.loading' | transloco"
+    />
+  } @else if (errorMessage) {
+    <app-empty-state
+      tone="danger"
+      [title]="'workouts.exercises.list.loadError' | transloco"
+      [message]="errorMessage | uiMessage"
+    >
+      <button class="btn btn--secondary" type="button" (click)="load()">
+        {{ 'common.tryAgain' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else if (!exercises.length) {
+    <app-empty-state
+      icon="dumbbell"
+      [title]="'workouts.exercises.list.emptyTitle' | transloco"
+      [message]="'exerciseLibrary.list.emptyMessage' | transloco"
+    />
+  } @else if (!filtered.length) {
+    <app-empty-state
+      icon="search"
+      [title]="'workouts.exercises.list.noMatchesTitle' | transloco"
+      [message]="'exerciseLibrary.list.noMatchesMessage' | transloco"
+    >
+      <button class="btn btn--secondary" type="button" (click)="clearSearch()">
+        {{ 'common.clearSearch' | transloco }}
+      </button>
+    </app-empty-state>
+  } @else {
+    <app-exercises-table
+      [exercises]="filtered"
+      [link]="detailLink"
+      [label]="'exerciseLibrary.list.title' | transloco"
+      [linkLabel]="'exerciseLibrary.list.openColumn' | transloco"
+    />
+  }
+</section>

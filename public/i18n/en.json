@@ -74,6 +74,7 @@
     "trainingTimes": "Training times",
     "profile": "Profile",
     "schedule": "Schedule",
+    "exercises": "Exercises",
     "stats": "Stats",
     "records": "Records",
     "content": "Content",
@@ -1825,6 +1826,24 @@
     "title": "You're booked",
     "message": "Your place is saved. See you at the training!",
     "notBookedMessage": "You aren't booked for this training."
+  },
+  "exerciseLibrary": {
+    "list": {
+      "title": "Exercises",
+      "subtitle": "The movements of our workouts, with their videos.",
+      "search": "Search exercises",
+      "emptyMessage": "The coaches haven't added any exercises yet.",
+      "noMatchesMessage": "No exercise matches the search.",
+      "loadErrorMessage": "Unable to load the exercises right now.",
+      "openColumn": "Open"
+    },
+    "detail": {
+      "title": "Exercise",
+      "back": "Back to the exercises",
+      "loading": "Loading the exercise...",
+      "loadErrorMessage": "Unable to load the exercise right now.",
+      "noDescription": "The coaches haven't written a description yet."
+    }
   },
   "googleCalendar": {
     "add": "Add to Google Calendar",

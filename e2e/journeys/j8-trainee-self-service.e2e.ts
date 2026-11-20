@@ -140,8 +140,12 @@ test.describe('J8 trainee self-service', () => {
       );
       await expect(shown(page, 'Monthly')).toBeVisible();
 
-      // 3–4. Stats and Records from the tab bar.
+      // 3–4. Stats from the Account sheet, Records from the tab bar.
       await tabs(page)
+        .getByRole('button', { name: t('nav.account') })
+        .click();
+      await page
+        .getByRole('dialog', { name: t('nav.account') })
         .getByRole('link', { name: t('nav.stats') })
         .click();
       await expect(page).toHaveURL(/\/stats$/);
@@ -199,14 +203,14 @@ test.describe('J8 trainee self-service', () => {
       await expect(
         page
           .getByRole('navigation', { name: tBg('nav.mainLabel') })
-          .getByRole('link', { name: tBg('nav.stats') }),
+          .getByRole('link', { name: tBg('nav.exercises') }),
       ).toBeVisible();
       await page.reload();
       await expect(page.locator('html')).toHaveAttribute('lang', 'bg');
       await expect(
         page
           .getByRole('navigation', { name: tBg('nav.mainLabel') })
-          .getByRole('link', { name: tBg('nav.stats') }),
+          .getByRole('link', { name: tBg('nav.exercises') }),
       ).toBeVisible();
       await page.getByRole('button', { name: tBg('nav.account') }).click();
       await choose(page.getByRole('dialog'), tBg('common.language'), 'EN');
@@ -291,6 +295,7 @@ test.describe('J8 trainee self-service', () => {
       await expect(nav.getByRole('link')).toHaveText([
         t('nav.profile'),
         t('nav.schedule'),
+        t('nav.exercises'),
         t('nav.stats'),
         t('nav.records'),
       ]);

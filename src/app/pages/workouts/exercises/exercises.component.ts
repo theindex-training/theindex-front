@@ -6,10 +6,8 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { ChipComponent } from '../../../components/chip/chip.component';
 import { EmptyStateComponent } from '../../../components/empty-state/empty-state.component';
-import { IconComponent } from '../../../components/icon/icon.component';
-import { ListRowComponent } from '../../../components/list-row/list-row.component';
+import { ExercisesTableComponent } from '../../../components/exercises-table/exercises-table.component';
 import { PageHeaderComponent } from '../../../components/page-header/page-header.component';
 import { SearchFieldComponent } from '../../../components/search-field/search-field.component';
 import {
@@ -17,7 +15,6 @@ import {
   SegmentedOption,
 } from '../../../components/segmented-control/segmented-control.component';
 import { SkeletonListComponent } from '../../../components/skeleton-list/skeleton-list.component';
-import { StatusDotComponent } from '../../../components/status-dot/status-dot.component';
 import { apiErrorMessage, UiMessage } from '../../../i18n/ui-message';
 import { UiMessagePipe } from '../../../i18n/ui-message.pipe';
 import {
@@ -42,10 +39,7 @@ type StatusFilter = 'all' | 'active' | 'inactive';
     SegmentedControlComponent,
     SkeletonListComponent,
     EmptyStateComponent,
-    ListRowComponent,
-    IconComponent,
-    ChipComponent,
-    StatusDotComponent,
+    ExercisesTableComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './exercises.component.html',
@@ -63,6 +57,12 @@ export class ExercisesComponent implements OnInit {
   status: StatusFilter = 'all';
   loading = true;
   errorMessage: UiMessage | null = null;
+
+  readonly editLink = (exercise: Exercise) => [
+    '/workouts/exercises',
+    exercise.id,
+    'edit',
+  ];
 
   constructor(
     private readonly exercisesService: ExercisesService,
