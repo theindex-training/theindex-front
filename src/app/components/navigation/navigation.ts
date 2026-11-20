@@ -106,8 +106,17 @@ const STAFF_TAB_ROUTES = [
 const TRAINEE_MAIN: NavItem[] = [
   { label: 'nav.profile', route: '/my-profile', icon: 'user' },
   { label: 'nav.schedule', route: '/schedule', icon: 'calendar' },
+  { label: 'nav.exercises', route: '/exercises', icon: 'dumbbell' },
   { label: 'nav.stats', route: '/stats', icon: 'chart' },
   { label: 'nav.records', route: '/records', icon: 'trophy' },
+];
+
+/** Stats is used least, so on phones it is the one in the Account sheet. */
+const TRAINEE_TAB_ROUTES = [
+  '/my-profile',
+  '/schedule',
+  '/exercises',
+  '/records',
 ];
 
 function visibleTo(items: NavItem[], role: string | null): NavItem[] {
@@ -119,12 +128,14 @@ function visibleTo(items: NavItem[], role: string | null): NavItem[] {
 /** Navigation for a role. Role checks here only shape the UI; routes are still guarded by roleGuard. */
 export function buildNavigation(role: string | null): Navigation {
   if (role === 'TRAINEE') {
-    // Trainees have four destinations, so all fit in the tab bar; the fifth tab holds theme and account.
+    // Four destinations fit in the tab bar; the fifth tab opens the sheet with the rest, the theme
+    // and the account.
+    const isTab = (item: NavItem) => TRAINEE_TAB_ROUTES.includes(item.route);
     return {
       main: TRAINEE_MAIN,
       manage: [],
-      tabs: TRAINEE_MAIN,
-      moreMain: [],
+      tabs: TRAINEE_MAIN.filter(isTab),
+      moreMain: TRAINEE_MAIN.filter((item) => !isTab(item)),
       moreManage: [],
       sheetLabel: 'nav.account',
     };

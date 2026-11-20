@@ -121,6 +121,26 @@ export const routes: Routes = [
         data: { roles: ['TRAINEE'], confirmation: true },
       },
       {
+        path: 'exercises',
+        title: 'exerciseLibrary.list.title',
+        loadComponent: () =>
+          import('./pages/exercise-library/exercise-library.component').then(
+            (m) => m.ExerciseLibraryComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['TRAINEE'] },
+      },
+      {
+        path: 'exercises/:id',
+        title: 'exerciseLibrary.detail.title',
+        loadComponent: () =>
+          import('./pages/exercise-library/exercise-detail.component').then(
+            (m) => m.ExerciseDetailComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['TRAINEE'] },
+      },
+      {
         path: 'stats',
         title: 'nav.stats',
         loadComponent: () =>

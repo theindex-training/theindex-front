@@ -76,24 +76,29 @@ describe('buildNavigation', () => {
     ]);
   });
 
-  it('gives trainees their own four tabs and an Account sheet', () => {
+  it('gives trainees their own four tabs and an Account sheet with Stats', () => {
     const nav = buildNavigation('TRAINEE');
 
     expect(labels(nav.main)).toEqual([
       'Profile',
       'Schedule',
+      'Exercises',
       'Stats',
       'Records',
     ]);
     expect(labels(nav.tabs)).toEqual([
       'Profile',
       'Schedule',
-      'Stats',
+      'Exercises',
       'Records',
     ]);
+    expect(nav.tabs.some((tab) => tab.primary)).toBe(false);
     expect(nav.manage).toEqual([]);
-    expect(nav.moreMain).toEqual([]);
+    expect(labels(nav.moreMain)).toEqual(['Stats']);
+    expect(nav.moreManage).toEqual([]);
     expect(english(nav.sheetLabel)).toBe('Account');
+    expect(isUrlInItems('/stats', nav.moreMain)).toBe(true);
+    expect(isUrlInItems('/exercises/e1', nav.moreMain)).toBe(false);
   });
 
   it('shows only unrestricted items when the role is unknown', () => {

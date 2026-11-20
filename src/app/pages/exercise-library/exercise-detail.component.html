@@ -1,0 +1,61 @@
+<section class="page-stack page-narrow">
+  <app-page-header
+    [title]="exercise?.name ?? ('exerciseLibrary.detail.title' | transloco)"
+    [back]="{
+      label: ('exerciseLibrary.detail.back' | transloco),
+      link: '/exercises',
+    }"
+  />
+
+  @if (loading) {
+    <p class="notice" role="status">
+      {{ 'exerciseLibrary.detail.loading' | transloco }}
+    </p>
+  } @else if (errorMessage || !exercise) {
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
+  } @else {
+    <div class="panel exercise">
+      <dl class="detail-list">
+        <div>
+          <dt>{{ 'workouts.exercises.fields.aliases' | transloco }}</dt>
+          <dd
+            data-testid="exercise-aliases"
+            [class.text-muted]="!exercise.aliases.length"
+          >
+            {{ exercise.aliases.join(', ') || ('common.dash' | transloco) }}
+          </dd>
+        </div>
+      </dl>
+
+      @if (exercise.videoUrl) {
+        <app-exercise-video
+          class="exercise__video"
+          [name]="exercise.name"
+          [url]="exercise.videoUrl"
+        />
+      }
+
+      <section
+        class="panel-section"
+        aria-labelledby="exercise-description-title"
+      >
+        <h2 class="panel__title" id="exercise-description-title">
+          {{ 'workouts.exercises.fields.description' | transloco }}
+        </h2>
+        @if (exercise.description) {
+          <p
+            class="exercise__description"
+            data-testid="exercise-description"
+            [textContent]="exercise.description"
+          ></p>
+        } @else {
+          <p class="exercise__description text-muted">
+            {{ 'exerciseLibrary.detail.noDescription' | transloco }}
+          </p>
+        }
+      </section>
+    </div>
+  }
+</section>

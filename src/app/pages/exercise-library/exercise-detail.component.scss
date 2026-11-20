@@ -1,0 +1,16 @@
+.exercise {
+  display: grid;
+  gap: var(--space-5);
+}
+
+// The description is plain text whose line breaks matter.
+.exercise__description {
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+// A wide screen shouldn't get a player as wide as the page.
+.exercise__video {
+  max-width: 40rem;
+}
