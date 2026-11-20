@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, UrlTree } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { forkJoin, of } from 'rxjs';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
@@ -36,7 +36,8 @@ import { clock, scoringText } from './score-format';
  * Logs a result (`/records/:id/log`) or changes one of the person's own (`/records/:id/results/
  * :resultId`): the day, the score in the benchmark's terms (time, or the reps done when capped;
  * rounds and reps; reps; kg), Rx or scaled (benchmarks only) and an optional note. Nobody checks
- * it: people are trusted. Saving goes back to the benchmark's page.
+ * it: people are trusted. Saving goes back to the benchmark's page, or to the Mine tab of the
+ * records when the edit was opened from there (`?from=mine`).
  */
 @Component({
   selector: 'app-result-edit',
@@ -76,6 +77,8 @@ export class ResultEditComponent implements OnInit {
 
   benchmarkId = '';
   resultId: string | null = null;
+  /** Opened from the Mine tab of the records (`?from=mine`): back and saving go there. */
+  fromMine = false;
   benchmark: Benchmark | null = null;
   result: BenchmarkResult | null = null;
   loading = true;
@@ -107,14 +110,20 @@ export class ResultEditComponent implements OnInit {
       : null;
   }
 
-  get backLink(): string {
-    return `/records/${this.benchmarkId}`;
+  /** A UrlTree, so `?tab=mine` stays a query parameter. */
+  get backLink(): UrlTree {
+    return this.fromMine
+      ? this.router.createUrlTree(['/records'], {
+          queryParams: { tab: 'mine' },
+        })
+      : this.router.createUrlTree(['/records', this.benchmarkId]);
   }
 
   ngOnInit(): void {
     const params = this.route.snapshot.paramMap;
     this.benchmarkId = params.get('id') ?? '';
     this.resultId = params.get('resultId');
+    this.fromMine = this.route.snapshot.queryParamMap.get('from') === 'mine';
 
     this.form.controls.capped.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -199,7 +208,7 @@ export class ResultEditComponent implements OnInit {
     request.subscribe({
       next: () => {
         this.submitting = false;
-        void this.router.navigate(['/records', this.benchmarkId]);
+        void this.router.navigateByUrl(this.backLink);
       },
       error: (error) => {
         this.errorMessage = apiErrorMessage(error, 'records.form.saveError');

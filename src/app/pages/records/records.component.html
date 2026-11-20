@@ -45,13 +45,21 @@
         }}</a>
       </app-empty-state>
     } @else {
+      @if (actionError) {
+        <p class="notice notice--danger" role="alert">
+          {{ actionError | uiMessage }}
+        </p>
+      }
       <ul
         class="list-card"
         [attr.aria-label]="'records.tabs.mine' | transloco"
         data-testid="my-results"
       >
         @for (result of results; track result.id) {
-          <li class="record" [attr.data-testid]="'my-result-' + result.id">
+          <li
+            class="record my-result"
+            [attr.data-testid]="'my-result-' + result.id"
+          >
             <div class="record__main">
               <a
                 class="record__title"
@@ -80,6 +88,46 @@
                   }}</app-chip>
                 }
               </span>
+            </div>
+            <div class="result__actions">
+              <a
+                class="icon-btn"
+                data-testid="my-result-edit"
+                [routerLink]="[
+                  '/records',
+                  result.benchmark.id,
+                  'results',
+                  result.id,
+                ]"
+                [queryParams]="{ from: 'mine' }"
+                [attr.aria-label]="
+                  'records.mine.edit'
+                    | transloco
+                      : {
+                          name: result.benchmark.name,
+                          day: day(result.performedOn),
+                        }
+                "
+              >
+                <app-icon name="pencil" />
+              </a>
+              <button
+                class="icon-btn icon-btn--danger"
+                type="button"
+                data-testid="my-result-delete"
+                [disabled]="deletingId !== null"
+                [attr.aria-label]="
+                  'records.mine.delete'
+                    | transloco
+                      : {
+                          name: result.benchmark.name,
+                          day: day(result.performedOn),
+                        }
+                "
+                (click)="deleteResult(result)"
+              >
+                <app-icon name="trash" />
+              </button>
             </div>
           </li>
         }

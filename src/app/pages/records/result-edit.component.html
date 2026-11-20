@@ -6,7 +6,9 @@
     "
     [subtitle]="scoring()"
     [back]="{
-      label: ('records.form.back' | transloco),
+      label:
+        (fromMine ? 'records.form.backToMine' : 'records.form.back')
+        | transloco,
       link: backLink,
     }"
   />

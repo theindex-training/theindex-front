@@ -1368,7 +1368,11 @@
     "mine": {
       "emptyTitle": "No results yet",
       "emptyMessage": "Pick a benchmark or a heavy lift and log your first result.",
-      "browse": "See the benchmarks"
+      "browse": "See the benchmarks",
+      "edit": "Edit your {name} result of {day}",
+      "delete": "Delete your {name} result of {day}",
+      "deleteConfirm": "Delete your {name} result of {day}? This can't be undone.",
+      "deleteError": "Unable to delete this result right now."
     },
     "detail": {
       "title": "Benchmark",
@@ -1392,6 +1396,7 @@
       "logRouteTitle": "Log a result",
       "editRouteTitle": "Edit result",
       "back": "Back to the benchmark",
+      "backToMine": "Back to my results",
       "loading": "Loading...",
       "loadError": "Enter a load from 0.5 to 1000 kg, in steps of 0.5.",
       "saveError": "Unable to save the result right now.",
