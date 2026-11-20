@@ -68,6 +68,13 @@ const ALLOCATION = {
   },
 };
 
+/** Opens a tab of the report (Paid / Waiting): the option's text in the control. */
+const openTab = (page: Page, key: string) =>
+  page
+    .getByRole('group', { name: t('settlements.details.tabsLabel') })
+    .getByText(t(key))
+    .click();
+
 const finalizeButton = (page: Page) =>
   page.getByRole('button', { name: t('settlements.details.finalize') });
 /** The text before the first placeholder of a translation. */
@@ -126,7 +133,7 @@ test.describe('J6 settlements', { tag: '@desktop' }, () => {
     await expect(page).toHaveURL(/\/settlements\/s-new$/);
     await expect
       .poll(() => api.last('GET', '/api/settlements/s-new/allocations')?.query)
-      .toEqual({ offset: '0', limit: '500' });
+      .toEqual({ offset: '0', limit: '50' });
     await expect(page.getByTestId('settlement-status')).toHaveText(
       t('enums.settlementStatus.DRAFT'),
     );
@@ -146,7 +153,10 @@ test.describe('J6 settlements', { tag: '@desktop' }, () => {
     await expect(
       paid.getByText(t('settlements.details.earlierPeriod')),
     ).toBeVisible();
-    // What waits for a later report.
+    // What waits for a later report, in its own tab.
+    await openTab(page, 'settlements.details.tabWaiting');
+    await expect(page).toHaveURL(/\/settlements\/s-new\?tab=waiting$/);
+    await expect(paid).toHaveCount(0);
     const waiting = page.getByRole('region', {
       name: t('settlements.details.waitingTable'),
     });
@@ -159,7 +169,7 @@ test.describe('J6 settlements', { tag: '@desktop' }, () => {
       .selectOption('trainer-2');
     await expect
       .poll(() => api.last('GET', '/api/settlements/s-new/allocations')?.query)
-      .toEqual({ trainerId: 'trainer-2', offset: '0', limit: '500' });
+      .toEqual({ trainerId: 'trainer-2', offset: '0', limit: '50' });
     await expect(
       page.getByText(t('settlements.details.noWaiting')),
     ).toBeVisible();
@@ -185,6 +195,82 @@ test.describe('J6 settlements', { tag: '@desktop' }, () => {
       page.getByText(t('settlements.details.finalizedAt'), { exact: true }),
     ).toBeVisible();
     expect(api.calls('GET', '/api/settlements/s-new')).toHaveLength(2);
+  });
+
+  test('a long report is paged: the API sends each page of paid trainings, and the page stays in the address', async ({
+    page,
+    api,
+    signInAs,
+  }) => {
+    await signInAs('ADMIN');
+    const draft = settlement('s-new', '2026-11-16', '2026-11-30', 'DRAFT');
+    api.on('GET', '/api/settlements/s-new', {
+      body: { settlement: draft, lines: LINES, waiting: WAITING },
+    });
+    api.on('GET', '/api/settlements/s-new/allocations', (request) => {
+      const offset = Number(request.query['offset']);
+      const limit = Number(request.query['limit']);
+      const total = 4812;
+      return {
+        body: {
+          total,
+          limit,
+          offset,
+          rows: Array.from(
+            { length: Math.min(limit, total - offset) },
+            (_, i) => ({ ...ALLOCATION, id: `al${offset + i}` }),
+          ),
+        },
+      };
+    });
+
+    await page.goto('/settlements/s-new');
+    const pages = page.getByRole('navigation', {
+      name: t('settlements.details.allocationsPages'),
+    });
+    await expect(page.getByTestId('list-count')).toHaveText(
+      '1–50 of 4,812 rows',
+    );
+    await expect(
+      pages.getByRole('button', {
+        name: t('common.pagination.page', { page: '1' }),
+      }),
+    ).toHaveAttribute('aria-current', 'page');
+
+    await pages
+      .getByRole('button', { name: t('common.pagination.next') })
+      .click();
+    await expect(page).toHaveURL(/\/settlements\/s-new\?page=2$/);
+    await expect(page.getByTestId('list-count')).toHaveText(
+      '51–100 of 4,812 rows',
+    );
+    expect(
+      api.last('GET', '/api/settlements/s-new/allocations')?.query,
+    ).toEqual({ offset: '50', limit: '50' });
+
+    await pages
+      .getByRole('button', { name: t('common.pagination.last') })
+      .click();
+    await expect(page.getByTestId('list-count')).toHaveText(
+      '4,801–4,812 of 4,812 rows',
+    );
+    await expect(page).toHaveURL(/\?page=97$/);
+
+    await pages.getByLabel(t('common.pagination.perPage')).selectOption('100');
+    await expect(page).toHaveURL(/\?size=100$/);
+    await expect(page.getByTestId('list-count')).toHaveText(
+      '1–100 of 4,812 rows',
+    );
+
+    // A reload (or going back from a trainee) shows the same page.
+    await pages
+      .getByRole('button', { name: t('common.pagination.page', { page: '3' }) })
+      .click();
+    await expect(page).toHaveURL(/\?page=3&size=100$/);
+    await page.reload();
+    await expect(page.getByTestId('list-count')).toHaveText(
+      '201–300 of 4,812 rows',
+    );
   });
 
   test('cancelling the confirmation finalizes nothing; a refused finalize shows why', async ({

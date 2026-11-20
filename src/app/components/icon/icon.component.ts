@@ -28,6 +28,8 @@ export type IconName =
   | 'search'
   | 'chevron-left'
   | 'chevron-right'
+  | 'chevrons-left'
+  | 'chevrons-right'
   | 'plus'
   | 'alert'
   | 'trash'

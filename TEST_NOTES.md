@@ -90,7 +90,7 @@ This file records findings only. Fixes are on hold: as in theindex-api, no fixes
 - **Behavior:** a report with more rows shows the first 500 and "Showing 500 of N rows", with no way to see the rest.
 - **Why it looks wrong:** part of a payout breakdown is unreachable. It only matters once a single settlement has more than 500 allocations.
 - **Pinned by:** `settlement-details.component.spec.ts` › "shows at most 500 allocation rows, with no way to see the rest".
-- **Status:** open.
+- **Status:** **fixed in Nov 2026.** The page asks for 50 rows a page (`offset`/`limit`) and has page controls (`app-pagination`: First, Previous, the numbered pages, Next, Last and a rows-per-page choice of 25/50/100/200), with the page kept in the address. The test is now "pages through every paid training, 50 at a time by default (TEST_NOTES.md S10)"; the new paging tests all failed against the old page.
 
 ## S11 — A settlement period can end before it starts
 - **Where:** `SettlementGenerateComponent.generateSettlement()` checked only that both dates were filled.
