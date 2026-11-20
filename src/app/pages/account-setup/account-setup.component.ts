@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  inject,
   OnInit,
 } from '@angular/core';
 import {
@@ -11,7 +12,7 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ContactFieldsComponent } from '../../components/contact-fields/contact-fields.component';
 import {
@@ -33,6 +34,7 @@ import {
   RegistrationService,
 } from '../../services/registration.service';
 import { trimmedLength } from '../../utils/form-validators.util';
+import { RETURN_URL_PARAM, safeReturnUrl } from '../../utils/return-url.util';
 
 const passwordsMatch: ValidatorFn = (group) => {
   const password = group.get('password')?.value as string;
@@ -64,6 +66,14 @@ const passwordsMatch: ValidatorFn = (group) => {
   ],
 })
 export class AccountSetupComponent implements OnInit {
+  /**
+   * The page the person was on their way to when the login sent them here (`?returnUrl=`), where
+   * the saved setup takes them instead of their start page.
+   */
+  private readonly returnUrl = safeReturnUrl(
+    inject(ActivatedRoute).snapshot.queryParamMap.get(RETURN_URL_PARAM),
+  );
+
   readonly contact = contactForm({ phoneRequired: true });
   readonly form = new FormGroup(
     {
@@ -131,12 +141,15 @@ export class AccountSetupComponent implements OnInit {
           // fresh one.
           if (this.authService.isSetupRequired()) {
             this.authService.logout();
-            void this.router.navigate(['/login'], { replaceUrl: true });
+            void this.router.navigate(['/login'], {
+              queryParams: this.returnUrl
+                ? { [RETURN_URL_PARAM]: this.returnUrl }
+                : {},
+              replaceUrl: true,
+            });
             return;
           }
-          void this.router.navigate([this.authService.defaultRoute()], {
-            replaceUrl: true,
-          });
+          this.goOn();
           return;
         }
         this.show(setup);
@@ -219,9 +232,7 @@ export class AccountSetupComponent implements OnInit {
       next: () => {
         this.submitting = false;
         this.changeDetector.detectChanges();
-        void this.router.navigate([this.authService.defaultRoute()], {
-          replaceUrl: true,
-        });
+        this.goOn();
       },
       error: (error: unknown) => {
         this.submitting = false;
@@ -234,6 +245,14 @@ export class AccountSetupComponent implements OnInit {
   signOut(): void {
     this.authService.logout();
     void this.router.navigate(['/login']);
+  }
+
+  /** On to the page the person was going to, else their start page. */
+  private goOn(): void {
+    void this.router.navigateByUrl(
+      this.returnUrl ?? this.authService.defaultRoute(),
+      { replaceUrl: true },
+    );
   }
 
   private show(setup: AccountSetup): void {

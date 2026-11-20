@@ -235,8 +235,10 @@ describe('routing (real routes)', () => {
     expect(await open('/')).toBe('/login');
   });
 
-  it('sends a signed-out deep link into the shell to /login', async () => {
-    expect(await open('/trainees')).toBe('/login');
+  it('sends a signed-out deep link into the shell to /login, remembering it', async () => {
+    expect(await open('/trainees/t-1?tab=history')).toBe(
+      '/login?returnUrl=%2Ftrainees%2Ft-1%3Ftab%3Dhistory',
+    );
   });
 
   it('sends signed-in staff at / to /home and a trainee to /my-profile', async () => {
@@ -284,7 +286,9 @@ describe('routing (real routes)', () => {
   });
 
   it('sends a signed-out visitor at the editor to /login', async () => {
-    expect(await open('/content/articles/a-1')).toBe('/login');
+    expect(await open('/content/articles/a-1')).toBe(
+      '/login?returnUrl=%2Fcontent%2Farticles%2Fa-1',
+    );
   });
 
   it('lets every role open Change password', async () => {
