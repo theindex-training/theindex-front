@@ -81,7 +81,7 @@ describe('authInterceptor', () => {
     req.flush([]);
   });
 
-  it('on a 401 with a token: logs out, goes to /login and still passes the error on', async () => {
+  it('on a 401 with a token: logs out, goes to /login (to come back here) and still passes the error on', async () => {
     localStorage.setItem(
       'accessToken',
       makeToken({ sub: 'a1', role: 'ADMIN' }),
@@ -94,7 +94,48 @@ describe('authInterceptor', () => {
     await new Promise((resolve) => setTimeout(resolve));
 
     expect(localStorage.getItem('accessToken')).toBeNull();
-    expect(router.url).toBe('/login');
+    expect(router.url).toBe('/login?returnUrl=%2Ftrainees');
+    expect(result.status).toBe(401);
+  });
+
+  it('keeps the return address when several requests are refused one after another', async () => {
+    localStorage.setItem(
+      'accessToken',
+      makeToken({ sub: 'a1', role: 'ADMIN' }),
+    );
+
+    const first = get('/api/trainees');
+    const second = get('/api/gym-subscriptions');
+    controller
+      .expectOne('/api/trainees')
+      .flush(null, { status: 401, statusText: 'Unauthorized' });
+    await new Promise((resolve) => setTimeout(resolve));
+    controller
+      .expectOne('/api/gym-subscriptions')
+      .flush(null, { status: 401, statusText: 'Unauthorized' });
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(router.url).toBe('/login?returnUrl=%2Ftrainees');
+    expect(first.status).toBe(401);
+    expect(second.status).toBe(401);
+  });
+
+  it('keeps a newer session when a request sent with an older token is refused', async () => {
+    localStorage.setItem(
+      'accessToken',
+      makeToken({ sub: 'a1', role: 'ADMIN' }),
+    );
+    const result = get();
+    const newer = makeToken({ sub: 'a2', role: 'TRAINER' });
+    localStorage.setItem('accessToken', newer);
+
+    controller
+      .expectOne('/api/trainees')
+      .flush(null, { status: 401, statusText: 'Unauthorized' });
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(localStorage.getItem('accessToken')).toBe(newer);
+    expect(router.url).toBe('/trainees');
     expect(result.status).toBe(401);
   });
 

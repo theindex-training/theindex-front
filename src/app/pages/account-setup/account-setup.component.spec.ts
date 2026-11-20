@@ -64,9 +64,10 @@ describe('AccountSetupComponent', () => {
   async function open(
     setup: AccountSetup | 'error' = TRAINEE_SETUP,
     role: 'TRAINEE' | 'TRAINER' = 'TRAINEE',
+    url = '/account-setup',
   ) {
     signInAs(role, { setupRequired: true });
-    await harness.navigateByUrl('/account-setup', AccountSetupComponent);
+    await harness.navigateByUrl(url, AccountSetupComponent);
     page = driver(
       () => harness.routeNativeElement!,
       () => harness.fixture.whenStable(),
@@ -217,6 +218,57 @@ describe('AccountSetupComponent', () => {
     });
     await page.settle();
     expect(router.url).toBe('/my-profile');
+  });
+
+  describe('sent here by the login on the way to a page (?returnUrl=)', () => {
+    const url = '/account-setup?returnUrl=%2Fschedule%2Fs-1';
+
+    it('goes on to that page once saved', async () => {
+      await open(
+        { ...TRAINEE_SETUP, passwordChangeRequired: false },
+        'TRAINEE',
+        url,
+      );
+      await page.check('#account-setup-consent', true);
+      await page.submit();
+      expectPost().flush({
+        accessToken: makeToken({ role: 'TRAINEE', setupRequired: false }),
+        account: {},
+      });
+      await page.settle();
+
+      expect(router.url).toBe('/schedule/s-1');
+    });
+
+    it('goes on to that page when the setup was already done', async () => {
+      signInAs('TRAINEE', { setupRequired: false });
+      await harness.navigateByUrl(url, AccountSetupComponent);
+      page = driver(
+        () => harness.routeNativeElement!,
+        () => harness.fixture.whenStable(),
+      );
+      http.expectOne('/api/auth/register/options').flush(OPTIONS);
+      http
+        .expectOne('/api/account-setup')
+        .flush({ ...TRAINEE_SETUP, setupRequired: false });
+      await page.settle();
+
+      expect(router.url).toBe('/schedule/s-1');
+    });
+
+    it('keeps the page for the next sign-in when the stored token is stale', async () => {
+      await open({ ...TRAINEE_SETUP, setupRequired: false }, 'TRAINEE', url);
+
+      expect(localStorage.getItem('accessToken')).toBeNull();
+      expect(router.url).toBe('/login?returnUrl=%2Fschedule%2Fs-1');
+    });
+
+    it('forgets the page when the person signs out', async () => {
+      await open(TRAINEE_SETUP, 'TRAINEE', url);
+      await page.click('.login__footer button');
+
+      expect(router.url).toBe('/login');
+    });
   });
 
   it("shows the API's message and stays when the save fails", async () => {

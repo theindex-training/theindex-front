@@ -627,7 +627,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 
 ### J2. Access control and session expiry (P0) [desktop]
 ✅ Done in PR 5: `e2e/journeys/j2-access-control.e2e.ts`, 7 tests. Step 3 also checks `/settlements` for a trainee.
-1. No token, deep link `/trainees` → `/login`. No `/api/trainees` call.
+1. No token, deep link `/trainees?status=inactive` → `/login?returnUrl=…` (the deep link). No `/api/trainees` call. "Create an account" links to the plain `/register`. Signing in as a trainer lands back on the deep link (added with the return-URL feature).
 2. TRAINER token:
    - the sidebar has no Trainers and no Cash register;
    - the sidebar has no Content either (added with J11);
@@ -636,9 +636,9 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 3. TRAINEE token: `/home` → `/my-profile`, and `/trainees` → `/my-profile`.
 4. Any token, `/login` → the role's home (`loginGuard`).
 5. Session expiry: an ADMIN on `/trainees` gets `GET /api/trainees` → 401.
-   - The token is removed and the app is on `/login`.
-   - Reload stays on `/login`.
-6. Log out from the user block → `/login`, token gone. Browser Back → still `/login` (`authGuard`).
+   - The token is removed and the app is on `/login?returnUrl=%2Ftrainees`.
+   - Reload stays there; signing in again goes back to `/trainees`.
+6. Log out from the user block → `/login`, token gone. Browser Back → `/login?returnUrl=%2Fhome` (`authGuard`).
 7. Characterization: a token with a past `exp` is let in, and the first API 401 logs the user out (S6).
 
 ### J3. Register attendance as a trainer on a phone (P0) [mobile, plus a desktop smoke run]

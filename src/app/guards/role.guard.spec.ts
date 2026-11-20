@@ -29,6 +29,18 @@ describe('roleGuard', () => {
     expect(run()).toBe('/login');
   });
 
+  it('remembers the page a signed-out visitor was going to', () => {
+    const route = {
+      data: { roles: ['ADMIN'] },
+    } as unknown as ActivatedRouteSnapshot;
+    const result = TestBed.runInInjectionContext(() =>
+      roleGuard(route, { url: '/content/articles/a-1' } as RouterStateSnapshot),
+    );
+    expect(result instanceof UrlTree && result.toString()).toBe(
+      '/login?returnUrl=%2Fcontent%2Farticles%2Fa-1',
+    );
+  });
+
   it('lets any signed-in user through when the route lists no roles', () => {
     signInAs('TRAINEE');
     expect(run()).toBe(true);

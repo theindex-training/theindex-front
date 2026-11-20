@@ -152,6 +152,82 @@ describe('LoginComponent', () => {
     expect(router.url).toBe('/home');
   });
 
+  describe('when sent here from a page that needs a sign-in (?returnUrl=)', () => {
+    async function openWith(returnUrl: string) {
+      await router.navigateByUrl(
+        `/login?returnUrl=${encodeURIComponent(returnUrl)}`,
+      );
+      fixture = TestBed.createComponent(LoginComponent);
+      el = fixture.nativeElement;
+      await fixture.whenStable();
+    }
+
+    it.each(['TRAINER', 'TRAINEE'])(
+      'takes a set-up %s to that page instead of their start page',
+      async (role) => {
+        await openWith('/schedule/s-1?week=2026-11-16');
+        await logInWith({ sub: 'account-1', role, setupRequired: false });
+
+        expect(router.url).toBe('/schedule/s-1?week=2026-11-16');
+      },
+    );
+
+    it('passes the page on to the first-login setup', async () => {
+      await openWith('/schedule/s-1');
+      await logInWith({
+        sub: 'account-1',
+        role: 'TRAINEE',
+        setupRequired: true,
+      });
+
+      expect(router.url).toBe('/account-setup?returnUrl=%2Fschedule%2Fs-1');
+    });
+
+    it('takes an admin to that page, and when the password check fails', async () => {
+      await openWith('/settlements/s-1?tab=waiting');
+      await logInWith({ sub: 'account-1', role: 'ADMIN' });
+      http
+        .expectOne('/api/accounts/account-1/password-status')
+        .flush({ accountId: 'account-1', hasUpdatedInitialPassword: true });
+      await settle();
+      expect(router.url).toBe('/settlements/s-1?tab=waiting');
+
+      await openWith('/trainees');
+      await logInWith({ sub: 'account-1', role: 'ADMIN' });
+      http
+        .expectOne('/api/accounts/account-1/password-status')
+        .flush(null, { status: 500, statusText: 'Server Error' });
+      await settle();
+      expect(router.url).toBe('/trainees');
+    });
+
+    it('still makes an admin with the seeded password change it first', async () => {
+      await openWith('/trainees');
+      await logInWith({ sub: 'account-1', role: 'ADMIN' });
+      http
+        .expectOne('/api/accounts/account-1/password-status')
+        .flush({ accountId: 'account-1', hasUpdatedInitialPassword: false });
+      await settle();
+
+      expect(router.url).toBe('/change-password');
+    });
+
+    it('ignores an address outside the app', async () => {
+      await openWith('//evil.example/home');
+      await logInWith({ sub: 'account-1', role: 'TRAINEE' });
+
+      expect(router.url).toBe('/my-profile');
+    });
+
+    it('does not pass the page on to Create an account', async () => {
+      await openWith('/trainees');
+
+      expect(el.querySelector('.login__footer a')!.getAttribute('href')).toBe(
+        '/register',
+      );
+    });
+  });
+
   describe('when the login fails', () => {
     async function failWith(body: object | null, status = 401) {
       await type('email', 'coach@gym.test');

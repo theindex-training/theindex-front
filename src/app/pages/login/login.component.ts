@@ -5,7 +5,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LanguageSwitchComponent } from '../../components/language-switch/language-switch.component';
 import { UiButtonComponent } from '../../components/ui-button/ui-button.component';
 import { UiInputComponent } from '../../components/ui-input/ui-input.component';
@@ -14,6 +14,7 @@ import { AuthService } from '../../services/auth.service';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import { RETURN_URL_PARAM, safeReturnUrl } from '../../utils/return-url.util';
 
 @Component({
   selector: 'app-login',
@@ -33,6 +34,13 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 })
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
+  /**
+   * The page the person was sent here from (`?returnUrl=`, set by the guards and by an expired
+   * session), where a successful sign-in takes them instead of their start page.
+   */
+  private readonly returnUrl = safeReturnUrl(
+    inject(ActivatedRoute).snapshot.queryParamMap.get(RETURN_URL_PARAM),
+  );
 
   authErrorMessage: UiMessage | null = null;
   isSubmitting = false;
@@ -75,11 +83,18 @@ export class LoginComponent {
         this.changeDetector.detectChanges();
         // Trainees and trainers an admin created an account for (or who never gave consent)
         // fill in the first-login form before anything else.
-        void this.router.navigate([
-          this.authService.isSetupRequired()
-            ? '/account-setup'
-            : this.authService.defaultRoute(),
-        ]);
+        // The setup page passes the return address on, so the person still gets there after it.
+        if (this.authService.isSetupRequired()) {
+          void this.router.navigate(['/account-setup'], {
+            queryParams: this.returnUrl
+              ? { [RETURN_URL_PARAM]: this.returnUrl }
+              : {},
+          });
+          return;
+        }
+        void this.router.navigateByUrl(
+          this.returnUrl ?? this.authService.defaultRoute(),
+        );
       },
       error: (error: unknown) => {
         this.isSubmitting = false;
@@ -96,21 +111,22 @@ export class LoginComponent {
   /** Admins have no first-login setup; they are still asked once to replace a seeded password. */
   private goAfterAdminLogin(): void {
     const accountId = this.authService.getAccountId();
-    const go = (route: string) => {
+    const start = this.returnUrl ?? '/home';
+    const go = (url: string) => {
       this.isSubmitting = false;
       this.changeDetector.detectChanges();
-      void this.router.navigate([route]);
+      void this.router.navigateByUrl(url);
     };
 
     if (!accountId) {
-      go('/home');
+      go(start);
       return;
     }
 
     this.accountSecurityService.hasChangedPassword(accountId).subscribe({
       next: (hasChangedPassword) =>
-        go(hasChangedPassword ? '/home' : '/change-password'),
-      error: () => go('/home'),
+        go(hasChangedPassword ? start : '/change-password'),
+      error: () => go(start),
     });
   }
 }
