@@ -1,0 +1,274 @@
+<section class="page-stack">
+  <app-page-header
+    [title]="'nav.dashboard' | transloco"
+    [subtitle]="'dashboard.subtitle' | transloco"
+  />
+
+  @if (isAdmin && (waitingAccounts || finalizable)) {
+    <section aria-labelledby="dashboard-attention-title">
+      <h2 class="visually-hidden" id="dashboard-attention-title">
+        {{ 'dashboard.attention.title' | transloco }}
+      </h2>
+      <ul class="attention">
+        @if (waitingAccounts) {
+          <li
+            class="notice notice--warning attention__item"
+            data-testid="dashboard-accounts"
+          >
+            <span>{{
+              'dashboard.attention.accounts'
+                | transloco: { count: waitingAccounts }
+            }}</span>
+            <a class="btn btn--secondary" routerLink="/accounts">{{
+              'dashboard.attention.accountsAction' | transloco
+            }}</a>
+          </li>
+        }
+        @if (finalizable) {
+          <li
+            class="notice notice--warning attention__item"
+            data-testid="dashboard-settlement"
+          >
+            <span>{{
+              'dashboard.attention.settlement'
+                | transloco: { period: period(finalizable) }
+            }}</span>
+            <a
+              class="btn btn--secondary"
+              [routerLink]="['/settlements', finalizable.id]"
+              >{{ 'dashboard.attention.settlementAction' | transloco }}</a
+            >
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <section class="page-stack" aria-labelledby="dashboard-trainings-title">
+    <div class="section-header">
+      <div>
+        <h2 class="panel__title" id="dashboard-trainings-title">
+          {{ 'dashboard.trainings.title' | transloco }}
+        </h2>
+        <p class="text-muted section-header__sub">
+          {{ 'dashboard.trainings.subtitle' | transloco }}
+        </p>
+      </div>
+      @if (trainerId) {
+        <app-segmented-control
+          [label]="'dashboard.trainings.scope' | transloco"
+          [options]="scopeOptions"
+          [value]="scope"
+          (valueChange)="selectScope($event)"
+        />
+      }
+    </div>
+
+    @if (loading) {
+      <app-skeleton-list
+        [label]="'dashboard.trainings.loading' | transloco"
+        [rows]="4"
+      />
+    } @else if (errorMessage) {
+      <app-empty-state
+        tone="danger"
+        [title]="'dashboard.trainings.loadError' | transloco"
+        [message]="errorMessage | uiMessage"
+      >
+        <button class="btn btn--secondary" type="button" (click)="load()">
+          {{ 'common.tryAgain' | transloco }}
+        </button>
+      </app-empty-state>
+    } @else {
+      @for (day of days; track day.date) {
+        <section
+          class="day"
+          [attr.aria-labelledby]="'dashboard-day-' + day.date"
+          [attr.data-testid]="'dashboard-day-' + day.date"
+        >
+          <h3 class="day__title" [id]="'dashboard-day-' + day.date">
+            {{ day.label | transloco }}
+            <span class="day__date">{{ dayLabel(day.date) }}</span>
+          </h3>
+          @if (day.trainings.length) {
+            <ul
+              class="trainings"
+              [attr.aria-label]="
+                'schedules.days.trainingsOf'
+                  | transloco: { day: dayLabel(day.date) }
+              "
+            >
+              @for (training of day.trainings; track training.id) {
+                @let state = status(training);
+                <li
+                  class="training"
+                  [class.training--due]="state === 'UNREGISTERED'"
+                  [attr.data-testid]="'dashboard-training-' + training.id"
+                >
+                  <div class="training__main">
+                    <span class="training__time num">{{
+                      range(training.trainingTime)
+                    }}</span>
+                    <span class="training__where"
+                      >{{ training.gym.name }} ·
+                      {{ training.trainer.name }}</span
+                    >
+                    <span class="training__meta text-muted">
+                      {{
+                        training.workout
+                          ? training.workout.title ||
+                            ('workouts.list.untitled' | transloco)
+                          : ('dashboard.trainings.noWorkout' | transloco)
+                      }}
+                      ·
+                      {{
+                        'schedules.days.booked'
+                          | transloco: { count: training.bookedCount }
+                      }}
+                    </span>
+                  </div>
+                  <div class="training__aside">
+                    <span class="training__chips">
+                      @if (training.weekStatus === 'DRAFT') {
+                        <app-chip tone="neutral">{{
+                          'dashboard.trainings.draft' | transloco
+                        }}</app-chip>
+                      }
+                      @switch (state) {
+                        @case ('REGISTERED') {
+                          <app-chip
+                            tone="success"
+                            data-testid="dashboard-training-status"
+                            >{{
+                              'dashboard.trainings.registered'
+                                | transloco: { count: training.attendanceCount }
+                            }}</app-chip
+                          >
+                        }
+                        @case ('UNREGISTERED') {
+                          <app-chip
+                            tone="warning"
+                            data-testid="dashboard-training-status"
+                            >{{
+                              'dashboard.trainings.unregistered' | transloco
+                            }}</app-chip
+                          >
+                        }
+                        @default {
+                          <app-chip
+                            tone="neutral"
+                            data-testid="dashboard-training-status"
+                            >{{
+                              'dashboard.trainings.upcoming' | transloco
+                            }}</app-chip
+                          >
+                        }
+                      }
+                    </span>
+                    @if (
+                      state === 'REGISTERED' &&
+                      training.unregisteredTraineeIds.length
+                    ) {
+                      <span class="training__note text-muted">{{
+                        'dashboard.trainings.bookedNotRegistered'
+                          | transloco
+                            : { count: training.unregisteredTraineeIds.length }
+                      }}</span>
+                    }
+                    <span class="training__actions">
+                      <a
+                        class="btn btn--ghost"
+                        [routerLink]="['/workouts/schedule', training.id]"
+                        [attr.aria-label]="
+                          'dashboard.trainings.detailsFor'
+                            | transloco: { training: describe(training) }
+                        "
+                        >{{ 'dashboard.trainings.details' | transloco }}</a
+                      >
+                      @if (canRegister(training)) {
+                        <a
+                          class="btn"
+                          [class.btn--primary]="state === 'UNREGISTERED'"
+                          [class.btn--secondary]="state !== 'UNREGISTERED'"
+                          routerLink="/attendance/new"
+                          [queryParams]="registerQuery(training)"
+                          [attr.aria-label]="
+                            'dashboard.trainings.registerFor'
+                              | transloco: { training: describe(training) }
+                          "
+                          >{{ 'dashboard.trainings.register' | transloco }}</a
+                        >
+                      }
+                    </span>
+                  </div>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="day__empty text-muted">
+              {{
+                (scope === 'mine' && trainerId
+                  ? 'dashboard.trainings.noneMine'
+                  : 'dashboard.trainings.none'
+                ) | transloco
+              }}
+            </p>
+          }
+        </section>
+      }
+    }
+  </section>
+
+  <nav
+    class="shortcuts"
+    [attr.aria-label]="'dashboard.shortcuts.label' | transloco"
+  >
+    <a class="shortcut" routerLink="/workouts/schedule">
+      <span class="shortcut__icon"><app-icon name="calendar" /></span>
+      <span class="shortcut__text">
+        <span class="shortcut__title">{{ 'nav.schedule' | transloco }}</span>
+        <span class="shortcut__desc">{{
+          'dashboard.shortcuts.scheduleDesc' | transloco
+        }}</span>
+      </span>
+    </a>
+    <a class="shortcut" routerLink="/renewals">
+      <span class="shortcut__icon"><app-icon name="renew" /></span>
+      <span class="shortcut__text">
+        <span class="shortcut__title">{{ 'nav.renewals' | transloco }}</span>
+        <span class="shortcut__desc">{{
+          'dashboard.shortcuts.renewalsDesc' | transloco
+        }}</span>
+        @if (toRenew) {
+          <span
+            class="shortcut__count"
+            data-testid="dashboard-renewals-count"
+            >{{
+              'dashboard.shortcuts.toRenew' | transloco: { count: toRenew }
+            }}</span
+          >
+        }
+      </span>
+    </a>
+    <a class="shortcut" routerLink="/attendance/new">
+      <span class="shortcut__icon"><app-icon name="check" /></span>
+      <span class="shortcut__text">
+        <span class="shortcut__title">{{
+          'nav.registerAttendance' | transloco
+        }}</span>
+        <span class="shortcut__desc">{{
+          'dashboard.shortcuts.registerDesc' | transloco
+        }}</span>
+      </span>
+    </a>
+    <a class="shortcut" routerLink="/settlements">
+      <span class="shortcut__icon"><app-icon name="wallet" /></span>
+      <span class="shortcut__text">
+        <span class="shortcut__title">{{ 'nav.settlements' | transloco }}</span>
+        <span class="shortcut__desc">{{
+          'dashboard.shortcuts.settlementsDesc' | transloco
+        }}</span>
+      </span>
+    </a>
+  </nav>
+</section>

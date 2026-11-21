@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   OnInit,
   inject,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AvatarComponent } from '../../components/avatar/avatar.component';
 import { ChipComponent, ChipTone } from '../../components/chip/chip.component';
@@ -22,6 +24,7 @@ import { LanguageService } from '../../i18n/language.service';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
 import { UiMessage, apiErrorMessage } from '../../i18n/ui-message';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
+import { AttendanceReportComponent } from './attendance-report.component';
 import {
   RenewalRow,
   SubscriptionRenewals,
@@ -29,6 +32,11 @@ import {
 } from '../../services/subscription-renewals.service';
 
 export type RenewalTab = 'punch' | 'time';
+
+/** The page's views: the renewals, and the two attendance reports (`?view=`). */
+export type RenewalsView = 'renewals' | 'inactive' | 'without';
+
+const VIEWS: RenewalsView[] = ['renewals', 'inactive', 'without'];
 
 /** A table column: header key, cell text and whether it is a number. */
 interface RenewalColumn {
@@ -54,7 +62,9 @@ export interface RenewalSectionView {
 /**
  * Renewals: active trainees by subscription state, so trainers see who has run out of paid
  * trainings and who runs out next. Two tabs (punch, time), each with an exhausted and an active
- * section. The API decides who goes where and in which order; this page only shows it.
+ * section. The API decides who goes where and in which order; this page only shows it. Two more
+ * views (`?view=inactive|without`) hold the attendance reports: trainees who stopped coming, and
+ * trainees without an active subscription.
  */
 @Component({
   selector: 'app-renewals',
@@ -71,15 +81,27 @@ export interface RenewalSectionView {
     PageHeaderComponent,
     SegmentedControlComponent,
     SkeletonListComponent,
+    AttendanceReportComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './renewals.component.html',
+  styleUrl: './renewals.component.scss',
 })
 export class RenewalsComponent implements OnInit {
   private readonly renewalsService = inject(SubscriptionRenewalsService);
   private readonly changeDetector = inject(ChangeDetectorRef);
   private readonly i18n = inject(LanguageService);
   private readonly format = inject(LocaleFormatService);
+
+  private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
+
+  readonly viewOptions: { value: RenewalsView; label: string }[] = [
+    { value: 'renewals', label: 'renewals.views.renewals' },
+    { value: 'inactive', label: 'renewals.views.inactive' },
+    { value: 'without', label: 'renewals.views.without' },
+  ];
+  view: RenewalsView = 'renewals';
 
   readonly tabOptions: SegmentedOption<RenewalTab>[] = [
     { value: 'punch', label: 'enums.planType.PUNCH' },
@@ -91,6 +113,13 @@ export class RenewalsComponent implements OnInit {
   errorMessage: UiMessage | null = null;
 
   ngOnInit(): void {
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const view = params.get('view') as RenewalsView | null;
+        this.view = view && VIEWS.includes(view) ? view : 'renewals';
+        this.changeDetector.markForCheck();
+      });
     this.load();
   }
 

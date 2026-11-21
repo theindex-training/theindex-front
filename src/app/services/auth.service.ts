@@ -120,9 +120,9 @@ export class AuthService {
     this.setToken(token);
   }
 
-  /** Where a signed-in person starts: trainees on their profile, staff on the dashboard. */
+  /** Where a signed-in person starts: the dashboard, which shows what their role needs. */
   defaultRoute(): string {
-    return this.getUserRole() === 'TRAINEE' ? '/my-profile' : '/home';
+    return '/home';
   }
 
   private setToken(token: string): void {

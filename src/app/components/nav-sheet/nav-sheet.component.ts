@@ -8,11 +8,11 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { IconComponent } from '../icon/icon.component';
 import { LanguageSwitchComponent } from '../language-switch/language-switch.component';
-import { NavItem } from '../navigation/navigation';
+import { NavGroup, NavItem, isItemActive } from '../navigation/navigation';
 import { ThemeSwitchComponent } from '../theme-switch/theme-switch.component';
 import { UserBlockComponent } from '../user-block/user-block.component';
 
@@ -26,7 +26,6 @@ import { UserBlockComponent } from '../user-block/user-block.component';
   imports: [
     NgTemplateOutlet,
     RouterLink,
-    RouterLinkActive,
     TranslocoPipe,
     IconComponent,
     LanguageSwitchComponent,
@@ -40,13 +39,19 @@ import { UserBlockComponent } from '../user-block/user-block.component';
 export class NavSheetComponent {
   /** Translation key of the sheet title (the same as its tab). */
   @Input({ required: true }) title = 'nav.more';
-  @Input() mainItems: NavItem[] = [];
-  @Input() manageItems: NavItem[] = [];
+  /** The pages that aren't tabs, by group. */
+  @Input() groups: NavGroup[] = [];
+  /** The current URL, for the active tile. */
+  @Input() url = '';
   @Output() readonly openChange = new EventEmitter<boolean>();
 
   @ViewChild('dialog', { static: true })
   private readonly dialog!: ElementRef<HTMLDialogElement>;
   private returnFocusTo: HTMLElement | null = null;
+
+  isActive(item: NavItem): boolean {
+    return isItemActive(this.url, item);
+  }
 
   get isOpen(): boolean {
     return this.dialog.nativeElement.open;

@@ -40,7 +40,7 @@ test.describe('J23 exercise library', () => {
       api.on('GET', '/api/exercises', { body: [RUN, THRUSTER] });
       api.on('GET', '/api/exercises/e-thr', { body: THRUSTER });
 
-      await page.goto('/my-profile');
+      await page.goto('/home');
       const links = mainNav(page).getByRole('link');
       await expect(links.nth(1)).toHaveAccessibleName(t('nav.schedule'));
       await expect(links.nth(2)).toHaveAccessibleName(t('nav.exercises'));
@@ -102,7 +102,7 @@ test.describe('J23 exercise library', () => {
       await signInAs('TRAINEE', { traineeProfileId: 'trainee-1' });
       mockTraineeHome(api);
 
-      await page.goto('/my-profile');
+      await page.goto('/home');
       const tabs = mainNav(page).getByRole('link');
       await expect(tabs).toHaveCount(4);
       await expect(tabs.nth(2)).toHaveAccessibleName(t('nav.exercises'));

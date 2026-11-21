@@ -49,6 +49,7 @@ describe('TraineeDashboardComponent', () => {
 
   afterEach(() => http.verify());
 
+  /** Renders the page; today's and tomorrow's trainings are answered with none. */
   async function render(traineeProfileId: string | null = 'trainee-1') {
     signInAs('TRAINEE', { traineeProfileId });
     const fixture = TestBed.createComponent(TraineeDashboardComponent);
@@ -57,6 +58,11 @@ describe('TraineeDashboardComponent', () => {
       () => fixture.nativeElement,
       () => fixture.whenStable(),
     );
+    await page.settle();
+    http.expectOne('/api/bookings/gyms').flush([]);
+    http
+      .expectOne((req) => req.url === '/api/bookings/trainings')
+      .flush({ from: '', to: '', slots: [] });
     await page.settle();
   }
 

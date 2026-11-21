@@ -52,9 +52,9 @@ describe('roleGuard', () => {
     expect(run(['ADMIN', 'TRAINER'])).toBe(true);
   });
 
-  it('sends a trainee on a staff route to /my-profile', () => {
+  it('sends a trainee on a staff route to /home', () => {
     signInAs('TRAINEE');
-    expect(run(['ADMIN', 'TRAINER'])).toBe('/my-profile');
+    expect(run(['ADMIN', 'TRAINER'])).toBe('/home');
   });
 
   it('sends a trainer on an admin-only route to /unauthorized', () => {

@@ -98,7 +98,7 @@ test.describe(
       ).toBeVisible();
     });
 
-    test('a trainee is sent to their own profile from staff pages', async ({
+    test('a trainee is sent to their dashboard from staff pages and the old profile address', async ({
       page,
       api,
       signInAs,
@@ -106,9 +106,15 @@ test.describe(
       await signInAs('TRAINEE');
       mockTraineeHome(api);
 
-      for (const url of ['/home', '/trainees', '/settlements']) {
+      for (const url of ['/my-profile', '/trainees', '/settlements']) {
         await page.goto(url);
-        await expect(page).toHaveURL(/\/my-profile$/);
+        await expect(page).toHaveURL(/\/home$/);
+        await expect(
+          page.getByRole('heading', {
+            level: 1,
+            name: t('traineeDashboard.title'),
+          }),
+        ).toBeVisible();
       }
       expect(api.calls('GET', '/api/trainees')).toHaveLength(0);
     });
@@ -181,25 +187,16 @@ test.describe(
       await seedToken(
         makeToken({ sub: 'account-admin', role: 'ADMIN', exp: 1_000_000_000 }),
       );
-      api.on(
-        'GET',
-        '/api/attendance/reports/inactive-trainees',
-        apiError(401, 'Token expired'),
-      );
-      api.on(
-        'GET',
-        '/api/attendance/reports/without-active-subscription',
-        apiError(401, 'Token expired'),
-      );
+      api.on('GET', '/api/schedules/slots', apiError(401, 'Token expired'));
 
       await page.goto('/home');
 
       // CHARACTERIZATION: possibly unintended — the guards never check `exp`, so the dashboard starts
       // loading; the first 401 then logs the user out. TEST_NOTES.md S6.
       await expect(page).toHaveURL(/\/login\?returnUrl=%2Fhome$/);
-      expect(
-        api.calls('GET', '/api/attendance/reports/inactive-trainees').length,
-      ).toBeGreaterThan(0);
+      expect(api.calls('GET', '/api/schedules/slots').length).toBeGreaterThan(
+        0,
+      );
       expect(await storedToken(page)).toBeNull();
     });
   },

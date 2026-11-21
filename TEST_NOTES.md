@@ -44,10 +44,10 @@ This file records findings only. Fixes are on hold: as in theindex-api, no fixes
 - **Status:** open.
 
 ## S4 — The inactive-trainees report can show stale results
-- **Where:** `HomeComponent.loadInactiveReport()`: each change of "Inactive for" starts a new request, and older requests are not cancelled.
+- **Where:** `AttendanceReportComponent.load()` (the report moved from the dashboard to Renewals, `?view=inactive`, Nov 2026): each change of "Inactive for" starts a new request, and older requests are not cancelled.
 - **Behavior:** pick 30 days and then 90 days. If the 30-day answer arrives last, it replaces the 90-day report while the selector still says 90 days.
 - **Why it looks wrong:** what the report shows no longer matches the selection, and nothing indicates it.
-- **Pinned by:** `home.component.spec.ts` › "shows the newest answer only if it arrives last".
+- **Pinned by:** `renewals/attendance-report.component.spec.ts` › "shows the newest answer only if it arrives last".
 - **Status:** open.
 
 ## S5 — The "password updated" notice is never seen

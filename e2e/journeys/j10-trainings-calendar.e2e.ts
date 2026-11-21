@@ -50,7 +50,7 @@ test.describe('J10 trainings calendar', () => {
       mockTrainee(api);
 
       // 1. The calendar is the default view, on the current month, with today marked.
-      await page.goto('/my-profile');
+      await page.goto('/home');
       const section = trainingsSection(page);
       await expect(
         section.getByRole('radio', { name: t('trainings.view.calendar') }),
@@ -174,7 +174,7 @@ test.describe('J10 trainings calendar', () => {
       await signInAs('TRAINEE');
       mockTrainee(api);
 
-      await page.goto('/my-profile');
+      await page.goto('/home');
       const section = trainingsSection(page);
       await section
         .getByRole('button', { name: t('trainings.calendar.previousMonth') })

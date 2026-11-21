@@ -33,9 +33,9 @@ describe('loginGuard', () => {
     expect(run()).toBe(true);
   });
 
-  it('sends a signed-in trainee to /my-profile', () => {
+  it('sends a signed-in trainee to /home', () => {
     signInAs('TRAINEE');
-    expect(redirect()).toBe('/my-profile');
+    expect(redirect()).toBe('/home');
   });
 
   it.each(['ADMIN', 'TRAINER'] as const)(

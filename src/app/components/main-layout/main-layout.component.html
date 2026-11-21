@@ -5,8 +5,8 @@
 <div class="shell">
   <app-sidebar
     class="shell__sidebar"
-    [mainItems]="navigation.main"
-    [manageItems]="navigation.manage"
+    [groups]="navigation.groups"
+    [url]="url()"
   />
 
   <header class="topbar">
@@ -20,6 +20,7 @@
   <app-tab-bar
     class="shell__tab-bar"
     [tabs]="navigation.tabs"
+    [url]="url()"
     [sheetLabel]="navigation.sheetLabel"
     [sheetActive]="isSheetPageActive()"
     [sheetOpen]="isSheetOpen"
@@ -29,7 +30,7 @@
 
 <app-nav-sheet
   [title]="navigation.sheetLabel"
-  [mainItems]="navigation.moreMain"
-  [manageItems]="navigation.moreManage"
+  [groups]="navigation.sheetGroups"
+  [url]="url()"
   (openChange)="isSheetOpen = $event"
 />

@@ -121,7 +121,7 @@ test.describe('J17 bookings', () => {
         },
       });
 
-      await page.goto('/my-profile');
+      await page.goto('/home');
       await mainNav(page)
         .getByRole('link', { name: t('nav.schedule') })
         .click();

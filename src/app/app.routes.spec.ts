@@ -39,9 +39,9 @@ const EVERYONE = ['ADMIN', 'TRAINER', 'TRAINEE'];
  * Adding a route without a row here fails the test, so access is always decided deliberately.
  */
 const SHELL_ACCESS: Record<string, string[] | null> = {
-  home: STAFF,
+  // Every role's dashboard; HomeComponent picks the role's.
+  home: null,
   renewals: STAFF,
-  'my-profile': TRAINEE,
   schedule: TRAINEE,
   'schedule/:id': TRAINEE,
   'schedule/:id/booked': TRAINEE,
@@ -243,18 +243,23 @@ describe('routing (real routes)', () => {
     );
   });
 
-  it('sends signed-in staff at / to /home and a trainee to /my-profile', async () => {
+  it('sends everyone signed in at / to their dashboard at /home', async () => {
     signInAs('ADMIN');
     expect(await open('/')).toBe('/home');
 
     signInAs('TRAINEE');
-    expect(await open('/')).toBe('/my-profile');
+    expect(await open('/')).toBe('/home');
+  });
+
+  it("sends a trainee's old start page, /my-profile, to /home", async () => {
+    signInAs('TRAINEE');
+    expect(await open('/my-profile')).toBe('/home');
   });
 
   it('keeps a trainee out of staff pages and a trainer out of admin pages', async () => {
     signInAs('TRAINEE');
-    expect(await open('/trainees')).toBe('/my-profile');
-    expect(await open('/renewals')).toBe('/my-profile');
+    expect(await open('/trainees')).toBe('/home');
+    expect(await open('/renewals')).toBe('/home');
 
     signInAs('TRAINER');
     expect(await open('/trainers')).toBe('/unauthorized');
