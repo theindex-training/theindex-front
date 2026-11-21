@@ -26,7 +26,7 @@ export const roleGuard: CanActivateFn = (
   }
 
   if (userRole === 'TRAINEE') {
-    return router.parseUrl('/my-profile');
+    return router.parseUrl('/home');
   }
 
   return router.parseUrl('/unauthorized');

@@ -11,6 +11,230 @@
       [message]="errorMessage | uiMessage"
     />
   } @else {
+    @if (!subscriptionsLoading && !subscriptionErrorMessage) {
+      @let current = summary;
+      <section
+        class="summary"
+        [class]="'summary--' + current.level.toLowerCase()"
+        aria-labelledby="subscription-summary-title"
+        data-testid="subscription-summary"
+      >
+        <h2 class="summary__title" id="subscription-summary-title">
+          {{ 'traineeDashboard.summary.title' | transloco }}
+        </h2>
+        @if (current.level === 'NONE') {
+          <p class="summary__figure">
+            {{ 'traineeDashboard.summary.none' | transloco }}
+          </p>
+        } @else {
+          <div class="summary__figures">
+            @if (current.creditsLeft !== null) {
+              <p class="summary__figure" data-testid="subscription-credits">
+                {{
+                  'traineeDashboard.summary.creditsLeft'
+                    | transloco: { count: current.creditsLeft }
+                }}
+              </p>
+            }
+            @if (current.endsOn && current.daysLeft !== null) {
+              <p class="summary__figure" data-testid="subscription-days">
+                {{
+                  'traineeDashboard.summary.daysLeft'
+                    | transloco: { count: current.daysLeft }
+                }}
+                <span class="summary__until">{{
+                  'traineeDashboard.summary.until'
+                    | transloco: { date: formatDate(current.endsOn) }
+                }}</span>
+              </p>
+            }
+          </div>
+        }
+        <p class="summary__advice">
+          {{ adviceKeys[current.level] | transloco }}
+        </p>
+      </section>
+    }
+
+    <section class="page-stack" aria-labelledby="upcoming-title">
+      <div class="section-header">
+        <div>
+          <h2 class="panel__title" id="upcoming-title">
+            {{ 'traineeDashboard.upcoming.title' | transloco }}
+          </h2>
+          <p class="text-muted section-header__sub">
+            {{ 'traineeDashboard.upcoming.subtitle' | transloco }}
+          </p>
+        </div>
+        @if (gyms.length > 1) {
+          <app-segmented-control
+            [label]="'traineeSchedule.gym' | transloco"
+            [options]="gymOptions"
+            [translateLabels]="false"
+            [value]="gymId"
+            (valueChange)="selectGym($event)"
+          />
+        }
+      </div>
+
+      @if (upcomingLoading) {
+        <app-skeleton-list
+          [label]="'traineeDashboard.upcoming.loading' | transloco"
+          [rows]="3"
+        />
+      } @else if (upcomingError) {
+        <app-empty-state
+          tone="danger"
+          [title]="'traineeDashboard.upcoming.loadError' | transloco"
+          [message]="upcomingError | uiMessage"
+        >
+          <button
+            class="btn btn--secondary"
+            type="button"
+            (click)="loadUpcoming()"
+          >
+            {{ 'common.tryAgain' | transloco }}
+          </button>
+        </app-empty-state>
+      } @else {
+        @if (actionError) {
+          <p class="notice notice--danger" role="alert">
+            {{ actionError | uiMessage }}
+          </p>
+        }
+        @for (day of upcomingDays; track day.date) {
+          <section
+            class="day"
+            [attr.aria-labelledby]="'upcoming-day-' + day.date"
+            [attr.data-testid]="'upcoming-day-' + day.date"
+          >
+            <h3 class="day__title" [id]="'upcoming-day-' + day.date">
+              {{ day.label | transloco }}
+              <span class="day__date">{{ dayLabel(day.date) }}</span>
+            </h3>
+            @if (day.trainings.length) {
+              <ul
+                class="trainings"
+                [attr.aria-label]="
+                  'schedules.days.trainingsOf'
+                    | transloco: { day: dayLabel(day.date) }
+                "
+              >
+                @for (training of day.trainings; track training.id) {
+                  <li
+                    class="training"
+                    [class.training--mine]="training.bookedByMe"
+                    [attr.data-testid]="'upcoming-training-' + training.id"
+                  >
+                    <div class="training__main">
+                      <span class="training__time num">{{
+                        range(training.trainingTime)
+                      }}</span>
+                      <span class="training__where">{{
+                        training.gym.id !== gymId
+                          ? training.gym.name + ' · ' + training.trainer.name
+                          : training.trainer.name
+                      }}</span>
+                      <span class="training__meta text-muted">
+                        @if (training.workout) {
+                          {{
+                            training.workout.title ||
+                              ('workouts.list.untitled' | transloco)
+                          }}
+                          ·
+                        }
+                        {{
+                          'schedules.days.booked'
+                            | transloco: { count: training.bookedCount }
+                        }}
+                      </span>
+                    </div>
+                    <div class="training__aside">
+                      @if (training.bookedByMe) {
+                        <app-chip tone="success">{{
+                          'traineeSchedule.booked' | transloco
+                        }}</app-chip>
+                      }
+                      @if (
+                        !training.canBook &&
+                        !training.canCancel &&
+                        !isPast(training)
+                      ) {
+                        <span class="training__note text-muted">{{
+                          (training.bookedByMe
+                            ? 'traineeSchedule.cancelClosed'
+                            : 'traineeSchedule.closed'
+                          ) | transloco
+                        }}</span>
+                      }
+                      <span class="training__actions">
+                        <a
+                          class="btn btn--secondary"
+                          [routerLink]="['/schedule', training.id]"
+                          [attr.aria-label]="
+                            'traineeSchedule.detailsFor'
+                              | transloco: { training: describe(training) }
+                          "
+                          >{{ 'traineeSchedule.details' | transloco }}</a
+                        >
+                        @if (training.canCancel) {
+                          <button
+                            class="btn btn--ghost"
+                            type="button"
+                            [disabled]="!!busyId"
+                            [attr.aria-label]="
+                              'traineeSchedule.cancelFor'
+                                | transloco: { training: describe(training) }
+                            "
+                            (click)="cancel(training)"
+                          >
+                            {{
+                              (busyId === training.id
+                                ? 'traineeSchedule.cancelling'
+                                : 'traineeSchedule.cancel'
+                              ) | transloco
+                            }}
+                          </button>
+                        }
+                        @if (training.canBook) {
+                          <button
+                            class="btn btn--primary"
+                            type="button"
+                            [disabled]="!!busyId"
+                            [attr.aria-label]="
+                              'traineeSchedule.bookFor'
+                                | transloco: { training: describe(training) }
+                            "
+                            (click)="book(training)"
+                          >
+                            {{
+                              (busyId === training.id
+                                ? 'traineeSchedule.booking'
+                                : 'traineeSchedule.book'
+                              ) | transloco
+                            }}
+                          </button>
+                        }
+                      </span>
+                    </div>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="day__empty text-muted">
+                {{ 'traineeDashboard.upcoming.none' | transloco }}
+              </p>
+            }
+          </section>
+        }
+        <p>
+          <a class="btn btn--secondary" routerLink="/schedule">{{
+            'traineeDashboard.upcoming.fullSchedule' | transloco
+          }}</a>
+        </p>
+      }
+    </section>
+
     <section class="page-stack" aria-labelledby="my-subscriptions-title">
       <div class="section-header">
         <div>

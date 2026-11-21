@@ -246,7 +246,7 @@ describe('ChangePasswordComponent', () => {
     });
   });
 
-  it('sends a trainee to /my-profile after the change', async () => {
+  it('sends a trainee to /home after the change', async () => {
     signInAs('TRAINEE');
     fixture = TestBed.createComponent(ChangePasswordComponent);
     el = fixture.nativeElement;
@@ -261,7 +261,7 @@ describe('ChangePasswordComponent', () => {
     http.expectOne('/api/accounts/account-trainee/change-password').flush({});
     await settle();
 
-    expect(router.url).toBe('/my-profile');
+    expect(router.url).toBe('/home');
   });
 
   it('does not ask for a phone when the password check fails', async () => {

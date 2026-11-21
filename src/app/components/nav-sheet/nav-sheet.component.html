@@ -20,28 +20,24 @@
       </button>
     </div>
 
-    @if (mainItems.length || manageItems.length) {
+    @if (groups.length) {
       <nav
         class="sheet__section"
         [attr.aria-label]="'nav.morePages' | transloco"
       >
-        @if (mainItems.length) {
-          <ul class="tiles">
-            @for (item of mainItems; track item.route) {
-              <li>
-                <ng-container
-                  *ngTemplateOutlet="tile; context: { $implicit: item }"
-                />
-              </li>
-            }
-          </ul>
-        }
-        @if (manageItems.length) {
-          <h3 class="sheet__label" id="nav-sheet-manage">
-            {{ 'nav.manage' | transloco }}
-          </h3>
-          <ul class="tiles" aria-labelledby="nav-sheet-manage">
-            @for (item of manageItems; track item.route) {
+        @for (group of groups; track group.id) {
+          @if (group.label) {
+            <h3 class="sheet__label" [id]="'nav-sheet-' + group.id">
+              {{ group.label | transloco }}
+            </h3>
+          }
+          <ul
+            class="tiles"
+            [attr.aria-labelledby]="
+              group.label ? 'nav-sheet-' + group.id : null
+            "
+          >
+            @for (item of group.items; track item.route) {
               <li>
                 <ng-container
                   *ngTemplateOutlet="tile; context: { $implicit: item }"
@@ -83,9 +79,8 @@
   <a
     class="tile"
     [routerLink]="item.route"
-    routerLinkActive="is-active"
-    ariaCurrentWhenActive="page"
-    [routerLinkActiveOptions]="{ exact: !!item.exact }"
+    [class.is-active]="isActive(item)"
+    [attr.aria-current]="isActive(item) ? 'page' : null"
     (click)="close()"
   >
     <app-icon [name]="item.icon" />

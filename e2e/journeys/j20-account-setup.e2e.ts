@@ -77,7 +77,7 @@ test.describe(
       ).toHaveValue('0888 111 222');
 
       // Any other page sends the person back.
-      await page.goto('/my-profile');
+      await page.goto('/home');
       await expect(page).toHaveURL(/\/account-setup$/);
 
       await page
@@ -104,7 +104,7 @@ test.describe(
         .getByRole('button', { name: t('accountSetup.submit') })
         .click();
 
-      await expect(page).toHaveURL(/\/my-profile$/);
+      await expect(page).toHaveURL(/\/home$/);
       await expect(
         page.getByRole('heading', {
           level: 1,
@@ -149,7 +149,7 @@ test.describe(
         body: { ...SETUP, passwordChangeRequired: false },
       });
 
-      await page.goto('/my-profile');
+      await page.goto('/home');
 
       await expect(page).toHaveURL(/\/account-setup$/);
       await expect(

@@ -79,7 +79,13 @@
     "records": "Records",
     "content": "Content",
     "workouts": "Workouts",
-    "accounts": "Accounts"
+    "accounts": "Accounts",
+    "groups": {
+      "daily": "Daily",
+      "people": "People",
+      "training": "Training",
+      "money": "Money"
+    }
   },
   "enums": {
     "role": {
@@ -339,8 +345,8 @@
     }
   },
   "traineeDashboard": {
-    "title": "My profile",
-    "subtitle": "Your subscriptions and training attendance.",
+    "title": "Home",
+    "subtitle": "Your subscription, the next trainings and your attendance.",
     "loadErrorTitle": "Couldn't load your profile",
     "subscriptions": "Subscriptions",
     "subscriptionsSub": "Your current and past subscriptions.",
@@ -352,7 +358,31 @@
     "noExhaustedSubscriptions": "No exhausted subscriptions found for your profile.",
     "noSubscriptions": "No subscriptions found for your profile.",
     "missingProfile": "Unable to load your dashboard. Missing trainee profile identifier.",
-    "loadError": "Unable to load your dashboard right now. Please try again later."
+    "loadError": "Unable to load your dashboard right now. Please try again later.",
+    "summary": {
+      "title": "Your subscription",
+      "none": "No active subscription",
+      "creditsLeft": "{count, plural, one {# training left} other {# trainings left}}",
+      "daysLeft": "{count, plural, =0 {Ends today} one {# day left} other {# days left}}",
+      "until": "until {date}",
+      "advice": {
+        "NONE": "Get a new one at the gym before your next training.",
+        "LAST": "Your last one: renew before your next training.",
+        "LOW": "Running low: time to renew soon.",
+        "OK": "You're all set."
+      }
+    },
+    "upcoming": {
+      "title": "Trainings today and tomorrow",
+      "subtitle": "Book a place, or cancel while the rules allow.",
+      "loading": "Loading the trainings",
+      "loadError": "Couldn't load the trainings",
+      "loadErrorMessage": "The trainings can't be loaded right now. Please try again.",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "none": "No trainings published for this day.",
+      "fullSchedule": "Full schedule"
+    }
   },
   "plans": {
     "list": {
@@ -1177,40 +1207,47 @@
     "subscriptionPurchase": "Subscription purchase",
     "unknownTrainee": "Unknown trainee"
   },
-  "home": {
-    "subtitle": "Welcome back! Jump straight to what you need.",
-    "shortcuts": "Shortcuts",
-    "registerDesc": "Open the attendance register and log a new training session.",
-    "trainings": "List of trainings",
-    "trainingsDesc": "Review training sessions and who attended.",
-    "settlements": "Settlement reports",
-    "settlementsDesc": "Open settlement reports and inspect payout details.",
-    "reports": {
-      "title": "Attendance reports",
-      "subtitle": "Monitor inactive trainees and trainees with no active subscription.",
-      "inactiveTitle": "Inactive trainees",
-      "inactiveFor": "Inactive for",
-      "lastDays": "Last {count, plural, one {day} other {# days}}",
-      "loadingInactive": "Loading inactive trainees report",
-      "noInactive": "No inactive trainees found.",
-      "activeSubscription": "Active subscription",
-      "withoutTitle": "Trainees without active subscription",
-      "loadingWithout": "Loading trainees without active subscription report",
-      "noWithout": "No trainees without active subscription found.",
-      "lastActiveSubscription": "Last active subscription",
-      "reportLabel": "{name} report",
-      "trainee": "Trainee",
-      "lastTraining": "Last training",
-      "lastTrainingOn": "Last training: {date}",
-      "unknown": "Unknown",
-      "plan": "Plan: {value}",
-      "type": "Type: {value}",
-      "start": "Start: {value}",
-      "end": "End: {value}",
-      "remainingTrainings": "Remaining trainings: {value}",
-      "remainingDays": "Remaining days: {value}",
-      "inactiveError": "Unable to load inactive trainees report right now.",
-      "withoutError": "Unable to load trainees without active subscription report right now."
+  "dashboard": {
+    "subtitle": "Today's and tomorrow's trainings, and what is waiting for you.",
+    "attention": {
+      "title": "Waiting for you",
+      "accounts": "{count, plural, one {# account is waiting to be connected to a profile.} other {# accounts are waiting to be connected to a profile.}}",
+      "accountsAction": "Open accounts",
+      "settlement": "The report for {period} is ready to finalize.",
+      "settlementAction": "Open the report",
+      "period": "{from} – {to}"
+    },
+    "trainings": {
+      "title": "Trainings",
+      "subtitle": "Today and tomorrow, in every gym. Register attendance right after a training.",
+      "scope": "Whose trainings",
+      "mine": "Mine",
+      "all": "All",
+      "loading": "Loading trainings",
+      "loadError": "Couldn't load the trainings",
+      "loadErrorMessage": "The trainings can't be loaded right now. Please try again.",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "none": "No trainings this day.",
+      "noneMine": "You have no trainings this day.",
+      "noWorkout": "No workout chosen",
+      "draft": "Draft",
+      "upcoming": "Upcoming",
+      "unregistered": "Not registered",
+      "registered": "Registered: {count}",
+      "bookedNotRegistered": "{count, plural, one {# booked trainee not registered} other {# booked trainees not registered}}",
+      "details": "Details",
+      "detailsFor": "Details of the training on {training}",
+      "register": "Register attendance",
+      "registerFor": "Register attendance for the training on {training}"
+    },
+    "shortcuts": {
+      "label": "Shortcuts",
+      "scheduleDesc": "This week's trainings and their workouts.",
+      "renewalsDesc": "Who has run out, and who runs out next.",
+      "toRenew": "{count, plural, one {# to renew} other {# to renew}}",
+      "registerDesc": "For a training that isn't on the schedule.",
+      "settlementsDesc": "The trainers' payout reports."
     }
   },
   "renewals": {
@@ -1256,6 +1293,38 @@
       "unpaidChip": "{count, plural, one {# unpaid} other {# unpaid}}",
       "leftChip": "{count, plural, one {# left} other {# left}}",
       "daysLeftChip": "{count, plural, =0 {Ends today} one {# day left} other {# days left}}"
+    },
+    "views": {
+      "label": "Renewals views",
+      "renewals": "Renewals",
+      "inactive": "Not training",
+      "without": "No subscription"
+    },
+    "reports": {
+      "inactiveTitle": "Inactive trainees",
+      "inactiveFor": "Inactive for",
+      "lastDays": "Last {count, plural, one {day} other {# days}}",
+      "loadingInactive": "Loading inactive trainees report",
+      "noInactive": "No inactive trainees found.",
+      "activeSubscription": "Active subscription",
+      "withoutTitle": "Trainees without active subscription",
+      "loadingWithout": "Loading trainees without active subscription report",
+      "noWithout": "No trainees without active subscription found.",
+      "lastActiveSubscription": "Last active subscription",
+      "trainee": "Trainee",
+      "lastTraining": "Last training",
+      "lastTrainingOn": "Last training: {date}",
+      "unknown": "Unknown",
+      "plan": "Plan: {value}",
+      "type": "Type: {value}",
+      "start": "Start: {value}",
+      "end": "End: {value}",
+      "remainingTrainings": "Remaining trainings: {value}",
+      "remainingDays": "Remaining days: {value}",
+      "inactiveError": "Unable to load inactive trainees report right now.",
+      "withoutError": "Unable to load trainees without active subscription report right now.",
+      "inactiveSub": "Active trainees who haven't trained for a while, with their active subscription.",
+      "withoutSub": "Trainees with no active subscription, with their last one."
     }
   },
   "auth": {

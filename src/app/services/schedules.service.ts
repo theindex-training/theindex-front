@@ -73,6 +73,30 @@ export interface ScheduleWeek {
   slots: ScheduleSlot[];
 }
 
+/**
+ * A training of the staff's dashboard (`GET /api/schedules/slots`): every active gym's trainings
+ * of a few days, drafts included, with their attendance.
+ */
+export interface DayTraining extends ScheduleSlot {
+  gym: { id: string; name: string };
+  /** Monday of its week, YYYY-MM-DD. */
+  weekStart: string;
+  weekStatus: ScheduleWeekStatus;
+  startsAt: string;
+  endsAt: string;
+  /** Trainees with attendance saved for it (its gym, at its start), walk-ins included. */
+  attendanceCount: number;
+  /** Who booked it, is active and isn't registered yet, in booking order. */
+  unregisteredTraineeIds: string[];
+}
+
+export interface DayTrainings {
+  from: string;
+  to: string;
+  /** By day, start, end, gym and trainer. */
+  slots: DayTraining[];
+}
+
 /** How close a booked trainee is to the end of what they paid for (the attendance preview's). */
 export type TrainingBookingLevel = 'UNPAID' | 'LAST' | 'LOW' | 'OK';
 
@@ -220,6 +244,12 @@ export class SchedulesService {
       `${this.weeksUrl}/${weekId}/slots`,
       payload,
     );
+  }
+
+  /** Every active gym's trainings from `from` to `to` (gym-local days, at most 14). */
+  trainings(from: string, to: string): Observable<DayTrainings> {
+    const params = buildHttpParams({ from, to });
+    return this.http.get<DayTrainings>(`${this.weeksUrl}/slots`, { params });
   }
 
   /** One training with the trainees who booked it and what they have left. */

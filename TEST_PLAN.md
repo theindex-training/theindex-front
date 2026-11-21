@@ -86,18 +86,18 @@ The review below turned up a few traps. Every spec should follow these.
 
 **`guards/*.ts` → one spec per guard, using `TestBed.runInInjectionContext`**
 - [x] `authGuard`: no token → `UrlTree('/login')`; any token → `true`.
-- [x] `loginGuard`: no token → `true`; `TRAINEE` → `/my-profile`; `ADMIN`, `TRAINER`, an unknown role or an undecodable token → `/home`.
+- [x] `loginGuard`: no token → `true`; any signed-in role, an unknown role or an undecodable token → `/home` (trainees too since the dashboards, Nov 2026; before that `/my-profile`).
 - [x] `roleGuard`:
   - no token → `/login`;
   - no `data.roles` or an empty list → `true`;
   - role allowed → `true`;
-  - `TRAINEE` not allowed → `/my-profile`;
+  - `TRAINEE` not allowed → `/home`;
   - `TRAINER` not allowed, or no role → `/unauthorized`.
 
 **`app.routes.ts` → `app.routes.spec.ts`** (route config is access control, so it gets pinned)
 - [x] Table test over the flattened route tree. Every path has exactly the documented `roleGuard` + `data.roles`:
   - ADMIN only: `trainers/**`, `cash-register` (`settlements/new` now redirects to the list);
-  - TRAINEE only: `my-profile`, `stats`;
+  - TRAINEE only: `stats` (`my-profile` is now a redirect to `/home`, which every role opens);
   - every role: `records`, `records/:id`, `records/:id/log`, `records/:id/results/:resultId`;
   - `change-password`: authenticated users of any role, with no `roleGuard`;
   - everything else under the shell: ADMIN + TRAINER;
@@ -114,7 +114,7 @@ The review below turned up a few traps. Every spec should follow these.
 
 **`pages/login/login.component.ts` → `login.component.spec.ts`**
 - [x] Empty submit sends no request and shows both field errors. A password shorter than 3 characters shows the length error.
-- [x] Success with a token without `sub`: no password-status call; it navigates to `/home` (staff) or `/my-profile` (trainee).
+- [x] Success with a token without `sub`: no password-status call; it navigates to `/home` (every role).
 - [x] Success with `sub`: GET `/api/accounts/<sub>/password-status`.
   - `true` → the default route by role;
   - `false` → `/change-password`;
@@ -331,12 +331,25 @@ One table-driven spec per page type (`crud-details.spec.ts`, `crud-forms.spec.ts
 
 ### 8. Dashboards (P1)
 
-**`pages/home/home.component.ts`** (replaces the existing "should create" spec, which is `[~]`)
-- [x] The old "should create" spec was replaced in PR 4.
-- [x] Reports load only for ADMIN or TRAINER: `GET /api/attendance/reports/inactive-trainees?skipDays=7` and `GET …/reports/without-active-subscription`.
+**Role dashboards (Nov 2026).** `/home` is every role's start page: `home.component.spec.ts` checks that a trainee gets `app-trainee-dashboard` and staff `app-staff-dashboard`.
+
+**`pages/home/staff-dashboard.ts` → `staff-dashboard.spec.ts`, `staff-dashboard.component.spec.ts`** (P1)
+- [x] `GET /api/schedules/slots?from&to` for the Sofia today and tomorrow (clock at 00:30 Sofia, 22:30Z the day before).
+- [x] Mine (the token's `trainerProfileId`) by default, All on request, kept in localStorage `dashboardTrainings`; admins without a trainer profile see all, with no switch.
+- [x] Status: Upcoming before the start, Not registered after it without attendance, "Registered: N" once any is saved, plus "N booked trainees not registered"; a draft week's training has a Draft chip.
+- [x] Register attendance from the training's day on, primary while not registered, linking `/attendance/new?date&time&trainer&gym&trainees` (the booked unregistered ones); Details links `/workouts/schedule/:id`.
+- [x] The Renewals shortcut counts used up + expired; admins get the unconnected accounts (`/api/accounts?link=unlinked`) and the oldest draft report whose period is over; trainers ask for neither.
+- [x] A failed load shows the API's message; Try again asks again.
+
+**`pages/trainee-dashboard/subscription-summary.ts`, `trainee-dashboard-upcoming.spec.ts`** (P1)
+- [x] Summary levels with the API's thresholds: none active → NONE; 1 training or ends today → LAST; ≤ 2 trainings or ≤ 7 days → LOW; else OK; several punch cards add up, the latest time pass counts, and the subscription that lasts best decides.
+- [x] Today's and tomorrow's trainings (`GET /api/bookings/trainings?from&to`): the preferred gym first, a gym switch remembered in `scheduleGym`, the trainee's own bookings in other gyms with their gym; Book posts and opens `/schedule/:id/booked`; Cancel asks and updates in place; a failure shows the API's message and asks again.
+
+**`pages/renewals/attendance-report.component.ts`** (the dashboard's old reports, now Renewals' `?view=inactive` and `?view=without`; `renewals-views.spec.ts` covers the views)
+- [x] The inactive report asks `GET /api/attendance/reports/inactive-trainees?skipDays=7`, the other `GET …/reports/without-active-subscription`.
 - [x] Changing "Inactive for" to 30 sends `skipDays=30`. Each report has its own loading, error and empty states.
 - [x] Changing the selection twice quickly: responses aren't cancelled, so a late response for 7 days can overwrite the 30-day result. CHARACTERIZATION, see S4.
-- [x] `traineeDisplayName`: "Name (nick)", a trimmed name, or `home.reports.unknown`.
+- [x] `traineeDisplayName`: "Name (nick)", a trimmed name, or `renewals.reports.unknown`.
 - [x] `formatSubscriptionSummary` (P2):
   - `null` → '—';
   - parts in order, joined by " • ";
@@ -524,7 +537,8 @@ One spec per service, each method asserting method, URL, query and body. These p
 - [x] Every name links to `/trainees/:id`; an empty section says so; an API error shows its message and "Try again" reloads; Bulgarian plurals.
 
 **`app.routes.spec.ts`, `navigation.spec.ts`**
-- [x] `/renewals` is for ADMIN and TRAINER (a trainee goes to `/my-profile`); the menu item sits right under Dashboard, and on phones first in the More sheet.
+- [x] `/renewals` is for ADMIN and TRAINER (a trainee goes to `/home`); the menu item is in the People group after Trainees, and on phones in the More sheet's People group.
+- [x] Navigation groups (Daily, People, Training, Money, Manage), the staff tabs Home / Schedule / Register / Trainees, and the active item by URL (`isItemActive`: Schedule, not Workouts, on `/workouts/schedule…`), also in the rendered sidebar, tab bar and sheet (`main-layout.component.spec.ts`).
 
 ### 17. Records: benchmarks and heavy lifts (P1)
 
@@ -633,7 +647,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 7. Submit with mismatched passwords: the error shows and no request is sent. Fix it and add a phone.
 8. `POST /api/accounts/<sub>/change-password {currentPassword,newPassword,confirmPassword,phone}` → the app lands on `/home`.
 9. Home loads `GET /api/attendance/reports/inactive-trainees?skipDays=7` and `GET /api/attendance/reports/without-active-subscription`. The report rows render.
-10. Variant: password-status `true` → straight to `/home`. A TRAINEE token → `/my-profile` (its calls are listed in J8).
+10. Variant: password-status `true` → straight to `/home`. A TRAINEE token → `/home` too, the trainee dashboard (its calls are listed in J8).
 
 ### J2. Access control and session expiry (P0) [desktop]
 ✅ Done in PR 5: `e2e/journeys/j2-access-control.e2e.ts`, 7 tests. Step 3 also checks `/settlements` for a trainee.
@@ -643,7 +657,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
    - the sidebar has no Content either (added with J11);
    - `/trainers` → `/unauthorized`, and so do `/cash-register` and `/content/categories`;
    - `/settlements/new` lands on the list, which explains that reports are created automatically.
-3. TRAINEE token: `/home` → `/my-profile`, and `/trainees` → `/my-profile`.
+3. TRAINEE token: `/my-profile` (the old start page), `/trainees` and `/settlements` → `/home`, the trainee dashboard.
 4. Any token, `/login` → the role's home (`loginGuard`).
 5. Session expiry: an ADMIN on `/trainees` gets `GET /api/trainees` → 401.
    - The token is removed and the app is on `/login?returnUrl=%2Ftrainees`.
@@ -740,10 +754,11 @@ Role access to this page is checked in J2 only.
 ### J8. Trainee self-service, navigation shell and preferences (P1) [mobile, plus a desktop smoke run]
 ✅ Done in PR 5: `e2e/journeys/j8-trainee-self-service.e2e.ts`, 4 tests. The More tab's "current" state is CSS-only and can't be asserted (S17).
 Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so its October training is in the month the calendar opens on.
-1. TRAINEE token with `traineeProfileId=P1`, landing on `/my-profile`. The page calls:
+1. TRAINEE token with `traineeProfileId=P1`, landing on `/home` (the trainee dashboard, once `/my-profile`). The page calls:
    - `GET /api/attendance/trainees/P1`
    - `GET /api/trainees/P1/subscriptions`
    - `GET /api/plans`
+   - `GET /api/bookings/gyms` and `GET /api/bookings/trainings?from&to` (today and tomorrow, since the dashboards; J24)
 2. Subscriptions are filtered to Active. Switching to Exhausted and then All changes the rows and the empty message. The trainings table renders.
 3. "Stats", a tile in the Account sheet since the exercise library took its tab → `GET /api/trainees/me/training-insights`. The ranked lists render; weekdays come from `weekdayNumber`.
 4. Tab "Records" → the benchmarks' leaderboards (`GET /api/leaderboards?kind=BENCHMARK`; empty here). The page itself is J21.
@@ -776,7 +791,7 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 
 ### J10. Trainings calendar (P1) [desktop, mobile]
 ✅ Added with the calendar: `e2e/journeys/j10-trainings-calendar.e2e.ts`, 2 tests. The clock is fixed to 3 Nov 2026 (`page.clock.setFixedTime`).
-1. Desktop, TRAINEE on `/my-profile`: Calendar is checked, the month is November 2026, today is `aria-current="date"`, Today is disabled, and the legend names unpaid trainings.
+1. Desktop, TRAINEE on `/home`: Calendar is checked, the month is November 2026, today is `aria-current="date"`, Today is disabled, and the legend names unpaid trainings.
 2. Previous month → October: the summary counts the month; a cell shows time, trainer and gym of each training.
 3. Opening a day lists its trainings with their payment status; "Clear selection" clears it.
 4. Keyboard: ArrowDown and PageDown move focus between days and months.
@@ -813,8 +828,9 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 
 ### J14. Renewals (P1) [desktop, mobile]
 ✅ Added with the renewals page: `e2e/journeys/j14-renewals.e2e.ts`, 2 tests.
-1. Desktop, trainer: the second menu link is Renewals; it opens `/renewals`. The punch tables list used up and active trainees in the API's order; the Time option shows expired ("9 days ago") and active ("10 days"); the overview is loaded once; names link to the trainee.
-2. Phone, admin: Renewals is the first link in the More sheet; the used-up list shows the unpaid chip.
+1. Desktop, trainer: the dashboard's Renewals shortcut counts who ran out; Renewals is in the People group and opens `/renewals`. The punch tables list used up and active trainees in the API's order; the Time option shows expired ("9 days ago") and active ("10 days"); the page loads the overview once; names link to the trainee.
+2. Phone, admin: Renewals is in the More sheet's People group; the used-up list shows the unpaid chip.
+3. Desktop and phone: the Not training view (`?view=inactive`, `skipDays=7`, then 30) and the No subscription view.
 
 ### J15. Workouts (P1) [desktop, mobile]
 ✅ `e2e/journeys/j15-workouts.e2e.ts`, 4 tests (5 runs).
@@ -847,7 +863,7 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 
 ### J20. First-login account setup (P0) [desktop, mobile]
 ✅ `e2e/journeys/j20-account-setup.e2e.ts`, 2 tests (4 runs). Unit specs: `account-setup.component.spec.ts`, `setup.guard.spec.ts`, `account-setup.service.spec.ts`, the interceptor's 403, the login redirects and the route table. Two deliberate breaks (the guard letting everyone through, the password left out of the body) were each caught.
-1. Desktop and phone, trainee an admin created: signing in with a `setupRequired` token opens `/account-setup`, prefilled with what the admin entered; `/my-profile` sends them back; a 409 shows the API's message and stays; saving posts every field, stores the answered token and opens My profile.
+1. Desktop and phone, trainee an admin created: signing in with a `setupRequired` token opens `/account-setup`, prefilled with what the admin entered; `/home` sends them back; a 409 shows the API's message and stays; saving posts every field, stores the answered token and opens the dashboard (`/home`).
 2. A token without the claim (issued before the setup existed): the API's 403 `ACCOUNT_SETUP_REQUIRED` sends the person to the form, here without the password fields (`passwordChangeRequired: false`).
 
 ### J21. Records (P1) [desktop, mobile]
@@ -866,7 +882,14 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 ### J23. Exercise library (P2) [desktop, mobile]
 ✅ `e2e/journeys/j23-exercise-library.e2e.ts`. Unit specs: section 19.
 1. Desktop and phone, trainee: Exercises is the navigation item after Schedule; the list asks for `active=true` and has no status filter; searching an other name leaves Thruster; its page shows the other names, the description with its line breaks and, once played, the youtube-nocookie player; Back returns to the list.
-2. Phone: four tabs (Profile, Schedule, Exercises, Records) and Stats as the Account sheet's tile.
+2. Phone: four tabs (Home, Schedule, Exercises, Records) and Stats as the Account sheet's tile.
+
+### J24. Dashboards (P1) [desktop, mobile]
+✅ `e2e/journeys/j24-dashboards.e2e.ts`. Unit specs: section 8.
+1. Desktop and phone, trainer at 19:05: `/` opens `/home`, which asks for today and tomorrow; his own trainings first (the 18:00 one Not registered, tomorrow's without Register), All adds Maria's 20:00 (Upcoming); Register attendance opens with the training's two booked trainees ticked.
+2. Phone: the tabs are Home, Schedule, Register, Trainees; Settlements is in the More sheet's Money group.
+3. Desktop, admin: "3 accounts are waiting…" and the oldest draft report whose period is over, linking to it; no Mine/All switch without a trainer profile.
+4. Desktop and phone, trainee: "2 trainings left" with the Low advice; today's training is booked from the dashboard and opens the confirmation.
 
 ---
 

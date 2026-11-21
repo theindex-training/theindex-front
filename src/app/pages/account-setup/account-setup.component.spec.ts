@@ -131,7 +131,7 @@ describe('AccountSetupComponent', () => {
     expect(page.text()).toContain(en.register.mismatch);
   });
 
-  it('sends the whole form, stores the new token and goes to the trainee profile', async () => {
+  it('sends the whole form, stores the new token and goes to the dashboard', async () => {
     await open();
     await page.type('#account-setup-name', ' Ivan G. Petrov ');
     await page.type('#account-setup-email', ' ivan@example.com ');
@@ -166,7 +166,7 @@ describe('AccountSetupComponent', () => {
     await page.settle();
 
     expect(localStorage.getItem('accessToken')).toBe(token);
-    expect(router.url).toBe('/my-profile');
+    expect(router.url).toBe('/home');
   });
 
   it('a trainer: no gym subscription, the primary gym, and the dashboard after saving', async () => {
@@ -217,7 +217,7 @@ describe('AccountSetupComponent', () => {
       account: {},
     });
     await page.settle();
-    expect(router.url).toBe('/my-profile');
+    expect(router.url).toBe('/home');
   });
 
   describe('sent here by the login on the way to a page (?returnUrl=)', () => {
@@ -299,7 +299,7 @@ describe('AccountSetupComponent', () => {
       .flush({ ...TRAINEE_SETUP, setupRequired: false });
     await page.settle();
 
-    expect(router.url).toBe('/my-profile');
+    expect(router.url).toBe('/home');
   });
 
   it('signs out to the login page when the setup was finished elsewhere but the stored token still requires it', async () => {
@@ -307,7 +307,7 @@ describe('AccountSetupComponent', () => {
     router.resetConfig([
       { path: 'account-setup', component: AccountSetupComponent },
       { path: 'login', children: [] },
-      { path: 'my-profile', canActivate: [setupGuard], children: [] },
+      { path: 'home', canActivate: [setupGuard], children: [] },
       { path: '**', children: [] },
     ]);
     await open({ ...TRAINEE_SETUP, setupRequired: false });

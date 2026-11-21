@@ -1,0 +1,152 @@
+<section class="page-stack" [attr.aria-labelledby]="kind + '-report-title'">
+  <div class="section-header">
+    <div>
+      <h2 class="panel__title" [id]="kind + '-report-title'">
+        {{
+          (kind === 'inactive'
+            ? 'renewals.reports.inactiveTitle'
+            : 'renewals.reports.withoutTitle'
+          ) | transloco
+        }}
+      </h2>
+      <p class="text-muted section-header__sub">
+        {{
+          (kind === 'inactive'
+            ? 'renewals.reports.inactiveSub'
+            : 'renewals.reports.withoutSub'
+          ) | transloco
+        }}
+      </p>
+    </div>
+    @if (kind === 'inactive') {
+      <label class="form-field report__filter">
+        <span class="form-field__label">{{
+          'renewals.reports.inactiveFor' | transloco
+        }}</span>
+        <select
+          [(ngModel)]="selectedSkipDays"
+          (ngModelChange)="onSkipDaysChange()"
+        >
+          @for (days of skipDaysOptions; track days) {
+            <option [ngValue]="days">
+              {{ 'renewals.reports.lastDays' | transloco: { count: days } }}
+            </option>
+          }
+        </select>
+      </label>
+    }
+  </div>
+
+  @if (loading) {
+    <app-skeleton-list
+      [label]="
+        (kind === 'inactive'
+          ? 'renewals.reports.loadingInactive'
+          : 'renewals.reports.loadingWithout'
+        ) | transloco
+      "
+      [rows]="3"
+    />
+  } @else if (errorMessage) {
+    <p class="notice notice--danger" role="alert">
+      {{ errorMessage | uiMessage }}
+    </p>
+  } @else if (!items.length) {
+    <p class="notice" role="status">
+      {{
+        (kind === 'inactive'
+          ? 'renewals.reports.noInactive'
+          : 'renewals.reports.noWithout'
+        ) | transloco
+      }}
+    </p>
+  } @else {
+    <div
+      class="data-table-wrap responsive-table"
+      tabindex="0"
+      role="region"
+      [attr.aria-label]="
+        (kind === 'inactive'
+          ? 'renewals.reports.inactiveTitle'
+          : 'renewals.reports.withoutTitle'
+        ) | transloco
+      "
+    >
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'renewals.reports.trainee' | transloco }}</th>
+            <th scope="col">
+              {{ 'renewals.reports.lastTraining' | transloco }}
+            </th>
+            <th scope="col">
+              {{
+                (kind === 'inactive'
+                  ? 'renewals.reports.activeSubscription'
+                  : 'renewals.reports.lastActiveSubscription'
+                ) | transloco
+              }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items; track $index) {
+            <tr>
+              <td>
+                @if (item.traineeId) {
+                  <a
+                    class="cell-link"
+                    [routerLink]="['/trainees', item.traineeId]"
+                    >{{ traineeDisplayName(item) }}</a
+                  >
+                } @else {
+                  <strong>{{ traineeDisplayName(item) }}</strong>
+                }
+              </td>
+              <td class="num">
+                {{ formatDateOrFallback(item.lastTrainingDate) }}
+              </td>
+              <td class="summary">
+                {{ formatSubscriptionSummary(subscriptionOf(item)) }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <ul
+      class="list-card responsive-list"
+      [attr.aria-label]="
+        (kind === 'inactive'
+          ? 'renewals.reports.inactiveTitle'
+          : 'renewals.reports.withoutTitle'
+        ) | transloco
+      "
+    >
+      @for (item of items; track $index) {
+        <li class="record">
+          <div class="record__main">
+            @if (item.traineeId) {
+              <a
+                class="record__title"
+                [routerLink]="['/trainees', item.traineeId]"
+                >{{ traineeDisplayName(item) }}</a
+              >
+            } @else {
+              <span class="record__title">{{ traineeDisplayName(item) }}</span>
+            }
+            <span class="record__meta num">{{
+              'renewals.reports.lastTrainingOn'
+                | transloco
+                  : { date: formatDateOrFallback(item.lastTrainingDate) }
+            }}</span>
+            <span class="record__meta">{{
+              formatSubscriptionSummary(subscriptionOf(item))
+            }}</span>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

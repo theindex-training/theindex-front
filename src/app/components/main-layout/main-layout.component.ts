@@ -39,13 +39,13 @@ export class MainLayoutComponent {
   private readonly router = inject(Router);
 
   readonly navigation = buildNavigation(inject(AuthService).getUserRole());
-  readonly sheetItems = [
-    ...this.navigation.moreMain,
-    ...this.navigation.moreManage,
-  ];
+  readonly sheetItems = this.navigation.sheetGroups.flatMap(
+    (group) => group.items,
+  );
   isSheetOpen = false;
 
-  private readonly url = toSignal(
+  /** The current URL: the nav marks its item as the current page. */
+  readonly url = toSignal(
     this.router.events.pipe(
       filter((event) => event instanceof NavigationEnd),
       map(() => this.router.url),

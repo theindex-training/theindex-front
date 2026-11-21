@@ -116,7 +116,7 @@ test.describe('J8 trainee self-service', () => {
 
       // 1–2. My profile: active subscriptions first, then the other filters.
       await page.goto('/');
-      await expect(page).toHaveURL(/\/my-profile$/);
+      await expect(page).toHaveURL(/\/home$/);
       // The page may not have sent its requests yet when the URL changes, so wait for them.
       await expect.poll(() => api.last('GET', '/api/plans')?.query).toEqual({});
       await expect(shown(page, 'Ten visits')).toBeVisible();
@@ -262,7 +262,7 @@ test.describe('J8 trainee self-service', () => {
     async ({ page, api, signInAs }) => {
       await signInAs('TRAINEE', { traineeProfileId: null });
 
-      await page.goto('/my-profile');
+      await page.goto('/home');
 
       // CHARACTERIZATION: possibly unintended — the missing-profile message never renders; the trainee
       // reads "no subscriptions" instead. TEST_NOTES.md S16.
@@ -272,14 +272,21 @@ test.describe('J8 trainee self-service', () => {
       await expect(
         page.getByText(t('traineeDashboard.missingProfile')),
       ).toHaveCount(0);
-      // The page loads nothing; only the navigation asks for the avatar (name, photo).
+      // The page loads none of the trainee's lists; only the navigation asks for the avatar (name,
+      // photo) and the dashboard for today's and tomorrow's trainings, which need no profile id.
+      await expect
+        .poll(() => api.calls('GET', '/api/bookings/trainings').length)
+        .toBe(1);
       expect(
-        api.requests.filter(
-          (request) =>
-            request.path !== '/api/health' &&
-            request.path !== '/api/my-profile',
-        ),
-      ).toEqual([]);
+        api.requests
+          .filter(
+            (request) =>
+              request.path !== '/api/health' &&
+              request.path !== '/api/my-profile',
+          )
+          .map((request) => request.path)
+          .sort(),
+      ).toEqual(['/api/bookings/gyms', '/api/bookings/trainings']);
     },
   );
 
@@ -290,10 +297,10 @@ test.describe('J8 trainee self-service', () => {
       await signInAs('TRAINEE');
       mockTraineeData(api);
 
-      await page.goto('/my-profile');
+      await page.goto('/home');
       const nav = page.getByRole('navigation', { name: t('nav.mainLabel') });
       await expect(nav.getByRole('link')).toHaveText([
-        t('nav.profile'),
+        t('nav.home'),
         t('nav.schedule'),
         t('nav.exercises'),
         t('nav.stats'),

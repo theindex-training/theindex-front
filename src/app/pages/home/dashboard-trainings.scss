@@ -1,0 +1,109 @@
+// Today's and tomorrow's trainings on both dashboards (staff and trainee).
+.day {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.day__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-size: var(--text-xl);
+}
+
+.day__date {
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.day__empty {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-xl);
+}
+
+.trainings {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  list-style: none;
+}
+
+.trainings > li + li {
+  border-top: 1px solid var(--border);
+}
+
+.training {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.training__main {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.training__time {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: var(--heading-tracking);
+}
+
+.training__where {
+  font-weight: 600;
+}
+
+.training__meta,
+.training__note {
+  font-size: var(--text-sm);
+}
+
+.training__aside {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2) var(--space-3);
+  margin-left: auto;
+}
+
+.training__chips,
+.training__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+// Phones: the actions get their own full-width line, primary last (on the right).
+@media (max-width: 767.98px) {
+  .training__aside {
+    justify-content: flex-start;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .training__actions {
+    width: 100%;
+  }
+
+  .training__actions > * {
+    flex: 1 1 auto;
+  }
+}
