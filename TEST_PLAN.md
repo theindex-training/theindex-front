@@ -299,7 +299,7 @@ Reports are automatic since Nov 2026 (theindex-api creates one per half month; s
   - `GET /api/trainers`, `GET /api/trainees` (no params);
   - `GET /api/gym-locations?includeInactive=true`.
 - [x] The admin trainer filter re-requests allocations with `trainerId`; "All" omits it. It also limits the waiting list (client-side).
-- [x] Paid and Waiting are two tabs (`?tab=waiting`), each labelled with its count. Paid trainings are paged by the API (`offset`/`limit`, 50 by default; S10 fixed), waiting ones in the browser; First / Previous / numbers / Next / Last and the page size change `?page=` / `?size=` (replacing the entry), a page past the end goes to the last one, the shown rows stay until the next page arrives, and there are no controls while everything fits on 25 rows.
+- [x] Paid and Waiting are two tabs (`?tab=waiting`), each labelled with its count. Paid trainings are paged by the API (`offset`/`limit`, 50 by default; S10 fixed), waiting ones in the browser; First / Previous / numbers / Next / Last and the page size change `?page=` / `?size=` (replacing the entry), a page past the end goes to the last one, the shown rows stay until the next page arrives, and there are no controls while everything fits on 25 rows. A failed page of paid trainings (S18, Nov 2026) keeps its rows, the count and the controls on the page shown, with "Try again" for the failed page; another trainer's failed rows drop the old ones; a failed first page offers "Try again" too.
 - [x] Lines show the carried-over part and the waiting count; a carried-over allocation has the "Earlier period" chip; the waiting list says why each training waits (`UNPAID`, `TIME_PASS_NOT_ENDED` with the date, `NEXT_REPORT`).
 - [x] A draft says it can still change (admins: what finalizing does, with the period end).
 - [x] Finalize is visible and works only for ADMIN on a DRAFT settlement: a confirm names the period and the total (cancel → no request), then `POST …/finalize` with `{}`, the status updates, the button disappears and the report reloads as stored. Error → the API's message, the draft stays. `finalizeSettlement()` is a no-op for a TRAINER or a FINAL settlement.
@@ -915,6 +915,7 @@ These come from reading the code. Each gets a `// CHARACTERIZATION: possibly uni
 - **S8 — A failed account load allows a second account.** On the trainee/trainer account page, a failed or `null` account GET for a linked profile falls back to "create account" mode.
 - **S9 — Trainer without a profile sees all sessions.** A TRAINER token without `trainerProfileId` gets unfiltered attendance history (but can't delete anything).
 - **S10 — Allocations capped at 500.** Settlement allocations stopped at 500 rows with no paging. Fixed in Nov 2026 (page controls).
+- **S18 — A failed page of paid trainings is a dead end.** The error replaced the rows and the page controls, with no "Try again". Fixed in Nov 2026.
 - **S17 — The More/Account tab's "current page" state is visual only** (found in PR 5). It is shown with a CSS class only; there is no `aria-current`.
 - **S11 / S12 — No range checks.** Settlement generate and training times have no client-side range check (start ≤ end); only the API validates.
 - **S13 — Login can be submitted twice.** The submit button isn't disabled while signing in, so a double click sends two login requests (found while writing §2).

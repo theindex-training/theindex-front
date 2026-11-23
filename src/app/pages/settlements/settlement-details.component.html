@@ -282,15 +282,25 @@
             [label]="'settlements.details.loadingAllocations' | transloco"
             [rows]="4"
           />
-        } @else if (allocationError) {
-          <p class="notice notice--danger" role="alert">
-            {{ allocationError | uiMessage }}
-          </p>
-        } @else if (!allocations.length) {
+        } @else if (!allocations.length && !allocationError) {
           <p class="notice" role="status">
             {{ 'settlements.details.noAllocations' | transloco }}
           </p>
         } @else {
+          @if (allocationError) {
+            <div class="notice notice--danger notice--retry">
+              <span role="alert">{{ allocationError | uiMessage }}</span>
+              <button
+                class="btn btn--secondary"
+                type="button"
+                (click)="loadAllocations(true)"
+              >
+                {{ 'common.tryAgain' | transloco }}
+              </button>
+            </div>
+          }
+        }
+        @if (!loadingAllocations && allocations.length) {
           <div
             class="data-table-wrap responsive-table"
             tabindex="0"
@@ -408,8 +418,8 @@
           <app-pagination
             [label]="'settlements.details.allocationsPages' | transloco"
             [total]="allocationsTotal"
-            [page]="allocationsPage"
-            [pageSize]="pageSize"
+            [page]="allocationsPagerPage"
+            [pageSize]="allocationsPagerPageSize"
             (pageChange)="changePage($event)"
             (pageSizeChange)="changePageSize($event)"
           />

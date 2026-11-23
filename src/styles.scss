@@ -923,6 +923,16 @@ html:has(dialog[open]) {
   color: var(--danger);
 }
 
+// A notice with its own action, e.g. a failed page with "Try again": the message, then the
+// button at the end (under it when there is no room). Put role="alert" on the message only.
+.notice--retry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
 // Mobile row for records that are not a single link (they hold their own links/buttons).
 // Use inside ul.list-card: <li class="record"><div class="record__main">…</div><div class="record__aside">…</div></li>
 .record {
