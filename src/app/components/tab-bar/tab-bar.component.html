@@ -6,9 +6,8 @@
           class="tab"
           [class.tab--primary]="tab.primary"
           [routerLink]="tab.route"
-          routerLinkActive="is-active"
-          ariaCurrentWhenActive="page"
-          [routerLinkActiveOptions]="{ exact: !!tab.exact }"
+          [class.is-active]="isActive(tab)"
+          [attr.aria-current]="isActive(tab) ? 'page' : null"
         >
           <span class="tab__icon"><app-icon [name]="tab.icon" /></span>
           <span class="tab__label">{{

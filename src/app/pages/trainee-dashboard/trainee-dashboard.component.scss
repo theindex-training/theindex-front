@@ -1,0 +1,85 @@
+// The trainee's own booking, as on the Schedule.
+.training--mine {
+  box-shadow: inset 4px 0 0 var(--success);
+}
+
+// How much is left of the subscription, coloured by how soon to renew.
+.summary {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.summary--ok {
+  border-color: var(--success-border);
+  background: var(--success-soft);
+}
+
+.summary--low {
+  border-color: var(--warning-border);
+  background: var(--warning-soft);
+}
+
+.summary--last,
+.summary--none {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+}
+
+// Text on the tinted card stays --text: --muted isn't checked on the -soft fills.
+.summary__title {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-sm);
+  letter-spacing: var(--label-tracking);
+}
+
+.summary__figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-8);
+}
+
+.summary__figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  letter-spacing: var(--heading-tracking);
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.summary__until {
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.summary__advice {
+  margin: 0;
+  font-weight: 600;
+}
+
+.summary--ok .summary__advice {
+  color: var(--success);
+}
+
+.summary--low .summary__advice {
+  color: var(--warning);
+}
+
+.summary--last .summary__advice,
+.summary--none .summary__advice {
+  color: var(--danger);
+}

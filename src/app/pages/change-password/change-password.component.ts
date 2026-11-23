@@ -211,12 +211,6 @@ export class ChangePasswordComponent implements OnInit {
   }
 
   private getDefaultRoute(): string {
-    const role = this.authService.getUserRole();
-
-    if (role === 'TRAINEE') {
-      return '/my-profile';
-    }
-
-    return '/home';
+    return this.authService.defaultRoute();
   }
 }

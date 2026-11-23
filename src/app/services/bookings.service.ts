@@ -79,6 +79,18 @@ export interface BookingWeek {
   slots: BookableTraining[];
 }
 
+/** A training of the trainee's dashboard (`GET /api/bookings/trainings`), with its gym. */
+export interface GymTraining extends BookableTraining {
+  gym: { id: string; name: string };
+}
+
+export interface GymTrainings {
+  from: string;
+  to: string;
+  /** Published trainings of every active gym, by day, start, end, gym and trainer. */
+  slots: GymTraining[];
+}
+
 /** Trainees' bookings: always their own (the API takes the profile from the token). */
 @Injectable({
   providedIn: 'root',
@@ -96,6 +108,14 @@ export class BookingsService {
   week(gymId: string, week: string): Observable<BookingWeek> {
     const params = buildHttpParams({ gymId, week });
     return this.http.get<BookingWeek>(`${this.baseUrl}/schedule`, {
+      params,
+    });
+  }
+
+  /** Every active gym's published trainings from `from` to `to` (gym-local days, at most 14). */
+  trainings(from: string, to: string): Observable<GymTrainings> {
+    const params = buildHttpParams({ from, to });
+    return this.http.get<GymTrainings>(`${this.baseUrl}/trainings`, {
       params,
     });
   }

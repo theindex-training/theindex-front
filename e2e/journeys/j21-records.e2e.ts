@@ -128,7 +128,7 @@ test.describe('J21 records', () => {
       });
       api.on('GET', '/api/benchmark-results/mine', { body: [] });
 
-      await page.goto('/my-profile');
+      await page.goto('/home');
       await page
         .getByRole('navigation', { name: t('nav.mainLabel') })
         .getByRole('link', { name: t('nav.records') })

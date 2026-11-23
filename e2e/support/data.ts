@@ -36,8 +36,18 @@ export const myProfile = (over: object = {}) => ({
   ...over,
 });
 
-/** The two reports the staff dashboard (/home) loads. */
-export function mockStaffHome(
+/**
+ * The staff dashboard's trainings (`/home`: `GET /api/schedules/slots`, today and tomorrow);
+ * its other requests are answered empty by the fixture (`dashboardDefaults`).
+ */
+export function mockStaffHome(api: ApiMock, slots: object[] = []): void {
+  api.on('GET', '/api/schedules/slots', (request) => ({
+    body: { from: request.query['from'], to: request.query['to'], slots },
+  }));
+}
+
+/** The attendance reports on Renewals (`?view=inactive` and `?view=without`). */
+export function mockAttendanceReports(
   api: ApiMock,
   inactive: object[] = [inactiveTrainee],
   withoutSubscription: object[] = [],
@@ -50,7 +60,7 @@ export function mockStaffHome(
   });
 }
 
-/** The three lists the trainee dashboard (/my-profile) loads for profile `traineeId`. */
+/** The three lists the trainee dashboard (/home) loads for profile `traineeId`. */
 export function mockTraineeHome(api: ApiMock, traineeId = 'trainee-1'): void {
   api.on('GET', `/api/attendance/trainees/${traineeId}`, { body: [] });
   api.on('GET', `/api/trainees/${traineeId}/subscriptions`, { body: [] });

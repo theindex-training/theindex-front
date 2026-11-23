@@ -25,7 +25,8 @@ interface Fixtures {
 
 /**
  * - Every /api request is answered by `api`; an unanswered one fails the test at the end.
- *   `GET /api/my-profile` (the navigation's avatar) is answered by default with `myProfile()`.
+ *   `GET /api/my-profile` (the navigation's avatar) is answered by default with `myProfile()`,
+ *   and the dashboards' requests (`dashboardDefaults`) with nothing to show.
  * - The UI starts in English (localStorage `lang`), so `t()` selectors apply. Seeded values are
  *   written once per tab, so a reload or the app's own logout/language switch behaves as in real use.
  */
@@ -34,6 +35,7 @@ export const test = base.extend<Fixtures>({
     const api = new ApiMock();
     // The navigation's avatar of trainees and trainers (a test's own rule wins).
     api.on('GET', '/api/my-profile', { body: myProfile() });
+    dashboardDefaults(api);
     await api.install(page);
     await use(api);
     expect(api.unhandled, 'API requests no rule answered').toEqual([]);
@@ -61,6 +63,29 @@ export const test = base.extend<Fixtures>({
     await use((role, claims) => seedToken(tokenFor(role, claims)));
   },
 });
+
+/**
+ * What the dashboards (`/home`) load besides their own data, answered empty so that a journey
+ * passing through the start page needs no rules for it (a test's own rule wins): today's and
+ * tomorrow's trainings (staff and trainee), the trainee's gyms, the renewals count, and an admin's
+ * accounts waiting and reports.
+ */
+export function dashboardDefaults(api: ApiMock): void {
+  const noTrainings = (request: { query: Record<string, string> }) => ({
+    body: { from: request.query['from'], to: request.query['to'], slots: [] },
+  });
+  api.on('GET', '/api/schedules/slots', noTrainings);
+  api.on('GET', '/api/bookings/trainings', noTrainings);
+  api.on('GET', '/api/bookings/gyms', { body: [] });
+  api.on('GET', '/api/subscription-renewals', {
+    body: {
+      punch: { exhausted: [], active: [] },
+      time: { exhausted: [], active: [] },
+    },
+  });
+  api.on('GET', '/api/accounts', { body: [] });
+  api.on('GET', '/api/settlements', { body: [] });
+}
 
 /** The token the app currently holds, or null. */
 export async function storedToken(

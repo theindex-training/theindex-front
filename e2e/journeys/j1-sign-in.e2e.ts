@@ -110,14 +110,12 @@ test.describe('J1 sign-in', { tag: ['@desktop', '@mobile'] }, () => {
       phone: '+359 888 123 456',
     });
     await expect(
-      page.getByRole('link', { name: 'Ivan Petrov (Vanko)' }),
+      page.getByRole('heading', { level: 1, name: t('nav.dashboard') }),
     ).toBeVisible();
-    expect(
-      api.last('GET', '/api/attendance/reports/inactive-trainees')?.query,
-    ).toEqual({ skipDays: '7' });
-    expect(
-      api.calls('GET', '/api/attendance/reports/without-active-subscription'),
-    ).toHaveLength(1);
+    // The dashboard asks for today's and tomorrow's trainings.
+    await expect
+      .poll(() => api.calls('GET', '/api/schedules/slots').length)
+      .toBeGreaterThan(0);
   });
 
   test('takes a trainer whose account is set up straight to the dashboard', async ({
@@ -144,7 +142,7 @@ test.describe('J1 sign-in', { tag: ['@desktop', '@mobile'] }, () => {
     ).toHaveLength(0);
   });
 
-  test('takes a trainee to their own profile', async ({ page, api }) => {
+  test('takes a trainee to their own dashboard', async ({ page, api }) => {
     api.on('POST', '/api/auth/login', {
       body: { accessToken: tokenFor('TRAINEE'), account: {} },
     });
@@ -155,7 +153,7 @@ test.describe('J1 sign-in', { tag: ['@desktop', '@mobile'] }, () => {
     await password(page).fill('a-password');
     await signIn(page).click();
 
-    await expect(page).toHaveURL(/\/my-profile$/);
+    await expect(page).toHaveURL(/\/home$/);
     await expect(
       page.getByRole('heading', {
         level: 1,

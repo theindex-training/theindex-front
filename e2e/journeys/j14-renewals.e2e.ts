@@ -1,5 +1,9 @@
 import { Page } from '@playwright/test';
-import { mockStaffHome, renewalRow } from '../support/data';
+import {
+  mockAttendanceReports,
+  mockStaffHome,
+  renewalRow,
+} from '../support/data';
 import { expect, test } from '../support/fixtures';
 import { t } from '../support/i18n';
 
@@ -42,7 +46,10 @@ const RENEWALS = {
   },
 };
 
-/** TEST_PLAN.md J14: the renewals page, reached from the menu under Dashboard. */
+/**
+ * TEST_PLAN.md J14: the renewals page, reached from the menu's People group or the dashboard's
+ * shortcut, with the attendance reports that moved there from the dashboard.
+ */
 test.describe('J14 renewals', () => {
   const mainNav = (page: Page) =>
     page.getByRole('navigation', { name: t('nav.mainLabel') });
@@ -56,7 +63,7 @@ test.describe('J14 renewals', () => {
       .getByText(t(key), { exact: true });
 
   test(
-    'a trainer opens Renewals under Dashboard and reads both tabs',
+    'a trainer opens Renewals from the People group and reads both tabs',
     { tag: '@desktop' },
     async ({ page, api, signInAs }) => {
       await signInAs('TRAINER');
@@ -64,9 +71,18 @@ test.describe('J14 renewals', () => {
       api.on('GET', '/api/subscription-renewals', { body: RENEWALS });
 
       await page.goto('/home');
-      const links = mainNav(page).getByRole('link');
-      await expect(links.nth(1)).toHaveAccessibleName(t('nav.renewals'));
-      await links.nth(1).click();
+      // The dashboard's shortcut counts who has run out (punch and time).
+      await expect(page.getByTestId('dashboard-renewals-count')).toHaveText(
+        t('dashboard.shortcuts.toRenew', { count: 2 }),
+      );
+      const people = mainNav(page).getByRole('list', {
+        name: t('nav.groups.people'),
+      });
+      await expect(people.getByRole('link')).toHaveText([
+        t('nav.trainees'),
+        t('nav.renewals'),
+      ]);
+      await people.getByRole('link', { name: t('nav.renewals') }).click();
       await expect(page).toHaveURL(/\/renewals$/);
       await expect(
         page.getByRole('heading', { level: 1, name: t('nav.renewals') }),
@@ -96,8 +112,9 @@ test.describe('J14 renewals', () => {
       await expect(
         table(page, 'renewals.time.activeTitle').getByRole('row').nth(1),
       ).toContainText(t('renewals.values.daysLeft', { count: 10 }));
-      // Switching tabs is local: the overview was loaded once.
-      expect(api.calls('GET', '/api/subscription-renewals')).toHaveLength(1);
+      // Switching tabs is local: the overview was loaded once by the page (and once before, by the
+      // dashboard for its count).
+      expect(api.calls('GET', '/api/subscription-renewals')).toHaveLength(2);
 
       // Each name opens the trainee's details page.
       await expect(
@@ -107,7 +124,7 @@ test.describe('J14 renewals', () => {
   );
 
   test(
-    'on a phone, Renewals is the first page in the More sheet',
+    'on a phone, Renewals is in the More sheet, under People',
     { tag: '@mobile' },
     async ({ page, api, signInAs }) => {
       await signInAs('ADMIN');
@@ -118,12 +135,12 @@ test.describe('J14 renewals', () => {
       await mainNav(page)
         .getByRole('button', { name: t('nav.more') })
         .click();
-      const sheetLinks = page
+      const people = page
         .getByRole('dialog', { name: t('nav.more') })
         .getByRole('navigation', { name: t('nav.morePages') })
-        .getByRole('link');
-      await expect(sheetLinks.first()).toHaveAccessibleName(t('nav.renewals'));
-      await sheetLinks.first().click();
+        .getByRole('list', { name: t('nav.groups.people') });
+      await expect(people.getByRole('link')).toHaveText([t('nav.renewals')]);
+      await people.getByRole('link', { name: t('nav.renewals') }).click();
       await expect(page).toHaveURL(/\/renewals$/);
 
       const usedUp = page.getByRole('list', {
@@ -135,6 +152,58 @@ test.describe('J14 renewals', () => {
       await expect(usedUp).toContainText(
         t('renewals.values.unpaidChip', { count: 3 }),
       );
+    },
+  );
+
+  test(
+    'shows the attendance reports that moved from the dashboard',
+    { tag: ['@desktop', '@mobile'] },
+    async ({ page, api, signInAs }) => {
+      await signInAs('TRAINER');
+      api.on('GET', '/api/subscription-renewals', { body: RENEWALS });
+      mockAttendanceReports(api);
+
+      await page.goto('/renewals');
+      const views = page.getByRole('navigation', {
+        name: t('renewals.views.label'),
+      });
+      await views
+        .getByRole('link', { name: t('renewals.views.inactive') })
+        .click();
+      await expect(page).toHaveURL(/\/renewals\?view=inactive$/);
+      await expect(
+        page.getByRole('heading', {
+          level: 2,
+          name: t('renewals.reports.inactiveTitle'),
+        }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('link', { name: 'Ivan Petrov (Vanko)' }),
+      ).toBeVisible();
+      await expect
+        .poll(
+          () =>
+            api.last('GET', '/api/attendance/reports/inactive-trainees')?.query,
+        )
+        .toEqual({ skipDays: '7' });
+
+      await page
+        .getByLabel(t('renewals.reports.inactiveFor'))
+        .selectOption({ label: t('renewals.reports.lastDays', { count: 30 }) });
+      await expect
+        .poll(
+          () =>
+            api.last('GET', '/api/attendance/reports/inactive-trainees')?.query,
+        )
+        .toEqual({ skipDays: '30' });
+
+      await views
+        .getByRole('link', { name: t('renewals.views.without') })
+        .click();
+      await expect(page).toHaveURL(/\/renewals\?view=without$/);
+      await expect(
+        page.getByText(t('renewals.reports.noWithout')),
+      ).toBeVisible();
     },
   );
 });

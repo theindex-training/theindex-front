@@ -61,12 +61,11 @@ export const routes: Routes = [
         redirectTo: 'home',
       },
       {
+        // Every role's dashboard: staff get theirs, trainees theirs (once "My profile").
         path: 'home',
-        title: 'nav.dashboard',
+        title: 'nav.home',
         loadComponent: () =>
           import('./pages/home/home.component').then((m) => m.HomeComponent),
-        canActivate: [roleGuard],
-        data: { roles: ['ADMIN', 'TRAINER'] },
       },
       {
         path: 'renewals',
@@ -80,14 +79,10 @@ export const routes: Routes = [
       },
 
       {
+        // The trainees' start page until it became their dashboard; kept for bookmarks.
         path: 'my-profile',
-        title: 'traineeDashboard.title',
-        loadComponent: () =>
-          import('./pages/trainee-dashboard/trainee-dashboard.component').then(
-            (m) => m.TraineeDashboardComponent,
-          ),
-        canActivate: [roleGuard],
-        data: { roles: ['TRAINEE'] },
+        pathMatch: 'full',
+        redirectTo: 'home',
       },
       {
         path: 'schedule',

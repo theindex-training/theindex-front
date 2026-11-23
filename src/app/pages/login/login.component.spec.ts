@@ -106,7 +106,7 @@ describe('LoginComponent', () => {
 
   it.each([
     ['TRAINER', '/home'],
-    ['TRAINEE', '/my-profile'],
+    ['TRAINEE', '/home'],
   ])(
     'sends a set-up %s to %s without asking about the password',
     async (role, url) => {
@@ -216,7 +216,7 @@ describe('LoginComponent', () => {
       await openWith('//evil.example/home');
       await logInWith({ sub: 'account-1', role: 'TRAINEE' });
 
-      expect(router.url).toBe('/my-profile');
+      expect(router.url).toBe('/home');
     });
 
     it('does not pass the page on to Create an account', async () => {
