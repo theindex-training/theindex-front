@@ -129,10 +129,38 @@
       </section>
     </div>
 
-    <section class="page-stack" aria-labelledby="transactions-title">
-      <h2 class="panel__title" id="transactions-title">
-        {{ 'cashRegister.transactions' | transloco }}
-      </h2>
+    <section
+      class="page-stack"
+      aria-labelledby="transactions-title"
+      [attr.aria-busy]="updating || null"
+    >
+      <div class="section-header" #listTop>
+        <h2 class="panel__title" id="transactions-title">
+          {{ 'cashRegister.transactions' | transloco }}
+        </h2>
+        @if (shownRange; as range) {
+          <p
+            class="list-toolbar__count"
+            data-testid="list-count"
+            aria-live="polite"
+          >
+            {{ range }}
+          </p>
+        }
+      </div>
+
+      @if (pageErrorMessage) {
+        <div class="notice notice--danger page-error">
+          <span role="alert">{{ pageErrorMessage | uiMessage }}</span>
+          <button
+            class="btn btn--secondary"
+            type="button"
+            (click)="loadState()"
+          >
+            {{ 'common.tryAgain' | transloco }}
+          </button>
+        </div>
+      }
 
       @if (!transactions.length) {
         <app-empty-state
@@ -247,6 +275,15 @@
             </li>
           }
         </ul>
+
+        <app-pagination
+          [label]="'cashRegister.transactionsPages' | transloco"
+          [total]="total"
+          [page]="page"
+          [pageSize]="pageSize"
+          (pageChange)="changePage($event)"
+          (pageSizeChange)="changePageSize($event)"
+        />
       }
     </section>
   }

@@ -1175,7 +1175,10 @@
     "settlementPeriod": "Settlement period: {start} → {end}",
     "settlementTransaction": "Settlement transaction",
     "subscriptionPurchase": "Subscription purchase",
-    "unknownTrainee": "Unknown trainee"
+    "unknownTrainee": "Unknown trainee",
+    "showingRange": "{from}–{to} of {total, plural, one {{totalText} transaction} other {{totalText} transactions}}",
+    "transactionsPages": "Transactions pages",
+    "loadPageError": "Unable to load this page of transactions right now."
   },
   "home": {
     "subtitle": "Welcome back! Jump straight to what you need.",

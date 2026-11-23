@@ -3,8 +3,9 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { TestBed } from '@angular/core/testing';
+import { Router, provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import en from '../../../../public/i18n/en.json';
 import { PageDriver, apiError, driver } from '../../../testing/dom';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
@@ -16,6 +17,8 @@ import { CashRegisterComponent } from './cash-register.component';
 
 const copy = en.cashRegister;
 const STATE_URL = '/api/cash-register';
+/** The first page of transactions, as the page asks for it by default. */
+const FIRST_PAGE = `${STATE_URL}?offset=0&limit=50`;
 const MANUAL_URL = '/api/cash-register/transactions/manual';
 
 function transaction(
@@ -35,47 +38,87 @@ function transaction(
   };
 }
 
+/** An answer of `GET /api/cash-register`: the balance and a page of transactions. */
+function state(
+  balanceCents: number,
+  transactions: CashRegisterTransaction[],
+  total = transactions.length,
+): CashRegisterState {
+  return { balanceCents, total, limit: 50, offset: 0, transactions };
+}
+
+/** `count` manual transactions, numbered from `from` (their ids and notes say which row they are). */
+function transactionRows(from: number, count: number) {
+  return Array.from({ length: count }, (_, i) =>
+    transaction({ id: `t${from + i}`, notes: `row ${from + i}` }),
+  );
+}
+
 describe('CashRegisterComponent', () => {
-  let fixture: ComponentFixture<CashRegisterComponent>;
+  let harness: RouterTestingHarness;
   let component: CashRegisterComponent;
   let http: HttpTestingController;
   let page: PageDriver;
   let money: (cents: number) => string;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
-      imports: [CashRegisterComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideRouter([]),
+        provideRouter([
+          { path: 'cash-register', component: CashRegisterComponent },
+          { path: '**', children: [] },
+        ]),
       ],
     });
     http = TestBed.inject(HttpTestingController);
     const format = TestBed.inject(LocaleFormatService);
     money = (cents) => format.money(cents);
+    harness = await RouterTestingHarness.create();
   });
 
-  afterEach(() => http.verify());
+  afterEach(() => {
+    http.verify();
+    vi.restoreAllMocks();
+  });
 
-  async function render(
-    state: CashRegisterState = {
-      balanceCents: 12_345,
-      transactions: [transaction()],
-    },
-  ) {
-    fixture = TestBed.createComponent(CashRegisterComponent);
-    component = fixture.componentInstance;
+  /** Opens the page at `url` without answering its request. */
+  async function open(url = '/cash-register') {
+    component = await harness.navigateByUrl(url, CashRegisterComponent);
     page = driver(
-      () => fixture.nativeElement,
-      () => fixture.whenStable(),
+      () => harness.routeNativeElement!,
+      () => harness.fixture.whenStable(),
     );
     await page.settle();
-    const req = http.expectOne(STATE_URL);
+  }
+
+  async function render(
+    answer: CashRegisterState = state(12_345, [transaction()]),
+    options: { url?: string; request?: string } = {},
+  ) {
+    await open(options.url);
+    const req = http.expectOne(options.request ?? FIRST_PAGE);
     expect(req.request.method).toBe('GET');
-    req.flush(state);
+    req.flush(answer);
     await page.settle();
   }
+
+  const url = () => TestBed.inject(Router).url;
+  /** The button with this accessible name, e.g. "Next page". */
+  const button = (name: string) =>
+    page.query<HTMLButtonElement>(`button[aria-label="${name}"]`);
+  const count = () =>
+    page.query('[data-testid="list-count"]')?.textContent?.trim();
+  /** The notes of the rows in the table, which say which row they are. */
+  const tableRows = () =>
+    page
+      .queryAll('.data-table tbody td:last-child')
+      .map((cell) => cell.textContent?.trim());
+  const flushPage = (request: string, answer: CashRegisterState) => {
+    http.expectOne(request).flush(answer);
+    return page.settle();
+  };
 
   async function addTransaction(
     direction: 'IN' | 'OUT',
@@ -105,21 +148,16 @@ describe('CashRegisterComponent', () => {
     });
 
     it('shows a negative balance', async () => {
-      await render({ balanceCents: -2_050, transactions: [] });
+      await render(state(-2_050, []));
 
       expect(page.text()).toContain(money(-2_050));
       expect(page.text()).toContain(copy.emptyTitle);
     });
 
     it('shows the error state and reloads on "Try again"', async () => {
-      fixture = TestBed.createComponent(CashRegisterComponent);
-      page = driver(
-        () => fixture.nativeElement,
-        () => fixture.whenStable(),
-      );
-      await page.settle();
+      await open();
       const error = apiError(undefined, 500);
-      http.expectOne(STATE_URL).flush(error.body, error.options);
+      http.expectOne(FIRST_PAGE).flush(error.body, error.options);
       await page.settle();
 
       expect(page.text()).toContain(copy.loadError);
@@ -130,7 +168,7 @@ describe('CashRegisterComponent', () => {
         .find((button) => button.textContent?.includes(en.common.tryAgain))!;
       retry.click();
       await page.settle();
-      http.expectOne(STATE_URL).flush({ balanceCents: 0, transactions: [] });
+      http.expectOne(FIRST_PAGE).flush(state(0, []));
       await page.settle();
 
       expect(page.text()).not.toContain(copy.loadError);
@@ -183,9 +221,7 @@ describe('CashRegisterComponent', () => {
       expectManualPost().flush(transaction({ id: 't2', type: 'MANUAL_OUT' }));
       await page.settle();
 
-      http
-        .expectOne(STATE_URL)
-        .flush({ balanceCents: 11_111, transactions: [] });
+      http.expectOne(FIRST_PAGE).flush(state(11_111, []));
       await page.settle();
 
       expect(page.text()).toContain(copy.created);
@@ -227,6 +263,181 @@ describe('CashRegisterComponent', () => {
       await page.settle();
 
       expect(page.alert()).toBe(copy.createError);
+    });
+  });
+
+  describe('paging', () => {
+    it('pages through the transactions, 50 at a time by default', async () => {
+      await render(state(12_345, transactionRows(1, 50), 734));
+
+      expect(count()).toBe('1–50 of 734 transactions');
+      expect(tableRows()).toHaveLength(50);
+      expect(button('Previous page')?.disabled).toBe(true);
+      expect(button('Page 1')?.getAttribute('aria-current')).toBe('page');
+      expect(page.query('nav[aria-label="Transactions pages"]')).not.toBeNull();
+
+      await page.click('button[aria-label="Next page"]');
+      expect(url()).toBe('/cash-register?page=2');
+      await flushPage(
+        `${STATE_URL}?offset=50&limit=50`,
+        state(12_345, transactionRows(51, 50), 734),
+      );
+      expect(count()).toBe('51–100 of 734 transactions');
+      expect(tableRows()[0]).toBe('row 51');
+      expect(button('Page 2')?.getAttribute('aria-current')).toBe('page');
+
+      await page.click('button[aria-label="Last page"]');
+      expect(url()).toBe('/cash-register?page=15');
+      await flushPage(
+        `${STATE_URL}?offset=700&limit=50`,
+        state(12_345, transactionRows(701, 34), 734),
+      );
+      expect(count()).toBe('701–734 of 734 transactions');
+      expect(tableRows()).toHaveLength(34);
+      expect(button('Next page')?.disabled).toBe(true);
+
+      await page.click('button[aria-label="First page"]');
+      expect(url()).toBe('/cash-register');
+      await flushPage(FIRST_PAGE, state(12_345, transactionRows(1, 50), 734));
+    });
+
+    it('shows the balance of each answer', async () => {
+      await render(state(12_345, transactionRows(1, 50), 60));
+
+      await page.click('button[aria-label="Next page"]');
+      await flushPage(
+        `${STATE_URL}?offset=50&limit=50`,
+        state(9_999, transactionRows(51, 10), 60),
+      );
+
+      expect(
+        page.query('[data-testid="cash-register-balance"]')?.textContent,
+      ).toBe(money(9_999));
+    });
+
+    it('shows as many rows a page as asked, from the first page again', async () => {
+      await render(state(0, transactionRows(101, 50), 734), {
+        url: '/cash-register?page=3',
+        request: `${STATE_URL}?offset=100&limit=50`,
+      });
+
+      await page.select('nav[aria-label="Transactions pages"] select', '200');
+      expect(url()).toBe('/cash-register?size=200');
+      await flushPage(
+        `${STATE_URL}?offset=0&limit=200`,
+        state(0, transactionRows(1, 200), 734),
+      );
+      expect(count()).toBe('1–200 of 734 transactions');
+      expect(tableRows()).toHaveLength(200);
+    });
+
+    it('opens on the page and size in the address, so going back returns to the same rows', async () => {
+      await render(state(0, transactionRows(51, 25), 80), {
+        url: '/cash-register?page=3&size=25',
+        request: `${STATE_URL}?offset=50&limit=25`,
+      });
+
+      expect(count()).toBe('51–75 of 80 transactions');
+      expect(button('Page 3')?.getAttribute('aria-current')).toBe('page');
+
+      // A page that isn't a number, or a size not offered, falls back to the defaults.
+      await harness.navigateByUrl('/cash-register?page=x&size=37');
+      await flushPage(FIRST_PAGE, state(0, [transaction()]));
+    });
+
+    it('goes to the last page when the address asks for one past the end', async () => {
+      await render(state(0, [], 734), {
+        url: '/cash-register?page=40',
+        request: `${STATE_URL}?offset=1950&limit=50`,
+      });
+
+      expect(url()).toBe('/cash-register?page=15');
+      await flushPage(
+        `${STATE_URL}?offset=700&limit=50`,
+        state(0, transactionRows(701, 34), 734),
+      );
+      expect(tableRows()).toHaveLength(34);
+      expect(page.text()).not.toContain(copy.emptyTitle);
+    });
+
+    it('has no page controls while every transaction fits on the smallest page', async () => {
+      await render(state(0, transactionRows(1, 25)));
+
+      expect(page.query('app-pagination nav')).toBeNull();
+      expect(count()).toBe('1–25 of 25 transactions');
+    });
+
+    it('has no count while there are no transactions', async () => {
+      await render(state(0, []));
+
+      expect(count()).toBeUndefined();
+      expect(page.text()).toContain(copy.emptyTitle);
+    });
+
+    it('keeps the shown rows while the next page loads, then replaces them', async () => {
+      await render(state(0, transactionRows(1, 50), 734));
+      const section = () =>
+        page.query('[aria-labelledby="transactions-title"]');
+
+      await page.click('button[aria-label="Next page"]');
+      expect(tableRows()[1]).toBe('row 2');
+      expect(section()?.getAttribute('aria-busy')).toBe('true');
+      expect(page.query('app-skeleton-list')).toBeNull();
+
+      await flushPage(
+        `${STATE_URL}?offset=50&limit=50`,
+        state(0, transactionRows(51, 50), 734),
+      );
+      expect(tableRows()[1]).toBe('row 52');
+      expect(section()?.hasAttribute('aria-busy')).toBe(false);
+    });
+
+    it('keeps the rows when a page fails, and asks for it again on "Try again"', async () => {
+      await render(state(0, transactionRows(1, 50), 734));
+
+      await page.click('button[aria-label="Next page"]');
+      const error = apiError(undefined, 500);
+      http
+        .expectOne(`${STATE_URL}?offset=50&limit=50`)
+        .flush(error.body, error.options);
+      await page.settle();
+
+      expect(page.alert()).toBe(copy.loadPageError);
+      expect(tableRows()[0]).toBe('row 1');
+      expect(page.text()).not.toContain(copy.loadError);
+
+      const retry = page
+        .queryAll('button')
+        .find((b) => b.textContent?.includes(en.common.tryAgain))!;
+      retry.click();
+      await flushPage(
+        `${STATE_URL}?offset=50&limit=50`,
+        state(0, transactionRows(51, 50), 734),
+      );
+      expect(page.query('[role="alert"]')).toBeNull();
+      expect(tableRows()[0]).toBe('row 51');
+    });
+
+    it('shows the first page, with the new transaction, after saving on a later one', async () => {
+      await render(state(5_000, transactionRows(101, 50), 734), {
+        url: '/cash-register?page=3',
+        request: `${STATE_URL}?offset=100&limit=50`,
+      });
+
+      await addTransaction('IN', '10');
+      expectManualPost().flush(transaction({ id: 'new' }));
+      await page.settle();
+
+      expect(url()).toBe('/cash-register');
+      await flushPage(
+        FIRST_PAGE,
+        state(6_000, [transaction({ id: 'new', notes: 'the new one' })], 735),
+      );
+      expect(tableRows()[0]).toBe('the new one');
+      expect(page.text()).toContain(copy.created);
+      expect(
+        page.query('[data-testid="cash-register-balance"]')?.textContent,
+      ).toBe(money(6_000));
     });
   });
 

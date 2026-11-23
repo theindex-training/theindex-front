@@ -20,6 +20,18 @@ const transaction = (
   sourceDetails: null,
 });
 
+/** A `GET /api/cash-register` answer: the balance and the first page of transactions. */
+const register = (
+  balanceCents: number,
+  transactions: ReturnType<typeof transaction>[],
+) => ({
+  balanceCents,
+  total: transactions.length,
+  limit: 50,
+  offset: 0,
+  transactions,
+});
+
 test.describe('J7 cash register', { tag: ['@desktop', '@mobile'] }, () => {
   const amount = (page: Page) => page.getByLabel(t('cashRegister.amount'));
   const notes = (page: Page) => page.getByLabel(t('cashRegister.notes'));
@@ -36,10 +48,9 @@ test.describe('J7 cash register', { tag: ['@desktop', '@mobile'] }, () => {
     await signInAs('ADMIN');
     let balanceCents = 12_345;
     api.on('GET', '/api/cash-register', () => ({
-      body: {
-        balanceCents,
-        transactions: [transaction('t1', 'MANUAL_IN', 12_345, 12_345)],
-      },
+      body: register(balanceCents, [
+        transaction('t1', 'MANUAL_IN', 12_345, 12_345),
+      ]),
     }));
     api.on('POST', '/api/cash-register/transactions/manual', (request) => {
       const { amountCents } = request.body as { amountCents: number };
@@ -54,6 +65,10 @@ test.describe('J7 cash register', { tag: ['@desktop', '@mobile'] }, () => {
     await expect(page.getByTestId('cash-register-balance')).toHaveText(
       '€123.45',
     );
+    expect(api.last('GET', '/api/cash-register')?.query).toEqual({
+      offset: '0',
+      limit: '50',
+    });
 
     for (const invalid of ['0', '12.345']) {
       await amount(page).fill(invalid);
@@ -96,7 +111,7 @@ test.describe('J7 cash register', { tag: ['@desktop', '@mobile'] }, () => {
   }) => {
     await signInAs('ADMIN');
     api.on('GET', '/api/cash-register', {
-      body: { balanceCents: 0, transactions: [] },
+      body: register(0, []),
     });
     api.on('POST', '/api/cash-register/transactions/manual', {
       status: 201,
@@ -121,7 +136,7 @@ test.describe('J7 cash register', { tag: ['@desktop', '@mobile'] }, () => {
   test('shows a negative balance', async ({ page, api, signInAs }) => {
     await signInAs('ADMIN');
     api.on('GET', '/api/cash-register', {
-      body: { balanceCents: -2050, transactions: [] },
+      body: register(-2050, []),
     });
 
     await page.goto('/cash-register');
@@ -129,5 +144,84 @@ test.describe('J7 cash register', { tag: ['@desktop', '@mobile'] }, () => {
     await expect(page.getByTestId('cash-register-balance')).toHaveText(
       '-€20.50',
     );
+  });
+
+  test('a long history is paged: the API sends each page, and the page stays in the address', async ({
+    page,
+    api,
+    signInAs,
+  }) => {
+    await signInAs('ADMIN');
+    const total = 4812;
+    api.on('GET', '/api/cash-register', (request) => {
+      const offset = Number(request.query['offset']);
+      const limit = Number(request.query['limit']);
+      return {
+        body: {
+          balanceCents: 500_000,
+          total,
+          limit,
+          offset,
+          transactions: Array.from(
+            { length: Math.min(limit, total - offset) },
+            (_, i) =>
+              transaction(`t${offset + i}`, 'MANUAL_IN', 100, 500_000 - i),
+          ),
+        },
+      };
+    });
+    api.on('POST', '/api/cash-register/transactions/manual', {
+      status: 201,
+      body: transaction('t-new', 'MANUAL_IN', 2000, 502_000),
+    });
+
+    await page.goto('/cash-register');
+    const pages = page.getByRole('navigation', {
+      name: t('cashRegister.transactionsPages'),
+    });
+    await expect(page.getByTestId('list-count')).toHaveText(
+      '1–50 of 4,812 transactions',
+    );
+
+    await pages
+      .getByRole('button', { name: t('common.pagination.next') })
+      .click();
+    await expect(page).toHaveURL(/\/cash-register\?page=2$/);
+    await expect(page.getByTestId('list-count')).toHaveText(
+      '51–100 of 4,812 transactions',
+    );
+    expect(api.last('GET', '/api/cash-register')?.query).toEqual({
+      offset: '50',
+      limit: '50',
+    });
+
+    await pages.getByLabel(t('common.pagination.perPage')).selectOption('100');
+    await expect(page).toHaveURL(/\/cash-register\?size=100$/);
+    // Phones show "2 / 49" instead of the numbered pages: step with Next.
+    const next = pages.getByRole('button', {
+      name: t('common.pagination.next'),
+    });
+    await next.click();
+    await expect(page).toHaveURL(/\?page=2&size=100$/);
+    await next.click();
+    await expect(page).toHaveURL(/\?page=3&size=100$/);
+
+    // A reload (or going back from a trainee) shows the same page.
+    await page.reload();
+    await expect(page.getByTestId('list-count')).toHaveText(
+      '201–300 of 4,812 transactions',
+    );
+
+    // A new transaction is the newest: the page goes back to the first page.
+    await amount(page).fill('20');
+    await add(page).click();
+    await expect(page).toHaveURL(/\/cash-register\?size=100$/);
+    await expect(page.getByTestId('list-count')).toHaveText(
+      '1–100 of 4,812 transactions',
+    );
+    expect(api.last('GET', '/api/cash-register')?.query).toEqual({
+      offset: '0',
+      limit: '100',
+    });
   });
 });

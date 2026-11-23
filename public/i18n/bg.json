@@ -1175,7 +1175,10 @@
     "settlementPeriod": "Разчет за периода {start} → {end}",
     "settlementTransaction": "Плащане по разчет",
     "subscriptionPurchase": "Покупка на абонамент",
-    "unknownTrainee": "Неизвестен трениращ"
+    "unknownTrainee": "Неизвестен трениращ",
+    "showingRange": "{from}–{to} от {total, plural, one {{totalText} движение} other {{totalText} движения}}",
+    "transactionsPages": "Страници с движения",
+    "loadPageError": "В момента тази страница с движения не може да се зареди."
   },
   "home": {
     "subtitle": "Добре дошли отново! Изберете откъде да започнете.",
