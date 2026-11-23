@@ -18,6 +18,7 @@ import { IconComponent } from '../icon/icon.component';
 import { SkeletonListComponent } from '../skeleton-list/skeleton-list.component';
 import { Plan } from '../../services/plans.service';
 import { Subscription } from '../../services/subscriptions.service';
+import { timePassLastDay } from '../../utils/time-pass.util';
 
 @Component({
   selector: 'app-trainee-subscriptions-table',
@@ -57,7 +58,7 @@ export class TraineeSubscriptionsTableComponent {
 
   formatEndsOrCredits(subscription: Subscription): string {
     if (subscription.type === 'TIME') {
-      return this.format.date(subscription.endsAt);
+      return this.format.date(timePassLastDay(subscription.endsAt));
     }
 
     const initial = subscription.initialCredits ?? 0;

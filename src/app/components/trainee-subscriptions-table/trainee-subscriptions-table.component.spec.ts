@@ -103,6 +103,18 @@ describe('TraineeSubscriptionsTableComponent', () => {
     ).toBe(format.date('2026-11-30'));
   });
 
+  it('shows a time-based plan ending at Sofia midnight by its last day, the day before', async () => {
+    await render({ subscriptions: [] });
+    const format = TestBed.inject(LocaleFormatService);
+
+    // A month pass from Nov 23 ends Dec 23 00:00 Sofia: its last day is Dec 22.
+    expect(
+      component.formatEndsOrCredits(
+        subscription({ type: 'TIME', endsAt: '2026-12-22T22:00:00.000Z' }),
+      ),
+    ).toBe(format.date('2026-12-22T12:00:00Z'));
+  });
+
   it.each([
     ['ACTIVE', 'success'],
     ['active', 'success'],

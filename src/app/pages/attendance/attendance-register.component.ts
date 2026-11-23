@@ -52,6 +52,7 @@ import { LanguageService } from '../../i18n/language.service';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
+import { timePassLastDay } from '../../utils/time-pass.util';
 
 /**
  * Register attendance in two steps: pick the session and who trained, then check a summary
@@ -241,7 +242,7 @@ export class AttendanceRegisterComponent implements OnInit {
     if (subscription.type === 'TIME') {
       return `${subscription.planTitle} · ${this.i18n.t(
         'attendance.register.summary.endsOn',
-        { date: this.format.date(subscription.endsAt) },
+        { date: this.format.date(timePassLastDay(subscription.endsAt)) },
       )}`;
     }
     return subscription.planTitle;
