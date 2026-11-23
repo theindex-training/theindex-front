@@ -235,6 +235,20 @@ describe('TraineeDashboardComponent: subscription and the next trainings', () =>
       expect(localStorage.getItem('scheduleGym')).toBe('gym-c');
     });
 
+    it("links the trainees' Schedule next to the trainings, with one gym too", async () => {
+      await render([], [LOZENETS], [LOZENETS_TODAY]);
+
+      const links = page.queryAll<HTMLAnchorElement>(
+        '[data-testid="dashboard-full-schedule"]',
+      );
+      expect(links.map((a) => a.getAttribute('href'))).toEqual(['/schedule']);
+      expect(links[0].textContent.trim()).toBe(copy.upcoming.fullSchedule);
+      // The heading row of the trainings, not under the list.
+      expect(
+        links[0].closest('.section-header')?.querySelector('#upcoming-title'),
+      ).not.toBeNull();
+    });
+
     it('says when a day has no published trainings', async () => {
       await render([], [LOZENETS], [LOZENETS_TODAY]);
 

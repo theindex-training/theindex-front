@@ -66,15 +66,23 @@
             {{ 'traineeDashboard.upcoming.subtitle' | transloco }}
           </p>
         </div>
-        @if (gyms.length > 1) {
-          <app-segmented-control
-            [label]="'traineeSchedule.gym' | transloco"
-            [options]="gymOptions"
-            [translateLabels]="false"
-            [value]="gymId"
-            (valueChange)="selectGym($event)"
-          />
-        }
+        <div class="trainings-header__actions">
+          @if (gyms.length > 1) {
+            <app-segmented-control
+              [label]="'traineeSchedule.gym' | transloco"
+              [options]="gymOptions"
+              [translateLabels]="false"
+              [value]="gymId"
+              (valueChange)="selectGym($event)"
+            />
+          }
+          <a
+            class="btn btn--secondary"
+            routerLink="/schedule"
+            data-testid="dashboard-full-schedule"
+            >{{ 'traineeDashboard.upcoming.fullSchedule' | transloco }}</a
+          >
+        </div>
       </div>
 
       @if (upcomingLoading) {
@@ -227,11 +235,6 @@
             }
           </section>
         }
-        <p>
-          <a class="btn btn--secondary" routerLink="/schedule">{{
-            'traineeDashboard.upcoming.fullSchedule' | transloco
-          }}</a>
-        </p>
       }
     </section>
 

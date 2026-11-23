@@ -6,7 +6,8 @@ import { t } from '../support/i18n';
  * J18: who booked a training. A trainer opens today's training from the Schedule tab, sees who
  * booked it (each a link to the trainee) with what they would have left after it, then opens
  * Register attendance from it: the training and the booked trainees are filled in, and nothing
- * is saved before the usual review.
+ * is saved before the usual review. Once attendance is saved, the page opens on who came, walk-ins
+ * included, and marks who booked but wasn't registered.
  */
 test.describe('J18 training bookings', () => {
   /** Friday 13 Nov 2026, 17:00 in Sofia: today's training starts at 18:00. */
@@ -75,6 +76,8 @@ test.describe('J18 training bookings', () => {
       booked('t-dimo', 'Dimo Petrov', 'LAST', { remainingCredits: 0 }),
       booked('t-ana', 'Ana Koleva', 'OK', { remainingCredits: 7 }),
     ],
+    // Nobody's attendance is saved yet.
+    attendees: [],
   };
 
   test(
@@ -193,6 +196,97 @@ test.describe('J18 training bookings', () => {
           trainedTime: '18:00',
         });
       expect(api.calls('POST', '/api/attendance/batch')).toHaveLength(0);
+    },
+  );
+
+  test(
+    'a trainer sees who came after the training, walk-ins included, then who booked and was not registered',
+    { tag: ['@desktop', '@mobile'] },
+    async ({ page, api, signInAs }) => {
+      await page.clock.setFixedTime('2026-11-13T19:30:00+02:00');
+      await signInAs('TRAINER', { trainerProfileId: 'tr-velcho' });
+      const [cveta, dimo, ana] = training.trainees;
+      api.on('GET', '/api/schedules/slots/s-fri', {
+        body: {
+          ...training,
+          trainees: [
+            cveta,
+            dimo,
+            {
+              ...ana,
+              attendanceSaved: true,
+              subscription: { ...ana.subscription, remainingCredits: 6 },
+            },
+          ],
+          attendees: [
+            {
+              traineeId: 't-ana',
+              name: 'Ana Koleva',
+              nickname: null,
+              photoUrl: null,
+              isActive: true,
+              booked: true,
+              paymentStatus: 'PAID',
+              level: 'OK',
+              subscription: { ...ana.subscription, remainingCredits: 6 },
+            },
+            {
+              traineeId: 't-boris',
+              name: 'Boris Ivanov',
+              nickname: null,
+              photoUrl: null,
+              isActive: true,
+              booked: false,
+              paymentStatus: 'UNPAID',
+              level: 'UNPAID',
+              subscription: null,
+            },
+          ],
+        },
+      });
+
+      await page.goto('/workouts/schedule/s-fri');
+
+      const tabs = page.getByRole('group', {
+        name: t('schedules.training.tabsLabel'),
+      });
+      const attendedTab = t('schedules.training.tabCount', {
+        label: t('schedules.training.tabAttended'),
+        count: 2,
+      });
+      const bookedTab = t('schedules.training.tabCount', {
+        label: t('schedules.training.tabBooked'),
+        count: 3,
+      });
+      await expect(
+        tabs.getByRole('radio', { name: attendedTab }),
+      ).toBeChecked();
+      const attended = page.getByRole('list', {
+        name: t('schedules.training.attendedLabel'),
+      });
+      await expect(attended.getByRole('listitem')).toHaveCount(2);
+      await expect(
+        attended.getByRole('link', { name: /Boris Ivanov/ }),
+      ).toContainText(t('schedules.training.didntBook'));
+      await expect(
+        attended.getByRole('link', { name: /Ana Koleva/ }),
+      ).toContainText(
+        t('attendance.register.summary.creditsLeft', { count: 6 }),
+      );
+
+      await tabs.getByText(bookedTab).click();
+      await expect(tabs.getByRole('radio', { name: bookedTab })).toBeChecked();
+      await expect(page).toHaveURL(/\/workouts\/schedule\/s-fri\?tab=booked$/);
+      const booked = page.getByRole('list', {
+        name: t('schedules.training.traineesLabel'),
+      });
+      await expect(booked.getByRole('listitem')).toHaveCount(3);
+      await expect(
+        booked.getByRole('link', { name: /Dimo Petrov/ }),
+      ).toContainText(t('schedules.training.notRegistered'));
+      await expect(
+        booked.getByRole('link', { name: /Ana Koleva/ }),
+      ).not.toContainText(t('schedules.training.notRegistered'));
     },
   );
 

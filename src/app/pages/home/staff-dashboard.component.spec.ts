@@ -171,6 +171,21 @@ describe('StaffDashboardComponent', () => {
     expect(localStorage.getItem('dashboardTrainings')).toBe('all');
   });
 
+  it("links the staff's Schedule next to the trainings, already while they load", async () => {
+    await render('TRAINER', 'trainer-v', 'pending');
+
+    const link = page.query<HTMLAnchorElement>(
+      '[data-testid="dashboard-full-schedule"]',
+    )!;
+    expect(link.textContent.trim()).toBe(copy.trainings.fullSchedule);
+    expect(link.getAttribute('href')).toBe('/workouts/schedule');
+
+    await answerTrainings([]);
+    expect(
+      page.query('[data-testid="dashboard-full-schedule"]'),
+    ).not.toBeNull();
+  });
+
   it('says when the trainer has no trainings on a day', async () => {
     await render('TRAINER', 'trainer-v', [ASENS]);
 

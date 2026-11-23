@@ -1247,7 +1247,8 @@
       "details": "Details",
       "detailsFor": "Details of the training on {training}",
       "register": "Register attendance",
-      "registerFor": "Register attendance for the training on {training}"
+      "registerFor": "Register attendance for the training on {training}",
+      "fullSchedule": "Full schedule"
     },
     "shortcuts": {
       "label": "Shortcuts",
@@ -1833,7 +1834,6 @@
       "bookings": "Bookings",
       "registerHint": "Opens Register attendance with this training filled in and the booked trainees ticked. Nothing is saved until you review it.",
       "registerFromDay": "Attendance can be registered from the day of the training.",
-      "bookedTitle": "Booked trainees",
       "traineesLabel": "Trainees who booked",
       "projectionNote": "Projected: what each trainee would have left if they come and their attendance for this training is saved. Once it is saved, the row says so and shows what is left now.",
       "ifTheyCome": "If they come",
@@ -1844,7 +1844,18 @@
       "noBookingsTitle": "No bookings yet",
       "noBookingsMessage": "Trainees who book this training will show here.",
       "noWorkoutTitle": "No workout for this training",
-      "noWorkoutMessage": "The day's workout is chosen when editing the training on the Schedule."
+      "noWorkoutMessage": "The day's workout is chosen when editing the training on the Schedule.",
+      "traineesTitle": "Trainees",
+      "tabsLabel": "Which trainees",
+      "tabAttended": "Attended",
+      "tabBooked": "Booked",
+      "tabCount": "{label} · {count}",
+      "attendedCount": "{count, plural, one {# attended} other {# attended}}",
+      "attendedLabel": "Trainees who attended",
+      "notRegistered": "Not registered",
+      "didntBook": "Didn't book",
+      "noAttendanceTitle": "No attendance registered yet",
+      "noAttendanceMessage": "Everyone whose attendance is registered for this training (its gym and start time) shows here, whether they booked or not."
     }
   },
   "traineeSchedule": {

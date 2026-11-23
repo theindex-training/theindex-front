@@ -11,6 +11,10 @@ import { ChipComponent, ChipTone } from '../../components/chip/chip.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { ListRowComponent } from '../../components/list-row/list-row.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import {
+  SegmentedControlComponent,
+  SegmentedOption,
+} from '../../components/segmented-control/segmented-control.component';
 import { TrainingWorkoutComponent } from '../trainee-schedule/training-workout.component';
 import { LanguageService } from '../../i18n/language.service';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
@@ -18,6 +22,7 @@ import { apiErrorMessage, UiMessage } from '../../i18n/ui-message';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
 import {
   ScheduleTraining,
+  TrainingAttendeeRow,
   TrainingBookingRow,
 } from '../../services/schedules.service';
 import { SchedulesService } from '../../services/schedules.service';
@@ -25,12 +30,18 @@ import { dayKeyToDate, localDayKey } from '../../utils/calendar.util';
 import { formatTimeWithoutSeconds } from '../../utils/time-display';
 import { timeRange } from './schedule-slot-form.component';
 
+/** The two lists of the training page: who came (attendance saved) and who booked. */
+export type TrainingTab = 'attended' | 'booked';
+
 /**
- * One training of a week for staff (`/workouts/schedule/:id`): when and where, the trainer, the
- * trainees who booked it, each a link to their page with what their subscriptions have left,
- * then its workout as trainees see it (`app-training-workout`). The figures are projected (as if they come and attendance is saved)
- * until attendance is saved for the training. From the training's day on, "Register attendance"
- * opens that page filled in with the training and the booked trainees.
+ * One training of a week for staff (`/workouts/schedule/:id`): when and where, the trainer, then
+ * two tabs of trainees, each a link to their page with what their subscriptions have left:
+ * **Attended** (attendance saved for the training, walk-ins included, with a "Didn't book" chip)
+ * and **Booked** (projected, as if they come, until their attendance is saved; "Not registered"
+ * once others' is). Attended is the default once anyone's attendance is saved, else Booked;
+ * `?tab=` keeps a choice (the entry replaced), so going back from a trainee returns to it. Then
+ * its workout as trainees see it (`app-training-workout`). From the training's day on, "Register
+ * attendance" opens that page filled in with the training and the booked trainees.
  */
 @Component({
   selector: 'app-schedule-training',
@@ -44,6 +55,7 @@ import { timeRange } from './schedule-slot-form.component';
     EmptyStateComponent,
     ListRowComponent,
     ChipComponent,
+    SegmentedControlComponent,
     TrainingWorkoutComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -58,7 +70,13 @@ export class ScheduleTrainingComponent implements OnInit {
   /** Back to the week of this training, in its gym, once it is known. */
   backLink: UrlTree | string = '/workouts/schedule';
 
+  /** The list shown; see `defaultTab`. */
+  tab: TrainingTab = 'booked';
+
   readonly range = timeRange;
+
+  private tabOptionsKey = '';
+  private tabOptionsCache: SegmentedOption<TrainingTab>[] = [];
 
   constructor(
     private readonly schedules: SchedulesService,
@@ -80,6 +98,7 @@ export class ScheduleTrainingComponent implements OnInit {
     this.schedules.training(id).subscribe({
       next: (training) => {
         this.training = training;
+        this.tab = this.tabFromUrl() ?? this.defaultTab(training);
         this.backLink = this.router.createUrlTree(['/workouts/schedule'], {
           queryParams: { gym: training.gym.id, week: training.weekStart },
         });
@@ -95,6 +114,49 @@ export class ScheduleTrainingComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
     });
+  }
+
+  /** Who came once anyone's attendance is saved for the training, else who booked. */
+  defaultTab(training: ScheduleTraining): TrainingTab {
+    return training.attendees.length ? 'attended' : 'booked';
+  }
+
+  /** "Attended · 3" / "Booked · 2", in the page's language. */
+  get tabOptions(): SegmentedOption<TrainingTab>[] {
+    const training = this.training;
+    const attended = training?.attendees.length ?? 0;
+    const booked = training?.trainees.length ?? 0;
+    const key = `${this.language.lang()}|${attended}|${booked}`;
+    if (key !== this.tabOptionsKey) {
+      this.tabOptionsKey = key;
+      this.tabOptionsCache = [
+        {
+          value: 'attended',
+          label: this.tabLabel('schedules.training.tabAttended', attended),
+        },
+        {
+          value: 'booked',
+          label: this.tabLabel('schedules.training.tabBooked', booked),
+        },
+      ];
+    }
+    return this.tabOptionsCache;
+  }
+
+  /** Shows the other list and keeps the choice in the address, replacing the entry. */
+  selectTab(tab: TrainingTab): void {
+    this.tab = tab;
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  /** Booked trainees not registered while others' attendance is saved: they may have skipped it. */
+  notRegistered(row: TrainingBookingRow): boolean {
+    return !row.attendanceSaved && !!this.training?.attendees.length;
   }
 
   dayLabel(day: string): string {
@@ -130,14 +192,33 @@ export class ScheduleTrainingComponent implements OnInit {
     });
   }
 
-  /** The second line of a row: the plan, when a period ends, and whether it is projected. */
+  /** The second line of a booked row: the plan, when a period ends, and whether it is projected. */
   note(row: TrainingBookingRow): string {
+    return [
+      ...this.subscriptionNote(row, row.attendanceSaved),
+      this.language.t(
+        row.attendanceSaved
+          ? 'schedules.training.attendanceSaved'
+          : 'schedules.training.ifTheyCome',
+      ),
+    ].join(' · ');
+  }
+
+  /** The second line of an attended row: the plan that paid, and when a period ends. */
+  attendeeNote(row: TrainingAttendeeRow): string {
+    return this.subscriptionNote(row, true).join(' · ');
+  }
+
+  private subscriptionNote(
+    row: Pick<TrainingBookingRow, 'subscription'>,
+    saved: boolean,
+  ): string[] {
     const parts: string[] = [];
     const subscription = row.subscription;
     if (!subscription) {
       parts.push(
         this.language.t(
-          row.attendanceSaved
+          saved
             ? 'schedules.training.savedUnpaid'
             : 'attendance.register.summary.noSubscription',
         ),
@@ -152,18 +233,13 @@ export class ScheduleTrainingComponent implements OnInit {
         );
       }
     }
-    parts.push(
-      this.language.t(
-        row.attendanceSaved
-          ? 'schedules.training.attendanceSaved'
-          : 'schedules.training.ifTheyCome',
-      ),
-    );
-    return parts.join(' · ');
+    return parts;
   }
 
   /** The key figure: what would be left after this training, or what is left now once saved. */
-  chip(row: TrainingBookingRow): string {
+  chip(
+    row: Pick<TrainingBookingRow, 'subscription' | 'attendanceSaved'>,
+  ): string {
     const subscription = row.subscription;
     if (!subscription) {
       return this.language.t('attendance.register.summary.unpaid');
@@ -186,7 +262,12 @@ export class ScheduleTrainingComponent implements OnInit {
       : this.language.t('schedules.training.leftAfter', { count: left });
   }
 
-  tone(row: TrainingBookingRow): ChipTone {
+  /** An attended row's key figure: what is left now. */
+  attendeeChip(row: TrainingAttendeeRow): string {
+    return this.chip({ subscription: row.subscription, attendanceSaved: true });
+  }
+
+  tone(row: Pick<TrainingBookingRow, 'level'>): ChipTone {
     if (row.level === 'UNPAID') {
       return 'danger';
     }
@@ -194,7 +275,19 @@ export class ScheduleTrainingComponent implements OnInit {
   }
 
   /** Trainees who need attention: unpaid, or at or near the end of their subscription. */
-  attentionCount(training: ScheduleTraining): number {
-    return training.trainees.filter((t) => t.level !== 'OK').length;
+  attentionCount(rows: Pick<TrainingBookingRow, 'level'>[]): number {
+    return rows.filter((t) => t.level !== 'OK').length;
+  }
+
+  private tabFromUrl(): TrainingTab | null {
+    const tab = this.route.snapshot.queryParamMap.get('tab');
+    return tab === 'attended' || tab === 'booked' ? tab : null;
+  }
+
+  private tabLabel(key: string, count: number): string {
+    return this.language.t('schedules.training.tabCount', {
+      label: this.language.t(key),
+      count: this.format.number(count),
+    });
   }
 }
