@@ -55,6 +55,7 @@ function mockTraineeData(api: import('../support/api-mock').ApiMock) {
         type: 'TIME',
         credits: null,
         durationDays: 30,
+        durationMonths: null,
         isActive: false,
       }),
     ],

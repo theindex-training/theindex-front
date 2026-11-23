@@ -54,6 +54,7 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
 import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
 import { LanguageService } from '../../i18n/language.service';
+import { timePassLastDay } from '../../utils/time-pass.util';
 
 type SettlementTab = 'paid' | 'waiting';
 
@@ -403,7 +404,7 @@ export class SettlementDetailsComponent implements OnInit {
       case 'TIME_PASS_NOT_ENDED':
         return row.availableFrom
           ? this.i18n.t('settlements.details.waitingTimePass', {
-              date: this.format.date(row.availableFrom),
+              date: this.format.date(timePassLastDay(row.availableFrom)),
             })
           : this.i18n.t('settlements.details.waitingNextReport');
       default:

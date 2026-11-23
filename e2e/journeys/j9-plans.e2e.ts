@@ -76,13 +76,16 @@ test.describe('J9 plan catalog', { tag: '@desktop' }, () => {
       credits: 10,
     });
 
-    // Open it, switch it to 30 days.
+    // Open it, switch it to one calendar month (the default unit).
     await page.goto('/plans/p-new');
     await page.getByRole('link', { name: t('plans.details.edit') }).click();
     await expect(page).toHaveURL(/\/plans\/p-new\/edit$/);
     await field(page, 'plans.fields.planType').selectOption('TIME');
     await expect(field(page, 'plans.fields.credits')).toHaveCount(0);
-    await field(page, 'plans.fields.duration').fill('30');
+    await expect(field(page, 'plans.fields.durationUnit')).toHaveValue(
+      'MONTHS',
+    );
+    await field(page, 'plans.fields.duration').fill('1');
     await page.getByRole('button', { name: t('common.saveChanges') }).click();
 
     await expect(page).toHaveURL(/\/plans$/);
@@ -92,7 +95,8 @@ test.describe('J9 plan catalog', { tag: '@desktop' }, () => {
       priceCents: 4550,
       isActive: true,
       credits: null,
-      durationDays: 30,
+      durationDays: null,
+      durationMonths: 1,
     });
 
     // Deactivate it.

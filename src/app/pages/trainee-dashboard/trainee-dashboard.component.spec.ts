@@ -81,6 +81,7 @@ describe('TraineeDashboardComponent', () => {
           priceCents: 4550,
           credits: 10,
           durationDays: null,
+          durationMonths: null,
           isActive: false,
         },
       ]);

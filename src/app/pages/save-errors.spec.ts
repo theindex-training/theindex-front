@@ -43,6 +43,7 @@ const PLAN = {
   priceCents: 4550,
   credits: 10,
   durationDays: null,
+  durationMonths: null,
   isActive: true,
 };
 const GYM = {

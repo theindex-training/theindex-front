@@ -1,5 +1,6 @@
 import { Subscription } from '../../services/subscriptions.service';
 import { dayKeyToDate, localDayKey } from '../../utils/calendar.util';
+import { timePassLastDay } from '../../utils/time-pass.util';
 
 /**
  * How soon a trainee needs a new subscription, with the API's thresholds (theindex-api
@@ -19,9 +20,9 @@ export interface SubscriptionSummary {
   level: SubscriptionLevel;
   /** Trainings left on the active punch cards, or null without one. */
   creditsLeft: number | null;
-  /** The latest end of the active time passes (YYYY-MM-DD), or null without one. */
+  /** The latest last day of the active time passes (YYYY-MM-DD), or null without one. */
   endsOn: string | null;
-  /** Calendar days from today to `endsOn` (0 = ends today). */
+  /** Calendar days from today to `endsOn` (0 = today is the last day). */
   daysLeft: number | null;
 }
 
@@ -57,7 +58,7 @@ export function subscriptionSummary(
   const punch = active.filter((s) => s.type === 'PUNCH');
   const ends = active
     .filter((s) => s.type === 'TIME' && s.endsAt)
-    .map((s) => localDayKey(s.endsAt!))
+    .map((s) => localDayKey(timePassLastDay(s.endsAt)!))
     .filter((day): day is string => !!day)
     .sort();
 

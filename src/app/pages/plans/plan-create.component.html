@@ -28,6 +28,32 @@
             }}</span>
           }
         </div>
+        <div class="form-field">
+          <label class="form-field__label" for="plan-price">{{
+            'plans.fields.priceEur' | transloco
+          }}</label>
+          <input
+            id="plan-price"
+            type="number"
+            inputmode="decimal"
+            formControlName="price"
+            min="0"
+            step="0.01"
+            aria-describedby="plan-price-help"
+            [attr.aria-invalid]="
+              form.controls.price.touched && form.controls.price.invalid
+            "
+          />
+          @if (form.controls.price.touched && form.controls.price.invalid) {
+            <span class="form-field__error" id="plan-price-help">{{
+              'plans.fields.priceError' | transloco
+            }}</span>
+          } @else {
+            <span class="form-field__hint" id="plan-price-help">{{
+              'plans.fields.priceHint' | transloco
+            }}</span>
+          }
+        </div>
       </div>
 
       <div class="form-row">
@@ -83,56 +109,43 @@
               id="plan-duration"
               type="number"
               inputmode="numeric"
-              formControlName="durationDays"
+              formControlName="duration"
               min="1"
               step="1"
               aria-describedby="plan-duration-help"
               [attr.aria-invalid]="
-                form.controls.durationDays.touched &&
-                form.controls.durationDays.invalid
+                form.controls.duration.touched && form.controls.duration.invalid
               "
             />
             @if (
-              form.controls.durationDays.touched &&
-              form.controls.durationDays.invalid
+              form.controls.duration.touched && form.controls.duration.invalid
             ) {
               <span class="form-field__error" id="plan-duration-help">{{
                 'plans.fields.wholeNumberError' | transloco
               }}</span>
             } @else {
               <span class="form-field__hint" id="plan-duration-help">{{
-                'plans.fields.durationHint' | transloco
+                (form.controls.durationUnit.value === 'MONTHS'
+                  ? 'plans.fields.durationMonthsHint'
+                  : 'plans.fields.durationDaysHint'
+                ) | transloco
               }}</span>
             }
           </div>
+          <div class="form-field">
+            <label class="form-field__label" for="plan-duration-unit">{{
+              'plans.fields.durationUnit' | transloco
+            }}</label>
+            <select id="plan-duration-unit" formControlName="durationUnit">
+              <option value="MONTHS">
+                {{ 'plans.fields.unitMonths' | transloco }}
+              </option>
+              <option value="DAYS">
+                {{ 'plans.fields.unitDays' | transloco }}
+              </option>
+            </select>
+          </div>
         }
-
-        <div class="form-field">
-          <label class="form-field__label" for="plan-price">{{
-            'plans.fields.priceEur' | transloco
-          }}</label>
-          <input
-            id="plan-price"
-            type="number"
-            inputmode="decimal"
-            formControlName="price"
-            min="0"
-            step="0.01"
-            aria-describedby="plan-price-help"
-            [attr.aria-invalid]="
-              form.controls.price.touched && form.controls.price.invalid
-            "
-          />
-          @if (form.controls.price.touched && form.controls.price.invalid) {
-            <span class="form-field__error" id="plan-price-help">{{
-              'plans.fields.priceError' | transloco
-            }}</span>
-          } @else {
-            <span class="form-field__hint" id="plan-price-help">{{
-              'plans.fields.priceHint' | transloco
-            }}</span>
-          }
-        </div>
       </div>
 
       <label class="form-field form-field--check">

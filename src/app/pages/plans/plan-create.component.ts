@@ -20,6 +20,11 @@ import {
   PlanType,
   PlansService,
 } from '../../services/plans.service';
+import {
+  DEFAULT_DURATION_UNIT,
+  DurationUnit,
+  durationFields,
+} from './plan-duration';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
@@ -68,7 +73,8 @@ export class PlanCreateComponent implements OnInit {
     title: FormControl<string>;
     price: FormControl<number>;
     credits: FormControl<number | null>;
-    durationDays: FormControl<number | null>;
+    duration: FormControl<number | null>;
+    durationUnit: FormControl<DurationUnit>;
     isActive: FormControl<boolean>;
   }>;
 
@@ -91,7 +97,10 @@ export class PlanCreateComponent implements OnInit {
         currencyValidator,
       ]),
       credits: this.formBuilder.control<number | null>(null),
-      durationDays: this.formBuilder.control<number | null>(null),
+      duration: this.formBuilder.control<number | null>(null),
+      durationUnit: this.formBuilder.nonNullable.control<DurationUnit>(
+        DEFAULT_DURATION_UNIT,
+      ),
       isActive: this.formBuilder.nonNullable.control(true),
     });
   }
@@ -120,7 +129,12 @@ export class PlanCreateComponent implements OnInit {
     if (raw.type === 'PUNCH') {
       payload.credits = Number(raw.credits);
     } else {
-      payload.durationDays = Number(raw.durationDays);
+      const fields = durationFields(raw.durationUnit, Number(raw.duration));
+      if (fields.durationMonths !== null) {
+        payload.durationMonths = fields.durationMonths;
+      } else {
+        payload.durationDays = fields.durationDays!;
+      }
     }
 
     this.submitting = true;
@@ -141,7 +155,7 @@ export class PlanCreateComponent implements OnInit {
 
   private syncTypeValidators(type: PlanType): void {
     const creditsControl = this.form.controls.credits;
-    const durationControl = this.form.controls.durationDays;
+    const durationControl = this.form.controls.duration;
 
     if (type === 'PUNCH') {
       creditsControl.setValidators([

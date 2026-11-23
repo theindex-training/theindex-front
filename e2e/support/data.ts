@@ -112,6 +112,7 @@ export const plan = (id: string, title: string, overrides: object = {}) => ({
   priceCents: 4550,
   credits: 10,
   durationDays: null,
+  durationMonths: null,
   isActive: true,
   ...overrides,
 });

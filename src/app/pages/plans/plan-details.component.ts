@@ -16,6 +16,7 @@ import { apiErrorMessage, i18nMessage, UiMessage } from '../../i18n/ui-message';
 import { LocaleFormatService } from '../../i18n/locale-format.service';
 import { LanguageService } from '../../i18n/language.service';
 import { EnumLabelPipe } from '../../i18n/enum-label.pipe';
+import { planIncludes } from './plan-duration';
 
 @Component({
   selector: 'app-plan-details',
@@ -72,13 +73,7 @@ export class PlanDetailsComponent implements OnInit {
   }
 
   formatPlanDetails(plan: Plan): string {
-    if (plan.type === 'PUNCH') {
-      return this.i18n.t('plans.fields.creditsCount', {
-        count: plan.credits ?? 0,
-      });
-    }
-    return this.i18n.t('plans.fields.daysCount', {
-      count: plan.durationDays ?? 0,
-    });
+    const { key, count } = planIncludes(plan);
+    return this.i18n.t(key, { count });
   }
 }

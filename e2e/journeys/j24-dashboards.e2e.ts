@@ -265,6 +265,7 @@ test.describe('J24 dashboards', () => {
             priceCents: 8000,
             credits: 8,
             durationDays: null,
+            durationMonths: null,
             isActive: true,
           },
         ],

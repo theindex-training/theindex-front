@@ -22,6 +22,7 @@ import {
   InactiveTraineeReportItem,
   TraineeWithoutActiveSubscriptionReportItem,
 } from '../../services/attendance.service';
+import { timePassLastDay } from '../../utils/time-pass.util';
 
 /** Which attendance report: trainees who stopped coming, or trainees without a subscription. */
 export type AttendanceReportKind = 'inactive' | 'without';
@@ -103,7 +104,10 @@ export class AttendanceReportComponent implements OnInit {
         ? this.part('start', this.format.date(subscription.startDate))
         : null,
       subscription.endDate
-        ? this.part('end', this.format.date(subscription.endDate))
+        ? this.part(
+            'end',
+            this.format.date(timePassLastDay(subscription.endDate)),
+          )
         : null,
       subscription.remainingTrainings !== null
         ? this.part('remainingTrainings', subscription.remainingTrainings)

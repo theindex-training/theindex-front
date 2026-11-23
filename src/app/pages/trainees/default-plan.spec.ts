@@ -10,6 +10,7 @@ function plan(id: string): Plan {
     priceCents: 1000,
     credits: 10,
     durationDays: null,
+    durationMonths: null,
     isActive: true,
   };
 }

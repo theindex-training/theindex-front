@@ -80,6 +80,20 @@ describe('subscriptionSummary', () => {
     },
   );
 
+  it('counts a pass ending at Sofia midnight (a month plan) to its last day, the day before', () => {
+    // Ends Nov 22 00:00 Sofia: today (Nov 21) is its last day.
+    expect(subscriptionSummary([time('2026-11-21T22:00:00Z')], TODAY)).toEqual({
+      level: 'LAST',
+      creditsLeft: null,
+      endsOn: '2026-11-21',
+      daysLeft: 0,
+    });
+    // Ends Nov 23 00:00 Sofia: last day Nov 22, one day after today.
+    expect(
+      subscriptionSummary([time('2026-11-22T22:00:00Z')], TODAY),
+    ).toMatchObject({ level: 'LOW', endsOn: '2026-11-22', daysLeft: 1 });
+  });
+
   it('takes the latest end of several time passes', () => {
     expect(
       subscriptionSummary(

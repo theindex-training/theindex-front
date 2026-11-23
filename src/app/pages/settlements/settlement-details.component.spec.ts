@@ -785,9 +785,10 @@ describe('SettlementDetailsComponent', () => {
     const text = page.text();
     expect(text).toContain(copy.waitingUnpaid);
     expect(text).toContain(
+      // The pass ends Nov 21 00:00 Sofia (exclusive), so it shows its last day, Nov 20.
       copy.waitingTimePass.replace(
         '{date}',
-        format.date('2026-11-20T22:00:00Z'),
+        format.date('2026-11-20T12:00:00Z'),
       ),
     );
     expect(text).toContain(copy.waitingNextReport);

@@ -12,7 +12,9 @@ export interface Plan {
   title: string;
   priceCents: number;
   credits: number | null;
+  /** TIME: 24-hour days, or calendar months (`durationMonths`); exactly one is set. */
   durationDays: number | null;
+  durationMonths: number | null;
   isActive: boolean;
   createdAt?: string;
 }
@@ -23,6 +25,7 @@ export interface CreatePlanPayload {
   priceCents: number;
   credits?: number;
   durationDays?: number;
+  durationMonths?: number;
   isActive?: boolean;
 }
 
@@ -32,6 +35,7 @@ export interface UpdatePlanPayload {
   priceCents?: number;
   credits?: number | null;
   durationDays?: number | null;
+  durationMonths?: number | null;
   isActive?: boolean;
 }
 

@@ -30,6 +30,7 @@ import {
   SubscriptionRenewals,
   SubscriptionRenewalsService,
 } from '../../services/subscription-renewals.service';
+import { timePassLastDay } from '../../utils/time-pass.util';
 
 export type RenewalTab = 'punch' | 'time';
 
@@ -219,7 +220,7 @@ export class RenewalsComponent implements OnInit {
           this.planColumn(),
           {
             header: 'renewals.fields.endedOn',
-            value: (row) => this.format.date(row.endsAt),
+            value: (row) => this.format.date(timePassLastDay(row.endsAt)),
           },
           {
             header: 'renewals.fields.expired',
@@ -249,7 +250,7 @@ export class RenewalsComponent implements OnInit {
           this.planColumn(),
           {
             header: 'renewals.fields.endsOn',
-            value: (row) => this.format.date(row.endsAt),
+            value: (row) => this.format.date(timePassLastDay(row.endsAt)),
           },
           {
             header: 'renewals.fields.daysLeft',
@@ -267,7 +268,7 @@ export class RenewalsComponent implements OnInit {
           }),
         chipTone: () => 'neutral',
         meta: (row) =>
-          `${this.planText(row)} · ${this.format.date(row.endsAt)}`,
+          `${this.planText(row)} · ${this.format.date(timePassLastDay(row.endsAt))}`,
       },
     ];
   }
