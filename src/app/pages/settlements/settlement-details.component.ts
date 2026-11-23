@@ -112,6 +112,9 @@ export class SettlementDetailsComponent implements OnInit {
   pageSize = DEFAULT_PAGE_SIZE;
   /** The page of paid trainings asked for (page 1 while the Waiting tab is open). */
   allocationsPage = 1;
+  /** The page and page size of the paid rows shown (the last answer), which a failed page keeps. */
+  shownAllocationsPage = 1;
+  shownAllocationsPageSize = DEFAULT_PAGE_SIZE;
 
   loading = true;
   /** Until the first answer: the skeleton. Later pages keep the rows until theirs come. */
@@ -130,6 +133,8 @@ export class SettlementDetailsComponent implements OnInit {
   private settlementId = '';
   /** The query of the allocations shown (or on their way), so a repeated one isn't sent again. */
   private allocationsKey = '';
+  /** The trainer filter of the paid rows shown. */
+  private shownAllocationsTrainerId = '';
   private allocationsRequest?: Subscription;
   private scrollPending = false;
   private paramsApplied = false;
@@ -257,6 +262,9 @@ export class SettlementDetailsComponent implements OnInit {
           }
           this.allocations = response.rows;
           this.allocationsTotal = response.total;
+          this.shownAllocationsPage = this.allocationsPage;
+          this.shownAllocationsPageSize = this.pageSize;
+          this.shownAllocationsTrainerId = this.selectedTrainerId;
           this.loadingAllocations = false;
           this.updatingAllocations = false;
           this.changeDetector.detectChanges();
@@ -267,7 +275,13 @@ export class SettlementDetailsComponent implements OnInit {
             error,
             'settlements.details.loadAllocationsError',
           );
-          // Asking again for the same page is a retry.
+          // Another page or page size of the same list keeps the rows shown (they say which page
+          // they are); another trainer's would look like theirs, so they go.
+          if (this.selectedTrainerId !== this.shownAllocationsTrainerId) {
+            this.allocations = [];
+            this.allocationsTotal = 0;
+          }
+          // Asking again for the same page is a retry ("Try again").
           this.allocationsKey = '';
           this.loadingAllocations = false;
           this.updatingAllocations = false;
@@ -282,7 +296,12 @@ export class SettlementDetailsComponent implements OnInit {
 
   changePage(page: number): void {
     this.scrollPending = true;
-    this.goTo({ page });
+    // After a failed page size, the paid controls show the size of the rows shown: page in it.
+    this.goTo(
+      this.tab === 'paid' && this.allocationError
+        ? { page, size: this.shownAllocationsPageSize }
+        : { page },
+    );
   }
 
   changePageSize(pageSize: number): void {
@@ -293,9 +312,27 @@ export class SettlementDetailsComponent implements OnInit {
     this.goTo({ trainer: trainerId, page: 1 });
   }
 
+  /**
+   * The page the paid trainings' controls show: the one asked for, or after a failed page the one
+   * whose rows are still shown ("Try again" still asks for the failed one).
+   */
+  get allocationsPagerPage(): number {
+    return this.allocationError
+      ? this.shownAllocationsPage
+      : this.allocationsPage;
+  }
+
+  get allocationsPagerPageSize(): number {
+    return this.allocationError ? this.shownAllocationsPageSize : this.pageSize;
+  }
+
   /** The Paid / Waiting options, with how many rows each has (cached: the control needs the same array). */
   get tabOptions(): SegmentedOption<SettlementTab>[] {
-    const paid = this.loadingAllocations ? null : this.allocationsTotal;
+    const paid =
+      this.loadingAllocations ||
+      (this.allocationError && !this.allocations.length)
+        ? null
+        : this.allocationsTotal;
     const waiting = this.settlement ? this.shownWaiting.length : null;
     const key = `${this.i18n.lang()}|${paid}|${waiting}`;
     if (key !== this.tabOptionsKey) {
@@ -316,17 +353,23 @@ export class SettlementDetailsComponent implements OnInit {
 
   /** "51–100 of 4,812 rows" for the open tab, or null while there is nothing to count. */
   get shownRange(): string | null {
-    const total =
-      this.tab === 'paid'
-        ? this.loadingAllocations || this.allocationError
-          ? 0
-          : this.allocationsTotal
-        : this.shownWaiting.length;
+    // The paid count describes the rows shown, which a failed page keeps.
+    const paid = this.tab === 'paid';
+    const total = paid
+      ? this.loadingAllocations || !this.allocations.length
+        ? 0
+        : this.allocationsTotal
+      : this.shownWaiting.length;
     if (!total) {
       return null;
     }
-    const page = this.tab === 'paid' ? this.allocationsPage : this.page;
-    const { from, to } = pageRange(page, this.pageSize, total);
+    const { from, to } = paid
+      ? pageRange(
+          this.shownAllocationsPage,
+          this.shownAllocationsPageSize,
+          total,
+        )
+      : pageRange(this.page, this.pageSize, total);
     return this.i18n.t('settlements.details.showingRange', {
       from: this.format.number(from),
       to: this.format.number(to),

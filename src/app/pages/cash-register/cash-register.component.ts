@@ -230,7 +230,10 @@ export class CashRegisterComponent implements OnInit {
 
   changePage(page: number): void {
     this.scrollPending = true;
-    this.goTo({ page });
+    // After a failed page size, the controls show the size of the rows shown: page in it.
+    this.goTo(
+      this.pageErrorMessage ? { page, size: this.shownPageSize } : { page },
+    );
   }
 
   changePageSize(pageSize: number): void {

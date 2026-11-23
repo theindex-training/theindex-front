@@ -160,6 +160,8 @@ describe('SettlementDetailsComponent', () => {
       waiting?: SettlementWaiting[];
       url?: string;
       allocationsUrl?: string;
+      /** The first page of paid trainings fails. */
+      allocationsError?: boolean;
     } = {},
   ) {
     signInAs(role);
@@ -223,14 +225,20 @@ describe('SettlementDetailsComponent', () => {
       lines: LINES,
       waiting: options.waiting ?? WAITING,
     });
-    http
-      .expectOne(options.allocationsUrl ?? `${ALLOCATIONS}?offset=0&limit=50`)
-      .flush({
+    const allocations = http.expectOne(
+      options.allocationsUrl ?? `${ALLOCATIONS}?offset=0&limit=50`,
+    );
+    if (options.allocationsError) {
+      const error = apiError(undefined, 500);
+      allocations.flush(error.body, error.options);
+    } else {
+      allocations.flush({
         total: options.allocationsTotal ?? 1,
         limit: 50,
         offset: 0,
         rows: options.allocations ?? [ALLOCATION],
       });
+    }
     await page.settle();
   }
 
@@ -260,6 +268,18 @@ describe('SettlementDetailsComponent', () => {
     rows: SettlementAllocation[],
   ) => {
     http.expectOne(request).flush({ total, limit: 50, offset: 0, rows });
+    return page.settle();
+  };
+
+  const count = () =>
+    page.query('[data-testid="list-count"]')?.textContent?.trim();
+  const tryAgain = () =>
+    page
+      .queryAll<HTMLButtonElement>('button')
+      .find((b) => b.textContent?.trim() === en.common.tryAgain);
+  const failPage = (request: string) => {
+    const error = apiError(undefined, 500);
+    http.expectOne(request).flush(error.body, error.options);
     return page.settle();
   };
 
@@ -491,6 +511,98 @@ describe('SettlementDetailsComponent', () => {
     expect(page.query('[data-testid="list-count"]')?.textContent?.trim()).toBe(
       '1–25 of 25 rows',
     );
+  });
+
+  it('keeps the paid rows when a page fails, and asks for it again on "Try again" (TEST_NOTES.md S18)', async () => {
+    await open('ADMIN', {
+      allocationsTotal: 734,
+      allocations: allocationRows(1, 50),
+    });
+
+    await page.click('button[aria-label="Next page"]');
+    await failPage(`${ALLOCATIONS}?offset=50&limit=50`);
+
+    expect(page.alert()).toBe(copy.loadAllocationsError);
+    // The rows, the count and the page controls still describe the page that loaded.
+    expect(tableTrainees()).toHaveLength(50);
+    expect(tableTrainees()[1]).toBe('t2');
+    expect(count()).toBe('1–50 of 734 rows');
+    expect(button('Page 1')?.getAttribute('aria-current')).toBe('page');
+    expect(url()).toBe('/settlements/s1?page=2');
+
+    tryAgain()!.click();
+    await flushPage(
+      `${ALLOCATIONS}?offset=50&limit=50`,
+      734,
+      allocationRows(51, 50),
+    );
+    expect(page.query('[role="alert"]')).toBeNull();
+    expect(tableTrainees()[0]).toBe('t51');
+    expect(count()).toBe('51–100 of 734 rows');
+    expect(button('Page 2')?.getAttribute('aria-current')).toBe('page');
+  });
+
+  it('keeps counting the paid rows shown when a new page size fails', async () => {
+    await open('ADMIN', {
+      allocationsTotal: 734,
+      allocations: allocationRows(1, 50),
+    });
+
+    await page.select('nav[aria-label="Paid trainings pages"] select', '200');
+    await failPage(`${ALLOCATIONS}?offset=0&limit=200`);
+
+    expect(count()).toBe('1–50 of 734 rows');
+    expect(
+      page.query<HTMLSelectElement>(
+        'nav[aria-label="Paid trainings pages"] select',
+      )?.value,
+    ).toBe('50');
+    expect(tableTrainees()).toHaveLength(50);
+
+    // Next follows the controls shown: the next 50, not a page of the size that failed.
+    await page.click('button[aria-label="Next page"]');
+    expect(url()).toBe('/settlements/s1?page=2');
+    await flushPage(
+      `${ALLOCATIONS}?offset=50&limit=50`,
+      734,
+      allocationRows(51, 50),
+    );
+    expect(count()).toBe('51–100 of 734 rows');
+  });
+
+  it("drops the rows when another trainer's fail to load, rather than show them as that trainer's", async () => {
+    await open('ADMIN', {
+      allocationsTotal: 734,
+      allocations: allocationRows(1, 50),
+    });
+
+    await page.select('#settlement-trainer', 'tr2');
+    await failPage(`${ALLOCATIONS}?trainerId=tr2&offset=0&limit=50`);
+
+    expect(page.alert()).toBe(copy.loadAllocationsError);
+    expect(tableTrainees()).toHaveLength(0);
+    expect(count()).toBeUndefined();
+    expect(page.text()).not.toContain(copy.noAllocations);
+    expect(tabLabels()[0]).toBe(copy.tabPaid);
+
+    tryAgain()!.click();
+    await flushPage(`${ALLOCATIONS}?trainerId=tr2&offset=0&limit=50`, 1, [
+      ALLOCATION,
+    ]);
+    expect(tableTrainees()).toHaveLength(1);
+  });
+
+  it('offers "Try again" when the first page of paid trainings fails', async () => {
+    await open('ADMIN', { allocationsError: true });
+
+    expect(page.alert()).toBe(copy.loadAllocationsError);
+    expect(count()).toBeUndefined();
+    expect(page.text()).not.toContain(copy.noAllocations);
+
+    tryAgain()!.click();
+    await flushPage(`${ALLOCATIONS}?offset=0&limit=50`, 1, [ALLOCATION]);
+    expect(page.query('[role="alert"]')).toBeNull();
+    expect(tableTrainees()).toHaveLength(1);
   });
 
   it('keeps the shown rows while the next page loads, then replaces them', async () => {
