@@ -279,8 +279,8 @@
         <app-pagination
           [label]="'cashRegister.transactionsPages' | transloco"
           [total]="total"
-          [page]="page"
-          [pageSize]="pageSize"
+          [page]="pagerPage"
+          [pageSize]="pagerPageSize"
           (pageChange)="changePage($event)"
           (pageSizeChange)="changePageSize($event)"
         />

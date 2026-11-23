@@ -405,6 +405,10 @@ describe('CashRegisterComponent', () => {
       expect(page.alert()).toBe(copy.loadPageError);
       expect(tableRows()[0]).toBe('row 1');
       expect(page.text()).not.toContain(copy.loadError);
+      // The count and the controls still describe the rows shown, not the page that failed.
+      expect(count()).toBe('1–50 of 734 transactions');
+      expect(button('Page 1')?.getAttribute('aria-current')).toBe('page');
+      expect(url()).toBe('/cash-register?page=2');
 
       const retry = page
         .queryAll('button')
@@ -416,6 +420,26 @@ describe('CashRegisterComponent', () => {
       );
       expect(page.query('[role="alert"]')).toBeNull();
       expect(tableRows()[0]).toBe('row 51');
+      expect(count()).toBe('51–100 of 734 transactions');
+    });
+
+    it('keeps counting the rows shown when a new page size fails', async () => {
+      await render(state(0, transactionRows(1, 50), 734));
+
+      await page.select('nav[aria-label="Transactions pages"] select', '200');
+      const error = apiError(undefined, 500);
+      http
+        .expectOne(`${STATE_URL}?offset=0&limit=200`)
+        .flush(error.body, error.options);
+      await page.settle();
+
+      expect(count()).toBe('1–50 of 734 transactions');
+      expect(
+        page.query<HTMLSelectElement>(
+          'nav[aria-label="Transactions pages"] select',
+        )?.value,
+      ).toBe('50');
+      expect(tableRows()).toHaveLength(50);
     });
 
     it('shows the first page, with the new transaction, after saving on a later one', async () => {

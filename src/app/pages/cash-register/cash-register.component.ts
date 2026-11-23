@@ -103,6 +103,9 @@ export class CashRegisterComponent implements OnInit {
   /** The page shown (or on its way), from `?page=`. */
   page = 1;
   pageSize = DEFAULT_PAGE_SIZE;
+  /** The page and page size of the rows shown (the last answer), which a failed page keeps. */
+  shownPage = 1;
+  shownPageSize = DEFAULT_PAGE_SIZE;
 
   /** Until the first answer: the skeleton. Later pages keep the rows until theirs come. */
   loading = true;
@@ -197,6 +200,8 @@ export class CashRegisterComponent implements OnInit {
           this.balanceCents = response.balanceCents;
           this.transactions = response.transactions;
           this.total = response.total;
+          this.shownPage = this.page;
+          this.shownPageSize = this.pageSize;
           this.loading = false;
           this.updating = false;
           this.changeDetector.detectChanges();
@@ -232,12 +237,28 @@ export class CashRegisterComponent implements OnInit {
     this.goTo({ size: pageSize, page: 1 });
   }
 
-  /** "51–100 of 4,812 transactions", or null while there is nothing to count. */
+  /**
+   * The page the controls show: the one asked for, or after a failed page the one whose rows are
+   * still shown ("Try again" still asks for the failed one).
+   */
+  get pagerPage(): number {
+    return this.pageErrorMessage ? this.shownPage : this.page;
+  }
+
+  get pagerPageSize(): number {
+    return this.pageErrorMessage ? this.shownPageSize : this.pageSize;
+  }
+
+  /** "51–100 of 4,812 transactions" for the rows shown, or null while there is nothing to count. */
   get shownRange(): string | null {
     if (this.loading || !this.total) {
       return null;
     }
-    const { from, to } = pageRange(this.page, this.pageSize, this.total);
+    const { from, to } = pageRange(
+      this.shownPage,
+      this.shownPageSize,
+      this.total,
+    );
     return this.i18n.t('cashRegister.showingRange', {
       from: this.format.number(from),
       to: this.format.number(to),

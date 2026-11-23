@@ -174,7 +174,7 @@ The review below turned up a few traps. Every spec should follow these.
 
 **`pages/cash-register/cash-register.component.ts`**
 - [x] Load: GET `/api/cash-register?offset=0&limit=50` shows the balance and transactions. Error → the danger state with "Try again", which reloads.
-- [x] Paging (Nov 2026, the API pages the transactions): Next / Last / First ask for `offset`/`limit` and put `?page=` in the address; Per page asks from the first page again (`?size=`); the address's page and size are used on opening, invalid ones fall back to 1 / 50; a page past the end goes to the last one; no controls while 25 or fewer; no count while empty; the shown rows stay (`aria-busy`, no skeleton) until the next page comes; a failed page keeps the rows, shows `loadPageError` and "Try again" asks for the same page; each answer's balance is shown.
+- [x] Paging (Nov 2026, the API pages the transactions): Next / Last / First ask for `offset`/`limit` and put `?page=` in the address; Per page asks from the first page again (`?size=`); the address's page and size are used on opening, invalid ones fall back to 1 / 50; a page past the end goes to the last one; no controls while 25 or fewer; no count while empty; the shown rows stay (`aria-busy`, no skeleton) until the next page comes; a failed page (or page size) keeps the rows, and the count and controls go on describing them, shows `loadPageError` and "Try again" asks for the same page; each answer's balance is shown.
 - [x] Amount:
   - `0` and negative values fail `min(0.01)`;
   - three decimals fail;
