@@ -2,10 +2,14 @@ import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
+  DestroyRef,
+  ElementRef,
   OnInit,
+  ViewChild,
   inject,
   ChangeDetectionStrategy,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormBuilder,
@@ -13,11 +17,21 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { SkeletonListComponent } from '../../components/skeleton-list/skeleton-list.component';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 import { ChipComponent } from '../../components/chip/chip.component';
+import { PaginationComponent } from '../../components/pagination/pagination.component';
+import {
+  DEFAULT_PAGE_SIZE,
+  clampPage,
+  pageOffset,
+  pageRange,
+  parsePage,
+  parsePageSize,
+} from '../../components/pagination/pagination';
 import {
   CashRegisterService,
   CashRegisterTransaction,
@@ -62,22 +76,46 @@ const currencyValidator: ValidatorFn = (control: AbstractControl) => {
     SkeletonListComponent,
     EmptyStateComponent,
     ChipComponent,
+    PaginationComponent,
   ],
   templateUrl: './cash-register.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './cash-register.component.scss',
 })
+/**
+ * The balance, the manual transaction form and the transactions, newest first. The transactions are
+ * paged by the API (`offset`/`limit`, `app-pagination`); the page and page size are kept in the
+ * address (`?page=3&size=100`, the defaults left out, replacing the entry), so going back from a
+ * trainee returns to the same rows. Every page's answer carries the balance too.
+ */
 export class CashRegisterComponent implements OnInit {
   private readonly i18n = inject(LanguageService);
   readonly format = inject(LocaleFormatService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   balanceCents = 0;
   transactions: CashRegisterTransaction[] = [];
+  /** How many transactions there are in all. */
+  total = 0;
+  /** The page shown (or on its way), from `?page=`. */
+  page = 1;
+  pageSize = DEFAULT_PAGE_SIZE;
+  /** The page and page size of the rows shown (the last answer), which a failed page keeps. */
+  shownPage = 1;
+  shownPageSize = DEFAULT_PAGE_SIZE;
 
+  /** Until the first answer: the skeleton. Later pages keep the rows until theirs come. */
   loading = true;
+  /** A page or page size on its way; the shown rows are about to be replaced. */
+  updating = false;
   creatingTransaction = false;
+  /** The first load failed: nothing to show. */
   errorMessage: UiMessage | null = null;
+  /** A later page failed: the rows shown stay. */
+  pageErrorMessage: UiMessage | null = null;
   formErrorMessage: UiMessage | null = null;
   formSuccessMessage: UiMessage | null = null;
 
@@ -93,34 +131,139 @@ export class CashRegisterComponent implements OnInit {
     notes: this.formBuilder.control(''),
   });
 
+  /** The start of the transactions, brought into view after a page change. */
+  @ViewChild('listTop') private listTop?: ElementRef<HTMLElement>;
+
+  /** The query of the page shown (or on its way), so a repeated one isn't sent again. */
+  private stateKey = '';
+  private stateRequest?: Subscription;
+  private scrollPending = false;
+  private paramsApplied = false;
+
   constructor(
     private readonly cashRegisterService: CashRegisterService,
     private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
-    this.loadState();
+    // The page is reused when only the query changes (page, size).
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => this.applyParams(params));
   }
 
-  loadState(): void {
-    this.loading = true;
-    this.errorMessage = null;
+  /** The page and page size from the address; loads the transactions they need. */
+  private applyParams(params: ParamMap): void {
+    this.page = parsePage(params.get('page'));
+    this.pageSize = parsePageSize(params.get('size'));
+    this.loadState(false);
+    // The first call comes from ngOnInit, which the first check follows anyway.
+    if (this.paramsApplied) {
+      this.changeDetector.detectChanges();
+    }
+    this.paramsApplied = true;
+  }
 
-    this.cashRegisterService.getCurrentState().subscribe({
-      next: (response) => {
-        this.balanceCents = response.balanceCents;
-        this.transactions = response.transactions;
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
-      error: (error) => {
-        this.errorMessage = apiErrorMessage(
-          error,
-          'cashRegister.loadErrorMessage',
-        );
-        this.loading = false;
-        this.changeDetector.detectChanges();
-      },
+  /**
+   * Loads the balance and the page of transactions asked for; `force` asks again for the same one
+   * (after a save, or "Try again"). Until something is shown it is the skeleton, then the rows
+   * stay until the new ones come.
+   */
+  loadState(force = true): void {
+    const query = {
+      offset: pageOffset(this.page, this.pageSize),
+      limit: this.pageSize,
+    };
+    const key = JSON.stringify(query);
+    if (!force && key === this.stateKey) {
+      return;
+    }
+
+    this.stateKey = key;
+    this.stateRequest?.unsubscribe();
+    const shown = !this.loading && !this.errorMessage;
+    this.loading = !shown;
+    this.updating = shown;
+    this.errorMessage = null;
+    this.pageErrorMessage = null;
+
+    this.stateRequest = this.cashRegisterService
+      .getCurrentState(query)
+      .subscribe({
+        next: (response) => {
+          // A page past the end (an old link, or fewer rows since): show the last one instead.
+          const last = clampPage(this.page, response.total, this.pageSize);
+          if (!response.transactions.length && last < this.page) {
+            this.goTo({ page: last });
+            return;
+          }
+          this.balanceCents = response.balanceCents;
+          this.transactions = response.transactions;
+          this.total = response.total;
+          this.shownPage = this.page;
+          this.shownPageSize = this.pageSize;
+          this.loading = false;
+          this.updating = false;
+          this.changeDetector.detectChanges();
+          this.scrollToList();
+        },
+        error: (error) => {
+          if (shown) {
+            this.pageErrorMessage = apiErrorMessage(
+              error,
+              'cashRegister.loadPageError',
+            );
+          } else {
+            this.errorMessage = apiErrorMessage(
+              error,
+              'cashRegister.loadErrorMessage',
+            );
+          }
+          // Asking again for the same page is a retry.
+          this.stateKey = '';
+          this.loading = false;
+          this.updating = false;
+          this.changeDetector.detectChanges();
+        },
+      });
+  }
+
+  changePage(page: number): void {
+    this.scrollPending = true;
+    this.goTo({ page });
+  }
+
+  changePageSize(pageSize: number): void {
+    this.goTo({ size: pageSize, page: 1 });
+  }
+
+  /**
+   * The page the controls show: the one asked for, or after a failed page the one whose rows are
+   * still shown ("Try again" still asks for the failed one).
+   */
+  get pagerPage(): number {
+    return this.pageErrorMessage ? this.shownPage : this.page;
+  }
+
+  get pagerPageSize(): number {
+    return this.pageErrorMessage ? this.shownPageSize : this.pageSize;
+  }
+
+  /** "51–100 of 4,812 transactions" for the rows shown, or null while there is nothing to count. */
+  get shownRange(): string | null {
+    if (this.loading || !this.total) {
+      return null;
+    }
+    const { from, to } = pageRange(
+      this.shownPage,
+      this.shownPageSize,
+      this.total,
+    );
+    return this.i18n.t('cashRegister.showingRange', {
+      from: this.format.number(from),
+      to: this.format.number(to),
+      total: this.total,
+      totalText: this.format.number(this.total),
     });
   }
 
@@ -154,7 +297,12 @@ export class CashRegisterComponent implements OnInit {
         this.form.markAsUntouched();
         this.creatingTransaction = false;
         this.formSuccessMessage = i18nMessage('cashRegister.created');
-        this.loadState();
+        // The new transaction is the newest: show the first page, with the new balance.
+        if (this.page > 1) {
+          this.goTo({ page: 1 });
+        } else {
+          this.loadState();
+        }
       },
       error: (error) => {
         this.formErrorMessage = apiErrorMessage(
@@ -269,6 +417,31 @@ export class CashRegisterComponent implements OnInit {
         ? this.i18n.t('cashRegister.typePart', { type: subscriptionType })
         : undefined,
     ].filter((part): part is string => Boolean(part));
+  }
+
+  /** Puts the new settings in the address (replacing the entry); `applyParams` takes them from there. */
+  private goTo(changes: { page?: number; size?: number }): void {
+    const next = { page: this.page, size: this.pageSize, ...changes };
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      replaceUrl: true,
+      queryParams: {
+        page: next.page > 1 ? next.page : null,
+        size: next.size === DEFAULT_PAGE_SIZE ? null : next.size,
+      },
+    });
+  }
+
+  /** After a page change, brings the top of the list into view when it is scrolled past. */
+  private scrollToList(): void {
+    if (!this.scrollPending) {
+      return;
+    }
+    this.scrollPending = false;
+    const top = this.listTop?.nativeElement;
+    if (top && top.getBoundingClientRect().top < 0) {
+      top.scrollIntoView?.({ block: 'start' });
+    }
   }
 
   private toCents(amount: number): number {

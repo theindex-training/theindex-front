@@ -19,6 +19,14 @@
   min-width: 8rem;
 }
 
+.page-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
 @media (min-width: 1024px) {
   .cash-top {
     grid-template-columns: minmax(16rem, 1fr) 2fr;

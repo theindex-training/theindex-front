@@ -173,7 +173,8 @@ The review below turned up a few traps. Every spec should follow these.
 - [x] Success → `/plans`. Error: the API message shows and the button is usable again (S1, fixed in PR 3).
 
 **`pages/cash-register/cash-register.component.ts`**
-- [x] Load: GET `/api/cash-register` shows the balance and transactions. Error → the danger state with "Try again", which reloads.
+- [x] Load: GET `/api/cash-register?offset=0&limit=50` shows the balance and transactions. Error → the danger state with "Try again", which reloads.
+- [x] Paging (Nov 2026, the API pages the transactions): Next / Last / First ask for `offset`/`limit` and put `?page=` in the address; Per page asks from the first page again (`?size=`); the address's page and size are used on opening, invalid ones fall back to 1 / 50; a page past the end goes to the last one; no controls while 25 or fewer; no count while empty; the shown rows stay (`aria-busy`, no skeleton) until the next page comes; a failed page (or page size) keeps the rows, and the count and controls go on describing them, shows `loadPageError` and "Try again" asks for the same page; each answer's balance is shown.
 - [x] Amount:
   - `0` and negative values fail `min(0.01)`;
   - three decimals fail;
@@ -183,7 +184,7 @@ The review below turned up a few traps. Every spec should follow these.
 - [x] Success:
   - the form resets to IN / 0 / '', untouched;
   - the `cashRegister.created` notice shows;
-  - the state is reloaded (second GET).
+  - the state is reloaded (second GET), from the first page when a later one was shown.
 - [x] Error: the `formErrorMessage` notice; the form keeps its values.
 - [x] `formatTransactionDetails` (P2):
   - SETTLEMENT with a period, and without one;
@@ -415,7 +416,7 @@ One spec per service, each method asserting method, URL, query and body. These p
   - trainee lists (`/trainees/<id>`, `/paid`, `/unpaid`);
   - the two report URLs and `skipDays`.
 - [x] `SettlementsService`: `finalize` POSTs `{}`; `allocations` params; `delete`.
-- [x] `CashRegisterService`: state GET; manual POST to `/transactions/manual`.
+- [x] `CashRegisterService`: state GET, with `offset`/`limit` when given; manual POST to `/transactions/manual`.
 - [x] `AccountProvisioningService`: `/api/accounts/{trainer|trainee}/<profileId>` and by-id GET, PATCH, DELETE.
 - [x] `AccountSecurityService`: `hasChangedPassword` maps the response to its boolean; `changePassword` URL and body.
 - [x] `ApiService.health` via `app.component.spec.ts` (GET `/api/health` on startup).
@@ -739,7 +740,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
 7. As a TRAINER: the draft opens with the trainer notice, no finalize button, no trainer filter.
 
 ### J7. Cash register manual entry (P1, money) [desktop, mobile]
-✅ Done in PR 5: `e2e/journeys/j7-cash-register.e2e.ts`, 3 tests × 2 viewports.
+✅ Done in PR 5: `e2e/journeys/j7-cash-register.e2e.ts`, 3 tests × 2 viewports; the paging variant (step 6) added with the paged API, 4 tests × 2 viewports.
 1. ADMIN token. `/cash-register` → `GET /api/cash-register`. `cash-register-balance` shows the fixture balance.
 2. Amount 0 → error, no POST. Amount 12.345 → error, no POST.
 3. Direction OUT, amount 12.34, notes "  float top-up  ".
@@ -748,6 +749,7 @@ Every journey starts with `GET /api/health` on boot. It is mocked as `{status:'o
    - The balance shows the new fixture value, and the form is back to IN / 0 / empty.
 4. Variant: notes left blank → the body has no `notes` key.
 5. Variant: the GET returns a negative balance → the balance still renders, negative and formatted.
+6. Variant (Nov 2026): a long history is paged. The first GET asks for `offset=0&limit=50`; Next asks for the next 50 and puts `?page=2` in the address; Per page 100 goes to `?size=100`; a reload shows the same page; saving a transaction goes back to the first page.
 
 Role access to this page is checked in J2 only.
 

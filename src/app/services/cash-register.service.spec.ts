@@ -43,4 +43,16 @@ describe('CashRegisterService', () => {
       ],
     ]);
   });
+
+  it('asks for a page of transactions with offset and limit', () => {
+    service.getCurrentState({ offset: 100, limit: 25 }).subscribe();
+    service.getCurrentState({ offset: 0 }).subscribe();
+
+    expect(
+      http.match(() => true).map((req) => req.request.urlWithParams),
+    ).toEqual([
+      '/api/cash-register?offset=100&limit=25',
+      '/api/cash-register?offset=0',
+    ]);
+  });
 });
