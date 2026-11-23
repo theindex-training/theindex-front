@@ -2003,9 +2003,22 @@
     "noGym": "None",
     "unavailable": "The current one (no longer offered)",
     "socialTitle": "Social profiles",
-    "socialHint": "A handle (@name) or a link.",
+    "socialHint": "A handle (@name) or the profile's link.",
     "socialPlaceholder": "@name",
     "socialError": "Up to 200 characters.",
+    "socialOpen": "Open",
+    "socialOpenLabel": "Open the {network} profile in a new tab",
+    "socialStillSaved": "It can still be saved as it is.",
+    "socialWarnings": {
+      "handle": {
+        "instagram": "Instagram handles have up to 30 letters, numbers, periods and underscores.",
+        "facebook": "Facebook usernames have at least 5 letters, numbers and periods. You can paste the profile's link instead.",
+        "tiktok": "TikTok handles have 2–24 letters, numbers, periods and underscores."
+      },
+      "otherNetwork": "This link goes to {linked}, not {network}.",
+      "notProfile": "This link goes to a post or a page on {network}, not to a profile. Paste the profile's link or type the handle.",
+      "otherSite": "This isn't a link to {network}. Type the handle or paste the profile's link."
+    },
     "networks": {
       "instagram": "Instagram",
       "facebook": "Facebook",

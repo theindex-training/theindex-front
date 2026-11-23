@@ -130,38 +130,76 @@
       'common.optional' | transloco
     }}</span>
   </p>
-  <div class="form-row">
-    @for (network of networks; track network) {
-      <div class="form-field">
-        <label class="form-field__label" [for]="id(network)">{{
-          'contact.networks.' + network | transloco
-        }}</label>
+  @for (network of networks; track network) {
+    <div class="form-field contact-social">
+      <label class="form-field__label" [for]="id(network)">{{
+        'contact.networks.' + network | transloco
+      }}</label>
+      <div class="contact-social__control">
+        <app-social-icon class="contact-social__logo" [network]="network" />
         <input
           [id]="id(network)"
           type="text"
           autocomplete="off"
+          autocapitalize="none"
+          spellcheck="false"
           [formControl]="form.controls[network]"
           [placeholder]="'contact.socialPlaceholder' | transloco"
           [attr.aria-describedby]="describedBy(network, id(network))"
           [attr.aria-invalid]="invalid(network)"
+          (blur)="tidySocial(network)"
         />
-        @if (invalid(network)) {
-          <span class="form-field__error" [id]="id(network) + '-help'">{{
-            'contact.socialError' | transloco
-          }}</span>
-        } @else {
-          <span class="form-field__hint" [id]="id(network) + '-help'">{{
-            'contact.socialHint' | transloco
-          }}</span>
-        }
-        @if (difference(network); as value) {
-          <app-field-difference
-            [value]="value"
-            [differenceId]="id(network) + '-diff'"
-            (use)="useDifference(network)"
-          />
-        }
       </div>
-    }
-  </div>
+      @if (invalid(network)) {
+        <span class="form-field__error" [id]="id(network) + '-help'">{{
+          'contact.socialError' | transloco
+        }}</span>
+      } @else if (socialWarning(network); as warning) {
+        <span
+          class="contact-social__warning"
+          [id]="id(network) + '-help'"
+          [attr.data-testid]="'contact-social-warning-' + network"
+        >
+          <app-icon name="alert" />
+          <span
+            >{{ warning.key | transloco: warning.params }}
+            {{ 'contact.socialStillSaved' | transloco }}</span
+          >
+        </span>
+      } @else if (social(network).url; as url) {
+        <span class="contact-social__found">
+          <span
+            class="contact-social__address"
+            [id]="id(network) + '-help'"
+            [attr.data-testid]="'contact-social-address-' + network"
+          >
+            <app-icon name="check" />
+            <span class="contact-social__url">{{ socialAddress(url) }}</span>
+          </span>
+          <a
+            class="contact-social__open"
+            [href]="url"
+            target="_blank"
+            rel="noopener noreferrer"
+            [attr.aria-label]="
+              'contact.socialOpenLabel'
+                | transloco: { network: networkName(network) }
+            "
+            >{{ 'contact.socialOpen' | transloco }}</a
+          >
+        </span>
+      } @else {
+        <span class="form-field__hint" [id]="id(network) + '-help'">{{
+          'contact.socialHint' | transloco
+        }}</span>
+      }
+      @if (difference(network); as value) {
+        <app-field-difference
+          [value]="value"
+          [differenceId]="id(network) + '-diff'"
+          (use)="useDifference(network)"
+        />
+      }
+    </div>
+  }
 </div>

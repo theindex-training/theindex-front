@@ -1,9 +1,87 @@
 .contact-socials {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
 .contact-socials__title {
   margin: 0;
+}
+
+// One network per line, even on desktop; a handle doesn't need the full form width.
+.contact-social {
+  max-width: 40rem;
+}
+
+// The network's logo inside the start of the input, like the search field's icon.
+.contact-social__control {
+  position: relative;
+}
+
+.contact-social__logo {
+  position: absolute;
+  top: 50%;
+  left: var(--space-3);
+  color: var(--muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+  --icon-size: 1.25rem;
+}
+
+.contact-social__control:focus-within .contact-social__logo {
+  color: var(--text);
+}
+
+.contact-social__control input {
+  padding-left: calc(var(--space-3) + 1.25rem + var(--space-3));
+}
+
+.contact-social__warning,
+.contact-social__address {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  --icon-size: 1rem;
+}
+
+.contact-social__warning {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.contact-social__warning app-icon,
+.contact-social__address app-icon {
+  margin-top: 0.125rem;
+}
+
+.contact-social__found {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-3);
+  min-width: 0;
+}
+
+.contact-social__address {
+  min-width: 0;
+  color: var(--muted);
+}
+
+.contact-social__address app-icon {
+  color: var(--success);
+}
+
+.contact-social__url {
+  overflow-wrap: anywhere;
+}
+
+// A 44px target that takes only a line of text in the layout.
+.contact-social__open {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  margin-block: calc((var(--touch-target) - 1.25rem) / -2);
+  font-size: var(--text-sm);
+  font-weight: 600;
 }

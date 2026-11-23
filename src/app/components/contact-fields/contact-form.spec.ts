@@ -22,6 +22,22 @@ describe('contact-form', () => {
     });
   });
 
+  it('stores social profile links as handles, as the field tidies them on blur', () => {
+    const form = contactForm({ phoneRequired: false });
+    fillContactForm(form, {
+      instagram: 'https://www.instagram.com/ivan.p/?igsh=abc',
+      facebook: 'https://www.instagram.com/ivan.p/',
+      tiktok: 'ivan.trains',
+    });
+
+    expect(contactValues(form)).toMatchObject({
+      instagram: '@ivan.p',
+      // A link to another network is kept as typed (the field warns about it).
+      facebook: 'https://www.instagram.com/ivan.p/',
+      tiktok: '@ivan.trains',
+    });
+  });
+
   it('requires the phone only when asked, and always checks its form', () => {
     const required = contactForm({ phoneRequired: true });
     expect(required.controls.phone.hasError('required')).toBe(true);
