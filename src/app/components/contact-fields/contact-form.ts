@@ -4,6 +4,7 @@ import {
   phoneValidator,
   SOCIAL_LINK_MAX_LENGTH,
 } from '../../utils/contact.util';
+import { normalizeSocialProfile } from '../../utils/social-profile.util';
 
 /**
  * The contact part of a person's details, shared by Register, My details and connecting an account:
@@ -46,15 +47,19 @@ export function contactForm(opts: { phoneRequired: boolean }): ContactForm {
   });
 }
 
+/**
+ * Social profiles are tidied as the field does on blur (`normalizeSocialProfile`: a profile link
+ * becomes "@handle"), so a form sent with Enter before the field lost focus stores the same.
+ */
 export function contactValues(form: ContactForm): ContactValues {
   const raw = form.getRawValue();
   return {
     phone: optionalText(raw.phone),
     gymSubscriptionId: raw.gymSubscriptionId || null,
     homeGymId: raw.homeGymId || null,
-    instagram: optionalText(raw.instagram),
-    facebook: optionalText(raw.facebook),
-    tiktok: optionalText(raw.tiktok),
+    instagram: optionalText(normalizeSocialProfile('instagram', raw.instagram)),
+    facebook: optionalText(normalizeSocialProfile('facebook', raw.facebook)),
+    tiktok: optionalText(normalizeSocialProfile('tiktok', raw.tiktok)),
   };
 }
 

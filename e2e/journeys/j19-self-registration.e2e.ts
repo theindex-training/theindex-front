@@ -70,9 +70,29 @@ test.describe('J19 self-registration', () => {
       await page
         .getByLabel(t('contact.preferredGym'))
         .selectOption({ label: 'Lozenets' });
-      await page
-        .getByLabel(t('contact.networks.instagram'), { exact: true })
-        .fill('@ivan');
+      // A pasted profile link is stored as the handle, with a link to check it.
+      const instagram = page.getByLabel(t('contact.networks.instagram'), {
+        exact: true,
+      });
+      await instagram.fill('https://www.instagram.com/ivan/?igsh=abc123');
+      await instagram.blur();
+      await expect(instagram).toHaveValue('@ivan');
+      await expect(
+        page.getByRole('link', {
+          name: t('contact.socialOpenLabel', { network: 'Instagram' }),
+        }),
+      ).toHaveAttribute('href', 'https://www.instagram.com/ivan');
+      // A link to another network is only a warning.
+      const facebook = page.getByLabel(t('contact.networks.facebook'), {
+        exact: true,
+      });
+      await facebook.fill('https://www.tiktok.com/@ivan');
+      await expect(
+        page.getByTestId('contact-social-warning-facebook'),
+      ).toHaveText(
+        `${t('contact.socialWarnings.otherNetwork', { network: 'Facebook', linked: 'TikTok' })} ${t('contact.socialStillSaved')}`,
+      );
+      await facebook.fill('');
 
       // Without the consent nothing is sent.
       const create = page.getByRole('button', { name: t('register.submit') });
