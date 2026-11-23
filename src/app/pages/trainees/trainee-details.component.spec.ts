@@ -35,6 +35,7 @@ const PLANS: Plan[] = [
     priceCents: 4550,
     credits: 10,
     durationDays: null,
+    durationMonths: null,
     isActive: true,
   },
   {
@@ -44,6 +45,7 @@ const PLANS: Plan[] = [
     priceCents: 6000,
     credits: null,
     durationDays: 30,
+    durationMonths: null,
     isActive: true,
   },
 ];

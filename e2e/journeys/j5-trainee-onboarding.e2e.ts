@@ -46,6 +46,7 @@ test(
           priceCents: 6000,
           credits: null,
           durationDays: 30,
+          durationMonths: null,
         }),
       ],
     });

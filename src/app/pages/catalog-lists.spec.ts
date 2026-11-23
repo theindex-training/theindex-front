@@ -72,6 +72,7 @@ describe('catalog lists', () => {
         priceCents: 4550,
         credits: 10,
         durationDays: null,
+        durationMonths: null,
         isActive: true,
       },
       {
@@ -81,6 +82,7 @@ describe('catalog lists', () => {
         priceCents: 6000,
         credits: null,
         durationDays: 1,
+        durationMonths: null,
         isActive: false,
       },
     ];
@@ -99,13 +101,27 @@ describe('catalog lists', () => {
       expect(count()).toBe('2 plans');
     });
 
-    it('describes each plan by credits or days, and its price', async () => {
+    it('describes each plan by credits, days or months, and its price', async () => {
       const component = await render(PlansComponent);
       await flush('/api/plans', plans);
       const format = TestBed.inject(LocaleFormatService);
 
       expect(component.formatPlanDetails(plans[0] as never)).toBe('10 credits');
       expect(component.formatPlanDetails(plans[1] as never)).toBe('1 day');
+      expect(
+        component.formatPlanDetails({
+          ...plans[1],
+          durationDays: null,
+          durationMonths: 1,
+        } as never),
+      ).toBe('1 month');
+      expect(
+        component.formatPlanDetails({
+          ...plans[1],
+          durationDays: null,
+          durationMonths: 3,
+        } as never),
+      ).toBe('3 months');
       expect(
         component.formatPlanDetails({ ...plans[0], credits: null } as never),
       ).toBe('0 credits');

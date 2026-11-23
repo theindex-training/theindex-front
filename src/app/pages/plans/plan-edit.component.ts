@@ -21,6 +21,12 @@ import {
   PlansService,
   UpdatePlanPayload,
 } from '../../services/plans.service';
+import {
+  DEFAULT_DURATION_UNIT,
+  DurationUnit,
+  durationFields,
+  durationOf,
+} from './plan-duration';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { UiMessagePipe } from '../../i18n/ui-message.pipe';
@@ -69,7 +75,8 @@ export class PlanEditComponent implements OnInit {
     title: FormControl<string>;
     price: FormControl<number>;
     credits: FormControl<number | null>;
-    durationDays: FormControl<number | null>;
+    duration: FormControl<number | null>;
+    durationUnit: FormControl<DurationUnit>;
     isActive: FormControl<boolean>;
   }>;
 
@@ -95,7 +102,10 @@ export class PlanEditComponent implements OnInit {
         currencyValidator,
       ]),
       credits: this.formBuilder.control<number | null>(null),
-      durationDays: this.formBuilder.control<number | null>(null),
+      duration: this.formBuilder.control<number | null>(null),
+      durationUnit: this.formBuilder.nonNullable.control<DurationUnit>(
+        DEFAULT_DURATION_UNIT,
+      ),
       isActive: this.formBuilder.nonNullable.control(true),
     });
   }
@@ -120,7 +130,8 @@ export class PlanEditComponent implements OnInit {
           title: plan.title,
           price: this.toEuros(plan.priceCents),
           credits: plan.credits,
-          durationDays: plan.durationDays,
+          duration: durationOf(plan).duration,
+          durationUnit: durationOf(plan).unit,
           isActive: plan.isActive,
         });
         this.syncTypeValidators(plan.type);
@@ -151,7 +162,9 @@ export class PlanEditComponent implements OnInit {
       priceCents: this.toCents(raw.price),
       isActive: raw.isActive,
       credits: raw.type === 'PUNCH' ? Number(raw.credits) : null,
-      durationDays: raw.type === 'TIME' ? Number(raw.durationDays) : null,
+      ...(raw.type === 'TIME'
+        ? durationFields(raw.durationUnit, Number(raw.duration))
+        : { durationDays: null, durationMonths: null }),
     };
 
     this.submitting = true;
@@ -172,7 +185,7 @@ export class PlanEditComponent implements OnInit {
 
   private syncTypeValidators(type: PlanType): void {
     const creditsControl = this.form.controls.credits;
-    const durationControl = this.form.controls.durationDays;
+    const durationControl = this.form.controls.duration;
 
     if (type === 'PUNCH') {
       creditsControl.setValidators([

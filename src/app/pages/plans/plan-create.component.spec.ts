@@ -45,7 +45,8 @@ describe('PlanCreateComponent', () => {
     title?: string;
     type?: string;
     credits?: string;
-    days?: string;
+    duration?: string;
+    unit?: 'MONTHS' | 'DAYS';
     price?: string;
   }) {
     if (values.title !== undefined)
@@ -53,8 +54,10 @@ describe('PlanCreateComponent', () => {
     if (values.type !== undefined) await page.select('#plan-type', values.type);
     if (values.credits !== undefined)
       await page.type('#plan-credits', values.credits);
-    if (values.days !== undefined)
-      await page.type('#plan-duration', values.days);
+    if (values.duration !== undefined)
+      await page.type('#plan-duration', values.duration);
+    if (values.unit !== undefined)
+      await page.select('#plan-duration-unit', values.unit);
     if (values.price !== undefined)
       await page.type('#plan-price', values.price);
   }
@@ -78,14 +81,21 @@ describe('PlanCreateComponent', () => {
       credits: 10,
     });
     expect('durationDays' in req.request.body).toBe(false);
+    expect('durationMonths' in req.request.body).toBe(false);
     req.flush({ id: 'p1' });
     await page.settle();
 
     expect(router.url).toBe('/plans');
   });
 
-  it('creates a time-based plan: duration, no credits', async () => {
-    await fill({ title: 'Monthly', type: 'TIME', days: '30', price: '60' });
+  it('creates a time-based plan in calendar months by default: durationMonths, no credits or days', async () => {
+    await fill({ title: 'Monthly', type: 'TIME', duration: '1', price: '60' });
+    expect(page.query<HTMLSelectElement>('#plan-duration-unit')!.value).toBe(
+      'MONTHS',
+    );
+    expect(page.query('#plan-duration-help')!.textContent.trim()).toBe(
+      en.plans.fields.durationMonthsHint,
+    );
     await page.submit();
 
     const req = expectPost();
@@ -94,9 +104,32 @@ describe('PlanCreateComponent', () => {
       title: 'Monthly',
       priceCents: 6000,
       isActive: true,
+      durationMonths: 1,
+    });
+    req.flush({ id: 'p2' });
+  });
+
+  it('creates a time-based plan in days: durationDays, no credits or months', async () => {
+    await fill({
+      title: '30 days',
+      type: 'TIME',
+      duration: '30',
+      unit: 'DAYS',
+      price: '60',
+    });
+    expect(page.query('#plan-duration-help')!.textContent.trim()).toBe(
+      en.plans.fields.durationDaysHint,
+    );
+    await page.submit();
+
+    const req = expectPost();
+    expect(req.request.body).toEqual({
+      type: 'TIME',
+      title: '30 days',
+      priceCents: 6000,
+      isActive: true,
       durationDays: 30,
     });
-    expect('credits' in req.request.body).toBe(false);
     req.flush({ id: 'p2' });
   });
 
@@ -153,8 +186,8 @@ describe('PlanCreateComponent', () => {
     },
   );
 
-  it('a time-based plan needs a whole number of days of 1 or more', async () => {
-    await fill({ title: 'Plan', type: 'TIME', days: '0', price: '10' });
+  it('a time-based plan needs a whole duration of 1 or more', async () => {
+    await fill({ title: 'Plan', type: 'TIME', duration: '0', price: '10' });
     await page.submit();
 
     http.expectNone('/api/plans');

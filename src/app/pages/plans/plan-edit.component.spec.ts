@@ -18,6 +18,7 @@ const PUNCH_PLAN: Plan = {
   priceCents: 4550,
   credits: 10,
   durationDays: null,
+  durationMonths: null,
   isActive: true,
 };
 
@@ -98,6 +99,7 @@ describe('PlanEditComponent', () => {
       isActive: true,
       credits: 12,
       durationDays: null,
+      durationMonths: null,
     });
     req.flush({ ...PUNCH_PLAN, title: '12 visits' });
     await page.settle();
@@ -105,16 +107,19 @@ describe('PlanEditComponent', () => {
     expect(router.url).toBe('/plans');
   });
 
-  it('switches a punch card to time-based: credits cleared, days required', async () => {
+  it('switches a punch card to time-based: credits cleared, months by default, duration required', async () => {
     await open();
     await page.select('#plan-type', 'TIME');
+    expect(page.query<HTMLSelectElement>('#plan-duration-unit')!.value).toBe(
+      'MONTHS',
+    );
     await page.submit();
     http.expectNone('/api/plans/p1');
     expect(page.query('#plan-duration')!.getAttribute('aria-invalid')).toBe(
       'true',
     );
 
-    await page.type('#plan-duration', '30');
+    await page.type('#plan-duration', '1');
     await page.submit();
 
     expect(expectPatch().request.body).toEqual({
@@ -123,7 +128,62 @@ describe('PlanEditComponent', () => {
       priceCents: 4550,
       isActive: true,
       credits: null,
+      durationDays: null,
+      durationMonths: 1,
+    });
+  });
+
+  it('switches a punch card to a time-based plan in days', async () => {
+    await open();
+    await page.select('#plan-type', 'TIME');
+    await page.type('#plan-duration', '30');
+    await page.select('#plan-duration-unit', 'DAYS');
+    await page.submit();
+
+    expect(expectPatch().request.body).toMatchObject({
+      type: 'TIME',
+      credits: null,
       durationDays: 30,
+      durationMonths: null,
+    });
+  });
+
+  it.each([
+    ['days', { durationDays: 30, durationMonths: null }, '30', 'DAYS'],
+    ['months', { durationDays: null, durationMonths: 3 }, '3', 'MONTHS'],
+  ])(
+    'opens a time-based plan in %s with its duration and unit',
+    async (_, duration, shown, unit) => {
+      await open('/plans/p1/edit', {
+        ...PUNCH_PLAN,
+        type: 'TIME',
+        credits: null,
+        ...duration,
+      });
+
+      expect(page.query<HTMLInputElement>('#plan-duration')!.value).toBe(shown);
+      expect(page.query<HTMLSelectElement>('#plan-duration-unit')!.value).toBe(
+        unit,
+      );
+    },
+  );
+
+  it('moves a 30-day plan to calendar months: days cleared', async () => {
+    await open('/plans/p1/edit', {
+      ...PUNCH_PLAN,
+      type: 'TIME',
+      credits: null,
+      durationDays: 30,
+    });
+    await page.type('#plan-duration', '1');
+    await page.select('#plan-duration-unit', 'MONTHS');
+    await page.submit();
+
+    expect(expectPatch().request.body).toMatchObject({
+      type: 'TIME',
+      credits: null,
+      durationDays: null,
+      durationMonths: 1,
     });
   });
 
