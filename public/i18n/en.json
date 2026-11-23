@@ -1377,7 +1377,15 @@
       "submit": "Sign in",
       "noAccount": "No account yet?",
       "createAccount": "Create one",
-      "notLinked": "Your account isn't connected to your profile yet. An admin will connect it soon; then you can sign in."
+      "notLinked": "Your account isn't connected to your profile yet. An admin will connect it soon; then you can sign in.",
+      "or": "or",
+      "google": {
+        "hint": "Opens your account when its email is this Google account's Gmail or Google Workspace address.",
+        "noAccount": "No account uses this Google address. Sign in with your email and password, or ask an admin which email your account has.",
+        "notAccepted": "Only Gmail addresses and Google Workspace accounts can sign in with Google. Sign in with your email and password.",
+        "error": "Couldn't sign in with Google. Try again, or sign in with your email and password.",
+        "unavailable": "Signing in with Google isn't available right now. Sign in with your email and password."
+      }
     }
   },
   "stats": {

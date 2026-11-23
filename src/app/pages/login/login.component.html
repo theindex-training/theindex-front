@@ -84,6 +84,11 @@
         }}</app-ui-button>
       </form>
 
+      <app-google-sign-in-button
+        [busy]="isSubmitting"
+        (credential)="handleGoogleCredential($event)"
+      />
+
       <p class="login__footer">
         {{ 'auth.login.noAccount' | transloco }}
         <a routerLink="/register">{{
