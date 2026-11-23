@@ -558,6 +558,16 @@ describe('SettlementDetailsComponent', () => {
       )?.value,
     ).toBe('50');
     expect(tableTrainees()).toHaveLength(50);
+
+    // Next follows the controls shown: the next 50, not a page of the size that failed.
+    await page.click('button[aria-label="Next page"]');
+    expect(url()).toBe('/settlements/s1?page=2');
+    await flushPage(
+      `${ALLOCATIONS}?offset=50&limit=50`,
+      734,
+      allocationRows(51, 50),
+    );
+    expect(count()).toBe('51–100 of 734 rows');
   });
 
   it("drops the rows when another trainer's fail to load, rather than show them as that trainer's", async () => {

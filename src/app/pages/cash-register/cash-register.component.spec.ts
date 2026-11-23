@@ -440,6 +440,15 @@ describe('CashRegisterComponent', () => {
         )?.value,
       ).toBe('50');
       expect(tableRows()).toHaveLength(50);
+
+      // Next follows the controls shown: the next 50, not a page of the size that failed.
+      await page.click('button[aria-label="Next page"]');
+      expect(url()).toBe('/cash-register?page=2');
+      await flushPage(
+        `${STATE_URL}?offset=50&limit=50`,
+        state(0, transactionRows(51, 50), 734),
+      );
+      expect(count()).toBe('51–100 of 734 transactions');
     });
 
     it('shows the first page, with the new transaction, after saving on a later one', async () => {

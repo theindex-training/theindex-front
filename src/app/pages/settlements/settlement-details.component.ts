@@ -296,7 +296,12 @@ export class SettlementDetailsComponent implements OnInit {
 
   changePage(page: number): void {
     this.scrollPending = true;
-    this.goTo({ page });
+    // After a failed page size, the paid controls show the size of the rows shown: page in it.
+    this.goTo(
+      this.tab === 'paid' && this.allocationError
+        ? { page, size: this.shownAllocationsPageSize }
+        : { page },
+    );
   }
 
   changePageSize(pageSize: number): void {
