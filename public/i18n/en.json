@@ -1969,6 +1969,8 @@
     "consent": "I agree that The Index stores and uses my personal data for my membership and may send me emails.",
     "consentHint": "Required to create an account.",
     "consentRequired": "You need to agree to create an account.",
+    "privacyPolicy": "Read the privacy policy (in Bulgarian)",
+    "opensInNewTab": "(opens in a new tab)",
     "submit": "Create account",
     "submitting": "Creating account...",
     "error": "Couldn't create your account. Try again.",

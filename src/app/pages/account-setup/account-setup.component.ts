@@ -35,6 +35,7 @@ import {
 } from '../../services/registration.service';
 import { trimmedLength } from '../../utils/form-validators.util';
 import { RETURN_URL_PARAM, safeReturnUrl } from '../../utils/return-url.util';
+import { PRIVACY_POLICY_URL } from '../../utils/privacy-policy';
 
 const passwordsMatch: ValidatorFn = (group) => {
   const password = group.get('password')?.value as string;
@@ -66,6 +67,8 @@ const passwordsMatch: ValidatorFn = (group) => {
   ],
 })
 export class AccountSetupComponent implements OnInit {
+  /** The privacy policy the consent checkbox refers to (the public site's `/privacy`). */
+  readonly privacyPolicyUrl = PRIVACY_POLICY_URL;
   /**
    * The page the person was on their way to when the login sent them here (`?returnUrl=`), where
    * the saved setup takes them instead of their start page.

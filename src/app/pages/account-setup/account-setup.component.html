@@ -190,6 +190,17 @@
                 'accountSetup.consentHint' | transloco
               }}</span>
             }
+            <a
+              class="register__policy"
+              data-testid="account-setup-consent-policy"
+              target="_blank"
+              rel="noopener"
+              [href]="privacyPolicyUrl"
+              >{{ 'register.privacyPolicy' | transloco
+              }}<span class="visually-hidden">
+                {{ 'register.opensInNewTab' | transloco }}</span
+              ></a
+            >
           </div>
 
           @if (errorMessage) {

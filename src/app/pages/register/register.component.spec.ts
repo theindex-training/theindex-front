@@ -1,3 +1,4 @@
+import { environment } from '@environments/environment';
 import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -64,6 +65,23 @@ describe('RegisterComponent', () => {
 
     expect(page.query('[id*="nickname"]')).toBeNull();
     expect(page.text()).not.toContain(en.accountsAdmin.fields.nickname);
+  });
+
+  it('links the privacy policy under the consent, in a new tab, also while the consent is missing', async () => {
+    const link = () =>
+      page.query<HTMLAnchorElement>('[data-testid="register-consent-policy"]')!;
+    const expectLink = () => {
+      expect(link().href).toBe(`${environment.publicSiteUrl}/privacy`);
+      expect(link().target).toBe('_blank');
+      expect(link().rel).toBe('noopener');
+      expect(link().textContent).toContain(en.register.privacyPolicy);
+      expect(link().textContent).toContain(en.register.opensInNewTab);
+    };
+    expectLink();
+
+    await page.submit();
+    expect(page.text()).toContain(en.register.consentRequired);
+    expectLink();
   });
 
   it('sends nothing without the consent, and says it is needed', async () => {
