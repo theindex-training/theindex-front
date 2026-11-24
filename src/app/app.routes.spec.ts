@@ -27,6 +27,7 @@ import { ArticleEditorComponent } from './pages/content/articles/article-editor.
 import { leaveEditorGuard } from './pages/content/articles/leave-editor.guard';
 import { CategoryCreateComponent } from './pages/content/categories/category-create.component';
 import { PlanCreateComponent } from './pages/plans/plan-create.component';
+import { PrivacyComponent } from './pages/privacy/privacy.component';
 
 const STAFF = ['ADMIN', 'TRAINER'];
 const ADMIN = ['ADMIN'];
@@ -151,6 +152,15 @@ describe('route table', () => {
     expect(routes.indexOf(editor)).toBeGreaterThan(routes.indexOf(shell));
   });
 
+  it('leaves the privacy policy outside the shell and unguarded, for everyone', () => {
+    const route = routes.find((entry) => entry.path === 'privacy')!;
+    expect(guardsOf(route)).toEqual([]);
+    expect(route.title).toBe('privacy.title');
+    expect(shell.children!.some((child) => child.path === 'privacy')).toBe(
+      false,
+    );
+  });
+
   it('leaves the error pages outside the shell and unguarded', () => {
     for (const path of ['unauthorized', '**']) {
       const route = routes.find((entry) => entry.path === path)!;
@@ -232,6 +242,15 @@ describe('routing (real routes)', () => {
     }
     return route.component;
   }
+
+  it('opens the privacy policy signed out and signed in, without redirecting', async () => {
+    expect(await open('/privacy')).toBe('/privacy');
+    expect(leafComponent()).toBe(PrivacyComponent);
+
+    signInAs('TRAINEE', { setupRequired: true });
+    expect(await open('/privacy')).toBe('/privacy');
+    expect(leafComponent()).toBe(PrivacyComponent);
+  });
 
   it('sends a signed-out visitor at / to /login', async () => {
     expect(await open('/')).toBe('/login');

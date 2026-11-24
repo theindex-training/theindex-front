@@ -296,6 +296,12 @@ describe('LoginComponent', () => {
     });
   });
 
+  it('links to the privacy policy', () => {
+    const link = el.querySelector('[data-testid="login-privacy"]');
+    expect(link?.textContent?.trim()).toBe(en.auth.login.privacyPolicy);
+    expect(link?.getAttribute('href')).toBe('/privacy');
+  });
+
   it('links to the register page for people without an account', () => {
     const link = Array.from(el.querySelectorAll('a')).find(
       (a) => a.textContent?.trim() === en.auth.login.createAccount,

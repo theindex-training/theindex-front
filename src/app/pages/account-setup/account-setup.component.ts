@@ -12,7 +12,7 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ContactFieldsComponent } from '../../components/contact-fields/contact-fields.component';
 import {
@@ -35,7 +35,7 @@ import {
 } from '../../services/registration.service';
 import { trimmedLength } from '../../utils/form-validators.util';
 import { RETURN_URL_PARAM, safeReturnUrl } from '../../utils/return-url.util';
-import { PRIVACY_POLICY_URL } from '../../utils/privacy-policy';
+import { PRIVACY_POLICY_PATH } from '../../utils/privacy-policy';
 
 const passwordsMatch: ValidatorFn = (group) => {
   const password = group.get('password')?.value as string;
@@ -54,6 +54,7 @@ const passwordsMatch: ValidatorFn = (group) => {
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterLink,
     TranslocoPipe,
     UiMessagePipe,
     LanguageSwitchComponent,
@@ -67,8 +68,8 @@ const passwordsMatch: ValidatorFn = (group) => {
   ],
 })
 export class AccountSetupComponent implements OnInit {
-  /** The privacy policy the consent checkbox refers to (the public site's `/privacy`). */
-  readonly privacyPolicyUrl = PRIVACY_POLICY_URL;
+  /** The privacy policy the consent checkbox refers to (opened in a new tab, so the form stays). */
+  readonly privacyPolicyPath = PRIVACY_POLICY_PATH;
   /**
    * The page the person was on their way to when the login sent them here (`?returnUrl=`), where
    * the saved setup takes them instead of their start page.

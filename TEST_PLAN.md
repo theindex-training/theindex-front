@@ -27,6 +27,7 @@ Rules are in `CLAUDE.md` → "Testing". In short:
 - Who booked a training (a feature: the staff's training page and Register attendance opened from it) came with journey J18, `schedule-training.component.spec.ts`, Details links in `schedule-pages.spec.ts` and an "opened from a training" block in `attendance-register.component.spec.ts`. One deliberate break (the chosen gym not kept when the trainer changes) was caught.
 - Self-registration and connecting accounts (a feature: `/register`, `/accounts`, `/accounts/:id`, `/my-details`) came with journey J19 and its own specs (`register.component.spec.ts`, `pages/accounts/*.spec.ts`, `my-details.component.spec.ts`, `contact-form.spec.ts`, `contact.util.spec.ts`, `services/self-registration.services.spec.ts`), plus the login 403, the route table, the nav and the user block. Two deliberate breaks (registering without the consent, a trainer sending a gym subscription from My details) were each caught.
 - The exercise library (a feature: `/exercises` for trainees, with the staff Exercises table shared as `app-exercises-table`) came with section 19 and journey J23; J8 now opens Stats from the Account sheet. Two deliberate breaks (the Status column shown to trainees, Stats kept as a tab) were each caught.
+- The privacy policy (`/privacy`, public) came with `privacy.component.spec.ts`, the route table, the login, Register and account setup link specs, and journey J26.
 - Sign in with Google (a feature: a shortcut into the account with the same email) came with `login-google.component.spec.ts` and journey J25. Two deliberate breaks (Google's error codes shown as the API's English, the Google button rendered with a fixed language) were each caught.
 - The workouts area (a feature: workouts, exercises, workout types, PDF import) came with journey J15 and its own specs (`pages/workouts/*.spec.ts`, `services/workouts-api.services.spec.ts`): 81 spec files, 816 unit tests, 51 E2E tests. One deliberate break (the women's amount dropped from the payload) was caught.
 
@@ -899,6 +900,11 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 1. Desktop and phone: with no client id from the API, the login page has no Google button and requests nothing from Google.
 2. With one (Google's script replaced by a fake whose button signs in at once): the trainee's credential is posted to `/api/auth/google` (no password login) and the dashboard opens with the token stored.
 3. A Google address no account has: the translated explanation, still on `/login`, no token.
+
+### J26. Privacy policy (P1) [desktop, mobile]
+✅ `e2e/journeys/j26-privacy-policy.e2e.ts`. Unit specs: `pages/privacy/privacy.component.spec.ts`, `app.routes.spec.ts`.
+1. Desktop and phone, signed out: the sign-in page's link opens `/privacy` (the title and the controller), which asks the API for nothing; switching to БГ translates it; "Back to sign in" returns to `/login`.
+2. Register's consent link opens the policy in a new tab and the half-filled form keeps its values.
 
 ---
 

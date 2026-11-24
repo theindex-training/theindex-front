@@ -1,4 +1,3 @@
-import { environment } from '@environments/environment';
 import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -71,7 +70,7 @@ describe('RegisterComponent', () => {
     const link = () =>
       page.query<HTMLAnchorElement>('[data-testid="register-consent-policy"]')!;
     const expectLink = () => {
-      expect(link().href).toBe(`${environment.publicSiteUrl}/privacy`);
+      expect(link().getAttribute('href')).toBe('/privacy');
       expect(link().target).toBe('_blank');
       expect(link().rel).toBe('noopener');
       expect(link().textContent).toContain(en.register.privacyPolicy);

@@ -1385,7 +1385,8 @@
         "notAccepted": "Only Gmail addresses and Google Workspace accounts can sign in with Google. Sign in with your email and password.",
         "error": "Couldn't sign in with Google. Try again, or sign in with your email and password.",
         "unavailable": "Signing in with Google isn't available right now. Sign in with your email and password."
-      }
+      },
+      "privacyPolicy": "Privacy policy"
     }
   },
   "stats": {
@@ -1969,7 +1970,7 @@
     "consent": "I agree that The Index stores and uses my personal data for my membership and may send me emails.",
     "consentHint": "Required to create an account.",
     "consentRequired": "You need to agree to create an account.",
-    "privacyPolicy": "Read the privacy policy (in Bulgarian)",
+    "privacyPolicy": "Read the privacy policy",
     "opensInNewTab": "(opens in a new tab)",
     "submit": "Create account",
     "submitting": "Creating account...",
@@ -2175,6 +2176,81 @@
       "saveError": "Couldn't save the photo.",
       "removeError": "Couldn't remove the photo.",
       "loadError": "Couldn't load your photo."
+    }
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "updated": "Last updated: {date}",
+    "backToLogin": "Back to sign in",
+    "backToApp": "Back to the app",
+    "intro": "This policy explains how we process your personal data when you use The Index app (app.theindex.training). We process it under the General Data Protection Regulation (GDPR) and Bulgarian law.",
+    "controller": {
+      "heading": "Who processes your data",
+      "text": "The controller of your personal data is В.С. Груп ЕООД (V.S. Group EOOD), UIC 208548730, registered office and address: 2A Asen Hristoforov St., entrance A, floor 8, apt. 48, Yuzhen district, Plovdiv 4004, Bulgaria. It is the organisation of the trainers who lead the trainings. The gyms are only the places where we train and receive no data from the app.",
+      "contact": "For anything about your personal data, contact us in writing at the address above or in person through the trainers at the gym."
+    },
+    "data": {
+      "heading": "What data we collect",
+      "account": "Account: name, email and password. We never keep the password as text, only as an irreversible hash.",
+      "contact": "Contact and membership details: phone, the gym subscription card you use (e.g. MultiSport), your preferred gym and, if you add them, your Instagram, Facebook and TikTok profiles.",
+      "photo": "A profile photo, if you upload one. We also keep the original photo so you can crop it again; only you see it.",
+      "training": "Trainings and subscriptions: your bookings, your attendance (date, time, gym and trainer), the subscriptions you buy and the amounts paid.",
+      "results": "The benchmark and heavy lift results you log yourself, with their date and note.",
+      "nickname": "Nickname: trainers may give you an internal nickname to tell apart people with the same name. Only trainers see it.",
+      "consent": "When you agreed to the processing of your data.",
+      "technical": "Technical data: when you open the app, our servers receive your IP address and browser details needed for the connection and for security.",
+      "google": "If you sign in with Google: Google sends us your name and email. We use the email only to find your account and keep nothing else from your Google account."
+    },
+    "purposes": {
+      "heading": "Why we use it, and on what basis",
+      "contract": "To run your membership: your account, bookings, attendance, subscriptions and payments, and the trainers’ payouts for the trainings they lead. Basis: our contract with you (Art. 6(1)(b) GDPR).",
+      "legal": "To meet our legal obligations, such as accounting for payments. Basis: legal obligation (Art. 6(1)(c)).",
+      "consent": "To send you emails about your membership and news from The Index, and for the data you choose to add: photo, social profiles and results. Basis: your consent (Art. 6(1)(a)). You can withdraw it at any time; that doesn’t affect processing before the withdrawal.",
+      "security": "To keep the app secure and working. Basis: our legitimate interest (Art. 6(1)(f))."
+    },
+    "visibility": {
+      "heading": "Who sees your data",
+      "staff": "The Index’s trainers and administrators see your data to run trainings, memberships and payments.",
+      "members": "Other members see only your name and photo next to your results on the leaderboards. For trainings, they see how many people booked, but not who.",
+      "noSale": "We don’t sell your data or share it for advertising."
+    },
+    "processors": {
+      "heading": "Who helps us process it",
+      "hosting": "Contabo GmbH (Germany) hosts the servers the app and its database run on. The servers are in the European Union.",
+      "google": "Google, when you: sign in with Google; watch a YouTube video (the youtube-nocookie.com player loads only when you press play; until then you only see its picture from YouTube); add a training to Google Calendar. The app also loads its fonts from Google Fonts. Google therefore receives your IP address and may process data outside the EU under its own privacy policy.",
+      "authorities": "Public authorities, only when the law requires it."
+    },
+    "retention": {
+      "heading": "How long we keep it",
+      "membership": "We keep your account and profile data while you train with us and for up to 2 years after your last training. After that we delete it or make it anonymous.",
+      "accounting": "We keep subscriptions, payments and the attendance linked to them for as long as accounting and tax law requires, even if you asked us to delete your account.",
+      "yours": "We keep your photo, social profiles and results until you remove them or your profile is deleted.",
+      "technical": "We keep technical server records briefly, as long as security needs them."
+    },
+    "storage": {
+      "heading": "Cookies and data in your browser",
+      "text": "We don’t use cookies for tracking, advertising or visitor analytics. The app keeps in your browser (local storage) only what it needs to work: your sign-in while you are signed in, and settings such as language, theme and chosen gym."
+    },
+    "rights": {
+      "heading": "Your rights",
+      "intro": "You have the right:",
+      "access": "to get a copy of your data;",
+      "rectify": "to correct inaccurate data;",
+      "erase": "to ask us to delete your data, except what we must keep by law;",
+      "restrict": "to restrict its processing;",
+      "portability": "to receive the data you gave us in a machine-readable format;",
+      "object": "to object to processing based on our legitimate interest;",
+      "withdraw": "to withdraw your consent.",
+      "how": "You can change much of your data yourself in the app, under “My details”. For anything else, contact us as described at the start. We reply within one month.",
+      "complaint": "If you think we process your data unlawfully, you can complain to the Bulgarian Commission for Personal Data Protection (www.cpdp.bg)."
+    },
+    "security": {
+      "heading": "How we protect it",
+      "text": "The app works only over an encrypted connection (HTTPS), passwords are stored as an irreversible hash, and access to your data is limited to trainers and administrators."
+    },
+    "changes": {
+      "heading": "Changes to this policy",
+      "text": "When we change the policy, we publish the new version on this page with the date of the change."
     }
   }
 }
