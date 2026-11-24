@@ -37,6 +37,16 @@ export class AuthService {
       .pipe(tap((response) => this.setToken(response.accessToken)));
   }
 
+  /**
+   * "Sign in with Google": the API opens the account with the Google account's email (theindex-api
+   * `POST /api/auth/google`) and answers like a login.
+   */
+  loginWithGoogle(credential: string): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${environment.apiUrl}/auth/google`, { credential })
+      .pipe(tap((response) => this.setToken(response.accessToken)));
+  }
+
   logout(): void {
     localStorage.removeItem(this.tokenKey);
   }

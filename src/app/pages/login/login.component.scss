@@ -114,6 +114,18 @@
   text-align: center;
 }
 
+.login__policy {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  text-align: center;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+  }
+}
+
 @media (min-width: 1024px) {
   .login {
     grid-template-columns: 1.1fr 1fr;

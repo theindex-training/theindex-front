@@ -110,6 +110,26 @@ describe('AccountSetupComponent', () => {
     expect(page.text()).toContain(en.accountSetup.introPassword);
   });
 
+  it('links the privacy policy under the consent, in a new tab, also while the consent is missing', async () => {
+    await open();
+    const link = () =>
+      page.query<HTMLAnchorElement>(
+        '[data-testid="account-setup-consent-policy"]',
+      )!;
+    const expectLink = () => {
+      expect(link().getAttribute('href')).toBe('/privacy');
+      expect(link().target).toBe('_blank');
+      expect(link().rel).toBe('noopener');
+      expect(link().textContent).toContain(en.register.privacyPolicy);
+      expect(link().textContent).toContain(en.register.opensInNewTab);
+    };
+    expectLink();
+
+    await page.submit();
+    expect(page.text()).toContain(en.accountSetup.consentRequired);
+    expectLink();
+  });
+
   it('sends nothing without a new password or the consent, and says why', async () => {
     await open();
     await page.submit();

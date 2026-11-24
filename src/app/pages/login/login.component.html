@@ -84,10 +84,20 @@
         }}</app-ui-button>
       </form>
 
+      <app-google-sign-in-button
+        [busy]="isSubmitting"
+        (credential)="handleGoogleCredential($event)"
+      />
+
       <p class="login__footer">
         {{ 'auth.login.noAccount' | transloco }}
         <a routerLink="/register">{{
           'auth.login.createAccount' | transloco
+        }}</a>
+      </p>
+      <p class="login__policy">
+        <a routerLink="/privacy" data-testid="login-privacy">{{
+          'auth.login.privacyPolicy' | transloco
         }}</a>
       </p>
     </div>

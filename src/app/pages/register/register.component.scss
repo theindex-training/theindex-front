@@ -12,6 +12,15 @@
   line-height: 1.5;
 }
 
+// The privacy policy under the consent checkbox (a new tab, so the form isn't lost).
+.register__policy {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: var(--touch-target);
+  font-size: var(--text-sm);
+}
+
 .register__done {
   display: flex;
   flex-direction: column;

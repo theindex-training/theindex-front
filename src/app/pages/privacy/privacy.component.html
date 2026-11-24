@@ -1,0 +1,101 @@
+<div class="privacy-page">
+  <header class="privacy-page__bar">
+    <app-brand />
+    <app-language-switch [compact]="true" />
+  </header>
+
+  <main class="privacy-page__main">
+    <article class="privacy">
+      @if (signedIn) {
+        <a class="privacy__back" routerLink="/home">{{
+          'privacy.backToApp' | transloco
+        }}</a>
+      } @else {
+        <a class="privacy__back" routerLink="/login">{{
+          'privacy.backToLogin' | transloco
+        }}</a>
+      }
+
+      <h1 class="privacy__title">{{ 'privacy.title' | transloco }}</h1>
+      <p class="privacy__updated" data-testid="privacy-updated">
+        {{ 'privacy.updated' | transloco: { date: updated() } }}
+      </p>
+
+      <div class="privacy__body">
+        <p>{{ 'privacy.intro' | transloco }}</p>
+
+        <h2>{{ 'privacy.controller.heading' | transloco }}</h2>
+        <p data-testid="privacy-controller">
+          {{ 'privacy.controller.text' | transloco }}
+        </p>
+        <p>{{ 'privacy.controller.contact' | transloco }}</p>
+
+        <h2>{{ 'privacy.data.heading' | transloco }}</h2>
+        <ul>
+          <li>{{ 'privacy.data.account' | transloco }}</li>
+          <li>{{ 'privacy.data.contact' | transloco }}</li>
+          <li>{{ 'privacy.data.photo' | transloco }}</li>
+          <li>{{ 'privacy.data.training' | transloco }}</li>
+          <li>{{ 'privacy.data.results' | transloco }}</li>
+          <li>{{ 'privacy.data.nickname' | transloco }}</li>
+          <li>{{ 'privacy.data.consent' | transloco }}</li>
+          <li>{{ 'privacy.data.technical' | transloco }}</li>
+          <li>{{ 'privacy.data.google' | transloco }}</li>
+        </ul>
+
+        <h2>{{ 'privacy.purposes.heading' | transloco }}</h2>
+        <ul>
+          <li>{{ 'privacy.purposes.contract' | transloco }}</li>
+          <li>{{ 'privacy.purposes.legal' | transloco }}</li>
+          <li>{{ 'privacy.purposes.consent' | transloco }}</li>
+          <li>{{ 'privacy.purposes.security' | transloco }}</li>
+        </ul>
+
+        <h2>{{ 'privacy.visibility.heading' | transloco }}</h2>
+        <ul>
+          <li>{{ 'privacy.visibility.staff' | transloco }}</li>
+          <li>{{ 'privacy.visibility.members' | transloco }}</li>
+          <li>{{ 'privacy.visibility.noSale' | transloco }}</li>
+        </ul>
+
+        <h2>{{ 'privacy.processors.heading' | transloco }}</h2>
+        <ul>
+          <li>{{ 'privacy.processors.hosting' | transloco }}</li>
+          <li>{{ 'privacy.processors.google' | transloco }}</li>
+          <li>{{ 'privacy.processors.authorities' | transloco }}</li>
+        </ul>
+
+        <h2>{{ 'privacy.retention.heading' | transloco }}</h2>
+        <ul>
+          <li>{{ 'privacy.retention.membership' | transloco }}</li>
+          <li>{{ 'privacy.retention.accounting' | transloco }}</li>
+          <li>{{ 'privacy.retention.yours' | transloco }}</li>
+          <li>{{ 'privacy.retention.technical' | transloco }}</li>
+        </ul>
+
+        <h2>{{ 'privacy.storage.heading' | transloco }}</h2>
+        <p>{{ 'privacy.storage.text' | transloco }}</p>
+
+        <h2>{{ 'privacy.rights.heading' | transloco }}</h2>
+        <p>{{ 'privacy.rights.intro' | transloco }}</p>
+        <ul>
+          <li>{{ 'privacy.rights.access' | transloco }}</li>
+          <li>{{ 'privacy.rights.rectify' | transloco }}</li>
+          <li>{{ 'privacy.rights.erase' | transloco }}</li>
+          <li>{{ 'privacy.rights.restrict' | transloco }}</li>
+          <li>{{ 'privacy.rights.portability' | transloco }}</li>
+          <li>{{ 'privacy.rights.object' | transloco }}</li>
+          <li>{{ 'privacy.rights.withdraw' | transloco }}</li>
+        </ul>
+        <p>{{ 'privacy.rights.how' | transloco }}</p>
+        <p>{{ 'privacy.rights.complaint' | transloco }}</p>
+
+        <h2>{{ 'privacy.security.heading' | transloco }}</h2>
+        <p>{{ 'privacy.security.text' | transloco }}</p>
+
+        <h2>{{ 'privacy.changes.heading' | transloco }}</h2>
+        <p>{{ 'privacy.changes.text' | transloco }}</p>
+      </div>
+    </article>
+  </main>
+</div>

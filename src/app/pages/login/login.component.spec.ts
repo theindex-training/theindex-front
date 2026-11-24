@@ -30,9 +30,17 @@ describe('LoginComponent', () => {
     fixture = TestBed.createComponent(LoginComponent);
     el = fixture.nativeElement;
     await fixture.whenStable();
+    answerGoogleConfig(null);
   });
 
   afterEach(() => http.verify());
+
+  /** The login page asks whether Google sign-in is set up (no client id: no Google button). */
+  function answerGoogleConfig(clientId: string | null) {
+    const req = http.expectOne('/api/auth/google/config');
+    expect(req.request.method).toBe('GET');
+    req.flush({ clientId });
+  }
 
   async function type(id: string, value: string) {
     const input = el.querySelector<HTMLInputElement>(`#${id}`)!;
@@ -160,6 +168,7 @@ describe('LoginComponent', () => {
       fixture = TestBed.createComponent(LoginComponent);
       el = fixture.nativeElement;
       await fixture.whenStable();
+      answerGoogleConfig(null);
     }
 
     it.each(['TRAINER', 'TRAINEE'])(
@@ -285,6 +294,12 @@ describe('LoginComponent', () => {
       expect(router.url).toBe('/home');
       expect(alert()).toBeUndefined();
     });
+  });
+
+  it('links to the privacy policy', () => {
+    const link = el.querySelector('[data-testid="login-privacy"]');
+    expect(link?.textContent?.trim()).toBe(en.auth.login.privacyPolicy);
+    expect(link?.getAttribute('href')).toBe('/privacy');
   });
 
   it('links to the register page for people without an account', () => {

@@ -26,6 +26,7 @@ interface Fixtures {
 /**
  * - Every /api request is answered by `api`; an unanswered one fails the test at the end.
  *   `GET /api/my-profile` (the navigation's avatar) is answered by default with `myProfile()`,
+ *   `GET /api/auth/google/config` with no client id (the login page shows no Google button),
  *   and the dashboards' requests (`dashboardDefaults`) with nothing to show.
  * - The UI starts in English (localStorage `lang`), so `t()` selectors apply. Seeded values are
  *   written once per tab, so a reload or the app's own logout/language switch behaves as in real use.
@@ -35,6 +36,8 @@ export const test = base.extend<Fixtures>({
     const api = new ApiMock();
     // The navigation's avatar of trainees and trainers (a test's own rule wins).
     api.on('GET', '/api/my-profile', { body: myProfile() });
+    // The login page's "Sign in with Google": off unless a test sets a client id.
+    api.on('GET', '/api/auth/google/config', { body: { clientId: null } });
     dashboardDefaults(api);
     await api.install(page);
     await use(api);

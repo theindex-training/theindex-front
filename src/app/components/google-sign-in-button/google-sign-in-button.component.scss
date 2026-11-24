@@ -1,0 +1,49 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+:host:has(.google-sign-in__or) {
+  margin-top: var(--space-6);
+}
+
+.google-sign-in__or {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid var(--border);
+  }
+}
+
+// Google's iframe button, centred, at least the touch target tall (Google draws it 40px).
+.google-sign-in__button {
+  display: flex;
+  justify-content: center;
+  min-height: 0;
+
+  &:not(:empty) {
+    min-height: var(--touch-target);
+    align-items: center;
+  }
+
+  &.is-busy {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+.google-sign-in__hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}

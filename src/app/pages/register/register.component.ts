@@ -27,6 +27,7 @@ import {
   RegistrationService,
 } from '../../services/registration.service';
 import { trimmedLength } from '../../utils/form-validators.util';
+import { PRIVACY_POLICY_PATH } from '../../utils/privacy-policy';
 
 const passwordsMatch: ValidatorFn = (group) => {
   const password = group.get('password')?.value as string;
@@ -54,6 +55,8 @@ const passwordsMatch: ValidatorFn = (group) => {
   styleUrls: ['../login/login.component.scss', './register.component.scss'],
 })
 export class RegisterComponent implements OnInit {
+  /** The privacy policy the consent checkbox refers to (opened in a new tab, so the form stays). */
+  readonly privacyPolicyPath = PRIVACY_POLICY_PATH;
   readonly contact = contactForm({ phoneRequired: true });
   readonly form = new FormGroup(
     {

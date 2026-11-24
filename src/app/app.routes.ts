@@ -39,6 +39,15 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    // Public, for anyone signed in or not (Register's consent and Google's consent screen link here).
+    path: 'privacy',
+    title: 'privacy.title',
+    loadComponent: () =>
+      import('./pages/privacy/privacy.component').then(
+        (m) => m.PrivacyComponent,
+      ),
+  },
+  {
     path: 'unauthorized',
     title: 'system.unauthorized.title',
     loadComponent: () =>

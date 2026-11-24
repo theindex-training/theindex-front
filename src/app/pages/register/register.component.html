@@ -167,6 +167,17 @@
                 'register.consentHint' | transloco
               }}</span>
             }
+            <a
+              class="register__policy"
+              data-testid="register-consent-policy"
+              target="_blank"
+              rel="noopener"
+              [routerLink]="privacyPolicyPath"
+              >{{ 'register.privacyPolicy' | transloco
+              }}<span class="visually-hidden">
+                {{ 'register.opensInNewTab' | transloco }}</span
+              ></a
+            >
           </div>
 
           @if (errorMessage) {
