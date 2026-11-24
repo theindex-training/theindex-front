@@ -746,6 +746,60 @@ describe('schedule pages', () => {
       http.expectNone('/api/schedules/slots/s-sat');
     });
 
+    it("shows how many attended each training once attendance is saved, and each day's total", async () => {
+      signInAs('TRAINER');
+      await openSchedule('/workouts/schedule');
+      await showWeek({
+        ...WEEK,
+        slots: [
+          // Thursday: two trainings at 07:10 (they share the attendance at that start) and one at 17:00.
+          {
+            ...weekSlot('s-thu', '2026-11-12', MORNING, VELCHO),
+            bookedCount: 2,
+            attendanceCount: 3,
+          },
+          {
+            ...weekSlot('s-thu-2', '2026-11-12', MORNING, VASKO),
+            attendanceCount: 3,
+          },
+          {
+            ...weekSlot('s-thu-pm', '2026-11-12', EVENING, VASKO),
+            attendanceCount: 1,
+          },
+          {
+            ...weekSlot('s-fri', '2026-11-13', EVENING, VASKO),
+            bookedCount: 4,
+            attendanceCount: 0,
+          },
+          WEEK.slots[2],
+        ],
+      });
+
+      expect(slotLines('2026-11-12')).toEqual([
+        '07:10 – 08:10 Velcho Sokolov 2 booked 3 attended',
+        '07:10 – 08:10 Vasko 3 attended',
+        '17:00 – 18:00 Vasko 1 attended',
+      ]);
+      // A trainee who came twice counts twice; the shared 07:10 start counts once.
+      expect(
+        page
+          .query('[data-testid="schedule-attended-day-2026-11-12"]')
+          ?.textContent?.trim(),
+      ).toBe('4 attendances');
+      // Nothing saved yet: only the bookings, and no day total.
+      expect(slotLines('2026-11-13')).toEqual(['17:00 – 18:00 Vasko 4 booked']);
+      expect(
+        page.query('[data-testid="schedule-attended-day-2026-11-13"]'),
+      ).toBeNull();
+      // A week answered without the count (as a template slot is) shows none either.
+      expect(slotLines('2026-11-14')).toEqual([
+        '07:10 – 08:10 Velcho Sokolov Helen',
+      ]);
+      expect(
+        page.query('[data-testid="schedule-attended-day-2026-11-14"]'),
+      ).toBeNull();
+    });
+
     it('removes a training once confirmed', async () => {
       signInAs('TRAINER');
       await openSchedule('/workouts/schedule');

@@ -47,6 +47,11 @@ export interface ScheduleSlot {
   workout: { id: string; title: string | null } | null;
   /** Trainees who booked it (a plan to come, not attendance). */
   bookedCount: number;
+  /**
+   * Trainees with attendance saved for it (its gym and start, whoever the trainer), in a week's
+   * answers (`GET /api/schedules` and a changed slot); the training's page has `attendees`.
+   */
+  attendanceCount?: number;
 }
 
 /**
