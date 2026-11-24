@@ -31,6 +31,8 @@ export interface ScheduleSlotView {
   workout?: { id: string; title: string | null } | null;
   /** Bookings, in a real week (a template has none). */
   bookedCount?: number;
+  /** Trainees with attendance saved for it, in a real week. */
+  attendanceCount?: number;
 }
 
 /** One day of the list: a weekday of a template, or a date of a real week. */
@@ -112,6 +114,19 @@ export class ScheduleDaysComponent {
     return this.workouts
       ? this.workouts.filter((w) => w.date === dayKey)
       : null;
+  }
+
+  /**
+   * The day's attendance: the trainees saved for its trainings, added up, so someone who trained
+   * twice counts twice. Trainings that share a start (different trainers) share their attendance
+   * (it is counted by gym and start), so each start counts once.
+   */
+  dayAttendance(day: ScheduleDayView): number {
+    const byStart = new Map<string, number>();
+    for (const slot of day.slots) {
+      byStart.set(slot.trainingTime.startTime, slot.attendanceCount ?? 0);
+    }
+    return [...byStart.values()].reduce((sum, count) => sum + count, 0);
   }
 
   describe(day: ScheduleDayView, slot: ScheduleSlotView): string {

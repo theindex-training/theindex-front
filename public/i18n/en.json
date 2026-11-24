@@ -382,6 +382,11 @@
       "tomorrow": "Tomorrow",
       "none": "No trainings published for this day.",
       "fullSchedule": "Full schedule"
+    },
+    "myBookings": {
+      "title": "Your bookings",
+      "subtitle": "The trainings you booked for today and tomorrow.",
+      "onNow": "On now"
     }
   },
   "plans": {
@@ -1780,7 +1785,9 @@
       "add": "Add a training",
       "addFor": "Add a training on {day}",
       "booked": "{count, plural, =0 {No bookings} one {# booked} other {# booked}}",
-      "detailsFor": "Details of {slot}"
+      "detailsFor": "Details of {slot}",
+      "attended": "{count, plural, one {# attended} other {# attended}}",
+      "dayAttended": "{count, plural, one {# attendance} other {# attendances}}"
     },
     "template": {
       "title": "Weekly template",

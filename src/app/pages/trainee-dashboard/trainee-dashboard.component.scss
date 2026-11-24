@@ -83,3 +83,10 @@
 .summary--none .summary__advice {
   color: var(--danger);
 }
+
+// "Your bookings": the day above the time, in the muted label style.
+.training__when {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}

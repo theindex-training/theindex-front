@@ -12,6 +12,15 @@
             'workouts.list.today' | transloco
           }}</app-chip>
         }
+        @if (dayAttendance(day); as attended) {
+          <span
+            class="day__attended text-muted"
+            [attr.data-testid]="'schedule-attended-day-' + day.key"
+            >{{
+              'schedules.days.dayAttended' | transloco: { count: attended }
+            }}</span
+          >
+        }
       </div>
 
       @if (day.slots.length) {
@@ -66,6 +75,16 @@
                     'schedules.days.booked'
                       | transloco: { count: slot.bookedCount }
                   }}</span>
+                }
+                @if (slot.attendanceCount) {
+                  <app-chip
+                    tone="success"
+                    [attr.data-testid]="'schedule-attended-slot-' + slot.id"
+                    >{{
+                      'schedules.days.attended'
+                        | transloco: { count: slot.attendanceCount }
+                    }}</app-chip
+                  >
                 }
                 @if (day.editable || showDetails) {
                   <span class="slot__actions">

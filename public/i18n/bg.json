@@ -382,6 +382,11 @@
       "tomorrow": "Утре",
       "none": "Няма публикувани тренировки за този ден.",
       "fullSchedule": "Цялото разписание"
+    },
+    "myBookings": {
+      "title": "Вашите записвания",
+      "subtitle": "Тренировките, за които сте се записали днес и утре.",
+      "onNow": "В момента"
     }
   },
   "plans": {
@@ -1780,7 +1785,9 @@
       "add": "Добави тренировка",
       "addFor": "Добави тренировка в {day}",
       "booked": "{count, plural, =0 {Няма записани} one {# записан} other {# записани}}",
-      "detailsFor": "Подробности за {slot}"
+      "detailsFor": "Подробности за {slot}",
+      "attended": "{count, plural, one {# присъствал} other {# присъствали}}",
+      "dayAttended": "{count, plural, one {# присъствие} other {# присъствия}}"
     },
     "template": {
       "title": "Седмичен шаблон",

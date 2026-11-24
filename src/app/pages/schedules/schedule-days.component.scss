@@ -14,13 +14,19 @@
 
 .day__header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-1) var(--space-3);
 }
 
 .day__title {
   margin: 0;
   font-size: var(--text-lg);
+}
+
+.day__attended {
+  font-size: var(--text-sm);
+  white-space: nowrap;
 }
 
 .day--today .day__title {

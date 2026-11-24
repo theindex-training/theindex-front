@@ -205,6 +205,108 @@ describe('TraineeDashboardComponent: subscription and the next trainings', () =>
     });
   });
 
+  const myBookings = () =>
+    page
+      .queryAll('[data-testid^="my-booking-"]')
+      .map((li) => li.getAttribute('data-testid')!.replace('my-booking-', ''));
+
+  describe('your bookings', () => {
+    /** Sunday 22 Nov at Center, 07:00 – 08:00 Sofia, booked. */
+    const MORNING_BOOKED = training({
+      id: 'morning-booked',
+      gym: { id: CENTER.id, name: CENTER.name },
+      trainingTime: { startTime: '07:00:00', endTime: '08:00:00' },
+      startsAt: '2026-11-22T05:00:00.000Z',
+      bookedByMe: true,
+      canBook: false,
+      canCancel: true,
+      workout: { title: 'Fran' },
+    });
+    /** Sunday 22 Nov at Lozenets, 18:00 – 19:00, booked. */
+    const EVENING_BOOKED = training({
+      id: 'evening-booked',
+      bookedByMe: true,
+      canBook: false,
+      canCancel: true,
+    });
+    /** Monday 23 Nov at Lozenets, 18:00 – 19:00, booked. */
+    const TOMORROW_BOOKED = training({
+      id: 'tomorrow-booked',
+      date: TOMORROW,
+      startsAt: '2026-11-23T16:00:00.000Z',
+      bookedByMe: true,
+      canBook: false,
+      canCancel: true,
+    });
+
+    it("lists the trainee's own bookings of today and tomorrow, in any gym, between the subscription and the trainings", async () => {
+      await render(
+        [subscription({})],
+        [CENTER, LOZENETS],
+        [MORNING_BOOKED, LOZENETS_TODAY, EVENING_BOOKED, TOMORROW_BOOKED],
+      );
+
+      expect(myBookings()).toEqual([
+        'morning-booked',
+        'evening-booked',
+        'tomorrow-booked',
+      ]);
+      const section = page.query('[data-testid="my-bookings"]')!;
+      expect(section.querySelector('h2')!.textContent.trim()).toBe(
+        copy.myBookings.title,
+      );
+      // After the subscription card, before today's and tomorrow's trainings.
+      const order = page
+        .queryAll(
+          '[data-testid="subscription-summary"], [data-testid="my-bookings"], [data-testid^="upcoming-day-"]',
+        )
+        .map((el) => el.getAttribute('data-testid'));
+      expect(order).toEqual([
+        'subscription-summary',
+        'my-bookings',
+        `upcoming-day-${TODAY}`,
+        `upcoming-day-${TOMORROW}`,
+      ]);
+      const morning = page.query('[data-testid="my-booking-morning-booked"]')!;
+      const text = morning.textContent.replace(/\s+/g, ' ');
+      expect(text).toContain('Today · Sunday, 22 November');
+      expect(text).toContain('07:00 – 08:00');
+      expect(text).toContain('Center · Velcho');
+      expect(text).toContain('Fran');
+      expect(text).toContain(en.traineeSchedule.booked);
+      expect(morning.querySelector('a')!.getAttribute('href')).toBe(
+        '/schedule/morning-booked',
+      );
+      expect(
+        page.query('[data-testid="my-booking-tomorrow-booked"]')!.textContent,
+      ).toContain('Tomorrow · Monday, 23 November');
+    });
+
+    it('is left out while the trainee has no bookings', async () => {
+      await render([], [LOZENETS], [LOZENETS_TODAY, LOZENETS_TOMORROW]);
+
+      expect(page.query('[data-testid="my-bookings"]')).toBeNull();
+    });
+
+    it('marks a booked training that is on now, and drops one that has ended', async () => {
+      // 18:30 on Sunday in Sofia: the morning training is over, the evening one is on.
+      vi.setSystemTime(new Date('2026-11-22T16:30:00Z'));
+      await render(
+        [],
+        [CENTER, LOZENETS],
+        [MORNING_BOOKED, EVENING_BOOKED, TOMORROW_BOOKED],
+      );
+
+      expect(myBookings()).toEqual(['evening-booked', 'tomorrow-booked']);
+      expect(
+        page.query('[data-testid="my-booking-evening-booked"]')!.textContent,
+      ).toContain(copy.myBookings.onNow);
+      expect(
+        page.query('[data-testid="my-booking-tomorrow-booked"]')!.textContent,
+      ).toContain(en.traineeSchedule.booked);
+    });
+  });
+
   describe("today's and tomorrow's trainings", () => {
     const ALL = [
       CENTER_BOOKED,
@@ -275,6 +377,7 @@ describe('TraineeDashboardComponent: subscription and the next trainings', () =>
     it('cancels a booking after asking, and shows it as cancelled', async () => {
       await render([], [CENTER, LOZENETS], [CENTER_BOOKED]);
       const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      expect(myBookings()).toEqual(['center-booked']);
 
       button('center-booked', en.traineeSchedule.cancel)!.click();
       expect(confirm).toHaveBeenCalledWith(
@@ -293,8 +396,9 @@ describe('TraineeDashboardComponent: subscription and the next trainings', () =>
       });
       await page.settle();
 
-      // Not booked any more, and at the other gym: it leaves the list.
+      // Not booked any more, and at the other gym: it leaves the list, and "Your bookings" goes.
       expect(shown(TODAY)).toEqual([]);
+      expect(page.query('[data-testid="my-bookings"]')).toBeNull();
       confirm.mockRestore();
     });
 
