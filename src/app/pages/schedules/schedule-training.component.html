@@ -89,16 +89,34 @@
 
     <section
       class="page-stack"
-      aria-labelledby="training-booked-title"
-      data-testid="schedule-training-booked"
+      aria-labelledby="training-trainees-title"
+      data-testid="schedule-training-trainees"
     >
       <div class="section-header">
         <div>
-          <h2 class="panel__title" id="training-booked-title">
-            {{ 'schedules.training.bookedTitle' | transloco }}
+          <h2 class="panel__title" id="training-trainees-title">
+            {{ 'schedules.training.traineesTitle' | transloco }}
           </h2>
-          @if (training.trainees.length) {
-            <p class="text-muted section-header__sub">
+          @if (tab === 'attended' && training.attendees.length) {
+            <p
+              class="text-muted section-header__sub"
+              data-testid="schedule-training-summary"
+            >
+              {{
+                'schedules.training.attendedCount'
+                  | transloco: { count: training.attendees.length }
+              }}
+              ·
+              {{
+                'attendance.register.summary.attention'
+                  | transloco: { count: attentionCount(training.attendees) }
+              }}
+            </p>
+          } @else if (tab === 'booked' && training.trainees.length) {
+            <p
+              class="text-muted section-header__sub"
+              data-testid="schedule-training-summary"
+            >
               {{
                 'schedules.days.booked'
                   | transloco: { count: training.trainees.length }
@@ -106,48 +124,95 @@
               ·
               {{
                 'attendance.register.summary.attention'
-                  | transloco: { count: attentionCount(training) }
+                  | transloco: { count: attentionCount(training.trainees) }
               }}
             </p>
           }
         </div>
+        <app-segmented-control
+          [label]="'schedules.training.tabsLabel' | transloco"
+          [options]="tabOptions"
+          [value]="tab"
+          [translateLabels]="false"
+          (valueChange)="selectTab($event)"
+        />
       </div>
 
-      @if (!training.trainees.length) {
-        <app-empty-state
-          icon="users"
-          [title]="'schedules.training.noBookingsTitle' | transloco"
-          [message]="'schedules.training.noBookingsMessage' | transloco"
-        />
+      @if (tab === 'attended') {
+        @if (!training.attendees.length) {
+          <app-empty-state
+            icon="check"
+            [title]="'schedules.training.noAttendanceTitle' | transloco"
+            [message]="'schedules.training.noAttendanceMessage' | transloco"
+          />
+        } @else {
+          <ul
+            class="list-card"
+            [attr.aria-label]="'schedules.training.attendedLabel' | transloco"
+          >
+            @for (row of training.attendees; track row.traineeId) {
+              <li data-testid="schedule-training-attendee">
+                <app-list-row
+                  [link]="['/trainees', row.traineeId]"
+                  [title]="row.name"
+                  [titleSuffix]="row.nickname ?? ''"
+                  [avatarName]="row.name"
+                  [avatarPhotoUrl]="row.photoUrl"
+                  [dimmed]="!row.isActive"
+                >
+                  <span listRowMeta class="training__meta">
+                    <ng-container
+                      *ngTemplateOutlet="attendeeChips; context: { row }"
+                    />
+                    <span>{{ attendeeNote(row) }}</span>
+                  </span>
+                  <span listRowTrailing class="training__trailing">
+                    <ng-container
+                      *ngTemplateOutlet="attendeeChips; context: { row }"
+                    />
+                  </span>
+                </app-list-row>
+              </li>
+            }
+          </ul>
+        }
       } @else {
-        <p class="notice" data-testid="schedule-training-projection">
-          {{ 'schedules.training.projectionNote' | transloco }}
-        </p>
-        <ul
-          class="list-card"
-          [attr.aria-label]="'schedules.training.traineesLabel' | transloco"
-        >
-          @for (row of training.trainees; track row.traineeId) {
-            <li data-testid="schedule-training-trainee">
-              <app-list-row
-                [link]="['/trainees', row.traineeId]"
-                [title]="row.name"
-                [titleSuffix]="row.nickname ?? ''"
-                [avatarName]="row.name"
-                [avatarPhotoUrl]="row.photoUrl"
-                [dimmed]="!row.isActive"
-              >
-                <span listRowMeta class="training__meta">
-                  <ng-container *ngTemplateOutlet="chips; context: { row }" />
-                  <span>{{ note(row) }}</span>
-                </span>
-                <span listRowTrailing class="training__trailing">
-                  <ng-container *ngTemplateOutlet="chips; context: { row }" />
-                </span>
-              </app-list-row>
-            </li>
-          }
-        </ul>
+        @if (!training.trainees.length) {
+          <app-empty-state
+            icon="users"
+            [title]="'schedules.training.noBookingsTitle' | transloco"
+            [message]="'schedules.training.noBookingsMessage' | transloco"
+          />
+        } @else {
+          <p class="notice" data-testid="schedule-training-projection">
+            {{ 'schedules.training.projectionNote' | transloco }}
+          </p>
+          <ul
+            class="list-card"
+            [attr.aria-label]="'schedules.training.traineesLabel' | transloco"
+          >
+            @for (row of training.trainees; track row.traineeId) {
+              <li data-testid="schedule-training-trainee">
+                <app-list-row
+                  [link]="['/trainees', row.traineeId]"
+                  [title]="row.name"
+                  [titleSuffix]="row.nickname ?? ''"
+                  [avatarName]="row.name"
+                  [avatarPhotoUrl]="row.photoUrl"
+                  [dimmed]="!row.isActive"
+                >
+                  <span listRowMeta class="training__meta">
+                    <ng-container *ngTemplateOutlet="chips; context: { row }" />
+                    <span>{{ note(row) }}</span>
+                  </span>
+                  <span listRowTrailing class="training__trailing">
+                    <ng-container *ngTemplateOutlet="chips; context: { row }" />
+                  </span>
+                </app-list-row>
+              </li>
+            }
+          </ul>
+        }
       }
     </section>
 
@@ -165,6 +230,25 @@
     @if (!row.isActive) {
       <app-chip tone="neutral">{{ 'common.inactive' | transloco }}</app-chip>
     }
+    @if (notRegistered(row)) {
+      <app-chip tone="warning">{{
+        'schedules.training.notRegistered' | transloco
+      }}</app-chip>
+    }
     <app-chip [tone]="tone(row)">{{ chip(row) }}</app-chip>
+  </span>
+</ng-template>
+
+<ng-template #attendeeChips let-row="row">
+  <span class="training__chips">
+    @if (!row.isActive) {
+      <app-chip tone="neutral">{{ 'common.inactive' | transloco }}</app-chip>
+    }
+    @if (!row.booked) {
+      <app-chip tone="neutral">{{
+        'schedules.training.didntBook' | transloco
+      }}</app-chip>
+    }
+    <app-chip [tone]="tone(row)">{{ attendeeChip(row) }}</app-chip>
   </span>
 </ng-template>

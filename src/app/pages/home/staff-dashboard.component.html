@@ -54,14 +54,22 @@
           {{ 'dashboard.trainings.subtitle' | transloco }}
         </p>
       </div>
-      @if (trainerId) {
-        <app-segmented-control
-          [label]="'dashboard.trainings.scope' | transloco"
-          [options]="scopeOptions"
-          [value]="scope"
-          (valueChange)="selectScope($event)"
-        />
-      }
+      <div class="trainings-header__actions">
+        @if (trainerId) {
+          <app-segmented-control
+            [label]="'dashboard.trainings.scope' | transloco"
+            [options]="scopeOptions"
+            [value]="scope"
+            (valueChange)="selectScope($event)"
+          />
+        }
+        <a
+          class="btn btn--secondary"
+          routerLink="/workouts/schedule"
+          data-testid="dashboard-full-schedule"
+          >{{ 'dashboard.trainings.fullSchedule' | transloco }}</a
+        >
+      </div>
     </div>
 
     @if (loading) {

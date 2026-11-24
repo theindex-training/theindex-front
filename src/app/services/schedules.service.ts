@@ -128,7 +128,19 @@ export interface TrainingBookingRow {
   } | null;
 }
 
-/** `GET /api/schedules/slots/:id`: one training for staff, with who booked it. */
+/**
+ * A trainee who came to the training: attendance saved at its gym and start (whoever the trainer),
+ * walk-ins included, with what is left now (theindex-api `buildTrainingAttendees`).
+ */
+export interface TrainingAttendeeRow extends Omit<
+  TrainingBookingRow,
+  'bookedAt' | 'attendanceSaved'
+> {
+  /** Whether they had booked the training; false for a walk-in. */
+  booked: boolean;
+}
+
+/** `GET /api/schedules/slots/:id`: one training for staff, with who booked it and who came. */
 export interface ScheduleTraining extends Omit<ScheduleSlot, 'workout'> {
   /** The whole workout, as trainees see it on their training page; null when none is chosen. */
   workout: (TrainingWorkout & { id: string }) | null;
@@ -138,6 +150,8 @@ export interface ScheduleTraining extends Omit<ScheduleSlot, 'workout'> {
   startsAt: string;
   /** Needing attention first (unpaid, last, low), then by name: the API's order. */
   trainees: TrainingBookingRow[];
+  /** Who came, in the same order. */
+  attendees: TrainingAttendeeRow[];
 }
 
 /**

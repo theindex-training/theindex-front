@@ -98,6 +98,13 @@ test.describe('J24 dashboards', () => {
         .poll(() => api.last('GET', '/api/schedules/slots')?.query)
         .toEqual({ from: TODAY, to: TOMORROW });
 
+      // The whole week is one link away, on the staff's Schedule.
+      await expect(
+        page.getByRole('link', {
+          name: t('dashboard.trainings.fullSchedule'),
+        }),
+      ).toHaveAttribute('href', '/workouts/schedule');
+
       // His own trainings: today's 18:00, which still needs attendance, and tomorrow's.
       await expect(day(page, TODAY).getByRole('listitem')).toHaveCount(1);
       await expect(trainingRow(page, 's-evening')).toContainText('Fran');
@@ -331,6 +338,12 @@ test.describe('J24 dashboards', () => {
         .toEqual({ from: TODAY, to: TOMORROW });
       const today = page.getByTestId(`upcoming-day-${TODAY}`);
       await expect(today).toContainText('Velcho Sokolov');
+      // The whole week is one link away, on the trainees' Schedule.
+      await expect(
+        page.getByRole('link', {
+          name: t('traineeDashboard.upcoming.fullSchedule'),
+        }),
+      ).toHaveAttribute('href', '/schedule');
       await expect(page.getByTestId(`upcoming-day-${TOMORROW}`)).toContainText(
         t('traineeDashboard.upcoming.none'),
       );

@@ -11,6 +11,7 @@ import { PageDriver, apiError, driver } from '../../../testing/dom';
 import { signInAs } from '../../../testing/jwt';
 import {
   ScheduleTraining,
+  TrainingAttendeeRow,
   TrainingBookingRow,
 } from '../../services/schedules.service';
 import { ScheduleTrainingComponent } from './schedule-training.component';
@@ -39,7 +40,31 @@ function row(over: Partial<TrainingBookingRow>): TrainingBookingRow {
   };
 }
 
-/** Friday 13 Nov, 18:00 in Sofia; the API's order (needing attention first). */
+function attendee(over: Partial<TrainingAttendeeRow>): TrainingAttendeeRow {
+  return {
+    traineeId: 'tr-x',
+    name: 'Someone',
+    nickname: null,
+    photoUrl: null,
+    isActive: true,
+    booked: true,
+    paymentStatus: 'PAID',
+    level: 'OK',
+    subscription: {
+      type: 'PUNCH',
+      planTitle: 'Punch 16',
+      remainingCredits: 4,
+      endsAt: null,
+      daysLeft: null,
+    },
+    ...over,
+  };
+}
+
+/**
+ * Friday 13 Nov, 18:00 in Sofia; the API's order (needing attention first). Ana booked and her
+ * attendance is saved; Eli came without booking.
+ */
 const TRAINING: ScheduleTraining = {
   id: 'slot-fri',
   date: '2026-11-13',
@@ -122,6 +147,32 @@ const TRAINING: ScheduleTraining = {
       },
     }),
   ],
+  attendees: [
+    attendee({
+      traineeId: 'tr-eli',
+      name: 'Eli',
+      booked: false,
+      paymentStatus: 'UNPAID',
+      level: 'UNPAID',
+      subscription: null,
+    }),
+    attendee({ traineeId: 'tr-ana', name: 'Ana', nickname: 'Ani' }),
+  ],
+};
+
+/** The same training before anyone's attendance is saved. */
+const NOBODY_SAVED: ScheduleTraining = {
+  ...TRAINING,
+  trainees: TRAINING.trainees.map((t) =>
+    t.traineeId === 'tr-ana'
+      ? {
+          ...t,
+          attendanceSaved: false,
+          subscription: { ...t.subscription!, remainingCredits: 4 },
+        }
+      : t,
+  ),
+  attendees: [],
 };
 
 describe('ScheduleTrainingComponent', () => {
@@ -159,9 +210,9 @@ describe('ScheduleTrainingComponent', () => {
     vi.useRealTimers();
   });
 
-  async function open(training: object = TRAINING) {
+  async function open(training: object = TRAINING, query = '') {
     const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/workouts/schedule/slot-fri');
+    await harness.navigateByUrl(`/workouts/schedule/slot-fri${query}`);
     page = driver(
       () => harness.routeNativeElement!,
       () => harness.fixture.whenStable(),
@@ -183,9 +234,9 @@ describe('ScheduleTrainingComponent', () => {
             .textContent.replace(/\s+/g, ' ')
             .trim()}`,
       );
-  /** Each booked trainee as "name | link | second line | chips"; both chip copies must agree. */
-  const rows = () =>
-    page.queryAll('[data-testid="schedule-training-trainee"]').map((li) => {
+  /** Each row of a tab as "name | link | second line | chips"; both chip copies must agree. */
+  const rowsOf = (testId: string) =>
+    page.queryAll(`[data-testid="${testId}"]`).map((li) => {
       const link = li.querySelector('a')!;
       return [
         li
@@ -202,18 +253,108 @@ describe('ScheduleTrainingComponent', () => {
         ).join(', '),
       ].join(' | ');
     });
+  const rows = () => rowsOf('schedule-training-trainee');
+  const attendeeRows = () => rowsOf('schedule-training-attendee');
   const chipCopiesAgree = () =>
     page
-      .queryAll('[data-testid="schedule-training-trainee"]')
+      .queryAll(
+        '[data-testid="schedule-training-trainee"], [data-testid="schedule-training-attendee"]',
+      )
       .every(
         (li) =>
           li.querySelector('.training__meta .training__chips')!.textContent ===
           li.querySelector('.training__trailing .training__chips')!.textContent,
       );
 
+  const url = () => router.url;
+  const tabLabels = () =>
+    page
+      .queryAll('app-segmented-control label')
+      .map((label) => label.textContent.trim());
+  const checkedTab = () =>
+    page.query<HTMLInputElement>('app-segmented-control input:checked')!.value;
+  /** Opens a tab the way a person does: the option's radio. */
+  const openTab = (tab: 'attended' | 'booked') =>
+    page.click(`app-segmented-control input[value="${tab}"]`);
+  const summary = () =>
+    page
+      .query('[data-testid="schedule-training-summary"]')
+      ?.textContent.replace(/\s+/g, ' ')
+      .trim();
+
+  it('opens on who attended once attendance is saved for the training, walk-ins marked', async () => {
+    at('2026-11-13T17:30:00Z');
+    await open();
+
+    expect(tabLabels()).toEqual([
+      `${texts.tabAttended} · 2`,
+      `${texts.tabBooked} · 5`,
+    ]);
+    expect(checkedTab()).toBe('attended');
+    expect(summary()).toBe('2 attended · 1 near the end or unpaid');
+    expect(attendeeRows()).toEqual([
+      `Eli | /trainees/tr-eli | ${texts.savedUnpaid} | ${texts.didntBook}, Unpaid`,
+      `Ana Ani | /trainees/tr-ana | Punch 16 | 4 left`,
+    ]);
+    expect(chipCopiesAgree()).toBe(true);
+    // Projection is about the booked list only.
+    expect(
+      page.query('[data-testid="schedule-training-projection"]'),
+    ).toBeNull();
+    expect(rows()).toEqual([]);
+  });
+
+  it('shows who booked on the other tab, marking those not registered while others are, and keeps the choice in the address', async () => {
+    at('2026-11-13T17:30:00Z');
+    await open();
+
+    await openTab('booked');
+
+    expect(url()).toBe('/workouts/schedule/slot-fri?tab=booked');
+    expect(attendeeRows()).toEqual([]);
+    expect(rows()).toEqual([
+      `Cveta | /trainees/tr-cveta | No active subscription · ${texts.ifTheyCome} | ${texts.notRegistered}, Unpaid`,
+      `Dimo | /trainees/tr-dimo | Punch 8 · ${texts.ifTheyCome} | ${texts.notRegistered}, Last paid training`,
+      `Gosho | /trainees/tr-gosho | Punch 8 · ${texts.ifTheyCome} | Inactive, ${texts.notRegistered}, 2 left after it`,
+      `Ana Ani | /trainees/tr-ana | Punch 16 · ${texts.attendanceSaved} | 4 left`,
+      `Boris | /trainees/tr-boris | Month · Ends 12 Dec 2026 · ${texts.ifTheyCome} | ${texts.notRegistered}, 30 days left`,
+    ]);
+    expect(chipCopiesAgree()).toBe(true);
+
+    await openTab('attended');
+    expect(url()).toBe('/workouts/schedule/slot-fri?tab=attended');
+    expect(attendeeRows()).toHaveLength(2);
+  });
+
+  it('opens on the tab in the address, e.g. back from a trainee', async () => {
+    at('2026-11-13T17:30:00Z');
+    await open(TRAINING, '?tab=booked');
+
+    expect(checkedTab()).toBe('booked');
+    expect(rows()).toHaveLength(5);
+  });
+
+  it('opens on who booked while nobody is registered, and says nobody came yet on the other tab', async () => {
+    at('2026-11-13T11:00:00Z');
+    await open(NOBODY_SAVED);
+
+    expect(tabLabels()).toEqual([
+      `${texts.tabAttended} · 0`,
+      `${texts.tabBooked} · 5`,
+    ]);
+    expect(checkedTab()).toBe('booked');
+    // No "Not registered" while nobody is: the training may not have happened yet.
+    expect(page.text()).not.toContain(texts.notRegistered);
+
+    await openTab('attended');
+    expect(page.text()).toContain(texts.noAttendanceTitle);
+    expect(page.text()).toContain(texts.noAttendanceMessage);
+    expect(summary()).toBeUndefined();
+  });
+
   it('shows the training and who booked it, each linking to their page with what they would have left', async () => {
     at('2026-11-13T11:00:00Z');
-    await open();
+    await open(NOBODY_SAVED);
 
     expect(page.query('h1')!.textContent.trim()).toBe('Fran');
     expect(page.text()).toContain('Friday, 13 November 18:00 – 19:00');
@@ -226,12 +367,7 @@ describe('ScheduleTrainingComponent', () => {
     ]);
     // No link to the workout's form: the page shows the workout itself.
     expect(page.query('a[href^="/workouts/w-fran"]')).toBeNull();
-    expect(
-      page
-        .query('[data-testid="schedule-training-booked"] .section-header__sub')!
-        .textContent.replace(/\s+/g, ' ')
-        .trim(),
-    ).toBe('5 booked · 3 near the end or unpaid');
+    expect(summary()).toBe('5 booked · 3 near the end or unpaid');
     // The figures are explained as a projection.
     expect(
       page
@@ -242,7 +378,7 @@ describe('ScheduleTrainingComponent', () => {
       `Cveta | /trainees/tr-cveta | No active subscription · ${texts.ifTheyCome} | Unpaid`,
       `Dimo | /trainees/tr-dimo | Punch 8 · ${texts.ifTheyCome} | Last paid training`,
       `Gosho | /trainees/tr-gosho | Punch 8 · ${texts.ifTheyCome} | Inactive, 2 left after it`,
-      `Ana Ani | /trainees/tr-ana | Punch 16 · ${texts.attendanceSaved} | 4 left`,
+      `Ana Ani | /trainees/tr-ana | Punch 16 · ${texts.ifTheyCome} | 4 left after it`,
       `Boris | /trainees/tr-boris | Month · Ends 12 Dec 2026 · ${texts.ifTheyCome} | 30 days left`,
     ]);
     expect(chipCopiesAgree()).toBe(true);
@@ -278,11 +414,21 @@ describe('ScheduleTrainingComponent', () => {
     expect(exercises[1].querySelector('app-exercise-video')).toBeNull();
   });
 
+  it("shows each attendee's photo", async () => {
+    const photo = 'https://media.test/profile-photos/eli/s128.webp';
+    const [eli, ana] = TRAINING.attendees;
+    await open({ ...TRAINING, attendees: [{ ...eli, photoUrl: photo }, ana] });
+
+    const rows = page.queryAll('[data-testid="schedule-training-attendee"]');
+    expect(rows[0].querySelector('img')?.getAttribute('src')).toBe(photo);
+    expect(rows[1].querySelector('img')).toBeNull();
+  });
+
   it("shows each booked trainee's photo, or initials without one", async () => {
     const photo = 'https://media.test/profile-photos/cveta/s128.webp';
-    const [cveta, ...rest] = TRAINING.trainees;
+    const [cveta, ...rest] = NOBODY_SAVED.trainees;
     await open({
-      ...TRAINING,
+      ...NOBODY_SAVED,
       trainees: [{ ...cveta, photoUrl: photo }, ...rest],
     });
 
@@ -294,32 +440,35 @@ describe('ScheduleTrainingComponent', () => {
 
   it('says when a saved attendance used the last training or was unpaid', async () => {
     at('2026-11-13T17:30:00Z');
-    await open({
-      ...TRAINING,
-      trainees: [
-        row({
-          traineeId: 'tr-a',
-          name: 'Ana',
-          attendanceSaved: true,
-          paymentStatus: 'UNPAID',
-          level: 'UNPAID',
-          subscription: null,
-        }),
-        row({
-          traineeId: 'tr-d',
-          name: 'Dimo',
-          attendanceSaved: true,
-          level: 'LAST',
-          subscription: {
-            type: 'PUNCH',
-            planTitle: 'Punch 8',
-            remainingCredits: 0,
-            endsAt: null,
-            daysLeft: null,
-          },
-        }),
-      ],
-    });
+    await open(
+      {
+        ...TRAINING,
+        trainees: [
+          row({
+            traineeId: 'tr-a',
+            name: 'Ana',
+            attendanceSaved: true,
+            paymentStatus: 'UNPAID',
+            level: 'UNPAID',
+            subscription: null,
+          }),
+          row({
+            traineeId: 'tr-d',
+            name: 'Dimo',
+            attendanceSaved: true,
+            level: 'LAST',
+            subscription: {
+              type: 'PUNCH',
+              planTitle: 'Punch 8',
+              remainingCredits: 0,
+              endsAt: null,
+              daysLeft: null,
+            },
+          }),
+        ],
+      },
+      '?tab=booked',
+    );
 
     expect(rows()).toEqual([
       `Ana | /trainees/tr-a | ${texts.savedUnpaid} · ${texts.attendanceSaved} | Unpaid`,
@@ -359,7 +508,13 @@ describe('ScheduleTrainingComponent', () => {
 
   it('shows a training nobody booked, and one without a workout', async () => {
     at('2026-11-13T11:00:00Z');
-    await open({ ...TRAINING, workout: null, bookedCount: 0, trainees: [] });
+    await open({
+      ...TRAINING,
+      workout: null,
+      bookedCount: 0,
+      trainees: [],
+      attendees: [],
+    });
 
     expect(page.query('h1')!.textContent.trim()).toBe(texts.title);
     expect(page.queryAll('[data-testid^="training-exercise-"]')).toEqual([]);
