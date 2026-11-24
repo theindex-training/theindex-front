@@ -197,6 +197,23 @@ export class TraineeDashboardComponent implements OnInit {
     }));
   }
 
+  /**
+   * The trainee's own bookings of today and tomorrow, in any gym, until each training ends: the
+   * "Your bookings" section above the trainings, so a booking made for later today stands out.
+   */
+  get myBookings(): (GymTraining & { day: UpcomingDay['label'] })[] {
+    const now = Date.now();
+    return this.upcoming
+      .filter((t) => t.bookedByMe && trainingEndsAt(t) > now)
+      .map((t) => ({
+        ...t,
+        day:
+          t.date === this.today
+            ? ('traineeDashboard.upcoming.today' as const)
+            : ('traineeDashboard.upcoming.tomorrow' as const),
+      }));
+  }
+
   selectGym(gymId: string): void {
     this.gymId = gymId;
     rememberGym(gymId);
@@ -332,4 +349,17 @@ export class TraineeDashboardComponent implements OnInit {
       },
     });
   }
+}
+
+/** When a training ends: its start plus its training time's length. */
+function trainingEndsAt(training: GymTraining): number {
+  const minutes = (time: string) => {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
+  };
+  const { startTime, endTime } = training.trainingTime;
+  return (
+    new Date(training.startsAt).getTime() +
+    (minutes(endTime) - minutes(startTime)) * 60_000
+  );
 }

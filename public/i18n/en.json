@@ -382,6 +382,11 @@
       "tomorrow": "Tomorrow",
       "none": "No trainings published for this day.",
       "fullSchedule": "Full schedule"
+    },
+    "myBookings": {
+      "title": "Your bookings",
+      "subtitle": "The trainings you booked for today and tomorrow.",
+      "onNow": "On now"
     }
   },
   "plans": {
