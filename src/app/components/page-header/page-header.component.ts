@@ -1,5 +1,6 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, UrlTree } from '@angular/router';
+import { HolidayGiftComponent } from '../../holidays/holiday-gift.component';
 import { IconComponent } from '../icon/icon.component';
 
 export interface PageHeaderAction {
@@ -16,7 +17,7 @@ export interface PageHeaderAction {
 @Component({
   selector: 'app-page-header',
   standalone: true,
-  imports: [RouterLink, IconComponent],
+  imports: [RouterLink, IconComponent, HolidayGiftComponent],
   templateUrl: './page-header.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './page-header.component.scss',

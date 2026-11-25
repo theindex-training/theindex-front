@@ -1,0 +1,58 @@
+:host {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+// The wire, with a bulb hanging from it every 20px.
+.lights {
+  display: flex;
+  gap: var(--space-3);
+  height: 0.875rem;
+  padding: 0 var(--space-2);
+  overflow: hidden;
+  border-top: 1px solid var(--nav-border);
+}
+
+.lights__bulb {
+  flex: none;
+  width: 0.5rem;
+  height: 0.6875rem;
+  margin-top: 1px;
+  border-radius: 45% 45% 50% 50%;
+  animation: lights-glow 3.2s ease-in-out infinite;
+}
+
+.lights__bulb--0 {
+  background: var(--holiday-red);
+}
+
+.lights__bulb--1 {
+  background: var(--holiday-gold);
+  animation-delay: 0.8s;
+}
+
+.lights__bulb--2 {
+  background: var(--holiday-green);
+  animation-delay: 1.6s;
+}
+
+.lights__bulb--3 {
+  background: var(--snow-fill);
+  animation-delay: 2.4s;
+}
+
+@keyframes lights-glow {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lights__bulb {
+    animation: none;
+  }
+}

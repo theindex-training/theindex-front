@@ -11,6 +11,7 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { filter, map } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { HolidayLightsComponent } from '../../holidays/holiday-lights.component';
 import { BrandComponent } from '../brand/brand.component';
 import { NavSheetComponent } from '../nav-sheet/nav-sheet.component';
 import { buildNavigation, isUrlInItems } from '../navigation/navigation';
@@ -27,6 +28,7 @@ const DESKTOP_QUERY = '(min-width: 1024px)';
     RouterOutlet,
     TranslocoPipe,
     BrandComponent,
+    HolidayLightsComponent,
     SidebarComponent,
     TabBarComponent,
     NavSheetComponent,

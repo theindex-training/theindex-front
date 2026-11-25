@@ -22,6 +22,11 @@
     <p class="advent__intro text-muted">
       {{ 'holidays.advent.intro' | transloco }}
     </p>
+    @if (holidays.christmas()) {
+      <p class="notice notice--success" data-testid="advent-gift-hint">
+        {{ 'holidays.advent.giftHint' | transloco }}
+      </p>
+    }
 
     <ul
       class="advent__grid"

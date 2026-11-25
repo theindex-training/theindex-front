@@ -1,0 +1,118 @@
+:host {
+  display: contents;
+}
+
+// A small box by the title, wiggling now and then so it gets noticed.
+.gift {
+  flex: none;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  padding: var(--space-1);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  cursor: pointer;
+  animation: gift-wiggle 6s ease-in-out infinite;
+}
+
+.gift svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.gift__box {
+  fill: var(--holiday-red);
+}
+
+.gift__lid-top {
+  fill: var(--holiday-red-dark);
+}
+
+.gift__ribbon {
+  fill: var(--holiday-gold);
+}
+
+.gift__lid {
+  transform-origin: 20px 14px;
+  transition:
+    transform 0.5s cubic-bezier(0.2, 1.4, 0.4, 1),
+    opacity 0.5s;
+}
+
+.gift.is-open {
+  animation: none;
+}
+
+.gift.is-open .gift__lid {
+  opacity: 0;
+  transform: translate(-6px, -16px) rotate(-30deg);
+}
+
+@keyframes gift-wiggle {
+  0%,
+  88%,
+  100% {
+    transform: none;
+  }
+
+  91% {
+    transform: rotate(-12deg);
+  }
+
+  94% {
+    transform: rotate(10deg);
+  }
+
+  97% {
+    transform: rotate(-6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gift,
+  .gift__lid {
+    animation: none;
+    transition: none;
+  }
+}
+
+.gift-dialog {
+  width: calc(100% - 2 * var(--space-4));
+  max-width: 28rem;
+  padding: var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+}
+
+.gift-dialog::backdrop {
+  background: var(--scrim);
+}
+
+.gift-dialog__kicker {
+  margin: 0;
+  color: var(--accent-text);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+}
+
+.gift-dialog__title {
+  margin: var(--space-1) 0 var(--space-4);
+  font-size: var(--text-2xl);
+}
+
+.gift-dialog__text {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-lg);
+}
+
+.gift-dialog__hint {
+  margin: 0 0 var(--space-6);
+}

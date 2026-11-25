@@ -49,6 +49,12 @@
   // The holidays' snow (December): the caps on page titles and the falling flakes (decorative).
   --snow-fill: #ffffff;
   --snow-edge: #a9b6c3;
+  // Christmas (decorative): the hat on the logo, the lights and the confetti. The same in both
+  // themes, like the nav shell they mostly sit on.
+  --holiday-red: #d93a2f;
+  --holiday-red-dark: #9e1b13;
+  --holiday-green: #2f8f57;
+  --holiday-gold: #e3a92b;
   --shadow-sm: 0 1px 2px rgba(18, 18, 17, 0.06);
   --shadow-md: 0 10px 24px rgba(18, 18, 17, 0.12);
 }
@@ -100,6 +106,10 @@
   --apple-tile-text: #1d1d1f;
   --snow-fill: #eef1f4;
   --snow-edge: #7d8a97;
+  --holiday-red: #d93a2f;
+  --holiday-red-dark: #9e1b13;
+  --holiday-green: #2f8f57;
+  --holiday-gold: #e3a92b;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.5);
 }

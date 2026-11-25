@@ -14,6 +14,13 @@
   min-width: 0;
 }
 
+// The title, with the holidays' hidden gift next to it on the day's page (app-holiday-gift).
+.page-header__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .page-header__title {
   margin: 0;
   font-size: var(--text-4xl);

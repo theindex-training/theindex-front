@@ -104,11 +104,13 @@ describe('HolidayService', () => {
     expect(service.celebration()).toEqual({
       id: 1,
       key: 'holidays.celebrate.bookDecember',
+      burst: 'snow',
     });
     service.celebrate('personalBest');
     expect(service.celebration()).toEqual({
       id: 2,
       key: 'holidays.celebrate.personalBestDecember',
+      burst: 'snow',
     });
   });
 
@@ -144,5 +146,71 @@ describe('HolidayService', () => {
     const service = serviceOn('2026-11-20T09:00:00+02:00');
     expect(service.previewDay).toBeNull();
     expect(service.state().active).toBe(false);
+  });
+
+  describe('Christmas (Dec 20 – 27)', () => {
+    it('celebrates with Christmas lines and confetti, and snows harder', () => {
+      const service = serviceOn('2026-12-22T10:00:00+02:00');
+      expect(service.christmas()).toBe(true);
+      expect(service.snowIntensity()).toBe(1);
+      service.celebrate('book');
+      expect(service.celebration()).toEqual({
+        id: 1,
+        key: 'holidays.celebrate.bookChristmas',
+        burst: 'confetti',
+      });
+      service.celebrate('personalBest');
+      expect(service.celebration()?.key).toBe(
+        'holidays.celebrate.personalBestChristmas',
+      );
+    });
+
+    it('keeps December’s snow and lines before Christmas', () => {
+      const service = serviceOn('2026-12-19T10:00:00+02:00');
+      expect(service.christmas()).toBe(false);
+      expect(service.snowIntensity()).toBe(0.6);
+      service.celebrate('book');
+      expect(service.celebration()?.burst).toBe('snow');
+    });
+
+    it('hides a gift on one page a day, by role', () => {
+      const service = serviceOn('2026-12-20T10:00:00+02:00');
+      expect(service.giftDay()).toBe(20);
+      expect(service.giftPage('TRAINEE')).toBe('/home');
+      expect(service.giftPage('ADMIN')).toBe('/home');
+      TestBed.resetTestingModule();
+      const later = serviceOn('2026-12-22T10:00:00+02:00');
+      expect(later.giftPage('TRAINEE')).toBe('/records');
+      TestBed.resetTestingModule();
+      const staff = serviceOn('2026-12-21T10:00:00+02:00');
+      expect(staff.giftPage('TRAINER')).toBe('/workouts/schedule');
+      expect(staff.giftPage('TRAINEE')).toBe('/schedule');
+    });
+
+    it('opens the day’s gift once: remembered, with confetti from where it was', () => {
+      const service = serviceOn('2026-12-24T10:00:00+02:00');
+      service.openGift({ x: 10, y: 20 });
+      expect(service.giftFound()).toBe(true);
+      expect(service.giftPage('TRAINEE')).toBeNull();
+      expect(service.celebration()).toEqual({
+        id: 1,
+        key: null,
+        burst: 'confetti',
+        origin: { x: 10, y: 20 },
+      });
+      expect(stored()).toEqual({ season: 2026, gifts: [24] });
+    });
+
+    it('shows no decorations or gifts with the effects off, or after Dec 27', () => {
+      const service = serviceOn('2026-12-22T10:00:00+02:00');
+      service.setEffects(false);
+      expect(service.christmas()).toBe(false);
+      expect(service.giftPage('TRAINEE')).toBeNull();
+
+      TestBed.resetTestingModule();
+      const after = serviceOn('2026-12-28T10:00:00+02:00');
+      expect(after.christmas()).toBe(false);
+      expect(after.giftDay()).toBeNull();
+    });
   });
 });

@@ -16,8 +16,6 @@ import { Snowfall } from './snowfall';
 
 /** How long a celebration's line stays. */
 const CELEBRATION_MS = 4500;
-/** December's snowfall is light; later occasions can raise it. */
-const DECEMBER_INTENSITY = 0.6;
 
 /**
  * The holidays' layer over every page (in the app root, so the sign-in page has it too): the
@@ -68,13 +66,14 @@ export class HolidayLayerComponent {
   constructor() {
     effect(() => {
       const canvas = this.canvas()?.nativeElement;
+      const intensity = this.holidays.snowIntensity();
       if (canvas && this.view && !this.snowfall) {
         this.snowfall = new Snowfall(canvas, this.view);
-        this.snowfall.setIntensity(DECEMBER_INTENSITY);
       } else if (!canvas && this.snowfall) {
         this.snowfall.destroy();
         this.snowfall = null;
       }
+      this.snowfall?.setIntensity(intensity);
     });
 
     effect(() => {
@@ -82,15 +81,22 @@ export class HolidayLayerComponent {
       if (!celebration) {
         return;
       }
-      this.line.set(celebration.key);
-      clearTimeout(this.hideTimer);
-      this.hideTimer = setTimeout(() => this.line.set(null), CELEBRATION_MS);
+      if (celebration.key) {
+        this.line.set(celebration.key);
+        clearTimeout(this.hideTimer);
+        this.hideTimer = setTimeout(() => this.line.set(null), CELEBRATION_MS);
+      }
       if (this.snowfall && this.view) {
-        // From just above the line, at the bottom middle of the window.
-        this.snowfall.burst(
-          this.view.innerWidth / 2,
-          this.view.innerHeight - 140,
-        );
+        // From where it happened, else just above the line at the bottom middle of the window.
+        const { x, y } = celebration.origin ?? {
+          x: this.view.innerWidth / 2,
+          y: this.view.innerHeight - 140,
+        };
+        if (celebration.burst === 'confetti') {
+          this.snowfall.confetti(x, y);
+        } else {
+          this.snowfall.burst(x, y);
+        }
       }
     });
 

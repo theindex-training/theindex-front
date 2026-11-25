@@ -1,0 +1,55 @@
+@if (here()) {
+  <button
+    type="button"
+    class="gift"
+    [class.is-open]="opening()"
+    [attr.aria-label]="'holidays.gift.label' | transloco"
+    data-testid="holiday-gift"
+    (click)="open($event)"
+  >
+    <svg viewBox="0 0 40 40" aria-hidden="true">
+      <rect class="gift__box" x="7" y="17" width="26" height="20" rx="2" />
+      <rect class="gift__ribbon" x="18" y="17" width="4" height="20" />
+      <g class="gift__lid">
+        <rect class="gift__lid-top" x="5" y="11" width="30" height="7" rx="2" />
+        <rect class="gift__ribbon" x="18" y="11" width="4" height="7" />
+        <path
+          class="gift__ribbon"
+          d="M20 11C12 2 6 8 13 11ZM20 11C28 2 34 8 27 11Z"
+        />
+      </g>
+    </svg>
+  </button>
+}
+
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- a click on the backdrop closes it; keyboard users have Escape and the button -->
+<dialog
+  #dialog
+  class="gift-dialog"
+  aria-labelledby="gift-dialog-title"
+  aria-describedby="gift-dialog-text"
+  (close)="handleClose()"
+  (click)="handleDialogClick($event)"
+>
+  @if (shownDay(); as day) {
+    <p class="gift-dialog__kicker">{{ 'holidays.gift.found' | transloco }}</p>
+    <h2 class="gift-dialog__title" id="gift-dialog-title">
+      {{ 'holidays.gift.title' | transloco }}
+    </h2>
+    <p
+      class="gift-dialog__text"
+      id="gift-dialog-text"
+      data-testid="holiday-gift-text"
+    >
+      {{ greeting(day) | transloco }}
+    </p>
+    <p class="gift-dialog__hint text-muted">
+      {{ 'holidays.gift.tomorrow' | transloco }}
+    </p>
+    <div class="form-actions">
+      <button class="btn btn--primary" type="button" (click)="close()">
+        {{ 'holidays.gift.thanks' | transloco }}
+      </button>
+    </div>
+  }
+</dialog>
