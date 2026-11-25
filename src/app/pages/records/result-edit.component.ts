@@ -31,6 +31,7 @@ import {
   ScoreRules,
 } from './result-form';
 import { clock, scoringText } from './score-format';
+import { HolidayService } from '../../holidays/holiday.service';
 
 /**
  * Logs a result (`/records/:id/log`) or changes one of the person's own (`/records/:id/results/
@@ -70,6 +71,7 @@ import { clock, scoringText } from './score-format';
 })
 export class ResultEditComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly holidays = inject(HolidayService);
 
   readonly form: ResultForm;
   readonly today: string;
@@ -206,8 +208,11 @@ export class ResultEditComponent implements OnInit {
         });
 
     request.subscribe({
-      next: () => {
+      next: (saved) => {
         this.submitting = false;
+        if (saved.personalBest) {
+          this.holidays.celebrate('personalBest');
+        }
         void this.router.navigateByUrl(this.backLink);
       },
       error: (error) => {

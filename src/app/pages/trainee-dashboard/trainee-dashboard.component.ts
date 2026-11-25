@@ -46,6 +46,8 @@ import {
   SubscriptionSummary,
   subscriptionSummary,
 } from './subscription-summary';
+import { AdventCalendarComponent } from '../../holidays/advent-calendar.component';
+import { HolidayService } from '../../holidays/holiday.service';
 
 type SubscriptionFilter = 'ACTIVE' | 'EXHAUSTED' | 'ALL';
 
@@ -76,6 +78,7 @@ interface UpcomingDay {
     SkeletonListComponent,
     TraineeSubscriptionsTableComponent,
     TraineeTrainingsComponent,
+    AdventCalendarComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainee-dashboard.component.html',
@@ -122,6 +125,7 @@ export class TraineeDashboardComponent implements OnInit {
   busyId: string | null = null;
   actionError: UiMessage | null = null;
 
+  private readonly holidays = inject(HolidayService);
   constructor(
     private readonly attendanceService: AttendanceService,
     private readonly subscriptionsService: SubscriptionsService,
@@ -272,6 +276,7 @@ export class TraineeDashboardComponent implements OnInit {
     this.actionError = null;
     this.bookings.book(training.id).subscribe({
       next: () => {
+        this.holidays.celebrate('book');
         void this.router.navigate(['/schedule', training.id, 'booked']);
       },
       error: (error) => this.failed(error, 'traineeSchedule.bookError'),

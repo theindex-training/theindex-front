@@ -1,0 +1,102 @@
+@if (holidays.state().advent) {
+  <section
+    class="advent panel"
+    aria-labelledby="advent-title"
+    data-testid="advent-calendar"
+  >
+    <div class="advent__head">
+      <h2 class="panel__title" id="advent-title">
+        {{ 'holidays.advent.title' | transloco }}
+      </h2>
+      <p class="advent__count text-muted" data-testid="advent-count">
+        {{
+          'holidays.advent.count'
+            | transloco
+              : {
+                  opened: openedCount(),
+                  available: holidays.state().adventDay,
+                }
+        }}
+      </p>
+    </div>
+    <p class="advent__intro text-muted">
+      {{ 'holidays.advent.intro' | transloco }}
+    </p>
+
+    <ul
+      class="advent__grid"
+      [attr.aria-label]="'holidays.advent.doorsLabel' | transloco"
+    >
+      @for (door of doors; track door.day) {
+        <li class="advent__cell" [class.advent__cell--big]="door.day === 24">
+          <button
+            type="button"
+            class="door"
+            [class.is-open]="isOpen(door)"
+            [class.is-today]="door.day === today() && !isOpen(door)"
+            [class.is-locked]="isLocked(door)"
+            [attr.aria-disabled]="isLocked(door) || null"
+            [attr.aria-label]="doorLabel(door)"
+            [attr.data-testid]="'advent-door-' + door.day"
+            (click)="open(door)"
+          >
+            <span class="door__inside" aria-hidden="true">
+              <app-icon [name]="kindIcons[door.kind]" />
+            </span>
+            <span class="door__face" aria-hidden="true">
+              {{ door.day }}
+              @if (isLocked(door)) {
+                <app-icon class="door__lock" name="lock" />
+              }
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+
+    <p class="advent__hint text-muted" aria-live="polite">
+      @if (lockedTapped(); as day) {
+        {{ 'holidays.advent.locked' | transloco: { day: dayLabel(day) } }}
+      }
+    </p>
+  </section>
+
+  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- a click on the backdrop closes it; keyboard users have Escape and the Close button -->
+  <dialog
+    #dialog
+    class="advent-dialog"
+    aria-labelledby="advent-dialog-title"
+    aria-describedby="advent-dialog-text"
+    (click)="handleDialogClick($event)"
+  >
+    @if (shown(); as door) {
+      <div class="advent-dialog__head">
+        <h2 class="advent-dialog__title" id="advent-dialog-title">
+          <span class="advent-dialog__day num">{{ door.day }}</span>
+          {{ dayLabel(door.day) }}
+        </h2>
+        <span class="advent-dialog__kind">
+          <app-icon [name]="kindIcons[door.kind]" />
+          {{ kindLabels[door.kind] | transloco }}
+        </span>
+      </div>
+      <p
+        class="advent-dialog__text"
+        id="advent-dialog-text"
+        data-testid="advent-door-text"
+      >
+        {{ door.text | transloco }}
+      </p>
+      <div class="form-actions">
+        <button class="btn btn--secondary" type="button" (click)="close()">
+          {{ 'common.close' | transloco }}
+        </button>
+        @if (action(door); as link) {
+          <a class="btn btn--primary" [routerLink]="link.route">{{
+            link.label | transloco
+          }}</a>
+        }
+      </div>
+    }
+  </dialog>
+}

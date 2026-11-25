@@ -45,6 +45,7 @@ import {
   settlementToFinalize,
   trainingStatus,
 } from './staff-dashboard';
+import { AdventCalendarComponent } from '../../holidays/advent-calendar.component';
 
 /**
  * The staff's dashboard (`/home`, ADMIN and TRAINER): today's and tomorrow's trainings of every
@@ -65,6 +66,7 @@ import {
     PageHeaderComponent,
     SegmentedControlComponent,
     SkeletonListComponent,
+    AdventCalendarComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './staff-dashboard.component.html',

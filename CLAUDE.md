@@ -106,6 +106,7 @@ src/
     app.routes.ts         # all routes; role restrictions via data: { roles: [...] } + roleGuard; title = translation key
     i18n/                 # LanguageService, Transloco setup, LocaleFormatService, UiMessage, enum labels, key tests
     pages/<feature>/      # one folder per feature: list, -create, -edit, -details, -delete components
+    holidays/             # December, Christmas and New Year: the date windows, snow, the Advent calendar; see "Holidays"
     pages/home/           # /home: every role's dashboard (staff-dashboard; trainees get pages/trainee-dashboard); see "Dashboards"
     pages/workouts/       # workouts of the day (ADMIN, TRAINER): week list, workout form with PDF import, exercises/, benchmarks/ (the records catalogue); see "Workouts area"
     pages/exercise-library/ # the trainees' exercise library: the active exercises and an exercise's page; see "Exercise library"
@@ -141,6 +142,19 @@ Every role's start page (`AuthService.defaultRoute()`, `loginGuard`, and where `
   - **Trainings today and tomorrow** (`BookingsService.trainings`, theindex-api `GET /api/bookings/trainings?from&to`): the chosen gym's (the gym control and `initialGymId` as on Schedule, kept in `scheduleGym`), plus the trainee's own bookings in other gyms (named with their gym). Book, Cancel booking and Details under the Schedule's rules (Book opens the confirmation; Cancel asks); "Full schedule" (`dashboard-full-schedule`, in the section's heading row) links `/schedule`.
   - Then the subscriptions table and the trainings calendar/list, as before.
 - The training lists of both share `pages/home/dashboard-trainings.scss` (each component lists it in `styleUrls`).
+
+## Holidays (`holidays/`)
+The app dresses up for December, Christmas and New Year **by itself, from the date**: nothing is deployed or switched on for an occasion, and it comes back every year. Everything works from the gym's calendar day (Europe/Sofia, `sofiaDayKey`), read again every minute, so an open tab changes at midnight.
+- **Windows** (`holiday-calendar.ts`, pure, unit-tested): December (snow) Dec 1 – Jan 6, Advent calendar Dec 1 – 31 (door N opens on Dec N; all 24 from Christmas Eve), Christmas Dec 20 – 27, year in review Dec 27 – Jan 10, New Year Dec 31 – Jan 2, сурвачка Jan 1 – 6. `active` (Dec 1 – Jan 10) is the season; `snowDepth` (0–1) grows to Christmas Eve and melts Jan 1 – 6.
+- **`HolidayService`** (root): `state()`, `effectsOn()` / `setEffects()`, `effects()` (December and the effects on), the opened Advent doors (`openDoor`, `canOpenDoor`), `reducedMotion()` (the OS setting) and `celebrate('book' | 'personalBest')`, which the three Book actions (dashboard, Schedule, the training's page) and the result form (a saved personal best) call. While the effects are on it sets `data-holiday-snow` and `--holiday-snow-depth` on `<html>`.
+- **Storage:** one localStorage key, `holidays` (`{ season, effects?: false, doors? }`). It is deleted on the first visit outside Dec 1 – Jan 10, and a value from another season is never read: nothing is kept past the holidays, and next December starts with the effects on and every door closed. The privacy policy's browser storage paragraph says so.
+- **Preview:** `?holidayDate=YYYY-MM-DD` in the address the app is opened with shows that day for the rest of the visit (any page, production too) and stores nothing.
+- **What shows:**
+  - `app-holiday-layer` (in the app root, so the sign-in page has it too): falling snow on a full-window canvas (`snowfall.ts`; ignores the pointer, `aria-hidden`, a few dozen flakes, stops while the tab is hidden), none with reduced motion; and a celebration's line (`aria-live`), with a puff of snow.
+  - The **snow cap** on every page title (`app-page-header`, CSS only, from the `<html>` attribute), in `--snow-fill` / `--snow-edge`.
+  - `app-holiday-switch` ("Holiday effects", a `role="switch"` checkbox on the nav shell): the sidebar footer and the phone sheet's Holidays section, Dec 1 – Jan 6 only. Off stops the snow, the caps and the celebrations, not the Advent calendar.
+  - `app-advent-calendar`: everyone's dashboard (trainees at the top, staff after the trainings). 24 doors in a mixed-up order (`advent-doors.ts`: the door's kind, its `holidays.advent.doors.*` text and an optional link for the roles that can open it), today's highlighted, later ones locked ("Opens on…"), missed ones still open. A door swings open, then a modal `<dialog>` shows what is behind it.
+- **Tests:** `src/test-providers.ts` gives every spec `HOLIDAY_CLOCK` (`holiday-clock.token.ts`) on a day outside the season, so no spec changes in December; holiday specs provide their own day. E2E journeys fix their own clock (J27).
 
 ## Plans: TIME durations
 A TIME plan lasts `durationDays` or `durationMonths` (calendar months), exactly one (theindex-api). The plan forms have Duration plus "Counted in" (Calendar months, the default, or Days); `pages/plans/plan-duration.ts` is its pure model (`durationOf`, `durationFields`, `planIncludes` for "1 month" / "30 days"). Create sends only the chosen field; edit sends both, the other as null. A month pass from Apr 14 ends May 14 at 00:00 Sofia (the API works out `endsAt` once, when it is sold); `endsAt` is exclusive, so every page shows a pass's **last day** instead (`utils/time-pass.util.ts` `timePassLastDay`: `endsAt` − 1 ms, Dec 22 for that pass): the subscriptions table, Register attendance's summary, Renewals and its reports, a settlement's waiting trainings and the trainee dashboard, whose days left count to it (0 = today is the last day), as the API's `daysLeft` does. Day passes sold from the form end at 02:00, so they keep their day.
@@ -298,6 +312,7 @@ All tokens are CSS custom properties defined in `src/styles.scss` (global, so th
 | `--google-button-bg` / `--google-button-hover` / `--google-button-border` / `--google-button-text` | Google's own button colors, only for `app-google-calendar-button` (people recognise it) | `#FFFFFF` / `#EEEEEE` / `#747775` / `#1F1F1F` | `#131314` / `#262627` / `#8E918F` / `#E3E3E3` |
 | `--apple-button-bg` / `--apple-button-hover` / `--apple-button-text` | Apple's button colors, only for `app-apple-calendar-button` | `#000000` / `#333336` / `#FFFFFF` | `#FFFFFF` / `#E8E8ED` / `#000000` |
 | `--apple-tile-bg` / `--apple-tile-border` / `--apple-tile-red` / `--apple-tile-text` | the Calendar date tile on that button (decorative) | `#FFFFFF` / `#FFFFFF` / `#FF3B30` / `#1D1D1F` | `#FFFFFF` / `#D2D2D7` / `#FF3B30` / `#1D1D1F` |
+| `--snow-fill` / `--snow-edge` | the holidays' snow: title caps and flakes (decorative; the edge outlines the snow on light pages) | `#FFFFFF` / `#A9B6C3` | `#EEF1F4` / `#7D8A97` |
 | `--shadow-sm` / `--shadow-md` | card lift / popovers and menus | | |
 
 Pairing rules (all checked at ≥4.5:1 for text):
@@ -463,7 +478,7 @@ Every list page follows the Trainees page; phase 4a applied it to Plans, Gyms, G
 - **`.skeleton`:** pulsing placeholder block.
 - **`.btn`** + `.btn--primary` / `.btn--secondary` / `.btn--ghost` (low emphasis) / `.btn--danger` (soft) / `.btn--danger-solid` (confirming a destructive action): link or button actions in page content. `ui-button` stays the full-width form button.
 
-**Icons** available in `app-icon`: home, rotate-ccw, rotate-cw, image, users, user-plus, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-left, chevron-right, chevrons-left, chevrons-right, plus, alert, trash, arrow-left, eye, eye-off, file-text, renew, chevron-up, chevron-down, timer, pencil, calendar, play.
+**Icons** available in `app-icon`: home, rotate-ccw, rotate-cw, image, users, user-plus, check, history, wallet, banknote, clipboard, dumbbell, ticket, trainer, clock, user, chart, trophy, more, settings, key, log-out, close, search, chevron-left, chevron-right, chevrons-left, chevrons-right, plus, alert, trash, arrow-left, eye, eye-off, file-text, renew, chevron-up, chevron-down, timer, pencil, calendar, play, snowflake, lock, smile, lightbulb, star, info.
 
 ### Form and detail page pattern (reference: `pages/plans/plan-*.component.html`)
 Create, edit, details and delete pages share one structure. They need no page SCSS. Create/edit pages drop `page-narrow` and use the full width:

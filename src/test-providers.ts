@@ -13,6 +13,7 @@ import en from '../public/i18n/en.json';
 // Only this dependency-free token file may be imported from src/app here: importing app modules
 // that specs also import breaks the shared test bundle (Angular linker/JIT error in every spec).
 import { INITIAL_LANGUAGE } from './app/i18n/initial-language.token';
+import { HOLIDAY_CLOCK } from './app/holidays/holiday-clock.token';
 
 // Same as registerAppLocales() in i18n.providers.ts.
 registerLocaleData(localeBg, 'bg');
@@ -33,4 +34,9 @@ export default [
   ),
   provideTranslocoMessageformat({ locales: 'en' }),
   { provide: INITIAL_LANGUAGE, useValue: 'en' },
+  // A day outside the holidays, so no spec changes in December (holiday specs set their own).
+  {
+    provide: HOLIDAY_CLOCK,
+    useValue: () => new Date('2026-11-15T12:00:00+02:00'),
+  },
 ];

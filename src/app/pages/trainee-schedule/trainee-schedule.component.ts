@@ -4,6 +4,7 @@ import {
   Component,
   DestroyRef,
   OnInit,
+  inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -31,6 +32,7 @@ import { addDays, dayKeyToDate, localDayKey } from '../../utils/calendar.util';
 import { initialGymId, rememberGym } from '../schedules/schedule-gym';
 import { timeRange } from '../schedules/schedule-slot-form.component';
 import { mondayOf } from '../workouts/workouts.component';
+import { HolidayService } from '../../holidays/holiday.service';
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -84,6 +86,7 @@ export class TraineeScheduleComponent implements OnInit {
 
   readonly range = timeRange;
 
+  private readonly holidays = inject(HolidayService);
   constructor(
     private readonly bookings: BookingsService,
     private readonly language: LanguageService,
@@ -264,6 +267,7 @@ export class TraineeScheduleComponent implements OnInit {
     this.actionError = null;
     this.bookings.book(training.id).subscribe({
       next: () => {
+        this.holidays.celebrate('book');
         void this.router.navigate(['/schedule', training.id, 'booked']);
       },
       error: (error) => this.failed(error, 'traineeSchedule.bookError'),
