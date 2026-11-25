@@ -20,6 +20,40 @@
   line-height: 0.95;
 }
 
+// The holidays' snow cap on the title (HolidayService marks <html> in December). Its depth grows
+// through December (--holiday-snow-depth, 0–1); the edge layer under it shows it on light pages.
+.page-header__title-text {
+  position: relative;
+  display: inline-block;
+}
+
+:host-context(html[data-holiday-snow]) .page-header__title-text::before,
+:host-context(html[data-holiday-snow]) .page-header__title-text::after {
+  content: '';
+  position: absolute;
+  right: -0.06em;
+  bottom: calc(100% - 0.14em);
+  left: -0.06em;
+  height: calc(0.06em + 0.2em * var(--holiday-snow-depth, 0));
+  border-radius: 0.3em 0.3em 0.04em 0.04em;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 16' preserveAspectRatio='none'%3E%3Cpath d='M0 16V9C5 3 10 3 14 6s8 5 14 1 9-5 14-2 9 5 14 3V16Z'/%3E%3C/svg%3E")
+    repeat-x left bottom / 1.1em 100%;
+  pointer-events: none;
+}
+
+:host-context(html[data-holiday-snow]) .page-header__title-text::before {
+  // A little taller and wider than the snow, so it outlines its top.
+  right: -0.08em;
+  left: -0.08em;
+  height: calc(0.06em + 0.2em * var(--holiday-snow-depth, 0) + 2px);
+  background: var(--snow-edge);
+  transform: translateY(1px);
+}
+
+:host-context(html[data-holiday-snow]) .page-header__title-text::after {
+  background: var(--snow-fill);
+}
+
 .page-header__back {
   display: inline-flex;
   align-items: center;

@@ -4,6 +4,7 @@ import {
   TestRequest,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
+import { Provider } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -17,6 +18,8 @@ import { signInAs } from '../../../testing/jwt';
 import { BenchmarkDetailComponent } from './benchmark-detail.component';
 import { RecordsComponent } from './records.component';
 import { ResultEditComponent } from './result-edit.component';
+import { HOLIDAY_CLOCK } from '../../holidays/holiday-clock.token';
+import { HolidayService } from '../../holidays/holiday.service';
 
 /** Records: the overview's tabs, a benchmark's page and the result form. */
 
@@ -161,7 +164,10 @@ describe('records pages', () => {
   let harness: RouterTestingHarness;
   let page: PageDriver;
 
-  async function setUp(role: 'ADMIN' | 'TRAINER' | 'TRAINEE') {
+  async function setUp(
+    role: 'ADMIN' | 'TRAINER' | 'TRAINEE',
+    extraProviders: Provider[] = [],
+  ) {
     localStorage.clear();
     signInAs(role);
     TestBed.configureTestingModule({
@@ -178,6 +184,7 @@ describe('records pages', () => {
           },
           { path: '**', children: [] },
         ]),
+        ...extraProviders,
       ],
     });
     http = TestBed.inject(HttpTestingController);
@@ -592,6 +599,46 @@ describe('records pages', () => {
 
       expect(page.query('[data-testid="benchmark-inactive"]')).not.toBeNull();
       expect(page.query('[data-testid="log-result"]')).toBeNull();
+    });
+  });
+
+  describe('result form in December', () => {
+    beforeEach(() =>
+      setUp('TRAINEE', [
+        {
+          provide: HOLIDAY_CLOCK,
+          useValue: () => new Date('2026-12-05T10:00:00+02:00'),
+        },
+      ]),
+    );
+    afterEach(() =>
+      document.documentElement.removeAttribute('data-holiday-snow'),
+    );
+
+    async function logFran(personalBest: boolean): Promise<void> {
+      await open('/records/fran/log');
+      http.expectOne('/api/benchmarks/fran').flush(FRAN);
+      await page.settle();
+      await page.type('#result-minutes', '4');
+      await page.type('#result-seconds', '26');
+      await page.submit();
+      http
+        .expectOne('/api/benchmark-results')
+        .flush(myResult({ personalBest }));
+      await page.settle();
+      leavePage();
+    }
+
+    it('celebrates a new personal best', async () => {
+      await logFran(true);
+      expect(TestBed.inject(HolidayService).celebration()?.key).toBe(
+        'holidays.celebrate.personalBestDecember',
+      );
+    });
+
+    it('celebrates nothing when the result is not a personal best', async () => {
+      await logFran(false);
+      expect(TestBed.inject(HolidayService).celebration()).toBeNull();
     });
   });
 

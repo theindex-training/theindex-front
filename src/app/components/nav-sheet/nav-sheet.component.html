@@ -63,6 +63,15 @@
       <app-language-switch />
     </section>
 
+    @if (holidays.state().december) {
+      <section class="sheet__section" aria-labelledby="nav-sheet-holidays">
+        <h3 class="sheet__label" id="nav-sheet-holidays">
+          {{ 'holidays.section' | transloco }}
+        </h3>
+        <app-holiday-switch />
+      </section>
+    }
+
     <section class="sheet__section" aria-labelledby="nav-sheet-account">
       <h3 class="sheet__label" id="nav-sheet-account">
         {{

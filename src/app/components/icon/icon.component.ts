@@ -42,7 +42,13 @@ export type IconName =
   | 'chevron-down'
   | 'timer'
   | 'pencil'
-  | 'calendar';
+  | 'calendar'
+  | 'snowflake'
+  | 'lock'
+  | 'smile'
+  | 'lightbulb'
+  | 'star'
+  | 'info';
 
 /**
  * Inline stroke icons in the Lucide style (24px grid, 2px round strokes, currentColor).

@@ -2247,7 +2247,7 @@
     },
     "storage": {
       "heading": "Cookies and data in your browser",
-      "text": "We don’t use cookies for tracking, advertising or visitor analytics. The app keeps in your browser (local storage) only what it needs to work: your sign-in while you are signed in, and settings such as language, theme and chosen gym."
+      "text": "We don’t use cookies for tracking, advertising or visitor analytics. The app keeps in your browser (local storage) only what it needs to work: your sign-in while you are signed in, and settings such as language, theme and chosen gym. From December to early January it also keeps the holiday extras (which Advent calendar doors you opened, and whether you switched the holiday effects off), and deletes them by itself after 10 January."
     },
     "rights": {
       "heading": "Your rights",
@@ -2269,6 +2269,62 @@
     "changes": {
       "heading": "Changes to this policy",
       "text": "When we change the policy, we publish the new version on this page with the date of the change."
+    }
+  },
+  "holidays": {
+    "section": "Holidays",
+    "effects": "Holiday effects",
+    "celebrate": {
+      "bookDecember": "Booked! A little snow never stopped anyone.",
+      "personalBestDecember": "New personal best! Even the snowman is sweating."
+    },
+    "advent": {
+      "title": "Advent calendar",
+      "intro": "A door a day until Christmas. Missed one? It stays open for you.",
+      "count": "{opened} of {available} {available, plural, one {door} other {doors}} open",
+      "doorsLabel": "Advent calendar doors",
+      "door": "{day}",
+      "doorToday": "{day}, today’s door",
+      "doorOpened": "{day}, opened",
+      "locked": "Opens on {day}",
+      "kinds": {
+        "joke": "Joke",
+        "tip": "Coach’s tip",
+        "challenge": "Challenge",
+        "feature": "Did you know?",
+        "holiday": "Holiday"
+      },
+      "actions": {
+        "book": "Book a training",
+        "records": "Open Records",
+        "schedule": "Open the Schedule"
+      },
+      "doors": {
+        "d1": "Welcome to the Advent calendar! One door a day until Christmas. Today’s challenge: come back tomorrow.",
+        "d2": "Did you know? You can book tomorrow’s training right from Home. One tap and the spot is yours.",
+        "d3": "A snowman’s favourite exercise? Snow angels. Scaled version: lying in the snow.",
+        "d4": "Cold outside? Give your warm-up two extra minutes. Joints like it slow in December.",
+        "d5": "Mini challenge: 20 air squats while the kettle boils.",
+        "d6": "Happy Nikulden! Fish is protein. We’re just saying.",
+        "d7": "Did you know? In Records you can log your Fran or your back squat and see your place on the leaderboard.",
+        "d8": "Happy Students’ Day! Today’s lesson: the clock doesn’t stop for chalk breaks.",
+        "d9": "Winter dries you out too. Bring a bottle and finish it before the cool-down.",
+        "d10": "Hold a plank for as long as the song you’re listening to. Choose wisely.",
+        "d11": "Did you know? Once you book, you can add the training to Google or Apple Calendar from its page.",
+        "d12": "December diet plan: one burpee for every cookie. See you in March.",
+        "d13": "The best supplement is free: eight hours of sleep. Holidays included.",
+        "d14": "Stairs only today. Every staircase is a free set of step-ups.",
+        "d15": "Fran is 21-15-9 thrusters and pull-ups. Elite athletes finish it in under three minutes. The rest of us need years to forget it.",
+        "d16": "Did you know? Home shows how many trainings are left on your card, so no more asking the trainers.",
+        "d17": "Santa’s sleigh is just a sled push with eight training partners.",
+        "d18": "Holiday table tip: protein first, then everything else. The banitsa goes right after.",
+        "d19": "Bring a friend to a training before Christmas. Suffering is better together.",
+        "d20": "Burpees: the one gift nobody asks for, and the one coaches give most generously.",
+        "d21": "Winter solstice, the shortest day of the year. Perfect for the shortest list of excuses.",
+        "d22": "Today: 50 burpees, split any way you like. Yes, before dinner counts.",
+        "d23": "Check the Schedule before the holidays and book early. Spots go fast around Christmas.",
+        "d24": "Christmas Eve. Holiday fact: only the strongest train between Christmas and New Year. Everyone else is training their sofa. Be one of the strongest! Merry Christmas from all the coaches!"
+      }
     }
   }
 }

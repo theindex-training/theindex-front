@@ -12,6 +12,8 @@ import { LanguageService } from '../../i18n/language.service';
 import { PageDriver, apiError, driver } from '../../../testing/dom';
 import { signInAs } from '../../../testing/jwt';
 import { TraineeTrainingComponent } from './trainee-training.component';
+import { HOLIDAY_CLOCK } from '../../holidays/holiday-clock.token';
+import { HolidayService } from '../../holidays/holiday.service';
 
 const texts = en.traineeTraining;
 const schedule = en.traineeSchedule;
@@ -63,8 +65,11 @@ describe('TraineeTrainingComponent', () => {
   let http: HttpTestingController;
   let router: Router;
   let page: PageDriver;
+  /** The holidays' "now" (outside them unless a test says otherwise). */
+  let holidayNow: Date;
 
   beforeEach(() => {
+    holidayNow = new Date('2026-11-12T22:30:00Z');
     vi.useFakeTimers({
       toFake: ['Date'],
       now: new Date('2026-11-12T22:30:00Z'),
@@ -84,6 +89,7 @@ describe('TraineeTrainingComponent', () => {
           },
           { path: '**', children: [] },
         ]),
+        { provide: HOLIDAY_CLOCK, useValue: () => holidayNow },
       ],
     });
     http = TestBed.inject(HttpTestingController);
@@ -241,6 +247,28 @@ describe('TraineeTrainingComponent', () => {
     http.expectOne('/api/bookings/trainings/t-fri').flush(BOOKED);
     await page.settle();
     expect(page.query('h1')!.textContent.trim()).toBe(booked.title);
+  });
+
+  it('celebrates the booking in December', async () => {
+    holidayNow = new Date('2026-12-05T10:00:00+02:00');
+    await open();
+    actionButton()!.click();
+    await page.settle();
+    http.expectOne('/api/bookings').flush(
+      answer({
+        bookedCount: 4,
+        bookedByMe: true,
+        canBook: false,
+        canCancel: true,
+      }),
+    );
+    await page.settle();
+    http.expectOne('/api/bookings/trainings/t-fri').flush(BOOKED);
+    await page.settle();
+    expect(TestBed.inject(HolidayService).celebration()?.key).toBe(
+      'holidays.celebrate.bookDecember',
+    );
+    document.documentElement.removeAttribute('data-holiday-snow');
   });
 
   it('cancels a booking once confirmed', async () => {

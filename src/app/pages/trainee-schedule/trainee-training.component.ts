@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
+  inject,
 } from '@angular/core';
 import { ActivatedRoute, Router, UrlTree } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -27,6 +28,7 @@ import { mondayOf } from '../workouts/workouts.component';
 import { noWorkoutMessage } from './no-workout-message';
 import { trainingCalendarUrl } from './training-calendar';
 import { TrainingWorkoutComponent } from './training-workout.component';
+import { HolidayService } from '../../holidays/holiday.service';
 
 /**
  * A trainee's training (`/schedule/:id`): when and where (the gym's address too), the trainer, how
@@ -73,6 +75,7 @@ export class TraineeTrainingComponent implements OnInit {
 
   readonly range = timeRange;
 
+  private readonly holidays = inject(HolidayService);
   constructor(
     private readonly bookings: BookingsService,
     private readonly language: LanguageService,
@@ -187,6 +190,7 @@ export class TraineeTrainingComponent implements OnInit {
     this.actionDone = null;
     this.bookings.book(training.id).subscribe({
       next: (updated) => {
+        this.holidays.celebrate('book');
         if (this.confirmation) {
           this.applyBooking(updated);
           this.changeDetector.detectChanges();

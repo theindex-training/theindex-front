@@ -6,10 +6,13 @@ import {
   Output,
   ViewChild,
   ChangeDetectionStrategy,
+  inject,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { HolidaySwitchComponent } from '../../holidays/holiday-switch.component';
+import { HolidayService } from '../../holidays/holiday.service';
 import { IconComponent } from '../icon/icon.component';
 import { LanguageSwitchComponent } from '../language-switch/language-switch.component';
 import { NavGroup, NavItem, isItemActive } from '../navigation/navigation';
@@ -27,6 +30,7 @@ import { UserBlockComponent } from '../user-block/user-block.component';
     NgTemplateOutlet,
     RouterLink,
     TranslocoPipe,
+    HolidaySwitchComponent,
     IconComponent,
     LanguageSwitchComponent,
     ThemeSwitchComponent,
@@ -37,6 +41,8 @@ import { UserBlockComponent } from '../user-block/user-block.component';
   styleUrl: './nav-sheet.component.scss',
 })
 export class NavSheetComponent {
+  readonly holidays = inject(HolidayService);
+
   /** Translation key of the sheet title (the same as its tab). */
   @Input({ required: true }) title = 'nav.more';
   /** The pages that aren't tabs, by group. */

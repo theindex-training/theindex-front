@@ -1,0 +1,64 @@
+// Over the pages and the navigation (tab bar 20, FAB 15), under modal dialogs (top layer).
+.holiday-layer__snow {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.holiday-layer__line-region {
+  position: fixed;
+  right: 0;
+  // Above the phone's tab bar; at the bottom of the window from 1024px.
+  bottom: calc(5rem + env(safe-area-inset-bottom));
+  left: 0;
+  z-index: 31;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--space-4);
+  pointer-events: none;
+}
+
+.holiday-layer__line {
+  max-width: 28rem;
+  margin: 0;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--nav-bg);
+  color: var(--nav-text-strong);
+  box-shadow: var(--shadow-md);
+  font-weight: 600;
+  text-align: center;
+  animation: holiday-line 4.5s ease both;
+}
+
+@keyframes holiday-line {
+  0% {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+
+  8%,
+  85% {
+    opacity: 1;
+    transform: none;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holiday-layer__line {
+    animation: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .holiday-layer__line-region {
+    bottom: var(--space-8);
+  }
+}

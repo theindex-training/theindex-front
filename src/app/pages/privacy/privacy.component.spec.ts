@@ -40,7 +40,7 @@ describe('PrivacyComponent', () => {
     expect(el.querySelector('h1')?.textContent?.trim()).toBe(en.privacy.title);
     expect(testid(el, 'privacy-controller')).toBe(en.privacy.controller.text);
     expect(testid(el, 'privacy-updated')).toBe(
-      en.privacy.updated.replace('{date}', '23 Nov 2026'),
+      en.privacy.updated.replace('{date}', '25 Nov 2026'),
     );
     const headings = [...el.querySelectorAll('h2')].map((h) =>
       h.textContent?.trim(),
@@ -87,7 +87,7 @@ describe('PrivacyComponent', () => {
     expect(testid(el, 'privacy-controller')).toContain('„В.С. Груп“ ЕООД');
     // The Bulgarian date has a no-break space before "г.".
     expect(testid(el, 'privacy-updated')).toMatch(
-      /^Последна промяна: 23\.11\.2026\sг\.$/,
+      /^Последна промяна: 25\.11\.2026\sг\.$/,
     );
   });
 });
