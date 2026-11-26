@@ -29,22 +29,68 @@ interface StoredHolidays {
   effects?: false;
   /** The Advent doors opened, by day. */
   doors?: number[];
+  /** The days (of December) whose hidden gift was found. */
+  gifts?: number[];
 }
 
 export type CelebrationKind = 'book' | 'personalBest';
 
-/** A moment worth celebrating (a booking, a personal best), shown once by the holiday layer. */
+/** How a celebration bursts: a puff of snow (December) or confetti (Christmas). */
+export type BurstStyle = 'snow' | 'confetti';
+
+/** A moment worth celebrating, shown once by the holiday layer. */
 export interface Celebration {
   id: number;
-  /** Translation key of the line shown. */
-  key: string;
+  /** Translation key of the line shown; none when the moment shows its own text (a gift). */
+  key: string | null;
+  burst: BurstStyle;
+  /** Where the burst starts (window coordinates); the bottom middle when left out. */
+  origin?: { x: number; y: number };
 }
 
-/** The line for each kind of moment, by occasion (Christmas and New Year come later). */
-const CELEBRATION_KEYS: Record<CelebrationKind, { december: string }> = {
-  book: { december: 'holidays.celebrate.bookDecember' },
-  personalBest: { december: 'holidays.celebrate.personalBestDecember' },
+type Occasion = 'december' | 'christmas';
+
+/** The line for each kind of moment, by occasion (New Year comes later). */
+const CELEBRATION_KEYS: Record<CelebrationKind, Record<Occasion, string>> = {
+  book: {
+    december: 'holidays.celebrate.bookDecember',
+    christmas: 'holidays.celebrate.bookChristmas',
+  },
+  personalBest: {
+    december: 'holidays.celebrate.personalBestDecember',
+    christmas: 'holidays.celebrate.personalBestChristmas',
+  },
 };
+
+/**
+ * Where the day's hidden gift is (Dec 20 – 27, in that order): a page every person of the role
+ * can open, matched by its path. The gift sits by the page's title (`app-page-header`).
+ */
+export const GIFT_PAGES: Record<'TRAINEE' | 'STAFF', readonly string[]> = {
+  TRAINEE: [
+    '/home',
+    '/schedule',
+    '/records',
+    '/exercises',
+    '/stats',
+    '/home',
+    '/records',
+    '/schedule',
+  ],
+  STAFF: [
+    '/home',
+    '/workouts/schedule',
+    '/records',
+    '/workouts',
+    '/workouts/exercises',
+    '/home',
+    '/records',
+    '/workouts/benchmarks',
+  ],
+};
+
+/** The first day with a hidden gift (Dec 20, as Christmas starts). */
+const FIRST_GIFT_DAY = 20;
 
 /** How often "today" is read again, so the occasions change at midnight in an open tab. */
 const CLOCK_INTERVAL = 60_000;
@@ -82,6 +128,24 @@ export class HolidayService {
   readonly openedDoors = computed<readonly number[]>(
     () => this.stored()?.doors ?? [],
   );
+  /** The Christmas decorations (the hat on the logo, the lights): Christmas and the effects on. */
+  readonly christmas = computed(
+    () => this.state().christmas && this.effectsOn(),
+  );
+  /** How hard it snows: harder over Christmas. */
+  readonly snowIntensity = computed(() => (this.state().christmas ? 1 : 0.6));
+  /** Today's day of December while a gift hides somewhere (Dec 20 – 27, effects on), else null. */
+  readonly giftDay = computed(() => {
+    if (!this.christmas()) {
+      return null;
+    }
+    return Number(this.day().slice(8, 10));
+  });
+  /** Whether today's gift was found already. */
+  readonly giftFound = computed(() => {
+    const day = this.giftDay();
+    return day !== null && (this.stored()?.gifts ?? []).includes(day);
+  });
 
   private readonly reducedMotionQuery = this.document.defaultView?.matchMedia?.(
     '(prefers-reduced-motion: reduce)',
@@ -159,14 +223,50 @@ export class HolidayService {
     return true;
   }
 
-  /** Shows a line (and a burst of snow) for a booking or a personal best while the effects are on. */
+  /**
+   * Shows a line for a booking or a personal best while the effects are on, with a puff of snow
+   * (confetti over Christmas).
+   */
   celebrate(kind: CelebrationKind): void {
     if (!this.effects()) {
       return;
     }
+    const occasion: Occasion = this.state().christmas
+      ? 'christmas'
+      : 'december';
     this.celebrationSignal.set({
       id: this.nextCelebration++,
-      key: CELEBRATION_KEYS[kind].december,
+      key: CELEBRATION_KEYS[kind][occasion],
+      burst: occasion === 'christmas' ? 'confetti' : 'snow',
+    });
+  }
+
+  /** The page (path) where today's gift hides for this role, or null when there is none. */
+  giftPage(role: string | null): string | null {
+    const day = this.giftDay();
+    if (day === null || !role || this.giftFound()) {
+      return null;
+    }
+    const pages = GIFT_PAGES[role === 'TRAINEE' ? 'TRAINEE' : 'STAFF'];
+    return pages[day - FIRST_GIFT_DAY] ?? null;
+  }
+
+  /** Opens today's gift: remembered, with confetti from where it was. */
+  openGift(origin: { x: number; y: number }): void {
+    const day = this.giftDay();
+    const current = this.stored();
+    if (day === null || !current) {
+      return;
+    }
+    const gifts = current.gifts ?? [];
+    if (!gifts.includes(day)) {
+      this.write({ ...current, gifts: [...gifts, day] });
+    }
+    this.celebrationSignal.set({
+      id: this.nextCelebration++,
+      key: null,
+      burst: 'confetti',
+      origin,
     });
   }
 
@@ -234,8 +334,14 @@ function isStored(value: unknown): value is StoredHolidays {
   const stored = value as Record<string, unknown>;
   return (
     typeof stored['season'] === 'number' &&
-    (stored['doors'] === undefined ||
-      (Array.isArray(stored['doors']) &&
-        stored['doors'].every((door) => typeof door === 'number')))
+    isDayList(stored['doors']) &&
+    isDayList(stored['gifts'])
+  );
+}
+
+function isDayList(value: unknown): boolean {
+  return (
+    value === undefined ||
+    (Array.isArray(value) && value.every((day) => typeof day === 'number'))
   );
 }

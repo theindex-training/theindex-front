@@ -14,8 +14,8 @@ test.describe('J27 holidays', () => {
   const DEC_5 = '2026-12-05T10:00:00+02:00';
   const TODAY = '2026-12-05';
 
-  /** What a trainee's dashboard loads: no subscription, one training to book today. */
-  function traineeHome(api: ApiMock): void {
+  /** What a trainee's dashboard loads: no subscription, one training to book on `day` (today). */
+  function traineeHome(api: ApiMock, day = TODAY): void {
     api.on('GET', '/api/attendance/trainees/trainee-1', { body: [] });
     api.on('GET', '/api/trainees/trainee-1/subscriptions', { body: [] });
     api.on('GET', '/api/plans', { body: [] });
@@ -24,17 +24,17 @@ test.describe('J27 holidays', () => {
     });
     const evening = {
       id: 's-evening',
-      date: TODAY,
+      date: day,
       weekday: 6,
       trainingTime: { startTime: '18:00:00', endTime: '19:00:00' },
       trainer: { name: 'Velcho Sokolov', nickname: null },
       workout: null,
-      workoutReleasesAt: '2026-12-04T18:00:00.000Z',
-      startsAt: '2026-12-05T16:00:00.000Z',
+      workoutReleasesAt: `${day}T00:00:00.000Z`,
+      startsAt: `${day}T16:00:00.000Z`,
       bookedCount: 4,
       bookedByMe: false,
-      bookingClosesAt: '2026-12-05T15:30:00.000Z',
-      cancelUntil: '2026-12-05T15:00:00.000Z',
+      bookingClosesAt: `${day}T15:30:00.000Z`,
+      cancelUntil: `${day}T15:00:00.000Z`,
       canBook: true,
       canCancel: false,
       gym: { id: 'gym-c', name: 'Center' },
@@ -57,7 +57,7 @@ test.describe('J27 holidays', () => {
     api.on('GET', '/api/bookings/trainings/s-evening', {
       body: {
         ...booked,
-        endsAt: '2026-12-05T17:00:00.000Z',
+        endsAt: `${day}T17:00:00.000Z`,
         calendarToken: null,
         gym: { id: 'gym-c', name: 'Center', address: null },
       },
@@ -244,6 +244,68 @@ test.describe('J27 holidays', () => {
           .getByTestId('advent-door-text'),
       ).toHaveText(t('holidays.advent.doors.d24'));
       expect(await stored(page)).toBeNull();
+    },
+  );
+
+  test(
+    'over Christmas the logo wears a hat and a gift hides on the dashboard',
+    { tag: ['@desktop', '@mobile'] },
+    async ({ page, api, signInAs }) => {
+      // Dec 20: the first gift is on everyone's dashboard.
+      await page.clock.setFixedTime('2026-12-20T10:00:00+02:00');
+      await signInAs('TRAINEE');
+      traineeHome(api);
+      await page.goto('/home');
+
+      await expect(
+        page.getByTestId('brand-santa-hat').filter({ visible: true }),
+      ).toHaveCount(1);
+      await expect(
+        page.getByTestId('holiday-lights').filter({ visible: true }),
+      ).toHaveCount(1);
+      await expect(advent(page).getByTestId('advent-gift-hint')).toHaveText(
+        t('holidays.advent.giftHint'),
+      );
+
+      await page
+        .getByRole('button', { name: t('holidays.gift.label') })
+        .click();
+      const dialog = page.getByRole('dialog', {
+        name: t('holidays.gift.title'),
+      });
+      await expect(dialog.getByTestId('holiday-gift-text')).toHaveText(
+        t('holidays.gift.greetings.d20'),
+      );
+      await dialog
+        .getByRole('button', { name: t('holidays.gift.thanks') })
+        .click();
+      await expect(dialog).toBeHidden();
+      await expect(page.getByTestId('holiday-gift')).toHaveCount(0);
+
+      // Found for the day: not there after a reload either.
+      await page.reload();
+      await expect(advent(page)).toBeVisible();
+      await expect(page.getByTestId('holiday-gift')).toHaveCount(0);
+    },
+  );
+
+  test(
+    'a booking over Christmas gets a Christmas line',
+    { tag: '@desktop' },
+    async ({ page, api, signInAs }) => {
+      await page.clock.setFixedTime('2026-12-22T10:00:00+02:00');
+      await signInAs('TRAINEE');
+      traineeHome(api, '2026-12-22');
+      await page.goto('/home');
+
+      await page
+        .getByRole('button', { name: /^Book / })
+        .filter({ visible: true })
+        .first()
+        .click();
+      await expect(page.getByTestId('holiday-celebration')).toHaveText(
+        t('holidays.celebrate.bookChristmas'),
+      );
     },
   );
 });

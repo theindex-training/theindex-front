@@ -2,6 +2,7 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { HolidayLightsComponent } from '../../holidays/holiday-lights.component';
 import { HolidaySwitchComponent } from '../../holidays/holiday-switch.component';
 import { BrandComponent } from '../brand/brand.component';
 import { LanguageSwitchComponent } from '../language-switch/language-switch.component';
@@ -18,6 +19,7 @@ import { UserBlockComponent } from '../user-block/user-block.component';
     RouterLink,
     TranslocoPipe,
     BrandComponent,
+    HolidayLightsComponent,
     HolidaySwitchComponent,
     LanguageSwitchComponent,
     ThemeSwitchComponent,

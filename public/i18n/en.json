@@ -2276,7 +2276,9 @@
     "effects": "Holiday effects",
     "celebrate": {
       "bookDecember": "Booked! A little snow never stopped anyone.",
-      "personalBestDecember": "New personal best! Even the snowman is sweating."
+      "personalBestDecember": "New personal best! Even the snowman is sweating.",
+      "bookChristmas": "Ho-ho-ho! Santa saw that booking. Nice list, confirmed.",
+      "personalBestChristmas": "New personal best! The reindeer want your program."
     },
     "advent": {
       "title": "Advent calendar",
@@ -2324,6 +2326,24 @@
         "d22": "Today: 50 burpees, split any way you like. Yes, before dinner counts.",
         "d23": "Check the Schedule before the holidays and book early. Spots go fast around Christmas.",
         "d24": "Christmas Eve. Holiday fact: only the strongest train between Christmas and New Year. Everyone else is training their sofa. Be one of the strongest! Merry Christmas from all the coaches!"
+      },
+      "giftHint": "Until 27 December a gift hides somewhere in the app every day. Can you find it?"
+    },
+    "gift": {
+      "label": "A gift is hiding here. Open it",
+      "found": "You found a gift",
+      "title": "Merry Christmas!",
+      "tomorrow": "Another one hides somewhere in the app tomorrow.",
+      "thanks": "Thanks!",
+      "greetings": {
+        "d20": "Inside: zero burpees. That’s the gift.",
+        "d21": "Santa visits every home in one night. Now that’s an AMRAP.",
+        "d22": "Sarmi are carbs. Carbs are fuel. Fuel is for training. You know what to do.",
+        "d23": "This box weighs 24 kg. Ten kettlebell swings before you open it?",
+        "d24": "Christmas Eve has an odd number of dishes. Your next WOD has an odd number of rounds. Tradition.",
+        "d25": "Ho-ho-ho counts as core work. Three sets of ten, then dessert.",
+        "d26": "Reindeer never skip leg day. Look how far they get.",
+        "d27": "The best gift is the one you give yourself: a training booked for after the holidays."
       }
     }
   }

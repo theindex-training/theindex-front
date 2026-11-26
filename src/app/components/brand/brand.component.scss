@@ -15,3 +15,48 @@
   width: auto;
   height: 3rem;
 }
+
+.brand__mark {
+  position: relative;
+  display: block;
+}
+
+// Over Christmas: a Santa hat on the badge's top-left corner, swaying a little.
+.brand__hat {
+  position: absolute;
+  top: -38%;
+  left: -9%;
+  width: 34%;
+  overflow: visible;
+  pointer-events: none;
+  transform: rotate(-16deg);
+  transform-origin: 70% 90%;
+  animation: brand-hat-sway 5s ease-in-out infinite;
+}
+
+.brand__hat-red {
+  fill: var(--holiday-red);
+}
+
+.brand__hat-shade {
+  fill: var(--holiday-red-dark);
+  opacity: 0.6;
+}
+
+.brand__hat-fur {
+  fill: var(--snow-fill);
+  stroke: var(--snow-edge);
+  stroke-width: 1.2;
+}
+
+@keyframes brand-hat-sway {
+  50% {
+    transform: rotate(-9deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand__hat {
+    animation: none;
+  }
+}
