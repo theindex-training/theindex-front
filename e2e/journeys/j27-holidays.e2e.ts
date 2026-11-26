@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { Page } from '@playwright/test';
 import { ApiMock } from '../support/api-mock';
 import { expect, test } from '../support/fixtures';
@@ -432,6 +433,22 @@ test.describe('J27 holidays', () => {
       await expect(story.getByTestId('year-in-review-summary')).toBeVisible();
       await expect(story).toContainText(
         t('holidays.yearInReview.summary.outro', { year: '2027' }),
+      );
+
+      // Sharing makes a 1080×1920 picture; a browser that can't share files (as here) downloads it.
+      const downloading = page.waitForEvent('download');
+      await story
+        .getByRole('button', { name: t('holidays.yearInReview.share.button') })
+        .click();
+      const download = await downloading;
+      expect(download.suggestedFilename()).toBe('the-index-2026.png');
+      const picture = readFileSync(await download.path());
+      expect(picture.subarray(1, 4).toString()).toBe('PNG');
+      expect([picture.readUInt32BE(16), picture.readUInt32BE(20)]).toEqual([
+        1080, 1920,
+      ]);
+      await expect(story.getByRole('status')).toHaveText(
+        t('holidays.yearInReview.share.saved'),
       );
 
       await story

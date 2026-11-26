@@ -10,10 +10,13 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { environment } from '@environments/environment';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { AvatarComponent } from '../components/avatar/avatar.component';
 import { IconComponent } from '../components/icon/icon.component';
+import { LanguageService } from '../i18n/language.service';
 import { LocaleFormatService } from '../i18n/locale-format.service';
+import type { TranslationParams } from '../i18n/ui-message';
 import { AuthService } from '../services/auth.service';
 import { TraineesService, YearInReview } from '../services/trainees.service';
 import { HolidayService } from './holiday.service';
@@ -24,6 +27,11 @@ import {
   trainingsTier,
   yearSlides,
 } from './year-in-review';
+import { YearShareContent, shareFileName, shareRows } from './year-share-image';
+import { YearShareService } from './year-share.service';
+
+/** Where sharing the picture stands: being made, saved as a download, or failed. */
+export type ShareStatus = 'idle' | 'making' | 'saved' | 'error';
 
 /**
  * The trainee's year in review (Dec 27 – Jan 10, at the top of their dashboard): a card that
@@ -46,6 +54,8 @@ export class YearInReviewComponent {
   readonly holidays = inject(HolidayService);
   private readonly trainees = inject(TraineesService);
   private readonly format = inject(LocaleFormatService);
+  private readonly language = inject(LanguageService);
+  private readonly shares = inject(YearShareService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly auth = inject(AuthService);
   /** A trainee with a profile: the API reads the year from the token's profile. */
@@ -68,7 +78,14 @@ export class YearInReviewComponent {
     String((this.review()?.year ?? 0) + 1),
   );
 
+  readonly shareStatus = signal<ShareStatus>('idle');
+
   private loadedSeason: number | null = null;
+  /**
+   * The picture, made as soon as the summary shows (for its year and language): a phone lets a
+   * page open the share sheet only shortly after the tap, so Share mustn't wait for the drawing.
+   */
+  private prepared: { key: string; file: Promise<File | null> } | null = null;
 
   constructor() {
     effect(() => {
@@ -90,10 +107,104 @@ export class YearInReviewComponent {
           error: () => this.review.set(null),
         });
     });
+
+    effect(() => {
+      const review = this.review();
+      if (review && this.slide() === 'summary') {
+        void this.prepare(review);
+      }
+    });
+  }
+
+  /** Shares the year's picture (the share sheet on phones), else saves it as a download. */
+  async share(): Promise<void> {
+    const review = this.review();
+    if (!review || this.shareStatus() === 'making') {
+      return;
+    }
+    this.shareStatus.set('making');
+    const file = await this.prepare(review);
+    if (!file) {
+      this.prepared = null;
+      this.shareStatus.set('error');
+      return;
+    }
+    const year = String(review.year);
+    const outcome = await this.shares.shareOrSave(
+      file,
+      this.language.t('holidays.yearInReview.share.title', { year }),
+      this.language.t('holidays.yearInReview.share.text', {
+        year,
+        count: review.trainings,
+      }),
+    );
+    this.shareStatus.set(outcome === 'saved' ? 'saved' : 'idle');
+  }
+
+  private prepare(review: YearInReview): Promise<File | null> {
+    const key = `${review.year}:${this.language.lang()}`;
+    if (this.prepared?.key !== key) {
+      this.prepared = {
+        key,
+        file: this.shares
+          .makeImage(this.shareContent(review), shareFileName(review.year))
+          .catch(() => null),
+      };
+    }
+    return this.prepared.file;
+  }
+
+  /** The picture's text in the page's language. */
+  private shareContent(review: YearInReview): YearShareContent {
+    const t = (key: string, params?: TranslationParams) =>
+      this.language.t(key, params);
+    const upper = (text: string) =>
+      text.toLocaleUpperCase(this.language.locale());
+    const rows = shareRows(review).map((row) => {
+      switch (row) {
+        case 'time':
+          return {
+            label: t('holidays.yearInReview.summary.time'),
+            value: review.favouriteTime!.time,
+          };
+        case 'streak':
+          return {
+            label: t('holidays.yearInReview.summary.streak'),
+            value: t('holidays.yearInReview.summary.weeks', {
+              count: review.longestStreakWeeks,
+            }),
+          };
+        case 'trainer':
+          return {
+            label: t('holidays.yearInReview.summary.trainer'),
+            value: review.topTrainer!.name,
+          };
+        case 'month':
+          return {
+            label: t('holidays.yearInReview.summary.month'),
+            value: this.monthName(review.busiestMonth!.month),
+          };
+      }
+    });
+    return {
+      kicker: upper(
+        t('holidays.yearInReview.share.kicker', { year: String(review.year) }),
+      ),
+      figure: this.number(review.trainings),
+      figureLabel: t('holidays.yearInReview.trainings.label', {
+        count: review.trainings,
+      }),
+      rows: rows.map((row) => ({ ...row, label: upper(row.label) })),
+      outro: t('holidays.yearInReview.summary.outro', {
+        year: String(review.year + 1),
+      }),
+      site: new URL(environment.publicSiteUrl).host,
+    };
   }
 
   play(): void {
     this.index.set(0);
+    this.shareStatus.set('idle');
     this.dialog()?.nativeElement.showModal();
   }
 
@@ -115,6 +226,9 @@ export class YearInReviewComponent {
 
   /** As in other stories: a tap on the left third goes back, anywhere else forward. */
   handleSlideClick(event: MouseEvent): void {
+    if ((event.target as Element | null)?.closest('button')) {
+      return;
+    }
     const area = (event.currentTarget as HTMLElement).getBoundingClientRect();
     if (area.width && event.clientX - area.left < area.width / 3) {
       this.previous();

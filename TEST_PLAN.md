@@ -908,7 +908,7 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 2. Register's consent link opens the policy in a new tab and the half-filled form keeps its values.
 
 ### J27. Holidays (P1) [desktop, mobile]
-✅ `e2e/journeys/j27-holidays.e2e.ts`. Unit specs: `holidays/holiday-calendar.spec.ts`, `holidays/holiday.service.spec.ts`, `holidays/advent-calendar.component.spec.ts`, `holidays/year-in-review.spec.ts`, `holidays/year-in-review.component.spec.ts`, `holidays/snowfall.spec.ts`.
+✅ `e2e/journeys/j27-holidays.e2e.ts`. Unit specs: `holidays/holiday-calendar.spec.ts`, `holidays/holiday.service.spec.ts`, `holidays/advent-calendar.component.spec.ts`, `holidays/year-in-review.spec.ts`, `holidays/year-in-review.component.spec.ts`, `holidays/snowfall.spec.ts`, `holidays/year-share-image.spec.ts`, `holidays/year-share.service.spec.ts`.
 1. Desktop and phone, trainee on Dec 5: it snows; today's door opens and shows its text; later doors say when they open; after a reload the door is still open.
 2. Booking a training from the dashboard shows December's celebration line.
 3. "Holiday effects" off stops the snow and stays off after a reload (the Advent calendar stays); on a phone the switch is in the Account sheet.
@@ -916,7 +916,7 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 5. On Jan 11 nothing shows and the stored `holidays` value is gone; `?holidayDate=2026-12-24` previews Christmas Eve and stores nothing.
 6. Desktop and phone on Dec 20: the logo wears a hat, the lights are up, the Advent card tells about the gifts, and the gift next to the dashboard's title opens with the day's greeting and is gone after a reload. A booking on Dec 22 gets the Christmas line.
 7. Desktop and phone on Jan 1: the сурвачка's wish opens by itself with the rhyme, closes, stays closed after a reload, and the сурвачка by the logo opens it again. A booking on Dec 31 gets the New Year line.
-8. Desktop and phone on Dec 28: a trainee's dashboard asks for the 2026 year in review and plays it: the slides with Next, a tap on the left of the slide going back, the arrow keys, then the year in numbers and Done.
+8. Desktop and phone on Dec 28: a trainee's dashboard asks for the 2026 year in review and plays it: the slides with Next, a tap on the left of the slide going back, the arrow keys, then the year in numbers; Share your year downloads a 1080×1920 PNG (headless Chromium can't share files) and says so; Done.
 
 ---
 

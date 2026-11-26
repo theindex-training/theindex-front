@@ -29,14 +29,15 @@
 }
 
 .yir-card__play,
-.yir__step--next {
+.yir__step--next,
+.yir__share {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
   min-height: var(--control-height);
   padding: 0 var(--space-5);
-  border: 0;
+  border: 2px solid var(--nav-text-strong);
   border-radius: var(--radius-lg);
   background: var(--nav-text-strong);
   color: var(--nav-bg);
@@ -46,6 +47,17 @@
   text-transform: uppercase;
   cursor: pointer;
   --icon-size: 1.125rem;
+}
+
+// The summary's Share: the same button, outlined.
+.yir__share {
+  margin-top: var(--space-4);
+  background: none;
+  color: var(--nav-text-strong);
+}
+
+.yir__share:disabled {
+  cursor: progress;
 }
 
 .yir-card__play:focus-visible,

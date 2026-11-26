@@ -48,7 +48,8 @@ export type IconName =
   | 'smile'
   | 'lightbulb'
   | 'star'
-  | 'info';
+  | 'info'
+  | 'share';
 
 /**
  * Inline stroke icons in the Lucide style (24px grid, 2px round strokes, currentColor).

@@ -222,6 +222,30 @@
                 | transloco: { year: nextYearText() }
             }}
           </p>
+          <button
+            class="yir__share"
+            type="button"
+            data-testid="year-in-review-share"
+            [disabled]="shareStatus() === 'making'"
+            (click)="share()"
+          >
+            <app-icon name="share" />
+            {{
+              (shareStatus() === 'making'
+                ? 'holidays.yearInReview.share.making'
+                : 'holidays.yearInReview.share.button'
+              ) | transloco
+            }}
+          </button>
+          @if (shareStatus() === 'saved') {
+            <p class="yir__note" role="status">
+              {{ 'holidays.yearInReview.share.saved' | transloco }}
+            </p>
+          } @else if (shareStatus() === 'error') {
+            <p class="yir__note" role="alert">
+              {{ 'holidays.yearInReview.share.error' | transloco }}
+            </p>
+          }
         }
       }
     </div>

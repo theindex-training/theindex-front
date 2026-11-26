@@ -4,6 +4,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { recordingContext } from '../../testing/canvas';
 import { TestClaims, TestRole, signInAs } from '../../testing/jwt';
 import { YearInReview } from '../services/trainees.service';
 import { HOLIDAY_CLOCK } from './holiday-clock.token';
@@ -123,9 +124,15 @@ describe('YearInReviewComponent', () => {
     dialogProto['close'] = function (this: HTMLDialogElement) {
       this.removeAttribute('open');
     };
+    // jsdom draws nothing; the share specs give the canvas a context of their own.
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    delete (navigator as unknown as Record<string, unknown>)['share'];
+    delete (navigator as unknown as Record<string, unknown>)['canShare'];
     http.verify();
     delete dialogProto['showModal'];
     delete dialogProto['close'];
@@ -297,5 +304,124 @@ describe('YearInReviewComponent', () => {
     }
     expect(text(fixture, 'year-in-review-position')).toBe('6 of 6');
     expect(dialog(fixture).open).toBe(true);
+  });
+
+  describe('sharing the year', () => {
+    /** A canvas that draws (recording the text) and exports, and no logo to load. */
+    function stubCanvas() {
+      const { context, drawn } = recordingContext();
+      vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+        context,
+      );
+      vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation(
+        (callback) => callback(new Blob(['png'], { type: 'image/png' })),
+      );
+      vi.stubGlobal('fetch', () => Promise.reject(new TypeError('offline')));
+      return drawn;
+    }
+
+    function stubShare(can: boolean) {
+      const share = vi.fn((data: ShareData) => {
+        void data;
+        return Promise.resolve();
+      });
+      Object.defineProperty(navigator, 'share', {
+        value: share,
+        configurable: true,
+      });
+      Object.defineProperty(navigator, 'canShare', {
+        value: () => can,
+        configurable: true,
+      });
+      return share;
+    }
+
+    async function openSummary(): Promise<
+      ComponentFixture<YearInReviewComponent>
+    > {
+      const fixture = await render('2026-12-29T09:00:00+02:00');
+      await answer(fixture, 2026, YEAR);
+      await click(fixture, button(fixture, 'Play your year'));
+      for (let i = 0; i < 5; i++) {
+        await click(fixture, button(fixture, 'Next'));
+      }
+      return fixture;
+    }
+
+    it('shares a picture of the year from the summary', async () => {
+      const drawn = stubCanvas();
+      const share = stubShare(true);
+      const fixture = await openSummary();
+
+      await click(fixture, button(fixture, 'Share your year'));
+      await vi.waitFor(() => expect(share).toHaveBeenCalledTimes(1));
+      const data = share.mock.calls[0][0];
+      expect(data.title).toBe('My 2026 at The Index');
+      expect(data.text).toBe('My 2026 at The Index: 96 trainings.');
+      expect(data.files?.map((file) => [file.name, file.type])).toEqual([
+        ['the-index-2026.png', 'image/png'],
+      ]);
+      expect(drawn.map((item) => item.text)).toEqual(
+        expect.arrayContaining([
+          'MY 2026 AT THE INDEX',
+          '96',
+          'trainings',
+          'FAVOURITE HOUR',
+          '07:00',
+          'LONGEST STREAK',
+          '12 weeks',
+          'COACH OF THE YEAR',
+          'Ivan Petrov',
+          'STRONGEST MONTH',
+          'October',
+          'See you at the gym in 2027. Even stronger.',
+        ]),
+      );
+      // The tap on the button is no tap on the slide: the story stays on the summary.
+      await fixture.whenStable();
+      expect(dialog(fixture).open).toBe(true);
+      expect(text(fixture, 'year-in-review-position')).toBe('6 of 6');
+    });
+
+    it('saves the picture where the browser can’t share it', async () => {
+      stubCanvas();
+      stubShare(false);
+      const downloads: string[] = [];
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+        function (this: HTMLAnchorElement) {
+          downloads.push(this.download);
+        },
+      );
+      Object.defineProperty(URL, 'createObjectURL', {
+        value: () => 'blob:picture',
+        configurable: true,
+      });
+      Object.defineProperty(URL, 'revokeObjectURL', {
+        value: () => undefined,
+        configurable: true,
+      });
+      const fixture = await openSummary();
+
+      await click(fixture, button(fixture, 'Share your year'));
+      await vi.waitFor(() => expect(downloads).toEqual(['the-index-2026.png']));
+      await fixture.whenStable();
+      expect(text(fixture, 'year-in-review-slide')).toContain(
+        'The picture is in your downloads.',
+      );
+    });
+
+    it('says so when the picture can’t be made', async () => {
+      const share = stubShare(true);
+      const fixture = await openSummary();
+
+      await click(fixture, button(fixture, 'Share your year'));
+      await vi.waitFor(async () => {
+        await fixture.whenStable();
+        expect(text(fixture, 'year-in-review-slide')).toContain(
+          'Couldn’t make the picture. Try again.',
+        );
+      });
+      expect(share).not.toHaveBeenCalled();
+    });
   });
 });
