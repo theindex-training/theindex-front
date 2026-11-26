@@ -11,7 +11,7 @@
 
   <header class="topbar">
     <app-holiday-lights />
-    <app-brand />
+    <app-brand [inShell]="true" />
   </header>
 
   <main #main class="content" tabindex="-1">
@@ -28,6 +28,8 @@
     (openSheet)="openSheet($event)"
   />
 </div>
+
+<app-survachka-dialog />
 
 <app-nav-sheet
   [title]="navigation.sheetLabel"

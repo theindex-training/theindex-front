@@ -308,4 +308,63 @@ test.describe('J27 holidays', () => {
       );
     },
   );
+
+  test.describe('the сурвачка’s wish', () => {
+    test.use({ holidayGreeting: true });
+
+    test(
+      'on Jan 1 the сурвачка greets with its wish once, and its logo button opens it again',
+      { tag: ['@desktop', '@mobile'] },
+      async ({ page, api, signInAs }) => {
+        await page.clock.setFixedTime('2027-01-01T11:00:00+02:00');
+        await signInAs('TRAINEE');
+        traineeHome(api, '2027-01-01');
+        await page.goto('/home');
+
+        const wish = page.getByRole('dialog', {
+          name: t('holidays.newYear.title'),
+        });
+        await expect(wish.getByTestId('survachka-wish')).toContainText(
+          'Surva, surva, happy year,',
+        );
+        await wish
+          .getByRole('button', { name: t('holidays.newYear.thanks') })
+          .click();
+        await expect(wish).toBeHidden();
+
+        // Seen: not again by itself after a reload.
+        await page.reload();
+        await expect(
+          page.getByRole('heading', { name: t('traineeDashboard.title') }),
+        ).toBeVisible();
+        await expect(wish).toBeHidden();
+
+        await page
+          .getByRole('button', { name: t('holidays.newYear.open') })
+          .filter({ visible: true })
+          .click();
+        await expect(wish).toBeVisible();
+      },
+    );
+  });
+
+  test(
+    'a booking on New Year’s Eve gets a New Year line',
+    { tag: '@desktop' },
+    async ({ page, api, signInAs }) => {
+      await page.clock.setFixedTime('2026-12-31T10:00:00+02:00');
+      await signInAs('TRAINEE');
+      traineeHome(api, '2026-12-31');
+      await page.goto('/home');
+
+      await page
+        .getByRole('button', { name: /^Book / })
+        .filter({ visible: true })
+        .first()
+        .click();
+      await expect(page.getByTestId('holiday-celebration')).toHaveText(
+        t('holidays.celebrate.bookNewYear'),
+      );
+    },
+  );
 });

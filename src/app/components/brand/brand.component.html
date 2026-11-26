@@ -30,5 +30,30 @@
         <circle class="brand__hat-fur" cx="107" cy="42" r="11" />
       </svg>
     }
+    @if (holidays.newYear()) {
+      <!-- New Year (Dec 31 – Jan 2): two gold sparkles twinkling on the badge. -->
+      @for (sparkle of sparkles; track sparkle) {
+        <svg
+          class="brand__sparkle"
+          [class]="'brand__sparkle--' + sparkle"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path d="M12 0l2 10 10 2-10 2-2 10-2-10L0 12l10-2Z" />
+        </svg>
+      }
+    }
   </span>
 </a>
+@if (inShell && holidays.survachka()) {
+  <!-- Jan 1 – 6: the сурвачка by the logo; a tap opens its New Year wish. -->
+  <button
+    type="button"
+    class="brand__survachka"
+    [attr.aria-label]="'holidays.newYear.open' | transloco"
+    data-testid="brand-survachka"
+    (click)="holidays.openSurvachka()"
+  >
+    <app-survachka />
+  </button>
+}

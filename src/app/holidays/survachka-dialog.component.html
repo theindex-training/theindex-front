@@ -1,0 +1,43 @@
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- a click on the backdrop closes it; keyboard users have Escape and the button -->
+<dialog
+  #dialog
+  class="survachka-dialog"
+  aria-labelledby="survachka-title"
+  aria-describedby="survachka-wish"
+  data-testid="survachka-dialog"
+  (close)="handleClose()"
+  (click)="handleDialogClick($event)"
+>
+  <div class="survachka-dialog__scene" aria-hidden="true">
+    <img
+      class="survachka-dialog__logo"
+      [class.is-tapped]="tapping()"
+      src="brand/the-index-logo-red.png"
+      alt=""
+      width="640"
+      height="270"
+    />
+    <app-survachka
+      class="survachka-dialog__branch"
+      [class.is-tapping]="tapping()"
+    />
+  </div>
+  <h2 class="survachka-dialog__title" id="survachka-title">
+    {{ 'holidays.newYear.title' | transloco }}
+  </h2>
+  <p
+    class="survachka-dialog__wish"
+    id="survachka-wish"
+    data-testid="survachka-wish"
+  >
+    {{ 'holidays.newYear.wish' | transloco }}
+  </p>
+  <p class="survachka-dialog__custom text-muted">
+    {{ 'holidays.newYear.custom' | transloco }}
+  </p>
+  <div class="form-actions">
+    <button class="btn btn--primary" type="button" (click)="close()">
+      {{ 'holidays.newYear.thanks' | transloco }}
+    </button>
+  </div>
+</dialog>

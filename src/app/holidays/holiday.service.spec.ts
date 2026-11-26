@@ -213,4 +213,87 @@ describe('HolidayService', () => {
       expect(after.giftDay()).toBeNull();
     });
   });
+
+  describe('New Year (Dec 31 – Jan 6)', () => {
+    it('celebrates with New Year lines and fireworks', () => {
+      const service = serviceOn('2026-12-31T20:00:00+02:00');
+      expect(service.newYear()).toBe(true);
+      service.celebrate('book');
+      expect(service.celebration()).toEqual({
+        id: 1,
+        key: 'holidays.celebrate.bookNewYear',
+        burst: 'fireworks',
+      });
+      service.celebrate('personalBest');
+      expect(service.celebration()?.key).toBe(
+        'holidays.celebrate.personalBestNewYear',
+      );
+    });
+
+    it('plays the fireworks show once a day', () => {
+      const service = serviceOn('2026-12-31T20:00:00+02:00');
+      expect(service.takeFireworksShow()).toBe(true);
+      expect(service.takeFireworksShow()).toBe(false);
+      expect(stored()).toEqual({ season: 2026, show: '2026-12-31' });
+    });
+
+    it('plays no show with the effects off, or after Jan 2', () => {
+      const off = serviceOn('2026-12-31T20:00:00+02:00');
+      off.setEffects(false);
+      expect(off.newYear()).toBe(false);
+      expect(off.takeFireworksShow()).toBe(false);
+
+      TestBed.resetTestingModule();
+      localStorage.clear();
+      const later = serviceOn('2027-01-03T10:00:00+02:00');
+      expect(later.newYear()).toBe(false);
+      expect(later.takeFireworksShow()).toBe(false);
+    });
+
+    it('opens the сурвачка’s wish by itself on the first visit from Jan 1, before the show', () => {
+      const service = serviceOn('2027-01-01T10:00:00+02:00');
+      expect(service.survachkaOpen()).toBe(true);
+      expect(service.survachka()).toBe(true);
+      // The show waits for the wish.
+      expect(service.takeFireworksShow()).toBe(false);
+
+      service.closeSurvachka();
+      expect(service.survachkaOpen()).toBe(false);
+      expect(stored()).toEqual({ season: 2026, survachka: true });
+      expect(service.takeFireworksShow()).toBe(true);
+    });
+
+    it('opens the wish again when asked, and not by itself once seen', () => {
+      localStorage.setItem(
+        HOLIDAY_STORAGE_KEY,
+        JSON.stringify({ season: 2026, survachka: true }),
+      );
+      const service = serviceOn('2027-01-04T10:00:00+02:00');
+      expect(service.survachkaOpen()).toBe(false);
+      service.openSurvachka();
+      expect(service.survachkaOpen()).toBe(true);
+      service.closeSurvachka();
+      expect(service.survachkaOpen()).toBe(false);
+    });
+
+    it('greets with the wish even with the effects off, but shows no сурвачка on the logo', () => {
+      localStorage.setItem(
+        HOLIDAY_STORAGE_KEY,
+        JSON.stringify({ season: 2026, effects: false }),
+      );
+      const service = serviceOn('2027-01-02T10:00:00+02:00');
+      expect(service.survachkaOpen()).toBe(true);
+      expect(service.survachka()).toBe(false);
+    });
+
+    it('doesn’t open the wish on Dec 31 or after Jan 6', () => {
+      expect(serviceOn('2026-12-31T23:00:00+02:00').survachkaOpen()).toBe(
+        false,
+      );
+      TestBed.resetTestingModule();
+      expect(serviceOn('2027-01-07T10:00:00+02:00').survachkaOpen()).toBe(
+        false,
+      );
+    });
+  });
 });

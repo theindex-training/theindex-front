@@ -31,12 +31,16 @@ interface StoredHolidays {
   doors?: number[];
   /** The days (of December) whose hidden gift was found. */
   gifts?: number[];
+  /** The last day ('YYYY-MM-DD') the New Year's fireworks show played. */
+  show?: string;
+  /** The сурвачка's New Year wish was seen (it opens by itself once a season). */
+  survachka?: true;
 }
 
 export type CelebrationKind = 'book' | 'personalBest';
 
-/** How a celebration bursts: a puff of snow (December) or confetti (Christmas). */
-export type BurstStyle = 'snow' | 'confetti';
+/** How a celebration bursts: a puff of snow (December), confetti (Christmas), fireworks (New Year). */
+export type BurstStyle = 'snow' | 'confetti' | 'fireworks';
 
 /** A moment worth celebrating, shown once by the holiday layer. */
 export interface Celebration {
@@ -48,18 +52,26 @@ export interface Celebration {
   origin?: { x: number; y: number };
 }
 
-type Occasion = 'december' | 'christmas';
+type Occasion = 'december' | 'christmas' | 'newYear';
 
-/** The line for each kind of moment, by occasion (New Year comes later). */
+/** The line for each kind of moment, by occasion. */
 const CELEBRATION_KEYS: Record<CelebrationKind, Record<Occasion, string>> = {
   book: {
     december: 'holidays.celebrate.bookDecember',
     christmas: 'holidays.celebrate.bookChristmas',
+    newYear: 'holidays.celebrate.bookNewYear',
   },
   personalBest: {
     december: 'holidays.celebrate.personalBestDecember',
     christmas: 'holidays.celebrate.personalBestChristmas',
+    newYear: 'holidays.celebrate.personalBestNewYear',
   },
+};
+
+const BURSTS: Record<Occasion, BurstStyle> = {
+  december: 'snow',
+  christmas: 'confetti',
+  newYear: 'fireworks',
 };
 
 /**
@@ -141,6 +153,23 @@ export class HolidayService {
     }
     return Number(this.day().slice(8, 10));
   });
+  /** New Year's fireworks and the sparkles on the logo: Dec 31 – Jan 2 and the effects on. */
+  readonly newYear = computed(() => this.state().newYear && this.effectsOn());
+  /** The сурвачка on the logo (Jan 1 – 6, the effects on); a tap opens its wish. */
+  readonly survachka = computed(
+    () => this.state().survachka && this.effectsOn(),
+  );
+  private readonly survachkaAsked = signal(false);
+  /**
+   * The сурвачка's New Year wish is open: by itself the first time the app is opened from Jan 1
+   * (until Jan 6, effects on or off: it is a greeting), or when the сурвачка on the logo is tapped.
+   */
+  readonly survachkaOpen = computed(
+    () =>
+      this.survachkaAsked() ||
+      (this.state().survachka && !!this.stored() && !this.stored()?.survachka),
+  );
+
   /** Whether today's gift was found already. */
   readonly giftFound = computed(() => {
     const day = this.giftDay();
@@ -231,14 +260,50 @@ export class HolidayService {
     if (!this.effects()) {
       return;
     }
-    const occasion: Occasion = this.state().christmas
-      ? 'christmas'
-      : 'december';
+    const state = this.state();
+    const occasion: Occasion = state.newYear
+      ? 'newYear'
+      : state.christmas
+        ? 'christmas'
+        : 'december';
     this.celebrationSignal.set({
       id: this.nextCelebration++,
       key: CELEBRATION_KEYS[kind][occasion],
-      burst: occasion === 'christmas' ? 'confetti' : 'snow',
+      burst: BURSTS[occasion],
     });
+  }
+
+  /**
+   * Whether the New Year's fireworks show plays now: once a day from Dec 31 to Jan 2, after the
+   * сурвачка's wish is closed. Answering yes remembers the day.
+   */
+  takeFireworksShow(): boolean {
+    const current = this.stored();
+    const day = this.day();
+    if (
+      !current ||
+      !this.newYear() ||
+      this.survachkaOpen() ||
+      current.show === day
+    ) {
+      return false;
+    }
+    this.write({ ...current, show: day });
+    return true;
+  }
+
+  /** Opens the сурвачка's wish again (the сурвачка on the logo). */
+  openSurvachka(): void {
+    this.survachkaAsked.set(true);
+  }
+
+  /** The wish was closed: it doesn't open by itself again this season. */
+  closeSurvachka(): void {
+    this.survachkaAsked.set(false);
+    const current = this.stored();
+    if (current && !current.survachka) {
+      this.write({ ...current, survachka: true });
+    }
   }
 
   /** The page (path) where today's gift hides for this role, or null when there is none. */
@@ -335,7 +400,8 @@ function isStored(value: unknown): value is StoredHolidays {
   return (
     typeof stored['season'] === 'number' &&
     isDayList(stored['doors']) &&
-    isDayList(stored['gifts'])
+    isDayList(stored['gifts']) &&
+    (stored['show'] === undefined || typeof stored['show'] === 'string')
   );
 }
 

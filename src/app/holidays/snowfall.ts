@@ -43,6 +43,10 @@ export class Snowfall {
   private readonly context: CanvasRenderingContext2D | null;
   private flakes: Flake[] = [];
   private particles: Particle[] = [];
+  /** New Year's rockets on their way up; each bursts into sparks at its top. */
+  private rockets: Particle[] = [];
+  private sparks: Particle[] = [];
+  private timers: ReturnType<typeof setTimeout>[] = [];
   private width = 0;
   private height = 0;
   private intensity = 0;
@@ -105,6 +109,60 @@ export class Snowfall {
     this.kick();
   }
 
+  /** A firework bursting at (x, y): sparks flying out and falling, in the confetti's colors. */
+  fireworks(x: number, y: number, count = 70): void {
+    this.readColors();
+    if (!this.confettiColors.length) {
+      return;
+    }
+    const color = (index: number) =>
+      this.confettiColors[index % this.confettiColors.length];
+    const tint = Math.floor(Math.random() * this.confettiColors.length);
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.4 + Math.random() * 3;
+      const max = 60 + Math.random() * 40;
+      this.sparks.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        r: 2,
+        life: max,
+        max,
+        // Mostly one color per burst, with a few sparks of the others.
+        color: color(i % 5 === 0 ? i : tint),
+      });
+    }
+    this.kick();
+  }
+
+  /** A rocket from the bottom of the window at x, bursting `top` pixels from the top. */
+  rocket(x: number, top: number): void {
+    const rise = Math.max(80, this.height - top);
+    const gravity = 0.06;
+    const vy = -Math.sqrt(2 * gravity * rise);
+    const life = Math.round(-vy / gravity);
+    this.rockets.push({ x, y: this.height, vx: 0, vy, r: 2, life, max: life });
+    this.kick();
+  }
+
+  /** A short fireworks show: `count` rockets across the window, one every ~0.6 s. */
+  show(count = 7): void {
+    for (let i = 0; i < count; i++) {
+      this.timers.push(
+        setTimeout(
+          () =>
+            this.rocket(
+              this.width * (0.15 + Math.random() * 0.7),
+              this.height * (0.15 + Math.random() * 0.3),
+            ),
+          i * 600 + Math.random() * 300,
+        ),
+      );
+    }
+  }
+
   /** A puff of snow rising from (x, y), e.g. above the celebration's line. */
   burst(x: number, y: number, count = 40): void {
     this.readColors();
@@ -127,6 +185,7 @@ export class Snowfall {
 
   destroy(): void {
     this.view.cancelAnimationFrame(this.frame);
+    this.timers.forEach((timer) => clearTimeout(timer));
     this.view.removeEventListener('resize', this.onResize);
     this.view.document.removeEventListener(
       'visibilitychange',
@@ -209,7 +268,13 @@ export class Snowfall {
         this.dot(context, particle.x, particle.y, particle.r, fade);
       }
     }
-    if (this.flakes.length || this.particles.length) {
+    this.drawFireworks(context);
+    if (
+      this.flakes.length ||
+      this.particles.length ||
+      this.rockets.length ||
+      this.sparks.length
+    ) {
       this.kick();
     }
   }
@@ -256,5 +321,52 @@ export class Snowfall {
       particle.r / 1.2,
     );
     context.restore();
+  }
+
+  /** Rockets rise with a short trail; at their top they burst; sparks fall and fade. */
+  private drawFireworks(context: CanvasRenderingContext2D): void {
+    const burst: Particle[] = [];
+    this.rockets = this.rockets.filter((rocket) => {
+      if (--rocket.life <= 0) {
+        burst.push(rocket);
+        return false;
+      }
+      return true;
+    });
+    burst.forEach((rocket) => this.fireworks(rocket.x, rocket.y));
+    context.lineCap = 'round';
+    for (const rocket of this.rockets) {
+      rocket.vy += 0.06;
+      rocket.y += rocket.vy;
+      this.trail(context, rocket, this.fill, 1);
+    }
+    this.sparks = this.sparks.filter((spark) => --spark.life > 0);
+    for (const spark of this.sparks) {
+      spark.vx *= 0.975;
+      spark.vy = spark.vy * 0.975 + 0.045;
+      spark.x += spark.vx;
+      spark.y += spark.vy;
+      const fade = Math.min(1, spark.life / (spark.max * 0.4));
+      this.trail(context, spark, spark.color ?? this.fill, fade);
+    }
+  }
+
+  private trail(
+    context: CanvasRenderingContext2D,
+    particle: Particle,
+    color: string,
+    alpha: number,
+  ): void {
+    if (!color) {
+      return;
+    }
+    context.globalAlpha = alpha;
+    context.strokeStyle = color;
+    context.lineWidth = particle.r;
+    context.beginPath();
+    context.moveTo(particle.x - particle.vx * 2, particle.y - particle.vy * 2);
+    context.lineTo(particle.x, particle.y);
+    context.stroke();
+    context.globalAlpha = 1;
   }
 }
