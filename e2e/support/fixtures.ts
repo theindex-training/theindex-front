@@ -21,6 +21,11 @@ interface Fixtures {
   signInAs: (role: TestRole, claims?: TestClaims) => Promise<void>;
   /** Starts the browser with this token stored (e.g. an expired or malformed one). */
   seedToken: (token: string) => Promise<void>;
+  /**
+   * Let the сурвачка's New Year wish open by itself (Jan 1 – 6). Off by default: it is a modal
+   * dialog, and journeys run on the real date in CI. J27 turns it on with `test.use`.
+   */
+  holidayGreeting: boolean;
 }
 
 /**
@@ -30,8 +35,11 @@ interface Fixtures {
  *   and the dashboards' requests (`dashboardDefaults`) with nothing to show.
  * - The UI starts in English (localStorage `lang`), so `t()` selectors apply. Seeded values are
  *   written once per tab, so a reload or the app's own logout/language switch behaves as in real use.
+ * - From Jan 1 to Jan 6 (the browser's date) the сурвачка's wish is stored as seen, so its modal
+ *   dialog doesn't cover the page, unless the test sets `holidayGreeting`.
  */
 export const test = base.extend<Fixtures>({
+  holidayGreeting: [false, { option: true }],
   api: async ({ page }, use) => {
     const api = new ApiMock();
     // The navigation's avatar of trainees and trainers (a test's own rule wins).
@@ -43,7 +51,22 @@ export const test = base.extend<Fixtures>({
     await use(api);
     expect(api.unhandled, 'API requests no rule answered').toEqual([]);
   },
-  page: async ({ page }, use) => {
+  page: async ({ page, holidayGreeting }, use) => {
+    if (!holidayGreeting) {
+      await page.addInitScript(() => {
+        const now = new Date();
+        if (
+          now.getMonth() === 0 &&
+          now.getDate() <= 6 &&
+          !localStorage.getItem('holidays')
+        ) {
+          localStorage.setItem(
+            'holidays',
+            JSON.stringify({ season: now.getFullYear() - 1, survachka: true }),
+          );
+        }
+      });
+    }
     await page.addInitScript(() => {
       if (!sessionStorage.getItem('e2e-seeded-lang')) {
         localStorage.setItem('lang', 'en');

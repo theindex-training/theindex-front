@@ -12,6 +12,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { filter, map } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { HolidayLightsComponent } from '../../holidays/holiday-lights.component';
+import { SurvachkaDialogComponent } from '../../holidays/survachka-dialog.component';
 import { BrandComponent } from '../brand/brand.component';
 import { NavSheetComponent } from '../nav-sheet/nav-sheet.component';
 import { buildNavigation, isUrlInItems } from '../navigation/navigation';
@@ -29,6 +30,7 @@ const DESKTOP_QUERY = '(min-width: 1024px)';
     TranslocoPipe,
     BrandComponent,
     HolidayLightsComponent,
+    SurvachkaDialogComponent,
     SidebarComponent,
     TabBarComponent,
     NavSheetComponent,

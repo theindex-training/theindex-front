@@ -915,6 +915,7 @@ Since the trainings calendar, the phone test fixes the clock to 31 Oct 2026 so i
 4. A trainer's dashboard has the calendar too.
 5. On Jan 11 nothing shows and the stored `holidays` value is gone; `?holidayDate=2026-12-24` previews Christmas Eve and stores nothing.
 6. Desktop and phone on Dec 20: the logo wears a hat, the lights are up, the Advent card tells about the gifts, and the gift next to the dashboard's title opens with the day's greeting and is gone after a reload. A booking on Dec 22 gets the Christmas line.
+7. Desktop and phone on Jan 1: the сурвачка's wish opens by itself with the rhyme, closes, stays closed after a reload, and the сурвачка by the logo opens it again. A booking on Dec 31 gets the New Year line.
 
 ---
 

@@ -2278,7 +2278,9 @@
       "bookDecember": "Booked! A little snow never stopped anyone.",
       "personalBestDecember": "New personal best! Even the snowman is sweating.",
       "bookChristmas": "Ho-ho-ho! Santa saw that booking. Nice list, confirmed.",
-      "personalBestChristmas": "New personal best! The reindeer want your program."
+      "personalBestChristmas": "New personal best! The reindeer want your program.",
+      "bookNewYear": "Booked! Strong start to the new year.",
+      "personalBestNewYear": "New personal best! The new year is going to be heavy. In a good way."
     },
     "advent": {
       "title": "Advent calendar",
@@ -2345,6 +2347,13 @@
         "d26": "Reindeer never skip leg day. Look how far they get.",
         "d27": "The best gift is the one you give yourself: a training booked for after the holidays."
       }
+    },
+    "newYear": {
+      "title": "Happy New Year!",
+      "open": "The сурвачка: read its New Year wish",
+      "thanks": "Thank you!",
+      "custom": "On New Year’s Day, Bulgarian children tap people on the back with a сурвачка, a decorated cornel branch, wishing them health and luck.",
+      "wish": "Surva, surva, happy year,\na merry year is finally here!\n\nA loaded barbell on the rack,\na brand-new number, no looking back!\nA gym that’s full of athletes keen,\nand extra pork chops in between,\n\nNew personal records, one by one,\nand coaches proud of what you’ve done,\na little less around the belly,\nmore strength on the bar, legs not jelly!\n\nLots of squats, all deep and low,\nmuscles big and broad to show,\nburpees done without complaining,\nno excuses, just more training!\n\nHale and hearty all year through,\ntill next year, and amen to you!"
     }
   }
 }
