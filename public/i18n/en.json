@@ -2408,6 +2408,15 @@
         "trainer": "Coach of the year",
         "month": "Strongest month",
         "outro": "See you at the gym in {year}. Even stronger."
+      },
+      "share": {
+        "button": "Share your year",
+        "making": "Making your picture…",
+        "title": "My {year} at The Index",
+        "text": "My {year} at The Index: {count, plural, one {# training} other {# trainings}}.",
+        "kicker": "My {year} at The Index",
+        "saved": "The picture is in your downloads.",
+        "error": "Couldn’t make the picture. Try again."
       }
     }
   }
