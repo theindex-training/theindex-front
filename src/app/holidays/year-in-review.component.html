@@ -1,0 +1,257 @@
+@let data = review();
+@if (holidays.state().yearInReview && data && slides().length) {
+  <section
+    class="yir-card"
+    aria-labelledby="yir-card-title"
+    data-testid="year-in-review"
+  >
+    <div class="yir-card__text">
+      <h2 class="yir-card__title" id="yir-card-title">
+        {{
+          'holidays.yearInReview.card.title' | transloco: { year: yearText() }
+        }}
+      </h2>
+      <p class="yir-card__intro">
+        {{ 'holidays.yearInReview.card.intro' | transloco }}
+      </p>
+    </div>
+    <button class="yir-card__play" type="button" (click)="play()">
+      <app-icon name="play" />
+      {{ 'holidays.yearInReview.card.play' | transloco }}
+    </button>
+  </section>
+
+  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- a click on the backdrop closes it; keyboard users have Escape and the button -->
+  <dialog
+    #dialog
+    class="yir"
+    [attr.aria-label]="
+      'holidays.yearInReview.storyLabel' | transloco: { year: yearText() }
+    "
+    data-testid="year-in-review-story"
+    (click)="handleDialogClick($event)"
+  >
+    <ol class="yir__progress" aria-hidden="true">
+      @for (item of slides(); track item; let i = $index) {
+        <li
+          class="yir__bar"
+          [class.is-done]="i < index()"
+          [class.is-current]="i === index()"
+        ></li>
+      }
+    </ol>
+    <div class="yir__top">
+      <p class="yir__position" data-testid="year-in-review-position">
+        {{
+          'holidays.yearInReview.position'
+            | transloco: { current: index() + 1, total: slides().length }
+        }}
+      </p>
+      <button
+        class="yir__icon-btn"
+        type="button"
+        [attr.aria-label]="'holidays.yearInReview.close' | transloco"
+        (click)="close()"
+      >
+        <app-icon name="close" />
+      </button>
+    </div>
+
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- tapping a side steps like the buttons below, which keyboard users have (and the arrow keys) -->
+    <div
+      class="yir__slide"
+      aria-live="polite"
+      data-testid="year-in-review-slide"
+      (click)="handleSlideClick($event)"
+    >
+      @switch (slide()) {
+        @case ('trainings') {
+          <p class="yir__kicker">
+            {{
+              'holidays.yearInReview.trainings.kicker'
+                | transloco: { year: yearText() }
+            }}
+          </p>
+          <p class="yir__figure" data-testid="year-in-review-figure">
+            {{ number(data.trainings) }}
+          </p>
+          <p class="yir__label">
+            {{
+              'holidays.yearInReview.trainings.label'
+                | transloco: { count: data.trainings }
+            }}
+          </p>
+          <p class="yir__line">{{ trainingsKey(data) | transloco }}</p>
+          @if (data.firstTrainingOn) {
+            <p class="yir__note">
+              {{
+                'holidays.yearInReview.trainings.first'
+                  | transloco: { date: firstDay(data) }
+              }}
+            </p>
+          }
+        }
+        @case ('time') {
+          @if (data.favouriteTime; as time) {
+            <p class="yir__kicker">
+              {{ 'holidays.yearInReview.time.kicker' | transloco }}
+            </p>
+            <p class="yir__figure num" data-testid="year-in-review-figure">
+              {{ time.time }}
+            </p>
+            <p class="yir__label">
+              {{
+                'holidays.yearInReview.time.label'
+                  | transloco: { count: time.count }
+              }}
+            </p>
+            <p class="yir__line">{{ timeKey(time.time) | transloco }}</p>
+          }
+        }
+        @case ('streak') {
+          <p class="yir__kicker">
+            {{ 'holidays.yearInReview.streak.kicker' | transloco }}
+          </p>
+          <p class="yir__figure" data-testid="year-in-review-figure">
+            {{ number(data.longestStreakWeeks) }}
+          </p>
+          <p class="yir__label">
+            {{
+              'holidays.yearInReview.streak.label'
+                | transloco: { count: data.longestStreakWeeks }
+            }}
+          </p>
+          <p class="yir__line">
+            {{ streakKey(data.longestStreakWeeks) | transloco }}
+          </p>
+        }
+        @case ('trainer') {
+          @if (data.topTrainer; as trainer) {
+            <p class="yir__kicker">
+              {{ 'holidays.yearInReview.trainer.kicker' | transloco }}
+            </p>
+            <app-avatar
+              class="yir__avatar"
+              [name]="trainer.name"
+              [photoUrl]="trainer.photoUrl"
+            />
+            <p class="yir__name" data-testid="year-in-review-figure">
+              {{ trainer.name }}
+            </p>
+            <p class="yir__label">
+              {{
+                'holidays.yearInReview.trainer.label'
+                  | transloco: { count: trainer.count }
+              }}
+            </p>
+            <p class="yir__line">
+              {{ 'holidays.yearInReview.trainer.line' | transloco }}
+            </p>
+          }
+        }
+        @case ('month') {
+          @if (data.busiestMonth; as month) {
+            <p class="yir__kicker">
+              {{ 'holidays.yearInReview.month.kicker' | transloco }}
+            </p>
+            <p class="yir__name" data-testid="year-in-review-figure">
+              {{ monthName(month.month) }}
+            </p>
+            <p class="yir__label">
+              {{
+                'holidays.yearInReview.month.label'
+                  | transloco: { count: month.count }
+              }}
+            </p>
+            <p class="yir__line">
+              {{ 'holidays.yearInReview.month.line' | transloco }}
+            </p>
+          }
+        }
+        @case ('summary') {
+          <h2 class="yir__summary-title">
+            {{
+              'holidays.yearInReview.summary.title'
+                | transloco: { year: yearText() }
+            }}
+          </h2>
+          <dl class="yir__summary" data-testid="year-in-review-summary">
+            <div>
+              <dt>
+                {{ 'holidays.yearInReview.summary.trainings' | transloco }}
+              </dt>
+              <dd>{{ number(data.trainings) }}</dd>
+            </div>
+            @if (data.favouriteTime; as time) {
+              <div>
+                <dt>{{ 'holidays.yearInReview.summary.time' | transloco }}</dt>
+                <dd class="num">{{ time.time }}</dd>
+              </div>
+            }
+            @if (slides().includes('streak')) {
+              <div>
+                <dt>
+                  {{ 'holidays.yearInReview.summary.streak' | transloco }}
+                </dt>
+                <dd>
+                  {{
+                    'holidays.yearInReview.summary.weeks'
+                      | transloco: { count: data.longestStreakWeeks }
+                  }}
+                </dd>
+              </div>
+            }
+            @if (data.topTrainer; as trainer) {
+              <div>
+                <dt>
+                  {{ 'holidays.yearInReview.summary.trainer' | transloco }}
+                </dt>
+                <dd>{{ trainer.name }}</dd>
+              </div>
+            }
+            @if (data.busiestMonth; as month) {
+              <div>
+                <dt>{{ 'holidays.yearInReview.summary.month' | transloco }}</dt>
+                <dd>{{ monthName(month.month) }}</dd>
+              </div>
+            }
+          </dl>
+          <p class="yir__line">
+            {{
+              'holidays.yearInReview.summary.outro'
+                | transloco: { year: nextYearText() }
+            }}
+          </p>
+        }
+      }
+    </div>
+
+    <div class="yir__actions">
+      <button
+        class="yir__step yir__step--back"
+        type="button"
+        [disabled]="index() === 0"
+        (click)="previous()"
+      >
+        <app-icon name="chevron-left" />
+        {{ 'holidays.yearInReview.previous' | transloco }}
+      </button>
+      <button
+        class="yir__step yir__step--next"
+        type="button"
+        data-testid="year-in-review-next"
+        (click)="next()"
+      >
+        {{
+          (isLast()
+            ? 'holidays.yearInReview.done'
+            : 'holidays.yearInReview.next'
+          ) | transloco
+        }}
+        @if (!isLast()) {
+          <app-icon name="chevron-right" />
+        }
+      </button>
+    </div>
+  </dialog>
+}

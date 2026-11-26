@@ -48,6 +48,7 @@ import {
 } from './subscription-summary';
 import { AdventCalendarComponent } from '../../holidays/advent-calendar.component';
 import { HolidayService } from '../../holidays/holiday.service';
+import { YearInReviewComponent } from '../../holidays/year-in-review.component';
 
 type SubscriptionFilter = 'ACTIVE' | 'EXHAUSTED' | 'ALL';
 
@@ -79,6 +80,7 @@ interface UpcomingDay {
     TraineeSubscriptionsTableComponent,
     TraineeTrainingsComponent,
     AdventCalendarComponent,
+    YearInReviewComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trainee-dashboard.component.html',

@@ -367,4 +367,77 @@ test.describe('J27 holidays', () => {
       );
     },
   );
+
+  test(
+    'a trainee plays their year in review',
+    { tag: ['@desktop', '@mobile'] },
+    async ({ page, api, signInAs }) => {
+      await page.clock.setFixedTime('2026-12-28T10:00:00+02:00');
+      await signInAs('TRAINEE');
+      traineeHome(api, '2026-12-28');
+      api.on('GET', '/api/trainees/me/year-in-review', {
+        body: {
+          year: 2026,
+          trainings: 96,
+          firstTrainingOn: '2026-01-05',
+          favouriteTime: { time: '07:00', count: 41 },
+          longestStreakWeeks: 12,
+          topTrainer: {
+            id: 'trainer-1',
+            name: 'Velcho Sokolov',
+            count: 50,
+            photoUrl: null,
+          },
+          busiestMonth: { month: 10, count: 14 },
+        },
+      });
+      await page.goto('/home');
+
+      const card = page.getByRole('region', {
+        name: t('holidays.yearInReview.card.title', { year: '2026' }),
+      });
+      await card
+        .getByRole('button', { name: t('holidays.yearInReview.card.play') })
+        .click();
+      await expect
+        .poll(() => api.last('GET', '/api/trainees/me/year-in-review')?.query)
+        .toEqual({ year: '2026' });
+
+      const story = page.getByRole('dialog', {
+        name: t('holidays.yearInReview.storyLabel', { year: '2026' }),
+      });
+      const figure = story.getByTestId('year-in-review-figure');
+      const next = story.getByRole('button', {
+        name: t('holidays.yearInReview.next'),
+      });
+      await expect(figure).toHaveText('96');
+      await expect(story).toContainText(
+        t('holidays.yearInReview.trainings.strong'),
+      );
+      await next.click();
+      await expect(figure).toHaveText('07:00');
+      await next.click();
+      await expect(figure).toHaveText('12');
+      await next.click();
+      await expect(figure).toHaveText('Velcho Sokolov');
+      // A tap on the left of the slide goes back, like the Back button.
+      await story
+        .getByTestId('year-in-review-slide')
+        .click({ position: { x: 10, y: 10 } });
+      await expect(figure).toHaveText('12');
+      await page.keyboard.press('ArrowRight');
+      await page.keyboard.press('ArrowRight');
+      await expect(figure).toHaveText('October');
+      await next.click();
+      await expect(story.getByTestId('year-in-review-summary')).toBeVisible();
+      await expect(story).toContainText(
+        t('holidays.yearInReview.summary.outro', { year: '2027' }),
+      );
+
+      await story
+        .getByRole('button', { name: t('holidays.yearInReview.done') })
+        .click();
+      await expect(story).toBeHidden();
+    },
+  );
 });

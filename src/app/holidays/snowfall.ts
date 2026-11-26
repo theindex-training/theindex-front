@@ -139,6 +139,11 @@ export class Snowfall {
 
   /** A rocket from the bottom of the window at x, bursting `top` pixels from the top. */
   rocket(x: number, top: number): void {
+    // Nothing runs while the tab is hidden: a rocket queued then would wait and burst with the
+    // others when it is shown again.
+    if (this.view.document.hidden) {
+      return;
+    }
     const rise = Math.max(80, this.height - top);
     const gravity = 0.06;
     const vy = -Math.sqrt(2 * gravity * rise);

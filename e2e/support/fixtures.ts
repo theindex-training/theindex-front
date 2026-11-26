@@ -32,7 +32,8 @@ interface Fixtures {
  * - Every /api request is answered by `api`; an unanswered one fails the test at the end.
  *   `GET /api/my-profile` (the navigation's avatar) is answered by default with `myProfile()`,
  *   `GET /api/auth/google/config` with no client id (the login page shows no Google button),
- *   and the dashboards' requests (`dashboardDefaults`) with nothing to show.
+ *   and the dashboards' requests (`dashboardDefaults`, a trainee's year in review included) with
+ *   nothing to show.
  * - The UI starts in English (localStorage `lang`), so `t()` selectors apply. Seeded values are
  *   written once per tab, so a reload or the app's own logout/language switch behaves as in real use.
  * - From Jan 1 to Jan 6 (the browser's date) the сурвачка's wish is stored as seen, so its modal
@@ -111,6 +112,18 @@ export function dashboardDefaults(api: ApiMock): void {
   });
   api.on('GET', '/api/accounts', { body: [] });
   api.on('GET', '/api/settlements', { body: [] });
+  // A trainee's year in review (Dec 27 – Jan 10): a year without trainings, so no card shows.
+  api.on('GET', '/api/trainees/me/year-in-review', (request) => ({
+    body: {
+      year: Number(request.query['year']),
+      trainings: 0,
+      firstTrainingOn: null,
+      favouriteTime: null,
+      longestStreakWeeks: 0,
+      topTrainer: null,
+      busiestMonth: null,
+    },
+  }));
 }
 
 /** The token the app currently holds, or null. */
