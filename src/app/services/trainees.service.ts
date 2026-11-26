@@ -35,6 +35,29 @@ export interface CreateTraineePayload {
   preferredGymId?: string | null;
 }
 
+/**
+ * The trainee's year at the gym (theindex-api `GET /api/trainees/me/year-in-review?year=`), for
+ * the New Year story. Days and times are gym-local; nulls and 0 for a year without trainings.
+ */
+export interface YearInReview {
+  year: number;
+  trainings: number;
+  /** 'YYYY-MM-DD' */
+  firstTrainingOn: string | null;
+  /** 'HH:mm' */
+  favouriteTime: { time: string; count: number } | null;
+  /** Weeks (Monday to Sunday) in a row with at least one training. */
+  longestStreakWeeks: number;
+  topTrainer: {
+    id: string;
+    name: string;
+    count: number;
+    photoUrl: string | null;
+  } | null;
+  /** 1–12 */
+  busiestMonth: { month: number; count: number } | null;
+}
+
 export interface TraineeTrainingInsights {
   traineeId: string;
   totalAttendances: number;
@@ -113,5 +136,12 @@ export class TraineesService {
     return this.http.get<TraineeTrainingInsights>(
       `${this.baseUrl}/me/training-insights`,
     );
+  }
+
+  /** The signed-in trainee's year in review (TRAINEE only). */
+  getMyYearInReview(year: number): Observable<YearInReview> {
+    return this.http.get<YearInReview>(`${this.baseUrl}/me/year-in-review`, {
+      params: buildHttpParams({ year }),
+    });
   }
 }

@@ -1,0 +1,258 @@
+// The year in review wears the navigation's dark "iron" look in both themes, like a story;
+// the big figures are in the New Year's gold (over 8:1 on --nav-bg).
+:host {
+  display: block;
+}
+
+.yir-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--nav-border);
+  border-radius: var(--radius-xl);
+  background: var(--nav-bg);
+  color: var(--nav-text);
+  box-shadow: var(--shadow-sm);
+}
+
+.yir-card__title {
+  margin: 0 0 var(--space-1);
+  color: var(--holiday-gold);
+  font-size: var(--text-2xl);
+}
+
+.yir-card__intro {
+  margin: 0;
+}
+
+.yir-card__play,
+.yir__step--next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: 0 var(--space-5);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--nav-text-strong);
+  color: var(--nav-bg);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  cursor: pointer;
+  --icon-size: 1.125rem;
+}
+
+.yir-card__play:focus-visible,
+.yir button:focus-visible {
+  outline-color: var(--nav-accent);
+}
+
+.yir {
+  width: 100%;
+  max-width: 28rem;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--space-4);
+  border: 0;
+  background: var(--nav-bg);
+  color: var(--nav-text);
+  flex-direction: column;
+  gap: var(--space-3);
+
+  @media (min-width: 768px) {
+    height: min(46rem, calc(100dvh - 2 * var(--space-8)));
+    margin: auto;
+    border-radius: var(--radius-xl);
+  }
+}
+
+.yir[open] {
+  display: flex;
+}
+
+.yir::backdrop {
+  background: var(--scrim);
+}
+
+.yir__progress {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.yir__bar {
+  flex: 1;
+  height: 0.25rem;
+  border-radius: var(--radius-pill);
+  background: var(--nav-border);
+}
+
+.yir__bar.is-done,
+.yir__bar.is-current {
+  background: var(--nav-text-strong);
+}
+
+.yir__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.yir__position {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.yir__icon-btn {
+  display: grid;
+  place-items: center;
+  width: var(--touch-target);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: none;
+  color: var(--nav-text-strong);
+  cursor: pointer;
+}
+
+.yir__slide {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  overflow-y: auto;
+  text-align: center;
+  cursor: pointer;
+
+  > * {
+    margin: 0;
+    animation: yir-rise 0.5s ease both;
+  }
+}
+
+.yir__kicker,
+.yir__summary dt {
+  font-family: var(--font-heading);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+}
+
+.yir__figure,
+.yir__name,
+.yir__summary-title {
+  color: var(--holiday-gold);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.yir__figure {
+  font-size: clamp(4.5rem, 22vw, 7rem);
+  animation-delay: 0.1s;
+}
+
+.yir__name,
+.yir__summary-title {
+  font-size: var(--text-3xl);
+}
+
+.yir__label {
+  color: var(--nav-text-strong);
+  font-size: var(--text-xl);
+}
+
+.yir__line {
+  max-width: 22rem;
+  margin-top: var(--space-3);
+  color: var(--nav-text-strong);
+  font-size: var(--text-lg);
+  animation-delay: 0.3s;
+}
+
+.yir__avatar {
+  --avatar-size: 7rem;
+  --avatar-radius: var(--radius-pill);
+  --avatar-font-size: var(--text-3xl);
+}
+
+.yir__summary {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  margin: var(--space-4) 0 0;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--nav-border);
+    text-align: left;
+  }
+
+  dt {
+    font-size: var(--text-sm);
+  }
+
+  dd {
+    margin: 0;
+    color: var(--nav-text-strong);
+    font-weight: 600;
+    text-align: right;
+  }
+}
+
+.yir__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.yir__step {
+  --icon-size: 1.125rem;
+}
+
+.yir__step--back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-3);
+  border: 0;
+  background: none;
+  color: var(--nav-text-strong);
+  cursor: pointer;
+}
+
+.yir__step--back:disabled {
+  visibility: hidden;
+}
+
+.yir__step--next {
+  flex: 1;
+  max-width: 14rem;
+  margin-left: auto;
+}
+
+@keyframes yir-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yir__slide > * {
+    animation: none;
+  }
+}

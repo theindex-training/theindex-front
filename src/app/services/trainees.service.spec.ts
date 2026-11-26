@@ -61,4 +61,15 @@ describe('TraineesService', () => {
     expect(req.request.method).toBe('GET');
     req.flush({});
   });
+
+  it("loads the signed-in trainee's year in review for a year", () => {
+    service.getMyYearInReview(2026).subscribe();
+
+    const req = http.expectOne(
+      (request) => request.url === '/api/trainees/me/year-in-review',
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('year')).toBe('2026');
+    req.flush({});
+  });
 });

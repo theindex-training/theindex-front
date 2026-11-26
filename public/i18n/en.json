@@ -2354,6 +2354,61 @@
       "thanks": "Thank you!",
       "custom": "On New Year’s Day, Bulgarian children tap people on the back with a сурвачка, a decorated cornel branch, wishing them health and luck.",
       "wish": "Surva, surva, happy year,\na merry year is finally here!\n\nA loaded barbell on the rack,\na brand-new number, no looking back!\nA gym that’s full of athletes keen,\nand extra pork chops in between,\n\nNew personal records, one by one,\nand coaches proud of what you’ve done,\na little less around the belly,\nmore strength on the bar, legs not jelly!\n\nLots of squats, all deep and low,\nmuscles big and broad to show,\nburpees done without complaining,\nno excuses, just more training!\n\nHale and hearty all year through,\ntill next year, and amen to you!"
+    },
+    "yearInReview": {
+      "card": {
+        "title": "Your {year}",
+        "intro": "Your year at The Index, in a few slides. Ready?",
+        "play": "Play your year"
+      },
+      "storyLabel": "Your {year} at The Index",
+      "position": "{current} of {total}",
+      "previous": "Back",
+      "next": "Next",
+      "done": "Done",
+      "close": "Close",
+      "trainings": {
+        "kicker": "{year} at The Index",
+        "label": "{count, plural, one {training} other {trainings}}",
+        "first": "The first one: {date}",
+        "legend": "That’s not a hobby any more, that’s a lifestyle. We’re naming a barbell after you.",
+        "strong": "Most people make New Year’s resolutions. You made reps.",
+        "solid": "Solid work! The barbell knows your name by now.",
+        "start": "Every strong year starts with a first rep. Yours has started."
+      },
+      "time": {
+        "kicker": "Your favourite hour",
+        "label": "{count, plural, one {# training} other {# trainings}} at this time",
+        "morning": "Early bird: the workout is done before most people’s first coffee.",
+        "midday": "The midday crew: training while the others sit in meetings.",
+        "evening": "Straight from work to the barbell. The day ends strong."
+      },
+      "streak": {
+        "kicker": "Longest streak",
+        "label": "{count, plural, one {week} other {weeks}} in a row with a training",
+        "long": "Consistency beats motivation, and you proved it.",
+        "short": "Next year, let’s make it a longer one."
+      },
+      "trainer": {
+        "kicker": "Your coach of the year",
+        "label": "{count, plural, one {# training} other {# trainings}} together",
+        "line": "Thanks for every “one more round”."
+      },
+      "month": {
+        "kicker": "Your strongest month",
+        "label": "{count, plural, one {# training} other {# trainings}}",
+        "line": "Whatever you did that month, keep doing it."
+      },
+      "summary": {
+        "title": "Your {year} in numbers",
+        "trainings": "Trainings",
+        "time": "Favourite hour",
+        "streak": "Longest streak",
+        "weeks": "{count, plural, one {# week} other {# weeks}}",
+        "trainer": "Coach of the year",
+        "month": "Strongest month",
+        "outro": "See you at the gym in {year}. Even stronger."
+      }
     }
   }
 }
