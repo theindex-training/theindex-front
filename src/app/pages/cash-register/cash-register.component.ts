@@ -411,6 +411,10 @@ export class CashRegisterComponent implements OnInit {
       ? this.formatSubscriptionType(details.subscriptionType)
       : undefined;
 
+    // The sale of a deleted subscription says so; its reversal's type already does.
+    const deletedAt =
+      transaction.type === 'SUBSCRIPTION_IN' ? details.deletedAt : null;
+
     return [
       boughtByLabel,
       planTitle
@@ -418,6 +422,11 @@ export class CashRegisterComponent implements OnInit {
         : undefined,
       subscriptionType
         ? this.i18n.t('cashRegister.typePart', { type: subscriptionType })
+        : undefined,
+      deletedAt
+        ? this.i18n.t('cashRegister.deletedPart', {
+            date: this.format.date(deletedAt),
+          })
         : undefined,
     ].filter((part): part is string => Boolean(part));
   }

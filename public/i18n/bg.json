@@ -122,6 +122,7 @@
     },
     "cashTransactionType": {
       "SUBSCRIPTION_IN": "Абонамент",
+      "SUBSCRIPTION_REVERSAL": "Изтрит абонамент",
       "SETTLEMENT_OUT": "Разчет",
       "MANUAL_IN": "Ръчно внасяне",
       "MANUAL_OUT": "Ръчно теглене"
@@ -256,6 +257,7 @@
       "noExhaustedSubscriptions": "Трениращият няма изчерпани абонаменти.",
       "noSubscriptions": "Трениращият няма абонаменти.",
       "confirmDeleteSubscription": "Да се изтрие ли абонаментът „{plan}“ от {date}?",
+      "confirmDeletePaidSubscription": "Да се изтрие ли абонаментът „{plan}“ от {date}? Платените за него {amount} ще бъдат извадени от касата.",
       "buySubmit": "Купи абонамент"
     },
     "account": {
@@ -1211,6 +1213,7 @@
     "boughtByPrefix": "Купен от",
     "boughtBy": "Купен от {name}",
     "planPart": "План: {plan}",
+    "deletedPart": "Изтрит на {date}",
     "typePart": "Вид: {type}",
     "settlementPeriod": "Разчет за периода {start} → {end}",
     "settlementTransaction": "Плащане по разчет",

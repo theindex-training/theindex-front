@@ -122,6 +122,7 @@
     },
     "cashTransactionType": {
       "SUBSCRIPTION_IN": "Subscription",
+      "SUBSCRIPTION_REVERSAL": "Subscription deleted",
       "SETTLEMENT_OUT": "Settlement",
       "MANUAL_IN": "Manual in",
       "MANUAL_OUT": "Manual out"
@@ -256,6 +257,7 @@
       "noExhaustedSubscriptions": "No exhausted subscriptions found for this trainee.",
       "noSubscriptions": "No subscriptions found for this trainee.",
       "confirmDeleteSubscription": "Delete the {plan} subscription from {date}?",
+      "confirmDeletePaidSubscription": "Delete the {plan} subscription from {date}? Its {amount} will be taken out of the cash register.",
       "buySubmit": "Buy subscription"
     },
     "account": {
@@ -1211,6 +1213,7 @@
     "boughtByPrefix": "Bought by",
     "boughtBy": "Bought by {name}",
     "planPart": "Plan: {plan}",
+    "deletedPart": "Deleted on {date}",
     "typePart": "Type: {type}",
     "settlementPeriod": "Settlement period: {start} → {end}",
     "settlementTransaction": "Settlement transaction",

@@ -270,11 +270,18 @@ export class TraineeDetailsComponent implements OnInit {
       return;
     }
 
+    // Deleting takes a paid subscription's sale back out of the cash register.
     const confirmed = window.confirm(
-      this.i18n.t('trainees.details.confirmDeleteSubscription', {
-        plan: this.formatPlanLabel(subscription),
-        date: this.format.date(subscription.startsAt),
-      }),
+      this.i18n.t(
+        subscription.paidCents > 0
+          ? 'trainees.details.confirmDeletePaidSubscription'
+          : 'trainees.details.confirmDeleteSubscription',
+        {
+          plan: this.formatPlanLabel(subscription),
+          date: this.format.date(subscription.startsAt),
+          amount: this.format.money(subscription.paidCents),
+        },
+      ),
     );
 
     if (!confirmed) {

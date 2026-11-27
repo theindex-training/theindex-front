@@ -643,10 +643,23 @@ describe('TraineeDetailsComponent: subscriptions list', () => {
     deleteButtons()[0].click();
     await page.settle();
 
+    // Deleting takes the sale back out of the cash register (theindex-api SUB-21).
+    expect(confirm).toHaveBeenCalledWith(
+      `Delete the 10 visits subscription from ${format.date('2026-10-01')}? Its ${format.money(4550)} will be taken out of the cash register.`,
+    );
+    http.expectNone('/api/subscriptions/s-active');
+  });
+
+  it('asks without an amount for a free subscription', async () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    await open();
+    const format = TestBed.inject(LocaleFormatService);
+
+    component.deleteSubscription({ ...SUBSCRIPTIONS[0], paidCents: 0 });
+
     expect(confirm).toHaveBeenCalledWith(
       `Delete the 10 visits subscription from ${format.date('2026-10-01')}?`,
     );
-    http.expectNone('/api/subscriptions/s-active');
   });
 
   it('deletes the subscription and removes it from the list', async () => {

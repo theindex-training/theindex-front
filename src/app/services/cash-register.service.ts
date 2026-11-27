@@ -22,14 +22,20 @@ export interface CashRegisterTransaction {
 export interface CashRegisterTransactionSourceDetails {
   periodStart?: string;
   periodEnd?: string;
+  /** Null when the trainee is gone. */
   boughtBy?: {
     traineeId: string;
     name: string;
     nickname: string | null;
-  };
+  } | null;
   purchasedAt?: string;
   subscriptionType?: string;
   planTitle?: string;
+  /**
+   * When the subscription was deleted and its sale taken back out (a `SUBSCRIPTION_REVERSAL`
+   * row); null while it exists. On both the sale and the reversal.
+   */
+  deletedAt?: string | null;
 }
 
 /** The page of transactions to ask for, newest first (the API gives 50 by default, up to 500). */

@@ -13,6 +13,7 @@ export const ENUM_VALUES = {
   allocationReason: ['PUNCH_CREDIT', 'TIME_PRORATA', 'UNPAID'],
   cashTransactionType: [
     'SUBSCRIPTION_IN',
+    'SUBSCRIPTION_REVERSAL',
     'SETTLEMENT_OUT',
     'MANUAL_IN',
     'MANUAL_OUT',

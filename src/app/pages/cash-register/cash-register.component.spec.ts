@@ -523,6 +523,54 @@ describe('CashRegisterComponent', () => {
       ]);
     });
 
+    it("describes a deleted subscription's sale and the reversal that took it back out", () => {
+      const format = TestBed.inject(LocaleFormatService);
+      const details = {
+        boughtBy: { traineeId: 'tr1', name: 'Ivan Petrov', nickname: null },
+        planTitle: '10 visits',
+        subscriptionType: 'PUNCH',
+        deletedAt: '2026-11-02T09:30:00Z',
+      };
+      const sale = transaction({
+        type: 'SUBSCRIPTION_IN',
+        sourceType: 'SUBSCRIPTION',
+        sourceDetails: details,
+      });
+      const reversal = transaction({
+        type: 'SUBSCRIPTION_REVERSAL',
+        sourceType: 'SUBSCRIPTION',
+        amountCents: -1000,
+        sourceDetails: details,
+      });
+      const type = ` • Type: ${en.enums.planType.PUNCH}`;
+
+      expect(component.formatTransactionDetails(sale)).toBe(
+        `Bought by Ivan Petrov • Plan: 10 visits${type} • Deleted on ${format.date('2026-11-02T09:30:00Z')}`,
+      );
+      expect(component.formatTransactionDetails(reversal)).toBe(
+        `Bought by Ivan Petrov • Plan: 10 visits${type}`,
+      );
+      expect(component.formatTransactionType('SUBSCRIPTION_REVERSAL')).toBe(
+        en.enums.cashTransactionType.SUBSCRIPTION_REVERSAL,
+      );
+      expect(en.enums.cashTransactionType.SUBSCRIPTION_REVERSAL).toBe(
+        'Subscription deleted',
+      );
+    });
+
+    it('describes a sale whose trainee is gone by its plan only', () => {
+      const sale = transaction({
+        type: 'SUBSCRIPTION_IN',
+        sourceType: 'SUBSCRIPTION',
+        sourceDetails: { boughtBy: null, planTitle: '10 visits' },
+      });
+
+      expect(component.formatTransactionDetails(sale)).toBe('Plan: 10 visits');
+      expect(component.formatSubscriptionBuyerPath(sale)).toEqual([
+        '/trainees',
+      ]);
+    });
+
     it('humanizes an unknown subscription type and falls back when details are empty', () => {
       const sale = transaction({
         sourceType: 'SUBSCRIPTION',
